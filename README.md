@@ -1,0 +1,31 @@
+# Calorie Tracker
+
+A fast, private, local-first iPhone calorie and macro tracker. The app focuses on
+three days (yesterday, today, tomorrow), makes repeated foods quick to log, and
+keeps the diary and food search on-device.
+
+## What works
+
+- Local diary for calories, carbohydrates, fat, and protein.
+- Yesterday/today/tomorrow navigation and one-tap deletion.
+- Search across source-specific, on-device USDA and Open Food Facts catalogs.
+- Quick logging from recents, 90-day frequency, favorites, and saved meals.
+- Ounce-first entry, natural portions (for example, large egg and tablespoon),
+  and remembered quantity for each food.
+- Select any subset of diary entries and save it as a reusable meal.
+- Barcode scanning and manual barcode entry.
+- Custom foods and MyFitnessPal CSV import entry point.
+- Daily calorie and macro trend charts.
+
+## Build and run
+
+```sh
+make sim-launch
+```
+
+The default simulator and physical-device settings are in `Makefile`. See
+`docs/setup-install.md` for more detail and `docs/data-sources.md` for catalog
+provenance and refresh instructions.
+
+Catalog filtering and larger offline-size options are documented in
+`docs/catalog-sizing.md`.
