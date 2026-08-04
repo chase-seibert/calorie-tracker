@@ -82,7 +82,7 @@ struct FoodPickerView: View {
                                 dismiss()
                             }
                         case .scan:
-                            BarcodeLookup(catalog: catalog, onSelect: { selectedFood = $0 })
+                            BarcodeLookup(catalog: catalog, onSelect: { selectedFood = diary.displayedFood($0) })
                         }
                     }
                 }
@@ -120,7 +120,7 @@ struct FoodPickerView: View {
                 results = (Array(personalResults.prefix(10)) + bundledResults + Array(personalResults.dropFirst(10)))
                     .filter { seen.insert($0.id).inserted }
                     .prefix(50)
-                    .map { $0 }
+                    .map(diary.displayedFood)
                 isSearching = false
             }
         }
@@ -319,16 +319,17 @@ private enum QuantityUnitChoice: Hashable {
 struct QuantityEditor: View {
     @EnvironmentObject private var diary: DiaryStore
     @Environment(\.dismiss) private var dismiss
-    let food: Food
+    @State private var food: Food
     let date: Date
     private let entryID: UUID?
 
     @State private var amount: Double
     @State private var unitChoice: QuantityUnitChoice
+    @State private var showingNameEditor = false
     @FocusState private var amountIsFocused: Bool
 
     init(food: Food, date: Date) {
-        self.food = food
+        _food = State(initialValue: food)
         self.date = date
         entryID = nil
         _amount = State(initialValue: 1)
@@ -336,7 +337,7 @@ struct QuantityEditor: View {
     }
 
     init(entry: DiaryEntry) {
-        food = entry.food
+        _food = State(initialValue: entry.food)
         date = entry.date
         entryID = entry.id
         _amount = State(initialValue: entry.amount)
@@ -382,7 +383,17 @@ struct QuantityEditor: View {
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 18) {
-                FoodResultRow(food: food)
+                HStack(spacing: 8) {
+                    FoodResultRow(food: food)
+                    Button("Rename food", systemImage: "pencil") {
+                        showingNameEditor = true
+                    }
+                    .labelStyle(.iconOnly)
+                    .font(.headline)
+                    .foregroundStyle(AppTheme.coral)
+                    .frame(width: 44, height: 44)
+                    .accessibilityHint("Choose the name used throughout the app")
+                }
                 HStack(spacing: 12) {
                     TextField("Amount", value: $amount, format: .number.precision(.fractionLength(0...2)))
                         .keyboardType(.decimalPad)
@@ -409,7 +420,7 @@ struct QuantityEditor: View {
                     nutrient("Protein", preview.protein, suffix: "g")
                 }
                 Button(action: save) {
-                    Text(entryID == nil ? "Add \(Int(preview.calories.rounded())) calories" : "Save changes")
+                    Text(entryID == nil ? "Add \(Int(preview.calories.rounded())) calories" : "Save quantity")
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
@@ -434,6 +445,13 @@ struct QuantityEditor: View {
                     Button("Save", action: save)
                         .disabled(amount <= 0)
                 }
+            }
+            .sheet(isPresented: $showingNameEditor) {
+                FoodNameEditor(food: food) { name in
+                    guard diary.renameFood(foodID: food.id, name: name) else { return }
+                    food = diary.displayedFood(food)
+                }
+                .presentationDetents([.medium])
             }
             .onAppear {
                 guard entryID == nil else { return }
@@ -508,6 +526,60 @@ struct QuantityEditor: View {
             Text(title).font(.caption2).foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
+    }
+}
+
+private struct FoodNameEditor: View {
+    @Environment(\.dismiss) private var dismiss
+    let food: Food
+    let onApply: (String) -> Void
+
+    @State private var name: String
+    @State private var hasFinished = false
+
+    init(food: Food, onApply: @escaping (String) -> Void) {
+        self.food = food
+        self.onApply = onApply
+        _name = State(initialValue: food.name)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField("Food name", text: $name)
+                        .textInputAutocapitalization(.words)
+                } footer: {
+                    Text("This name is saved when you leave this editor and will be used in the diary, favorites, and future searches.")
+                }
+            }
+            .navigationTitle("Rename food")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        hasFinished = true
+                        dismiss()
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done", action: applyAndDismiss)
+                    .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+            .onDisappear {
+                guard !hasFinished else { return }
+                hasFinished = true
+                onApply(name)
+            }
+        }
+    }
+
+    private func applyAndDismiss() {
+        guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        hasFinished = true
+        onApply(name)
+        dismiss()
     }
 }
 

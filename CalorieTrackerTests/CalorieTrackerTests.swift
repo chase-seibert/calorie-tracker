@@ -1,3 +1,4 @@
+import Combine
 import XCTest
 @testable import CalorieTracker
 
@@ -134,6 +135,63 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(reloaded.entries(on: day).first?.amount, 2)
         XCTAssertEqual(reloaded.entries(on: day).first?.unit, .serving)
         XCTAssertEqual(reloaded.totals(on: day).calories, 150, accuracy: 0.001)
+    }
+
+    @MainActor
+    func testRenamingLoggedFoodUpdatesEveryPersonalCopyAndSearchesByCustomName() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let fileURL = folder.appendingPathComponent("diary.json")
+        let day = Date()
+        let food = Food(
+            sourceID: "rename-me",
+            source: .usda,
+            name: "Chicken breast, roasted",
+            brand: nil,
+            barcode: nil,
+            nutrients: MacroNutrients(calories: 165, carbs: 0, fat: 3.6, protein: 31),
+            baseAmountGrams: 100,
+            servingGrams: nil,
+            servingDescription: nil
+        )
+        let store = DiaryStore(fileURL: fileURL)
+
+        store.log(food, amount: 100, unit: .grams, on: day)
+        store.toggleFavorite(food)
+
+        XCTAssertTrue(store.renameFood(foodID: food.id, name: "My chicken"))
+        XCTAssertEqual(store.entries(on: day).first?.food.name, "My chicken")
+        XCTAssertEqual(store.document.favorites.first?.name, "My chicken")
+        XCTAssertEqual(store.displayedFood(food).name, "My chicken")
+        XCTAssertEqual(store.searchPersonalFoods("my chicken").first?.name, "My chicken")
+
+        let reloaded = DiaryStore(fileURL: fileURL)
+        XCTAssertEqual(reloaded.entries(on: day).first?.food.name, "My chicken")
+        XCTAssertEqual(reloaded.searchPersonalFoods("chicken").first?.name, "My chicken")
+    }
+
+    @MainActor
+    func testRenamingLoggedFoodPublishesAnImmediateChange() {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let store = DiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
+        let food = Food(
+            sourceID: "rename-publish",
+            source: .custom,
+            name: "Original name",
+            brand: nil,
+            barcode: nil,
+            nutrients: .zero,
+            baseAmountGrams: 100,
+            servingGrams: nil,
+            servingDescription: nil
+        )
+        store.log(food, amount: 100, unit: .grams, on: Date())
+
+        var changeCount = 0
+        let cancellation = store.objectWillChange.sink { _ in changeCount += 1 }
+        defer { cancellation.cancel() }
+
+        XCTAssertTrue(store.renameFood(foodID: food.id, name: "New name"))
+        XCTAssertGreaterThan(changeCount, 0)
     }
 
     @MainActor

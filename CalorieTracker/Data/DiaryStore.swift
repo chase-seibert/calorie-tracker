@@ -41,19 +41,20 @@ final class DiaryStore: ObservableObject {
 
     func log(_ food: Food, amount: Double, unit: LogUnit, portionID: String? = nil, on date: Date) {
         let clampedAmount = max(amount, 0.01)
+        let foodToLog = displayedFood(food)
         let entry = DiaryEntry(
             id: UUID(),
             date: calendar.startOfDay(for: date),
-            food: food,
+            food: foodToLog,
             amount: clampedAmount,
             unit: unit,
-            nutrients: food.nutrients(for: clampedAmount, unit: unit, portionID: portionID),
+            nutrients: foodToLog.nutrients(for: clampedAmount, unit: unit, portionID: portionID),
             loggedAt: Date(),
             portionID: portionID,
             displayOrder: nextDisplayOrder(on: date)
         )
         document.entries.append(entry)
-        document.rememberedQuantities[food.id] = QuantityPreference(
+        document.rememberedQuantities[foodToLog.id] = QuantityPreference(
             amount: clampedAmount,
             unit: unit,
             portionID: portionID
@@ -173,7 +174,7 @@ final class DiaryStore: ObservableObject {
         if let index = document.favorites.firstIndex(where: { $0.id == food.id }) {
             document.favorites.remove(at: index)
         } else {
-            document.favorites.insert(food, at: 0)
+            document.favorites.insert(displayedFood(food), at: 0)
             if let preference {
                 document.rememberedQuantities[food.id] = preference
             }
@@ -209,7 +210,7 @@ final class DiaryStore: ObservableObject {
             }
             .compactMap { $0.max(by: { $0.loggedAt < $1.loggedAt })?.food }
             .prefix(30)
-            .map { $0 }
+            .map(displayedFood)
     }
 
     func addCustomFood(
@@ -346,13 +347,62 @@ final class DiaryStore: ObservableObject {
     }
 
     func searchPersonalFoods(_ query: String) -> [Food] {
-        let all = document.importedFoods
+        let all = personalFoods
         let normalized = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalized.isEmpty else { return Array(all.prefix(50)) }
         return all.filter {
             $0.name.localizedStandardContains(normalized) ||
+                (document.customFoodNames[$0.id]?.localizedStandardContains(normalized) ?? false) ||
                 ($0.brand?.localizedStandardContains(normalized) ?? false)
         }.prefix(50).map { $0 }
+    }
+
+    func displayedFood(_ food: Food) -> Food {
+        guard let customName = document.customFoodNames[food.id], !customName.isEmpty else {
+            return food
+        }
+        var displayedFood = food
+        displayedFood.name = customName
+        return displayedFood
+    }
+
+    @discardableResult
+    func renameFood(foodID: String, name: String) -> Bool {
+        let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedName.isEmpty else { return false }
+
+        // The rename mutates nested values inside the published document.
+        // Announce it explicitly so SwiftUI refreshes the diary immediately.
+        objectWillChange.send()
+        document.customFoodNames[foodID] = normalizedName
+
+        for index in document.entries.indices {
+            if document.entries[index].food.id == foodID {
+                document.entries[index].food.name = normalizedName
+            }
+            document.entries[index].mealItems = document.entries[index].mealItems?.map {
+                var item = $0
+                if item.food.id == foodID {
+                    item.food.name = normalizedName
+                }
+                return item
+            }
+        }
+
+        document.favorites = document.favorites.map { renamedFood($0, foodID: foodID, name: normalizedName) }
+        document.customFoods = document.customFoods.map { renamedFood($0, foodID: foodID, name: normalizedName) }
+        document.importedFoods = document.importedFoods.map { renamedFood($0, foodID: foodID, name: normalizedName) }
+        document.meals = document.meals.map { meal in
+            var updatedMeal = meal
+            updatedMeal.items = meal.items.map { item in
+                var updatedItem = item
+                updatedItem.food = renamedFood(item.food, foodID: foodID, name: normalizedName)
+                return updatedItem
+            }
+            return updatedMeal
+        }
+        persist()
+        return true
     }
 
     @discardableResult
@@ -382,10 +432,29 @@ final class DiaryStore: ObservableObject {
         var seen = Set<String>()
         var foods: [Food] = []
         for entry in entries where seen.insert(entry.food.id).inserted {
-            foods.append(entry.food)
+            foods.append(displayedFood(entry.food))
             if foods.count == limit { break }
         }
         return foods
+    }
+
+    private var personalFoods: [Food] {
+        var seen = Set<String>()
+        let candidates = document.entries
+            .filter { !$0.isMeal }
+            .sorted { $0.loggedAt > $1.loggedAt }
+            .map(\.food) + document.favorites + document.customFoods + document.importedFoods
+        return candidates.compactMap { food in
+            guard seen.insert(food.id).inserted else { return nil }
+            return displayedFood(food)
+        }
+    }
+
+    private func renamedFood(_ food: Food, foodID: String, name: String) -> Food {
+        guard food.id == foodID else { return food }
+        var renamed = food
+        renamed.name = name
+        return renamed
     }
 
     private func nextDisplayOrder(on date: Date) -> Int {

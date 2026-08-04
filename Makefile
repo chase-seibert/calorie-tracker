@@ -91,10 +91,10 @@ phone-deploy: phone-build phone-install phone-launch
 phone-wifi-check:
 	@set -eu; \
 	if ! xcrun devicectl list devices \
-	  --filter "UDID == '$(DEVICE_ID)' AND State == 'available'" \
-	  --columns UDID \
+	  --filter "hardwareProperties.udid == '$(DEVICE_ID)' AND State CONTAINS 'available'" \
+	  --columns Identifier \
 	  --hide-headers \
-	  --timeout $(PHONE_DESTINATION_TIMEOUT) | rg -Fq "$(DEVICE_ID)"; then \
+	  --timeout $(PHONE_DESTINATION_TIMEOUT) | rg -q '[^[:space:]]'; then \
 	  echo "No reachable paired iPhone with UDID $(DEVICE_ID)."; \
 	  echo "In Xcode, open Manage Devices from the run-destination menu, pair the iPhone, and select it as the build destination."; \
 	  echo "Then disconnect the cable, keep the Mac and unlocked iPhone on the same network, and retry: make phone-wifi-deploy"; \

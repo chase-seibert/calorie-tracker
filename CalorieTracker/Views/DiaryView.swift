@@ -108,19 +108,22 @@ struct DiaryView: View {
             }
             .safeAreaInset(edge: .bottom) {
                 if isSelectingMealItems {
-                    HStack(spacing: 12) {
+                    HStack(spacing: 8) {
                         Button {
                             cancelMealSelection()
                         } label: {
-                            Text("Cancel")
-                                .frame(maxWidth: .infinity)
+                            Image(systemName: "xmark")
+                                .font(.subheadline.weight(.bold))
+                                .frame(width: 44, height: 32)
                         }
                         .buttonStyle(.bordered)
+                        .accessibilityLabel("Cancel")
 
                         Button(role: .destructive) {
                             showingDeleteConfirmation = true
                         } label: {
                             Text("Delete")
+                                .lineLimit(1)
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.bordered)
@@ -131,16 +134,18 @@ struct DiaryView: View {
                             mealName = ""
                             showingMealName = true
                         } label: {
-                            Text("Next (\(selectedEntryIDs.count))")
+                            Text("Create meal")
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.borderedProminent)
                         .disabled(selectedEntryIDs.isEmpty)
                     }
-                    .font(.headline)
-                    .controlSize(.large)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
+                    .font(.subheadline.weight(.semibold))
+                    .controlSize(.regular)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
                     .background(.ultraThinMaterial)
                 } else {
                     Button {
@@ -583,10 +588,7 @@ private struct ReorderableDiaryEntries: UIViewRepresentable {
         }
 
         func apply(entries: [DiaryEntry], to collectionView: UICollectionView) {
-            guard currentEntries.map(\.id) != entries.map(\.id) else {
-                currentEntries = entries
-                return
-            }
+            guard currentEntries != entries else { return }
             guard !isReordering else { return }
             currentEntries = entries
             collectionView.reloadData()

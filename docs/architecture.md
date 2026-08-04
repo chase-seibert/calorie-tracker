@@ -9,7 +9,8 @@ The SwiftUI app has two local data layers:
    lookup without loading the catalog into memory.
 2. A small writable JSON document in Application Support managed by `DiaryStore`.
    It holds diary entries, favorites, meals, remembered quantities, custom foods,
-   and imported MyFitnessPal records. Writes are atomic.
+   imported MyFitnessPal records, and stable-ID custom food names. Writes are
+   atomic.
 
 This split keeps a large catalog immutable and fast while making the personal
 data schema easy to evolve and back up.
@@ -25,6 +26,8 @@ Custom foods and saved meals are separate collections in the personal document.
 Settings presents them together as the Custom catalog while retaining their
 different logging behavior. Remembered quantities are keyed by stable food ID,
 so the same portion is available from favorites and later catalog searches.
+Custom names use the same stable IDs, allowing a rename to flow through existing
+diary entries and future personal search results.
 
 ## Catalog schema
 

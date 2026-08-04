@@ -186,7 +186,7 @@ struct SavedMeal: Codable, Hashable, Identifiable, Sendable {
 }
 
 struct DiaryDocument: Codable, Sendable {
-    var schemaVersion = 1
+    var schemaVersion = 2
     var dailyCalorieGoal: Int? = nil
     var entries: [DiaryEntry] = []
     var favorites: [Food] = []
@@ -194,6 +194,40 @@ struct DiaryDocument: Codable, Sendable {
     var rememberedQuantities: [String: QuantityPreference] = [:]
     var customFoods: [Food] = []
     var importedFoods: [Food] = []
+    var customFoodNames: [String: String] = [:]
+
+    init() {}
+
+    private enum CodingKeys: String, CodingKey {
+        case schemaVersion
+        case dailyCalorieGoal
+        case entries
+        case favorites
+        case meals
+        case rememberedQuantities
+        case customFoods
+        case importedFoods
+        case customFoodNames
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        schemaVersion = try container.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
+        dailyCalorieGoal = try container.decodeIfPresent(Int.self, forKey: .dailyCalorieGoal)
+        entries = try container.decodeIfPresent([DiaryEntry].self, forKey: .entries) ?? []
+        favorites = try container.decodeIfPresent([Food].self, forKey: .favorites) ?? []
+        meals = try container.decodeIfPresent([SavedMeal].self, forKey: .meals) ?? []
+        rememberedQuantities = try container.decodeIfPresent(
+            [String: QuantityPreference].self,
+            forKey: .rememberedQuantities
+        ) ?? [:]
+        customFoods = try container.decodeIfPresent([Food].self, forKey: .customFoods) ?? []
+        importedFoods = try container.decodeIfPresent([Food].self, forKey: .importedFoods) ?? []
+        customFoodNames = try container.decodeIfPresent(
+            [String: String].self,
+            forKey: .customFoodNames
+        ) ?? [:]
+    }
 }
 
 extension Double {

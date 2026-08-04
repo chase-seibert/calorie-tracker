@@ -46,8 +46,8 @@ The Select control beside the Logged heading enters meal selection mode. The
 user explicitly checks one or more entries and names the combination. The
 selected entries are replaced at their first position by one meal entry with the
 same calorie and macro totals; unrelated foods remain in place.
-In selection mode, Cancel and Next remain in a bottom safe-area action bar rather
-than the navigation bar, keeping both actions within easy thumb reach. A
+In selection mode, Cancel, Delete, and Create meal remain in a bottom safe-area
+action bar rather than the navigation bar, keeping the actions within easy thumb reach. A
 destructive Delete action in the same bar removes all selected diary entries
 after confirmation.
 Each meal entry exposes a visible actions menu to break the meal back into its
@@ -62,6 +62,9 @@ persistent reorder handle.
 Tapping a non-meal diary entry opens the quantity editor with its logged amount
 and unit selected. Saving updates that entry in place, recalculates daily totals,
 and remembers the choice for the next time that food is logged.
+The quantity editor also exposes a pencil action for renaming the food. A custom
+name is persisted by stable food ID and is used by existing diary rows, personal
+catalogs, favorites, and future search results.
 Focusing the amount field selects its complete value so typing replaces it.
 Return on a hardware keyboard saves immediately; the iPhone decimal keypad
 provides the same Save action in its keyboard toolbar.

@@ -25,6 +25,8 @@
   preferred order and have that order persist.
 - As someone correcting a logged food, I want to tap its diary row and edit its
   quantity or unit in place so totals and my next-use default update immediately.
+- As someone who uses personal names for foods, I want to rename a logged food
+  and have that name persist in the diary and future searches.
 - As someone tracking against a target, I want to set an optional daily calorie
   goal and see consumed calories alongside that goal on the diary.
 - As someone scrolling a long diary, I want the current calorie total to replace
@@ -51,7 +53,8 @@
   swipe. The normal row shows no trash button or destructive long-press action.
 - Logged foods reorder through a long-press drag and visibly move as they are
   crossed, without displaying a persistent reorder handle.
-- Diary multi-select keeps Cancel and Next in a bottom safe-area action bar.
+- Diary multi-select keeps Cancel, Delete, and Create meal in a bottom safe-area
+  action bar.
 - Diary multi-select can delete all selected entries after confirmation.
 - The diary summary displays carbs, fat, and protein as one stacked horizontal
   bar, in that order, with exact gram values in its legend.
