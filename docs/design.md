@@ -41,6 +41,12 @@ trailing + button logs that displayed remembered or default quantity and closes
 the sheet; tapping the rest of the row opens quantity editing. Quantity entry
 starts in ounces for a new food and offers every natural portion retained from
 the source dataset.
+Saved meal rows use the same interaction: + logs one meal, while tapping the
+row opens the quantity editor in meal servings. The meal editor keeps the name
+editable through the same pencil action as foods, shows the
+calorie/carbohydrate/fat/protein breakdown, and lists the constituent foods
+without offering edits to them. Logged meal rows open this same meal editor so
+changing servings updates the entry and its break-apart quantities.
 
 The Select control beside the Logged heading enters meal selection mode. The
 user explicitly checks one or more entries and names the combination. The
@@ -59,9 +65,10 @@ Rows animate into their new positions as the dragged item crosses them, and the
 resulting order is stored locally. Long press has no destructive menu; deletion
 is exposed only through the native trailing swipe action. Rows do not show a
 persistent reorder handle.
-Tapping a non-meal diary entry opens the quantity editor with its logged amount
-and unit selected. Saving updates that entry in place, recalculates daily totals,
-and remembers the choice for the next time that food is logged.
+Tapping a diary entry opens the quantity editor with its logged amount selected.
+For foods, the editor also selects the logged unit; for meals, it edits servings.
+Saving updates that entry in place, recalculates daily totals, and remembers the
+choice for the next time that food is logged.
 The quantity editor also exposes a pencil action for renaming the food. A custom
 name is persisted by stable food ID and is used by existing diary rows, personal
 catalogs, favorites, and future search results.

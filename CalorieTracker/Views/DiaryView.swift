@@ -170,7 +170,7 @@ struct DiaryView: View {
             .sheet(item: $editingEntry) { entry in
                 QuantityEditor(entry: entry)
                     .environmentObject(diary)
-                    .presentationDetents([.medium])
+                    .presentationDetents([.medium, .large])
             }
             .alert("Save selected foods as a meal", isPresented: $showingMealName) {
                 TextField("Meal name", text: $mealName)
@@ -266,7 +266,6 @@ struct DiaryView: View {
                         diary.moveEntry(entryID, toIndex: destinationIndex, on: date)
                     },
                     onEdit: { entry in
-                        guard !entry.isMeal else { return }
                         editingEntry = entry
                     },
                     onBreakApartMeal: { entryID in
@@ -620,11 +619,9 @@ private struct ReorderableDiaryEntries: UIViewRepresentable {
                 )
                 .contentShape(Rectangle())
                 .onTapGesture {
-                    guard !entry.isMeal else { return }
                     self?.parent.onEdit(entry)
                 }
                 .accessibilityAction(named: "Edit quantity") {
-                    guard !entry.isMeal else { return }
                     self?.parent.onEdit(entry)
                 }
                 .accessibilityElement(children: .contain)

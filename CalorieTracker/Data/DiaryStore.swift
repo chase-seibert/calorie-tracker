@@ -333,17 +333,81 @@ final class DiaryStore: ObservableObject {
         persist()
     }
 
-    func logMeal(_ meal: SavedMeal, on date: Date) {
-        guard !meal.items.isEmpty else { return }
+    func logMeal(_ meal: SavedMeal, amount: Double = 1, on date: Date) {
+        guard !meal.items.isEmpty, amount > 0 else { return }
         document.entries.append(
             makeMealEntry(
                 for: meal,
+                amount: amount,
                 on: date,
                 loggedAt: Date(),
                 displayOrder: nextDisplayOrder(on: date)
             )
         )
         persist()
+    }
+
+    func updateMealEntry(entryID: UUID, amount: Double) {
+        guard
+            let index = document.entries.firstIndex(where: { $0.id == entryID }),
+            document.entries[index].isMeal,
+            amount > 0
+        else { return }
+
+        let entry = document.entries[index]
+        let clampedAmount = max(amount, 0.01)
+        let baseItems: [MealItem]
+        if let savedMealID = entry.savedMealID,
+           let savedMeal = document.meals.first(where: { $0.id == savedMealID }) {
+            baseItems = savedMeal.items
+        } else if let currentItems = entry.mealItems, entry.amount > 0 {
+            baseItems = currentItems.map { item in
+                var baseItem = item
+                baseItem.amount /= entry.amount
+                return baseItem
+            }
+        } else {
+            return
+        }
+
+        let baseNutrients = baseItems.reduce(.zero) { total, item in
+            total + item.food.nutrients(
+                for: item.amount,
+                unit: item.unit,
+                portionID: item.portionID
+            )
+        }
+        let scaledItems = baseItems.map { item in
+            var scaledItem = item
+            scaledItem.amount *= clampedAmount
+            return scaledItem
+        }
+
+        document.entries[index].amount = clampedAmount
+        document.entries[index].unit = .serving
+        document.entries[index].portionID = "saved-meal"
+        document.entries[index].food.nutrients = baseNutrients
+        document.entries[index].nutrients = baseNutrients.scaled(by: clampedAmount)
+        document.entries[index].mealItems = scaledItems
+        persist()
+    }
+
+    @discardableResult
+    func renameMeal(mealID: UUID, name: String) -> Bool {
+        let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedName.isEmpty,
+              document.meals.contains(where: { $0.id == mealID })
+        else { return false }
+
+        objectWillChange.send()
+        for index in document.meals.indices where document.meals[index].id == mealID {
+            document.meals[index].name = normalizedName
+        }
+        for index in document.entries.indices where document.entries[index].savedMealID == mealID {
+            document.entries[index].food.name = normalizedName
+        }
+        persist()
+        return true
     }
 
     func searchPersonalFoods(_ query: String) -> [Food] {
@@ -478,24 +542,25 @@ final class DiaryStore: ObservableObject {
 
     private func makeMealEntry(
         for meal: SavedMeal,
+        amount: Double = 1,
         on date: Date,
         loggedAt: Date,
         displayOrder: Int? = nil
     ) -> DiaryEntry {
-        let nutrients = meal.items.reduce(.zero) { total, item in
-            total + item.food.nutrients(
-                for: item.amount,
-                unit: item.unit,
-                portionID: item.portionID
-            )
+        let clampedAmount = max(amount, 0.01)
+        let scaledItems = meal.items.map { item in
+            var scaledItem = item
+            scaledItem.amount *= clampedAmount
+            return scaledItem
         }
+        let baseNutrients = meal.nutrients
         let mealFood = Food(
             sourceID: "saved-meal-\(meal.id.uuidString)",
             source: .custom,
             name: meal.name,
             brand: nil,
             barcode: nil,
-            nutrients: nutrients,
+            nutrients: baseNutrients,
             baseAmountGrams: 1,
             servingGrams: 1,
             servingDescription: "1 meal",
@@ -505,14 +570,14 @@ final class DiaryStore: ObservableObject {
             id: UUID(),
             date: calendar.startOfDay(for: date),
             food: mealFood,
-            amount: 1,
+            amount: clampedAmount,
             unit: .serving,
-            nutrients: nutrients,
+            nutrients: baseNutrients.scaled(by: clampedAmount),
             loggedAt: loggedAt,
             portionID: "saved-meal",
             displayOrder: displayOrder,
             savedMealID: meal.id,
-            mealItems: meal.items
+            mealItems: scaledItems
         )
     }
 

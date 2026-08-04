@@ -20,6 +20,7 @@ struct FoodPickerView: View {
 
     @State private var mode: Mode = .suggested
     @State private var selectedFood: Food?
+    @State private var selectedMeal: SavedMeal?
     @State private var query = ProcessInfo.processInfo.arguments.contains("--show-food-search") ? "banana" : ""
     @State private var results: [Food] = []
     @State private var isSearching = false
@@ -77,10 +78,13 @@ struct FoodPickerView: View {
                                 onEdit: { selectedFood = $0 }
                             )
                         case .meals:
-                            MealsList { meal in
-                                diary.logMeal(meal, on: date)
-                                dismiss()
-                            }
+                            MealsList(
+                                onQuickLog: { meal in
+                                    diary.logMeal(meal, on: date)
+                                    dismiss()
+                                },
+                                onEdit: { selectedMeal = $0 }
+                            )
                         case .scan:
                             BarcodeLookup(catalog: catalog, onSelect: { selectedFood = diary.displayedFood($0) })
                         }
@@ -98,7 +102,11 @@ struct FoodPickerView: View {
             }
             .sheet(item: $selectedFood) { food in
                 QuantityEditor(food: food, date: date)
-                    .presentationDetents([.medium])
+                    .presentationDetents([.medium, .large])
+            }
+            .sheet(item: $selectedMeal) { meal in
+                QuantityEditor(meal: meal, date: date)
+                    .presentationDetents([.medium, .large])
             }
             .task {
                 try? await Task.sleep(for: .milliseconds(180))
@@ -322,9 +330,13 @@ struct QuantityEditor: View {
     @State private var food: Food
     let date: Date
     private let entryID: UUID?
+    private let mealID: UUID?
+    private let savedMeal: SavedMeal?
+    private let isMealEditor: Bool
 
     @State private var amount: Double
     @State private var unitChoice: QuantityUnitChoice
+    @State private var mealItems: [MealItem]
     @State private var showingNameEditor = false
     @FocusState private var amountIsFocused: Bool
 
@@ -332,15 +344,39 @@ struct QuantityEditor: View {
         _food = State(initialValue: food)
         self.date = date
         entryID = nil
+        mealID = nil
+        savedMeal = nil
+        isMealEditor = false
         _amount = State(initialValue: 1)
         _unitChoice = State(initialValue: .ounces)
+        _mealItems = State(initialValue: [])
+    }
+
+    init(meal: SavedMeal, date: Date) {
+        _food = State(initialValue: Self.mealFood(for: meal))
+        self.date = date
+        entryID = nil
+        mealID = meal.id
+        savedMeal = meal
+        isMealEditor = true
+        _amount = State(initialValue: 1)
+        _unitChoice = State(initialValue: .portion("saved-meal"))
+        _mealItems = State(initialValue: meal.items)
     }
 
     init(entry: DiaryEntry) {
         _food = State(initialValue: entry.food)
         date = entry.date
         entryID = entry.id
+        mealID = entry.savedMealID
+        savedMeal = nil
+        isMealEditor = entry.isMeal
         _amount = State(initialValue: entry.amount)
+        _mealItems = State(initialValue: entry.mealItems ?? [])
+        if entry.isMeal {
+            _unitChoice = State(initialValue: .portion(entry.portionID ?? "saved-meal"))
+            return
+        }
         switch entry.unit {
         case .ounces:
             _unitChoice = State(initialValue: .ounces)
@@ -356,11 +392,13 @@ struct QuantityEditor: View {
     }
 
     private var availableChoices: [QuantityUnitChoice] {
-        [.ounces, .grams] + food.availablePortions.map { .portion($0.id) }
+        if isMealEditor { return [.portion(selectedPortionID ?? "saved-meal")] }
+        return [.ounces, .grams] + food.availablePortions.map { .portion($0.id) }
     }
 
     private var selectedUnit: LogUnit {
-        switch unitChoice {
+        if isMealEditor { return .serving }
+        return switch unitChoice {
         case .ounces: .ounces
         case .grams: .grams
         case .portion: .serving
@@ -382,63 +420,94 @@ struct QuantityEditor: View {
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 18) {
-                HStack(spacing: 8) {
-                    FoodResultRow(food: food)
-                    Button("Rename food", systemImage: "pencil") {
-                        showingNameEditor = true
-                    }
-                    .labelStyle(.iconOnly)
-                    .font(.headline)
-                    .foregroundStyle(AppTheme.coral)
-                    .frame(width: 44, height: 44)
-                    .accessibilityHint("Choose the name used throughout the app")
-                }
-                HStack(spacing: 12) {
-                    TextField("Amount", value: $amount, format: .number.precision(.fractionLength(0...2)))
-                        .keyboardType(.decimalPad)
-                        .submitLabel(.done)
-                        .focused($amountIsFocused)
-                        .font(.title2.weight(.bold).monospacedDigit())
-                        .padding(12)
-                        .background(AppTheme.controlFill, in: RoundedRectangle(cornerRadius: 12))
-                        .onSubmit(save)
-                        .onChange(of: amountIsFocused) { _, isFocused in
-                            if isFocused { selectAllAmount() }
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    if isMealEditor {
+                        HStack(spacing: 8) {
+                            MealEditorHeader(name: food.name, itemCount: mealItems.count)
+                            if mealID != nil {
+                                Button("Rename meal", systemImage: "pencil") {
+                                    showingNameEditor = true
+                                }
+                                .labelStyle(.iconOnly)
+                                .font(.headline)
+                                .foregroundStyle(AppTheme.coral)
+                                .frame(width: 44, height: 44)
+                                .accessibilityHint("Choose the name used throughout the app")
+                            }
                         }
-                    Picker("Unit", selection: $unitChoice) {
-                        ForEach(availableChoices, id: \.self) { choice in
-                            Text(label(for: choice)).tag(choice)
+                    } else {
+                        HStack(spacing: 8) {
+                            FoodResultRow(food: food)
+                            Button("Rename food", systemImage: "pencil") {
+                                showingNameEditor = true
+                            }
+                            .labelStyle(.iconOnly)
+                            .font(.headline)
+                            .foregroundStyle(AppTheme.coral)
+                            .frame(width: 44, height: 44)
+                            .accessibilityHint("Choose the name used throughout the app")
                         }
                     }
-                    .pickerStyle(.menu)
+
+                    HStack(spacing: 12) {
+                        amountField
+                        if isMealEditor {
+                            Text("meal")
+                                .font(.headline)
+                                .foregroundStyle(AppTheme.muted)
+                                .frame(minWidth: 72, alignment: .leading)
+                        } else {
+                            Picker("Unit", selection: $unitChoice) {
+                                ForEach(availableChoices, id: \.self) { choice in
+                                    Text(label(for: choice)).tag(choice)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                        }
+                    }
+
+                    HStack {
+                        nutrient("Calories", preview.calories, suffix: "")
+                        nutrient("Carbs", preview.carbs, suffix: "g")
+                        nutrient("Fat", preview.fat, suffix: "g")
+                        nutrient("Protein", preview.protein, suffix: "g")
+                    }
+
+                    if isMealEditor, !mealItems.isEmpty {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Contains")
+                                .font(.headline)
+                            ForEach(mealItems) { item in
+                                MealItemRow(item: item)
+                            }
+                        }
+                        .padding(14)
+                        .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 16))
+                    }
+
+                    Button(action: save) {
+                        Text(saveTitle)
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(amount <= 0)
                 }
-                HStack {
-                    nutrient("Calories", preview.calories, suffix: "")
-                    nutrient("Carbs", preview.carbs, suffix: "g")
-                    nutrient("Fat", preview.fat, suffix: "g")
-                    nutrient("Protein", preview.protein, suffix: "g")
-                }
-                Button(action: save) {
-                    Text(entryID == nil ? "Add \(Int(preview.calories.rounded())) calories" : "Save quantity")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(amount <= 0)
-                Spacer()
+                .padding(18)
             }
-            .padding(18)
             .background(AppTheme.background)
-            .navigationTitle(entryID == nil ? "Quantity" : "Edit food")
+            .navigationTitle(navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(diary.isFavorite(food) ? "Unfavorite" : "Favorite", systemImage: diary.isFavorite(food) ? "star.fill" : "star") {
-                        diary.toggleFavorite(food, preference: currentPreference)
+                if !isMealEditor {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(diary.isFavorite(food) ? "Unfavorite" : "Favorite", systemImage: diary.isFavorite(food) ? "star.fill" : "star") {
+                            diary.toggleFavorite(food, preference: currentPreference)
+                        }
+                        .labelStyle(.iconOnly)
                     }
-                    .labelStyle(.iconOnly)
                 }
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
@@ -447,14 +516,33 @@ struct QuantityEditor: View {
                 }
             }
             .sheet(isPresented: $showingNameEditor) {
-                FoodNameEditor(food: food) { name in
-                    guard diary.renameFood(foodID: food.id, name: name) else { return }
-                    food = diary.displayedFood(food)
+                Group {
+                    if isMealEditor {
+                        NameEditor(
+                            title: "Rename meal",
+                            fieldTitle: "Meal name",
+                            footer: "This name is saved with the meal and used by logged meal entries.",
+                            name: food.name
+                        ) { name in
+                            guard let mealID, diary.renameMeal(mealID: mealID, name: name) else { return }
+                            food.name = diary.document.meals.first { $0.id == mealID }?.name ?? name
+                        }
+                    } else {
+                        NameEditor(
+                            title: "Rename food",
+                            fieldTitle: "Food name",
+                            footer: "This name is saved when you leave this editor and will be used in the diary, favorites, and future searches.",
+                            name: food.name
+                        ) { name in
+                            guard diary.renameFood(foodID: food.id, name: name) else { return }
+                            food = diary.displayedFood(food)
+                        }
+                    }
                 }
                 .presentationDetents([.medium])
             }
             .onAppear {
-                guard entryID == nil else { return }
+                guard entryID == nil, !isMealEditor else { return }
                 let preference = diary.preference(for: food)
                 amount = preference.amount
                 switch preference.unit {
@@ -471,7 +559,7 @@ struct QuantityEditor: View {
                 }
             }
             .onDisappear {
-                if entryID == nil, diary.isFavorite(food) {
+                if entryID == nil, !isMealEditor, diary.isFavorite(food) {
                     diary.rememberPreference(currentPreference, for: food)
                 }
             }
@@ -487,15 +575,48 @@ struct QuantityEditor: View {
         }
     }
 
+    private var amountField: some View {
+        TextField("Amount", value: $amount, format: .number.precision(.fractionLength(0...2)))
+            .keyboardType(.decimalPad)
+            .submitLabel(.done)
+            .focused($amountIsFocused)
+            .font(.title2.weight(.bold).monospacedDigit())
+            .padding(12)
+            .background(AppTheme.controlFill, in: RoundedRectangle(cornerRadius: 12))
+            .onSubmit(save)
+            .onChange(of: amountIsFocused) { _, isFocused in
+                if isFocused { selectAllAmount() }
+            }
+    }
+
+    private var navigationTitle: String {
+        if isMealEditor { return entryID == nil ? "Meal quantity" : "Edit meal" }
+        return entryID == nil ? "Quantity" : "Edit food"
+    }
+
+    private var saveTitle: String {
+        if entryID == nil {
+            return "Add \(Int(preview.calories.rounded())) calories"
+        }
+        return "Save quantity"
+    }
+
     private func save() {
         guard amount > 0 else { return }
         if let entryID {
-            diary.updateEntry(
-                entryID: entryID,
-                amount: amount,
-                unit: selectedUnit,
-                portionID: selectedPortionID
-            )
+            if isMealEditor {
+                diary.updateMealEntry(entryID: entryID, amount: amount)
+            } else {
+                diary.updateEntry(
+                    entryID: entryID,
+                    amount: amount,
+                    unit: selectedUnit,
+                    portionID: selectedPortionID
+                )
+            }
+        } else if let savedMeal {
+            let currentMeal = diary.document.meals.first { $0.id == savedMeal.id } ?? savedMeal
+            diary.logMeal(currentMeal, amount: amount, on: date)
         } else {
             diary.log(
                 food,
@@ -506,6 +627,21 @@ struct QuantityEditor: View {
             )
         }
         dismiss()
+    }
+
+    private static func mealFood(for meal: SavedMeal) -> Food {
+        Food(
+            sourceID: "saved-meal-\(meal.id.uuidString)",
+            source: .custom,
+            name: meal.name,
+            brand: nil,
+            barcode: nil,
+            nutrients: meal.nutrients,
+            baseAmountGrams: 1,
+            servingGrams: 1,
+            servingDescription: "1 meal",
+            portions: [FoodPortion(id: "saved-meal", label: "meal", grams: 1)]
+        )
     }
 
     @MainActor
@@ -529,31 +665,99 @@ struct QuantityEditor: View {
     }
 }
 
-private struct FoodNameEditor: View {
+private struct MealEditorHeader: View {
+    let name: String
+    let itemCount: Int
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Text("Meal")
+                .font(.system(size: 9, weight: .bold, design: .rounded))
+                .foregroundStyle(AppTheme.coral)
+                .frame(width: 44, height: 44)
+                .background(AppTheme.coral.opacity(0.12), in: Circle())
+            VStack(alignment: .leading, spacing: 3) {
+                Text(name)
+                    .font(.body.weight(.semibold))
+                    .lineLimit(2)
+                Text("Saved meal · \(itemCount) item\(itemCount == 1 ? "" : "s")")
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.muted)
+            }
+            Spacer(minLength: 0)
+        }
+    }
+}
+
+private struct MealItemRow: View {
+    let item: MealItem
+
+    var body: some View {
+        HStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(item.food.name)
+                    .font(.subheadline.weight(.semibold))
+                    .lineLimit(2)
+                Text(quantityDescription)
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.muted)
+            }
+            Spacer(minLength: 8)
+            Text("\(Int(nutrients.calories.rounded())) cal")
+                .font(.caption.monospacedDigit())
+                .foregroundStyle(AppTheme.muted)
+        }
+    }
+
+    private var nutrients: MacroNutrients {
+        item.food.nutrients(for: item.amount, unit: item.unit, portionID: item.portionID)
+    }
+
+    private var quantityDescription: String {
+        switch item.unit {
+        case .grams, .ounces:
+            "\(item.amount.cleanAmount) \(item.unit.rawValue)"
+        case .serving:
+            "\(item.amount.cleanAmount) \(item.food.portion(id: item.portionID)?.label ?? "serving")"
+        }
+    }
+}
+
+private struct NameEditor: View {
     @Environment(\.dismiss) private var dismiss
-    let food: Food
+    let title: String
+    let fieldTitle: String
+    let footer: String
     let onApply: (String) -> Void
 
-    @State private var name: String
+    @State private var editedName: String
     @State private var hasFinished = false
 
-    init(food: Food, onApply: @escaping (String) -> Void) {
-        self.food = food
+    init(
+        title: String,
+        fieldTitle: String,
+        footer: String,
+        name: String,
+        onApply: @escaping (String) -> Void
+    ) {
+        self.title = title
+        self.fieldTitle = fieldTitle
+        self.footer = footer
         self.onApply = onApply
-        _name = State(initialValue: food.name)
+        _editedName = State(initialValue: name)
     }
 
     var body: some View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("Food name", text: $name)
+                    TextField(fieldTitle, text: $editedName)
                         .textInputAutocapitalization(.words)
                 } footer: {
-                    Text("This name is saved when you leave this editor and will be used in the diary, favorites, and future searches.")
+                    Text(footer)
                 }
             }
-            .navigationTitle("Rename food")
+            .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -564,21 +768,21 @@ private struct FoodNameEditor: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done", action: applyAndDismiss)
-                    .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .disabled(editedName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
             .onDisappear {
                 guard !hasFinished else { return }
                 hasFinished = true
-                onApply(name)
+                onApply(editedName)
             }
         }
     }
 
     private func applyAndDismiss() {
-        guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        guard !editedName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         hasFinished = true
-        onApply(name)
+        onApply(editedName)
         dismiss()
     }
 }
@@ -586,6 +790,7 @@ private struct FoodNameEditor: View {
 private struct MealsList: View {
     @EnvironmentObject private var diary: DiaryStore
     let onQuickLog: (SavedMeal) -> Void
+    let onEdit: (SavedMeal) -> Void
 
     var body: some View {
         if diary.document.meals.isEmpty {
@@ -597,18 +802,19 @@ private struct MealsList: View {
         } else {
             List {
                 ForEach(diary.document.meals) { meal in
-                    Button {
-                        onQuickLog(meal)
-                    } label: {
-                        HStack {
-                            VStack(alignment: .leading) {
-                                Text(meal.name).font(.body.weight(.semibold))
-                                Text("\(meal.items.count) items · \(Int(meal.items.reduce(0) { $0 + $1.food.nutrients(for: $1.amount, unit: $1.unit, portionID: $1.portionID).calories }.rounded())) cal")
-                                    .font(.caption).foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            Label("Add", systemImage: "plus.circle.fill")
+                    HStack(spacing: 12) {
+                        MealListRow(meal: meal)
+                            .contentShape(Rectangle())
+                            .onTapGesture { onEdit(meal) }
+                        Button("Add", systemImage: "plus.circle.fill") {
+                            onQuickLog(meal)
                         }
+                        .labelStyle(.iconOnly)
+                        .font(.headline.weight(.bold))
+                        .buttonStyle(.borderedProminent)
+                        .buttonBorderShape(.circle)
+                        .frame(width: 44, height: 44)
+                        .accessibilityLabel("Add \(meal.name)")
                     }
                     .swipeActions {
                         Button("Delete", role: .destructive) { diary.deleteMeal(meal) }
@@ -617,6 +823,27 @@ private struct MealsList: View {
             }
             .scrollContentBackground(.hidden)
         }
+    }
+}
+
+private struct MealListRow: View {
+    let meal: SavedMeal
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(meal.name)
+                .font(.body.weight(.semibold))
+                .lineLimit(2)
+            Text("\(meal.items.count) item\(meal.items.count == 1 ? "" : "s") · \(macroDescription)")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(2)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var macroDescription: String {
+        "\(Int(meal.nutrients.calories.rounded())) cal · C \(meal.nutrients.carbs.cleanAmount)g · F \(meal.nutrients.fat.cleanAmount)g · P \(meal.nutrients.protein.cleanAmount)g"
     }
 }
 

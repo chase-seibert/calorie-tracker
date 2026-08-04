@@ -183,6 +183,16 @@ struct SavedMeal: Codable, Hashable, Identifiable, Sendable {
     let id: UUID
     var name: String
     var items: [MealItem]
+
+    var nutrients: MacroNutrients {
+        items.reduce(.zero) { total, item in
+            total + item.food.nutrients(
+                for: item.amount,
+                unit: item.unit,
+                portionID: item.portionID
+            )
+        }
+    }
 }
 
 struct DiaryDocument: Codable, Sendable {
