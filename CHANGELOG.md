@@ -1,5 +1,8 @@
 # Changelog
 
+- Added optional Apple Health writes for logged calories, carbohydrates, fat,
+  and protein, with update and deletion synchronization.
+
 ## 2026-08-03
 
 - Created the local-first SwiftUI calorie tracker.

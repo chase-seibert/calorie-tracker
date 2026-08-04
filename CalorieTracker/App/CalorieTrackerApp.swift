@@ -3,24 +3,31 @@ import SwiftUI
 @main
 struct CalorieTrackerApp: App {
     @StateObject private var diary: DiaryStore
+    @StateObject private var healthKit: HealthKitStore
     private let catalog = CatalogStore()
 
     init() {
-        _diary = StateObject(wrappedValue: LaunchConfiguration.makeDiaryStore())
+        let healthKit = HealthKitStore()
+        _healthKit = StateObject(wrappedValue: healthKit)
+        _diary = StateObject(wrappedValue: LaunchConfiguration.makeDiaryStore(healthKit: healthKit))
     }
 
     var body: some Scene {
         WindowGroup {
             RootView(catalog: catalog)
                 .environmentObject(diary)
+                .environmentObject(healthKit)
                 .tint(AppTheme.coral)
+                .task {
+                    healthKit.sync(entries: diary.document.entries)
+                }
         }
     }
 }
 
 private enum LaunchConfiguration {
     @MainActor
-    static func makeDiaryStore() -> DiaryStore {
+    static func makeDiaryStore(healthKit: HealthKitStore) -> DiaryStore {
 #if DEBUG
         let environment = ProcessInfo.processInfo.environment
         if environment["CALORIE_TRACKER_UI_TEST_FIXTURE"] == "reorder" {
@@ -31,14 +38,14 @@ private enum LaunchConfiguration {
                 try? FileManager.default.removeItem(at: fixtureURL)
             }
 
-            let store = DiaryStore(fileURL: fixtureURL)
+            let store = DiaryStore(fileURL: fixtureURL, healthKit: healthKit)
             if store.entries(on: Date()).isEmpty {
                 seedReorderFixture(in: store)
             }
             return store
         }
 #endif
-        return DiaryStore()
+        return DiaryStore(healthKit: healthKit)
     }
 
 #if DEBUG

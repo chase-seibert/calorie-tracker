@@ -15,6 +15,13 @@ The SwiftUI app has two local data layers:
 This split keeps a large catalog immutable and fast while making the personal
 data schema easy to evolve and back up.
 
+When Apple Health is connected, `HealthKitStore` mirrors each diary entry as
+four nutrition quantity samples: dietary energy, carbohydrates, total fat, and
+protein. Each sample uses the diary entry UUID as a sync identifier, so edits
+replace the previous samples and deletions remove only samples created by this
+app. Authorization is requested only from Settings; HealthKit synchronization
+is skipped until write access is granted.
+
 Diary rows use a small `UIViewRepresentable` collection-view adapter for
 reordering and deletion. `UICollectionView` interactive movement provides the
 long-press lift and live row displacement on iOS 18, while its list layout owns

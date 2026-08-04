@@ -8,10 +8,16 @@ final class DiaryStore: ObservableObject {
 
     private let fileURL: URL
     private let calendar: Calendar
+    private let healthKit: HealthKitStore?
 
-    init(fileURL: URL? = nil, calendar: Calendar = .current) {
+    init(
+        fileURL: URL? = nil,
+        calendar: Calendar = .current,
+        healthKit: HealthKitStore? = nil
+    ) {
         self.calendar = calendar
         self.fileURL = fileURL ?? Self.defaultFileURL()
+        self.healthKit = healthKit
         self.document = Self.load(from: self.fileURL) ?? DiaryDocument()
     }
 
@@ -60,17 +66,22 @@ final class DiaryStore: ObservableObject {
             portionID: portionID
         )
         persist()
+        healthKit?.sync(entries: [entry])
     }
 
     func delete(entryID: UUID) {
+        let deletedEntries = document.entries.filter { $0.id == entryID }
         document.entries.removeAll { $0.id == entryID }
         persist()
+        healthKit?.delete(entries: deletedEntries)
     }
 
     func deleteEntries(entryIDs: Set<UUID>) {
         guard !entryIDs.isEmpty else { return }
+        let deletedEntries = document.entries.filter { entryIDs.contains($0.id) }
         document.entries.removeAll { entryIDs.contains($0.id) }
         persist()
+        healthKit?.delete(entries: deletedEntries)
     }
 
     func updateEntry(
@@ -100,6 +111,7 @@ final class DiaryStore: ObservableObject {
             portionID: portionID
         )
         persist()
+        healthKit?.sync(entries: [document.entries[index]])
     }
 
     func moveEntry(
@@ -284,6 +296,8 @@ final class DiaryStore: ObservableObject {
         }
         document.meals.insert(meal, at: 0)
         persist()
+        healthKit?.delete(entries: selectedEntries)
+        healthKit?.sync(entries: [mealEntry])
     }
 
     func breakApartMeal(entryID: UUID) {
@@ -319,6 +333,8 @@ final class DiaryStore: ObservableObject {
             document.entries.append(entry)
         }
         persist()
+        healthKit?.delete(entries: [mealEntry])
+        healthKit?.sync(entries: expandedEntries)
     }
 
     func deleteCustomFood(_ food: Food) {
@@ -335,16 +351,16 @@ final class DiaryStore: ObservableObject {
 
     func logMeal(_ meal: SavedMeal, amount: Double = 1, on date: Date) {
         guard !meal.items.isEmpty, amount > 0 else { return }
-        document.entries.append(
-            makeMealEntry(
-                for: meal,
-                amount: amount,
-                on: date,
-                loggedAt: Date(),
-                displayOrder: nextDisplayOrder(on: date)
-            )
+        let entry = makeMealEntry(
+            for: meal,
+            amount: amount,
+            on: date,
+            loggedAt: Date(),
+            displayOrder: nextDisplayOrder(on: date)
         )
+        document.entries.append(entry)
         persist()
+        healthKit?.sync(entries: [entry])
     }
 
     func updateMealEntry(entryID: UUID, amount: Double) {
@@ -390,6 +406,7 @@ final class DiaryStore: ObservableObject {
         document.entries[index].nutrients = baseNutrients.scaled(by: clampedAmount)
         document.entries[index].mealItems = scaledItems
         persist()
+        healthKit?.sync(entries: [document.entries[index]])
     }
 
     @discardableResult
@@ -476,12 +493,15 @@ final class DiaryStore: ObservableObject {
         let existingIDs = Set(document.importedFoods.map(\.id))
         document.importedFoods.append(contentsOf: result.foods.filter { !existingIDs.contains($0.id) })
         persist()
+        healthKit?.sync(entries: result.entries)
         return ImportSummary(entries: result.entries.count, foods: result.foods.count, skipped: result.skipped)
     }
 
     func clearPersonalData() {
+        let deletedEntries = document.entries
         document = DiaryDocument()
         persist()
+        healthKit?.delete(entries: deletedEntries)
     }
 
     func totalsByDay(numberOfDays: Int = 30) -> [(date: Date, nutrients: MacroNutrients)] {

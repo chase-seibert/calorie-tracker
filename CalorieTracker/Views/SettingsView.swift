@@ -3,6 +3,7 @@ import UniformTypeIdentifiers
 
 struct SettingsView: View {
     @EnvironmentObject private var diary: DiaryStore
+    @EnvironmentObject private var healthKit: HealthKitStore
     let catalog: CatalogStore
 
     @State private var importing = false
@@ -55,6 +56,38 @@ struct SettingsView: View {
                 Text("Used for foods you have not logged before. Your last amount and unit are remembered per food.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+            }
+
+            Section("Apple Health") {
+                switch healthKit.authorizationState {
+                case .authorized:
+                    Label("Connected", systemImage: "checkmark.circle.fill")
+                        .foregroundStyle(AppTheme.protein)
+                    Button("Sync logged nutrition", systemImage: "arrow.triangle.2.circlepath") {
+                        healthKit.sync(entries: diary.document.entries)
+                    }
+                case .notDetermined:
+                    Button("Connect Apple Health", systemImage: "heart.fill") {
+                        Task {
+                            await healthKit.requestAuthorizationAndSync(entries: diary.document.entries)
+                        }
+                    }
+                    Text("Writes calories, carbohydrates, fat, and protein for your logged foods and meals.")
+                        .font(.caption)
+                case .denied:
+                    Label("Access is turned off", systemImage: "exclamationmark.triangle")
+                    Text("Allow nutrition data in the Health app's Apps settings to reconnect.")
+                        .font(.caption)
+                case .unavailable:
+                    Label("Apple Health is unavailable", systemImage: "heart.slash")
+                    Text("Health data can only be written on a device that supports Apple Health.")
+                        .font(.caption)
+                }
+                if let error = healthKit.lastError {
+                    Text(error)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             Section("Local catalogs") {
