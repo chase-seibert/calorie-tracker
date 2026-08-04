@@ -54,6 +54,23 @@ struct MacroNutrients: Codable, Hashable, Sendable {
     }
 }
 
+struct DailyCalorieProgress: Equatable, Sendable {
+    let consumed: Int
+    let goal: Int?
+
+    init(calories: Double, goal: Int?) {
+        consumed = Int(calories.rounded())
+        self.goal = goal.flatMap { $0 > 0 ? $0 : nil }
+    }
+
+    var accessibilityLabel: String {
+        if let goal {
+            return "\(consumed) of \(goal) calories"
+        }
+        return "\(consumed) calories"
+    }
+}
+
 struct FoodPortion: Codable, Hashable, Identifiable, Sendable {
     let id: String
     var label: String
@@ -145,6 +162,13 @@ struct DiaryEntry: Codable, Hashable, Identifiable, Sendable {
     var nutrients: MacroNutrients
     var loggedAt: Date
     var portionID: String? = nil
+    var displayOrder: Int? = nil
+    var savedMealID: UUID? = nil
+    var mealItems: [MealItem]? = nil
+
+    var isMeal: Bool {
+        savedMealID != nil || !(mealItems?.isEmpty ?? true)
+    }
 }
 
 struct MealItem: Codable, Hashable, Identifiable, Sendable {
@@ -163,36 +187,13 @@ struct SavedMeal: Codable, Hashable, Identifiable, Sendable {
 
 struct DiaryDocument: Codable, Sendable {
     var schemaVersion = 1
+    var dailyCalorieGoal: Int? = nil
     var entries: [DiaryEntry] = []
     var favorites: [Food] = []
     var meals: [SavedMeal] = []
     var rememberedQuantities: [String: QuantityPreference] = [:]
     var customFoods: [Food] = []
     var importedFoods: [Food] = []
-}
-
-enum CatalogScope: String, CaseIterable, Identifiable, Sendable {
-    case usda
-    case openFoodFacts = "off"
-    case myFitnessPal = "mfp"
-
-    var id: String { rawValue }
-
-    var title: String {
-        switch self {
-        case .usda: "USDA"
-        case .openFoodFacts: "Open Food Facts"
-        case .myFitnessPal: "MyFitnessPal"
-        }
-    }
-
-    var source: FoodSource {
-        switch self {
-        case .usda: .usda
-        case .openFoodFacts: .openFoodFacts
-        case .myFitnessPal: .myFitnessPal
-        }
-    }
 }
 
 extension Double {

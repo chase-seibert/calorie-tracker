@@ -10,26 +10,24 @@ struct TrendsView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                AppTheme.background.ignoresSafeArea()
-                ScrollView {
-                    VStack(spacing: 18) {
-                        Picker("Range", selection: $range) {
-                            Text("14 days").tag(14)
-                            Text("30 days").tag(30)
-                            Text("90 days").tag(90)
-                        }
-                        .pickerStyle(.segmented)
-
-                        chartCard(title: "Calories", color: AppTheme.coral, value: { $0.nutrients.calories })
-                        macroChart
+        ZStack {
+            AppTheme.background.ignoresSafeArea()
+            ScrollView {
+                VStack(spacing: 18) {
+                    Picker("Range", selection: $range) {
+                        Text("14 days").tag(14)
+                        Text("30 days").tag(30)
+                        Text("90 days").tag(90)
                     }
-                    .padding(16)
+                    .pickerStyle(.segmented)
+
+                    chartCard(title: "Calories", color: AppTheme.coral, value: { $0.nutrients.calories })
+                    macroChart
                 }
+                .padding(16)
             }
-            .navigationTitle("Trends")
         }
+        .navigationTitle("Trends")
     }
 
     private func chartCard(title: String, color: Color, value: @escaping (TrendPoint) -> Double) -> some View {
@@ -97,4 +95,3 @@ private struct TrendPoint: Identifiable {
     let nutrients: MacroNutrients
     var id: Date { date }
 }
-

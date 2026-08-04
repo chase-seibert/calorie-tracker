@@ -3,6 +3,36 @@ import XCTest
 
 final class CalorieTrackerTests: XCTestCase {
     @MainActor
+    func testDailyCalorieGoalPersistsAndCanBeRemoved() {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let fileURL = folder.appendingPathComponent("diary.json")
+        let store = DiaryStore(fileURL: fileURL)
+
+        XCTAssertNil(store.dailyCalorieGoal)
+        store.setDailyCalorieGoal(2_200)
+        XCTAssertEqual(store.dailyCalorieGoal, 2_200)
+        XCTAssertEqual(DiaryStore(fileURL: fileURL).dailyCalorieGoal, 2_200)
+
+        store.setDailyCalorieGoal(0)
+        XCTAssertNil(store.dailyCalorieGoal)
+        XCTAssertNil(DiaryStore(fileURL: fileURL).dailyCalorieGoal)
+    }
+
+    func testDailyCalorieProgressIncludesOptionalGoal() {
+        let progress = DailyCalorieProgress(calories: 1_234.5, goal: 2_000)
+        XCTAssertEqual(progress.consumed, 1_235)
+        XCTAssertEqual(progress.goal, 2_000)
+        XCTAssertEqual(
+            DailyCalorieProgress(calories: 1_234.4, goal: nil).accessibilityLabel,
+            "1234 calories"
+        )
+        XCTAssertEqual(
+            DailyCalorieProgress(calories: 1_234.4, goal: 2_000).accessibilityLabel,
+            "1234 of 2000 calories"
+        )
+    }
+
+    @MainActor
     func testLoggingScalesNutrientsAndRemembersQuantity() throws {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let store = DiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
@@ -23,6 +53,50 @@ final class CalorieTrackerTests: XCTestCase {
         let entry = try XCTUnwrap(store.entries(on: Date()).first)
         XCTAssertEqual(entry.nutrients.calories, 44.5, accuracy: 0.001)
         XCTAssertEqual(store.preference(for: food), QuantityPreference(amount: 50, unit: .grams))
+    }
+
+    @MainActor
+    func testEditingLoggedFoodUpdatesEntryTotalsPreferenceAndPersistence() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let fileURL = folder.appendingPathComponent("diary.json")
+        let day = Date()
+        let egg = Food(
+            sourceID: "scrambled-egg-edit",
+            source: .usda,
+            name: "Egg, whole, cooked, scrambled",
+            brand: nil,
+            barcode: nil,
+            nutrients: MacroNutrients(calories: 150, carbs: 2, fat: 10, protein: 10),
+            baseAmountGrams: 100,
+            servingGrams: 50,
+            servingDescription: "1 egg",
+            portions: [FoodPortion(id: "one-egg", label: "egg", grams: 50)]
+        )
+        let store = DiaryStore(fileURL: fileURL)
+        store.log(egg, amount: 100, unit: .grams, on: day)
+        let originalEntry = try XCTUnwrap(store.entries(on: day).first)
+
+        store.updateEntry(
+            entryID: originalEntry.id,
+            amount: 2,
+            unit: .serving,
+            portionID: "one-egg"
+        )
+
+        let editedEntry = try XCTUnwrap(store.entries(on: day).first)
+        XCTAssertEqual(store.entries(on: day).count, 1)
+        XCTAssertEqual(editedEntry.id, originalEntry.id)
+        XCTAssertEqual(editedEntry.amount, 2)
+        XCTAssertEqual(editedEntry.unit, .serving)
+        XCTAssertEqual(editedEntry.portionID, "one-egg")
+        XCTAssertEqual(editedEntry.nutrients.calories, 150, accuracy: 0.001)
+        XCTAssertEqual(store.totals(on: day).calories, 150, accuracy: 0.001)
+        XCTAssertEqual(store.preference(for: egg), QuantityPreference(amount: 2, unit: .serving, portionID: "one-egg"))
+
+        let reloaded = DiaryStore(fileURL: fileURL)
+        XCTAssertEqual(reloaded.entries(on: day).first?.amount, 2)
+        XCTAssertEqual(reloaded.entries(on: day).first?.unit, .serving)
+        XCTAssertEqual(reloaded.totals(on: day).calories, 150, accuracy: 0.001)
     }
 
     @MainActor
@@ -77,6 +151,133 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(store.document.meals.count, 1)
     }
 
+    @MainActor
+    func testReorderedDiaryEntriesPersistAndNewEntriesStayAtTop() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let fileURL = folder.appendingPathComponent("diary.json")
+        let day = Date()
+        let store = DiaryStore(fileURL: fileURL)
+
+        func food(_ name: String) -> Food {
+            Food(
+                sourceID: name.lowercased(),
+                source: .custom,
+                name: name,
+                brand: nil,
+                barcode: nil,
+                nutrients: MacroNutrients(calories: 100, carbs: 1, fat: 1, protein: 1),
+                baseAmountGrams: 100,
+                servingGrams: nil,
+                servingDescription: nil
+            )
+        }
+
+        store.log(food("A"), amount: 100, unit: .grams, on: day)
+        store.log(food("B"), amount: 100, unit: .grams, on: day)
+        store.log(food("C"), amount: 100, unit: .grams, on: day)
+
+        let cID = try XCTUnwrap(store.entries(on: day).first { $0.food.name == "C" }?.id)
+        let aID = try XCTUnwrap(store.entries(on: day).first { $0.food.name == "A" }?.id)
+        store.moveEntry(cID, relativeTo: aID, placeAfterTarget: true, on: day)
+
+        XCTAssertEqual(store.entries(on: day).map(\.food.name), ["B", "A", "C"])
+        let reloaded = DiaryStore(fileURL: fileURL)
+        XCTAssertEqual(reloaded.entries(on: day).map(\.food.name), ["B", "A", "C"])
+
+        reloaded.log(food("D"), amount: 100, unit: .grams, on: day)
+        XCTAssertEqual(reloaded.entries(on: day).map(\.food.name), ["D", "B", "A", "C"])
+    }
+
+    @MainActor
+    func testRepeatedMovesUpdateOrderAsAnEntryCrossesEachRow() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let store = DiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
+        let day = Date()
+
+        func food(_ name: String) -> Food {
+            Food(
+                sourceID: name,
+                source: .custom,
+                name: name,
+                brand: nil,
+                barcode: nil,
+                nutrients: MacroNutrients(calories: 1, carbs: 0, fat: 0, protein: 0),
+                baseAmountGrams: 1,
+                servingGrams: nil,
+                servingDescription: nil
+            )
+        }
+
+        ["A", "B", "C", "D"].forEach { store.log(food($0), amount: 1, unit: .grams, on: day) }
+        let dID = try XCTUnwrap(store.entries(on: day).first { $0.food.name == "D" }?.id)
+        let cID = try XCTUnwrap(store.entries(on: day).first { $0.food.name == "C" }?.id)
+        let bID = try XCTUnwrap(store.entries(on: day).first { $0.food.name == "B" }?.id)
+        let aID = try XCTUnwrap(store.entries(on: day).first { $0.food.name == "A" }?.id)
+
+        store.moveEntry(dID, relativeTo: cID, placeAfterTarget: true, on: day)
+        XCTAssertEqual(store.entries(on: day).map(\.food.name), ["C", "D", "B", "A"])
+
+        store.moveEntry(dID, relativeTo: bID, placeAfterTarget: true, on: day)
+        XCTAssertEqual(store.entries(on: day).map(\.food.name), ["C", "B", "D", "A"])
+
+        store.moveEntry(dID, relativeTo: aID, placeAfterTarget: true, on: day)
+        XCTAssertEqual(store.entries(on: day).map(\.food.name), ["C", "B", "A", "D"])
+    }
+
+    @MainActor
+    func testSavingAndBreakingApartMealPreservesDiaryAndTotals() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let fileURL = folder.appendingPathComponent("diary.json")
+        let day = Date()
+        let store = DiaryStore(fileURL: fileURL)
+
+        func food(_ name: String, calories: Double) -> Food {
+            Food(
+                sourceID: name.lowercased(),
+                source: .custom,
+                name: name,
+                brand: nil,
+                barcode: nil,
+                nutrients: MacroNutrients(calories: calories, carbs: calories / 10, fat: 1, protein: 2),
+                baseAmountGrams: 100,
+                servingGrams: nil,
+                servingDescription: nil
+            )
+        }
+
+        store.log(food("Toast", calories: 100), amount: 100, unit: .grams, on: day)
+        store.log(food("Eggs", calories: 200), amount: 100, unit: .grams, on: day)
+        store.log(food("Coffee", calories: 5), amount: 100, unit: .grams, on: day)
+        let totalsBefore = store.totals(on: day)
+        let entries = store.entries(on: day)
+        let selectedIDs = Set(entries.filter { $0.food.name != "Coffee" }.map(\.id))
+
+        store.saveMeal(name: "Breakfast", replacing: selectedIDs, on: day)
+
+        let updatedEntries = store.entries(on: day)
+        XCTAssertEqual(updatedEntries.map(\.food.name), ["Coffee", "Breakfast"])
+        XCTAssertEqual(updatedEntries.last?.food.availablePortions.first?.label, "meal")
+        XCTAssertEqual(updatedEntries.last?.savedMealID, store.document.meals.first?.id)
+        XCTAssertEqual(store.document.meals.first?.items.count, 2)
+        XCTAssertEqual(store.totals(on: day), totalsBefore)
+
+        let reloaded = DiaryStore(fileURL: fileURL)
+        XCTAssertEqual(reloaded.entries(on: day).map(\.food.name), ["Coffee", "Breakfast"])
+        XCTAssertEqual(reloaded.totals(on: day), totalsBefore)
+
+        let mealEntryID = try XCTUnwrap(reloaded.entries(on: day).last?.id)
+        reloaded.breakApartMeal(entryID: mealEntryID)
+
+        XCTAssertEqual(reloaded.entries(on: day).map(\.food.name), ["Coffee", "Eggs", "Toast"])
+        XCTAssertTrue(reloaded.entries(on: day).allSatisfy { !$0.isMeal })
+        XCTAssertEqual(reloaded.totals(on: day), totalsBefore)
+        XCTAssertEqual(reloaded.document.meals.count, 1)
+
+        let expandedReload = DiaryStore(fileURL: fileURL)
+        XCTAssertEqual(expandedReload.entries(on: day).map(\.food.name), ["Coffee", "Eggs", "Toast"])
+        XCTAssertEqual(expandedReload.totals(on: day), totalsBefore)
+    }
+
     func testMyFitnessPalCSVImport() throws {
         let csv = "Date,Food Name,Calories,Carbs,Fat,Protein\n2026-08-01,Banana,105,27,0.4,1.3\n"
         let result = try MyFitnessPalImporter.parse(data: Data(csv.utf8), calendar: .current)
@@ -95,6 +296,10 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertGreaterThan(catalog.count(source: .openFoodFacts), 0)
         XCTAssertFalse(catalog.search("banana", source: .usda).isEmpty)
         XCTAssertFalse(catalog.search("milk", source: .openFoodFacts).isEmpty)
+
+        let combinedSources = Set(catalog.searchAll("milk", limit: 100).map(\.source))
+        XCTAssertTrue(combinedSources.contains(.usda))
+        XCTAssertTrue(combinedSources.contains(.openFoodFacts))
     }
 
     func testCatalogPreservesNaturalPortions() throws {
@@ -143,5 +348,45 @@ final class CalorieTrackerTests: XCTestCase {
         )
 
         XCTAssertEqual(store.preference(for: food), QuantityPreference(amount: 1, unit: .ounces))
+    }
+
+    @MainActor
+    func testQuickLogUsesDisplayedPreferenceAndSuggestionsAreUnique() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let store = DiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
+        let peanutButter = Food(
+            sourceID: "peanut-butter",
+            source: .usda,
+            name: "Peanut butter",
+            brand: nil,
+            barcode: nil,
+            nutrients: MacroNutrients(calories: 588, carbs: 20, fat: 50, protein: 25),
+            baseAmountGrams: 100,
+            servingGrams: nil,
+            servingDescription: nil
+        )
+        let banana = Food(
+            sourceID: "banana-suggestion",
+            source: .usda,
+            name: "Banana",
+            brand: nil,
+            barcode: nil,
+            nutrients: MacroNutrients(calories: 89, carbs: 23, fat: 0.3, protein: 1.1),
+            baseAmountGrams: 100,
+            servingGrams: nil,
+            servingDescription: nil
+        )
+        let preference = QuantityPreference(amount: 2, unit: .ounces)
+
+        store.rememberPreference(preference, for: peanutButter)
+        store.quickLog(peanutButter, on: Date())
+        store.toggleFavorite(peanutButter)
+        store.toggleFavorite(banana)
+
+        let entry = try XCTUnwrap(store.entries(on: Date()).first)
+        XCTAssertEqual(entry.amount, preference.amount)
+        XCTAssertEqual(entry.unit, preference.unit)
+        XCTAssertEqual(store.suggestedFoods.filter { $0.id == peanutButter.id }.count, 1)
+        XCTAssertTrue(store.suggestedFoods.contains { $0.id == banana.id })
     }
 }

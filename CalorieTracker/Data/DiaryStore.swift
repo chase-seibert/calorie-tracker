@@ -18,11 +18,25 @@ final class DiaryStore: ObservableObject {
     func entries(on date: Date) -> [DiaryEntry] {
         document.entries
             .filter { calendar.isDate($0.date, inSameDayAs: date) }
-            .sorted { $0.loggedAt > $1.loggedAt }
+            .sorted {
+                let leftOrder = $0.displayOrder ?? Int.max
+                let rightOrder = $1.displayOrder ?? Int.max
+                if leftOrder != rightOrder { return leftOrder < rightOrder }
+                return $0.loggedAt > $1.loggedAt
+            }
     }
 
     func totals(on date: Date) -> MacroNutrients {
         entries(on: date).reduce(.zero) { $0 + $1.nutrients }
+    }
+
+    var dailyCalorieGoal: Int? {
+        document.dailyCalorieGoal
+    }
+
+    func setDailyCalorieGoal(_ goal: Int?) {
+        document.dailyCalorieGoal = goal.flatMap { $0 > 0 ? $0 : nil }
+        persist()
     }
 
     func log(_ food: Food, amount: Double, unit: LogUnit, portionID: String? = nil, on date: Date) {
@@ -35,7 +49,8 @@ final class DiaryStore: ObservableObject {
             unit: unit,
             nutrients: food.nutrients(for: clampedAmount, unit: unit, portionID: portionID),
             loggedAt: Date(),
-            portionID: portionID
+            portionID: portionID,
+            displayOrder: nextDisplayOrder(on: date)
         )
         document.entries.append(entry)
         document.rememberedQuantities[food.id] = QuantityPreference(
@@ -48,6 +63,59 @@ final class DiaryStore: ObservableObject {
 
     func delete(entryID: UUID) {
         document.entries.removeAll { $0.id == entryID }
+        persist()
+    }
+
+    func updateEntry(
+        entryID: UUID,
+        amount: Double,
+        unit: LogUnit,
+        portionID: String? = nil
+    ) {
+        guard
+            let index = document.entries.firstIndex(where: { $0.id == entryID }),
+            !document.entries[index].isMeal
+        else { return }
+
+        let clampedAmount = max(amount, 0.01)
+        let food = document.entries[index].food
+        document.entries[index].amount = clampedAmount
+        document.entries[index].unit = unit
+        document.entries[index].portionID = portionID
+        document.entries[index].nutrients = food.nutrients(
+            for: clampedAmount,
+            unit: unit,
+            portionID: portionID
+        )
+        document.rememberedQuantities[food.id] = QuantityPreference(
+            amount: clampedAmount,
+            unit: unit,
+            portionID: portionID
+        )
+        persist()
+    }
+
+    func moveEntry(
+        _ entryID: UUID,
+        relativeTo targetEntryID: UUID,
+        placeAfterTarget: Bool,
+        on date: Date
+    ) {
+        guard entryID != targetEntryID else { return }
+        var orderedEntries = entries(on: date)
+        guard let sourceIndex = orderedEntries.firstIndex(where: { $0.id == entryID }) else { return }
+
+        let movedEntry = orderedEntries.remove(at: sourceIndex)
+        guard let targetIndex = orderedEntries.firstIndex(where: { $0.id == targetEntryID }) else { return }
+        let insertionIndex = targetIndex + (placeAfterTarget ? 1 : 0)
+        orderedEntries.insert(movedEntry, at: insertionIndex)
+
+        let orderByID = Dictionary(uniqueKeysWithValues: orderedEntries.enumerated().map { ($1.id, $0) })
+        for index in document.entries.indices {
+            if let displayOrder = orderByID[document.entries[index].id] {
+                document.entries[index].displayOrder = displayOrder
+            }
+        }
         persist()
     }
 
@@ -97,12 +165,23 @@ final class DiaryStore: ObservableObject {
     }
 
     var recentFoods: [Food] {
-        uniqueFoods(from: document.entries.sorted { $0.loggedAt > $1.loggedAt }, limit: 30)
+        uniqueFoods(
+            from: document.entries.filter { !$0.isMeal }.sorted { $0.loggedAt > $1.loggedAt },
+            limit: 30
+        )
+    }
+
+    var suggestedFoods: [Food] {
+        let candidates = Array(recentFoods.prefix(12)) +
+            Array(frequentFoods.prefix(12)) +
+            document.favorites
+        var seen = Set<String>()
+        return candidates.filter { seen.insert($0.id).inserted }.prefix(30).map { $0 }
     }
 
     var frequentFoods: [Food] {
         let cutoff = calendar.date(byAdding: .day, value: -90, to: Date()) ?? .distantPast
-        let recentEntries = document.entries.filter { $0.date >= cutoff }
+        let recentEntries = document.entries.filter { $0.date >= cutoff && !$0.isMeal }
         let grouped = Dictionary(grouping: recentEntries, by: { $0.food.id })
         return grouped.values
             .sorted {
@@ -146,6 +225,101 @@ final class DiaryStore: ObservableObject {
         guard !items.isEmpty else { return }
         let meal = SavedMeal(id: UUID(), name: name, items: items)
         document.meals.insert(meal, at: 0)
+        persist()
+    }
+
+    func saveMeal(name: String, replacing entryIDs: Set<UUID>, on date: Date) {
+        let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedName.isEmpty, !entryIDs.isEmpty else { return }
+
+        let dayEntries = entries(on: date)
+        let selectedEntries = dayEntries.filter { entryIDs.contains($0.id) }
+        guard !selectedEntries.isEmpty else { return }
+
+        let meal = SavedMeal(
+            id: UUID(),
+            name: normalizedName,
+            items: selectedEntries.map {
+                MealItem(
+                    id: UUID(),
+                    food: $0.food,
+                    amount: $0.amount,
+                    unit: $0.unit,
+                    portionID: $0.portionID
+                )
+            }
+        )
+        let nutrients = selectedEntries.reduce(.zero) { $0 + $1.nutrients }
+        let mealFood = Food(
+            sourceID: "saved-meal-\(meal.id.uuidString)",
+            source: .custom,
+            name: normalizedName,
+            brand: nil,
+            barcode: nil,
+            nutrients: nutrients,
+            baseAmountGrams: 1,
+            servingGrams: 1,
+            servingDescription: "1 meal",
+            portions: [FoodPortion(id: "saved-meal", label: "meal", grams: 1)]
+        )
+        let mealEntry = DiaryEntry(
+            id: UUID(),
+            date: calendar.startOfDay(for: date),
+            food: mealFood,
+            amount: 1,
+            unit: .serving,
+            nutrients: nutrients,
+            loggedAt: selectedEntries.map(\.loggedAt).max() ?? Date(),
+            portionID: "saved-meal",
+            savedMealID: meal.id,
+            mealItems: meal.items
+        )
+
+        let insertionIndex = dayEntries.firstIndex { entryIDs.contains($0.id) } ?? 0
+        var replacementEntries = dayEntries.filter { !entryIDs.contains($0.id) }
+        replacementEntries.insert(mealEntry, at: min(insertionIndex, replacementEntries.count))
+
+        document.entries.removeAll { calendar.isDate($0.date, inSameDayAs: date) }
+        for (displayOrder, var entry) in replacementEntries.enumerated() {
+            entry.displayOrder = displayOrder
+            document.entries.append(entry)
+        }
+        document.meals.insert(meal, at: 0)
+        persist()
+    }
+
+    func breakApartMeal(entryID: UUID) {
+        guard
+            let mealEntry = document.entries.first(where: { $0.id == entryID }),
+            mealEntry.isMeal
+        else { return }
+
+        let items = mealEntry.mealItems ?? document.meals.first { $0.id == mealEntry.savedMealID }?.items
+        guard let items, !items.isEmpty else { return }
+
+        var dayEntries = entries(on: mealEntry.date)
+        guard let mealIndex = dayEntries.firstIndex(where: { $0.id == entryID }) else { return }
+        dayEntries.remove(at: mealIndex)
+
+        let expandedEntries = items.map {
+            DiaryEntry(
+                id: UUID(),
+                date: mealEntry.date,
+                food: $0.food,
+                amount: $0.amount,
+                unit: $0.unit,
+                nutrients: $0.food.nutrients(for: $0.amount, unit: $0.unit, portionID: $0.portionID),
+                loggedAt: mealEntry.loggedAt,
+                portionID: $0.portionID
+            )
+        }
+        dayEntries.insert(contentsOf: expandedEntries, at: mealIndex)
+
+        document.entries.removeAll { calendar.isDate($0.date, inSameDayAs: mealEntry.date) }
+        for (displayOrder, var entry) in dayEntries.enumerated() {
+            entry.displayOrder = displayOrder
+            document.entries.append(entry)
+        }
         persist()
     }
 
@@ -214,6 +388,14 @@ final class DiaryStore: ObservableObject {
             if foods.count == limit { break }
         }
         return foods
+    }
+
+    private func nextDisplayOrder(on date: Date) -> Int {
+        let firstOrder = document.entries
+            .filter { calendar.isDate($0.date, inSameDayAs: date) }
+            .compactMap(\.displayOrder)
+            .min() ?? 0
+        return firstOrder - 1
     }
 
     private func persist() {

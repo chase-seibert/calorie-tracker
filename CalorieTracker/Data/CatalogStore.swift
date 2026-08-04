@@ -56,6 +56,42 @@ final class CatalogStore: @unchecked Sendable {
         }
     }
 
+    func searchAll(_ query: String, limit: Int = 50) -> [Food] {
+        let terms = query
+            .split(whereSeparator: { !$0.isLetter && !$0.isNumber })
+            .prefix(8)
+            .map { "\($0)*" }
+            .joined(separator: " ")
+        guard !terms.isEmpty else { return [] }
+
+        let sql = """
+            SELECT f.source_id, f.source, f.name, f.brand, f.barcode,
+                   f.calories, f.carbs, f.fat, f.protein, f.base_grams,
+                   f.serving_grams, f.serving_description, f.portions_json
+            FROM foods_fts
+            JOIN foods f ON f.rowid = foods_fts.rowid
+            WHERE foods_fts MATCH ?
+            ORDER BY
+                CASE
+                    WHEN lower(f.name) = lower(?) THEN 0
+                    WHEN lower(f.name) LIKE lower(?) || ',%' THEN 1
+                    WHEN lower(f.name) LIKE lower(?) || '%' THEN 2
+                    ELSE 3
+                END,
+                bm25(foods_fts, 8.0, 3.0),
+                length(f.name),
+                f.rank DESC
+            LIMIT ?
+            """
+        return queryFoods(sql: sql) { statement in
+            bind(terms, at: 1, to: statement)
+            bind(query, at: 2, to: statement)
+            bind(query, at: 3, to: statement)
+            bind(query, at: 4, to: statement)
+            sqlite3_bind_int(statement, 5, Int32(limit))
+        }
+    }
+
     func popular(source: FoodSource, limit: Int = 50) -> [Food] {
         let sql = """
             SELECT source_id, source, name, brand, barcode, calories, carbs,

@@ -1,28 +1,16 @@
 import SwiftUI
+import UIKit
 
 struct FoodPickerView: View {
     enum Mode: String, CaseIterable, Identifiable {
+        case suggested = "For You"
         case recent = "Recent"
         case frequent = "Frequent"
         case favorites = "Favorites"
         case meals = "Meals"
-        case search = "Search"
         case scan = "Scan"
-        case custom = "Custom"
 
         var id: String { rawValue }
-
-        var icon: String {
-            switch self {
-            case .recent: "clock"
-            case .frequent: "repeat"
-            case .favorites: "star"
-            case .meals: "square.stack.3d.up"
-            case .search: "magnifyingglass"
-            case .scan: "barcode.viewfinder"
-            case .custom: "square.and.pencil"
-            }
-        }
     }
 
     @EnvironmentObject private var diary: DiaryStore
@@ -30,49 +18,72 @@ struct FoodPickerView: View {
     let date: Date
     let catalog: CatalogStore
 
-    @State private var mode: Mode = ProcessInfo.processInfo.arguments.contains("--show-food-search") ? .search : .recent
+    @State private var mode: Mode = .suggested
     @State private var selectedFood: Food?
-    @State private var addedMessage: String?
+    @State private var query = ProcessInfo.processInfo.arguments.contains("--show-food-search") ? "banana" : ""
+    @State private var results: [Food] = []
+    @State private var isSearching = false
+    @FocusState private var searchIsFocused: Bool
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                modeStrip
+                searchControls
+                if query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    modeStrip
+                }
                 Divider()
                 Group {
-                    switch mode {
-                    case .recent:
-                        QuickFoodList(
-                            title: "Logged recently",
-                            emptyMessage: "Foods you log will appear here.",
-                            foods: diary.recentFoods,
+                    if !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        SearchResultsList(
+                            query: query,
+                            results: results,
+                            isSearching: isSearching,
                             onQuickLog: quickLog,
                             onEdit: { selectedFood = $0 }
                         )
-                    case .frequent:
-                        QuickFoodList(
-                            title: "Most used · 90 days",
-                            emptyMessage: "Your most-used foods will appear here.",
-                            foods: diary.frequentFoods,
-                            onQuickLog: quickLog,
-                            onEdit: { selectedFood = $0 }
-                        )
-                    case .favorites:
-                        QuickFoodList(
-                            title: "Favorites",
-                            emptyMessage: "Star any food to keep it here.",
-                            foods: diary.document.favorites,
-                            onQuickLog: quickLog,
-                            onEdit: { selectedFood = $0 }
-                        )
-                    case .meals:
-                        MealsList(date: date)
-                    case .search:
-                        CatalogSearch(catalog: catalog, onSelect: { selectedFood = $0 })
-                    case .scan:
-                        BarcodeLookup(catalog: catalog, onSelect: { selectedFood = $0 })
-                    case .custom:
-                        CustomFoodForm(date: date)
+                    } else {
+                        switch mode {
+                        case .suggested:
+                            QuickFoodList(
+                                title: nil,
+                                emptyMessage: "Your recent, frequent, and favorite foods will appear here.",
+                                foods: diary.suggestedFoods,
+                                onQuickLog: quickLog,
+                                onEdit: { selectedFood = $0 }
+                            )
+                        case .recent:
+                            QuickFoodList(
+                                title: "Logged recently",
+                                emptyMessage: "Foods you log will appear here.",
+                                foods: diary.recentFoods,
+                                onQuickLog: quickLog,
+                                onEdit: { selectedFood = $0 }
+                            )
+                        case .frequent:
+                            QuickFoodList(
+                                title: "Most used · 90 days",
+                                emptyMessage: "Your most-used foods will appear here.",
+                                foods: diary.frequentFoods,
+                                onQuickLog: quickLog,
+                                onEdit: { selectedFood = $0 }
+                            )
+                        case .favorites:
+                            QuickFoodList(
+                                title: "Favorites",
+                                emptyMessage: "Star any food to keep it here.",
+                                foods: diary.document.favorites,
+                                onQuickLog: quickLog,
+                                onEdit: { selectedFood = $0 }
+                            )
+                        case .meals:
+                            MealsList { meal in
+                                diary.logMeal(meal, on: date)
+                                dismiss()
+                            }
+                        case .scan:
+                            BarcodeLookup(catalog: catalog, onSelect: { selectedFood = $0 })
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -85,35 +96,70 @@ struct FoodPickerView: View {
                     Button("Done") { dismiss() }
                 }
             }
-            .overlay(alignment: .bottom) {
-                if let addedMessage {
-                    Label(addedMessage, systemImage: "checkmark.circle.fill")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .background(AppTheme.ink, in: Capsule())
-                        .padding(.bottom, 18)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
-            }
             .sheet(item: $selectedFood) { food in
                 QuantityEditor(food: food, date: date)
                     .presentationDetents([.medium])
             }
+            .task {
+                try? await Task.sleep(for: .milliseconds(180))
+                searchIsFocused = true
+            }
+            .task(id: query) {
+                let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !normalizedQuery.isEmpty else {
+                    results = []
+                    isSearching = false
+                    return
+                }
+                isSearching = true
+                try? await Task.sleep(for: .milliseconds(140))
+                guard !Task.isCancelled else { return }
+                let personalResults = diary.searchPersonalFoods(normalizedQuery)
+                let bundledResults = catalog.searchAll(normalizedQuery)
+                var seen = Set<String>()
+                results = (Array(personalResults.prefix(10)) + bundledResults + Array(personalResults.dropFirst(10)))
+                    .filter { seen.insert($0.id).inserted }
+                    .prefix(50)
+                    .map { $0 }
+                isSearching = false
+            }
         }
     }
 
+    private var searchControls: some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+            TextField("Search foods", text: $query)
+                .focused($searchIsFocused)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .submitLabel(.search)
+            if !query.isEmpty {
+                Button("Clear", systemImage: "xmark.circle.fill") { query = "" }
+                    .labelStyle(.iconOnly)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(12)
+        .background(Color.black.opacity(0.055), in: RoundedRectangle(cornerRadius: 14))
+        .padding(.horizontal, 16)
+        .padding(.top, 10)
+    }
+
     private var modeStrip: some View {
-        FlowLayout(spacing: 8) {
+        FlowLayout(spacing: 6) {
             ForEach(Mode.allCases) { item in
                 Button {
-                    withAnimation(.snappy) { mode = item }
+                    withAnimation(.snappy) {
+                        mode = item
+                        searchIsFocused = false
+                    }
                 } label: {
-                    Label(item.rawValue, systemImage: item.icon)
+                    Text(item.rawValue)
                         .font(.caption.weight(.semibold))
                         .fixedSize()
-                        .padding(.horizontal, 11)
+                        .padding(.horizontal, 5)
                         .padding(.vertical, 8)
                         .foregroundStyle(mode == item ? Color.white : AppTheme.ink)
                         .background(mode == item ? AppTheme.ink : Color.black.opacity(0.055), in: Capsule())
@@ -121,23 +167,19 @@ struct FoodPickerView: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 12)
         .padding(.vertical, 10)
     }
 
     private func quickLog(_ food: Food) {
         diary.quickLog(food, on: date)
-        withAnimation(.spring) { addedMessage = "Added \(food.name)" }
-        Task { @MainActor in
-            try? await Task.sleep(for: .seconds(1.2))
-            withAnimation { addedMessage = nil }
-        }
+        dismiss()
     }
 }
 
 private struct QuickFoodList: View {
     @EnvironmentObject private var diary: DiaryStore
-    let title: String
+    let title: String?
     let emptyMessage: String
     let foods: [Food]
     let onQuickLog: (Food) -> Void
@@ -145,7 +187,7 @@ private struct QuickFoodList: View {
 
     var body: some View {
         if foods.isEmpty {
-            ContentUnavailableView(title, systemImage: "fork.knife.circle", description: Text(emptyMessage))
+            ContentUnavailableView(title ?? "No suggestions yet", systemImage: "fork.knife.circle", description: Text(emptyMessage))
         } else {
             List {
                 Section {
@@ -160,9 +202,9 @@ private struct QuickFoodList: View {
                             .onTapGesture { onEdit(food) }
                     }
                 } header: {
-                    Text(title)
+                    if let title { Text(title) }
                 } footer: {
-                    Text("Tap Add to reuse your last quantity. Tap the row to change it.")
+                    Text("Tap + to reuse your last quantity. Tap the row to change it.")
                 }
             }
             .scrollContentBackground(.hidden)
@@ -193,9 +235,13 @@ struct FoodResultRow: View {
             }
             Spacer()
             if let actionTitle, let action {
-                Button(actionTitle, action: action)
-                    .buttonStyle(.bordered)
-                    .buttonBorderShape(.capsule)
+                Button(actionTitle, systemImage: "plus", action: action)
+                    .labelStyle(.iconOnly)
+                    .font(.headline.weight(.bold))
+                    .buttonStyle(.borderedProminent)
+                    .buttonBorderShape(.circle)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .accessibilityLabel("\(actionTitle) \(food.name)")
             } else {
                 Image(systemName: "chevron.right")
                     .font(.caption.weight(.bold))
@@ -227,64 +273,39 @@ struct FoodResultRow: View {
     }
 }
 
-private struct CatalogSearch: View {
+private struct SearchResultsList: View {
     @EnvironmentObject private var diary: DiaryStore
-    let catalog: CatalogStore
-    let onSelect: (Food) -> Void
-
-    @State private var query = ProcessInfo.processInfo.arguments.contains("--show-food-search") ? "banana" : ""
-    @State private var scope: CatalogScope = .usda
-    @State private var results: [Food] = []
+    let query: String
+    let results: [Food]
+    let isSearching: Bool
+    let onQuickLog: (Food) -> Void
+    let onEdit: (Food) -> Void
 
     var body: some View {
-        VStack(spacing: 10) {
-            Picker("Source", selection: $scope) {
-                ForEach(CatalogScope.allCases) { Text($0.source.shortTitle).tag($0) }
-            }
-            .pickerStyle(.segmented)
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
-
-            HStack {
-                Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                TextField("Search \(scope.title)", text: $query)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                if !query.isEmpty {
-                    Button("Clear", systemImage: "xmark.circle.fill") { query = "" }
-                        .labelStyle(.iconOnly)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .padding(12)
-            .background(Color.black.opacity(0.055), in: RoundedRectangle(cornerRadius: 14))
-            .padding(.horizontal, 16)
-
-            if scope == .myFitnessPal, diary.document.importedFoods.isEmpty {
-                ContentUnavailableView(
-                    "Import not added yet",
-                    systemImage: "square.and.arrow.down",
-                    description: Text("Import your MyFitnessPal CSV from Settings, then search it here.")
-                )
-            } else if results.isEmpty, !query.isEmpty {
-                ContentUnavailableView.search(text: query)
-            } else {
-                List(results) { food in
-                    FoodResultRow(food: food, preference: diary.preference(for: food))
+        if isSearching {
+            ProgressView("Searching…")
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if results.isEmpty {
+            ContentUnavailableView.search(text: query)
+        } else {
+            List {
+                Section {
+                    ForEach(results) { food in
+                        FoodResultRow(
+                            food: food,
+                            preference: diary.preference(for: food),
+                            actionTitle: "Quick add",
+                            action: { onQuickLog(food) }
+                        )
                         .contentShape(Rectangle())
-                        .onTapGesture { onSelect(food) }
+                        .onTapGesture { onEdit(food) }
+                    }
+                } footer: {
+                    Text("Tap + to log the displayed quantity. Tap the row to change it.")
                 }
-                .listStyle(.plain)
-                .scrollContentBackground(.hidden)
             }
-        }
-        .task(id: query + scope.rawValue) {
-            try? await Task.sleep(for: .milliseconds(140))
-            if scope == .myFitnessPal {
-                results = diary.searchPersonalFoods(query)
-            } else {
-                results = catalog.search(query, source: scope.source)
-            }
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
         }
     }
 }
@@ -295,20 +316,42 @@ private enum QuantityUnitChoice: Hashable {
     case portion(String)
 }
 
-private struct QuantityEditor: View {
+struct QuantityEditor: View {
     @EnvironmentObject private var diary: DiaryStore
     @Environment(\.dismiss) private var dismiss
     let food: Food
     let date: Date
+    private let entryID: UUID?
 
     @State private var amount: Double
     @State private var unitChoice: QuantityUnitChoice
+    @FocusState private var amountIsFocused: Bool
 
     init(food: Food, date: Date) {
         self.food = food
         self.date = date
+        entryID = nil
         _amount = State(initialValue: 1)
         _unitChoice = State(initialValue: .ounces)
+    }
+
+    init(entry: DiaryEntry) {
+        food = entry.food
+        date = entry.date
+        entryID = entry.id
+        _amount = State(initialValue: entry.amount)
+        switch entry.unit {
+        case .ounces:
+            _unitChoice = State(initialValue: .ounces)
+        case .grams:
+            _unitChoice = State(initialValue: .grams)
+        case .serving:
+            if let portion = entry.food.portion(id: entry.portionID) {
+                _unitChoice = State(initialValue: .portion(portion.id))
+            } else {
+                _unitChoice = State(initialValue: .ounces)
+            }
+        }
     }
 
     private var availableChoices: [QuantityUnitChoice] {
@@ -343,9 +386,15 @@ private struct QuantityEditor: View {
                 HStack(spacing: 12) {
                     TextField("Amount", value: $amount, format: .number.precision(.fractionLength(0...2)))
                         .keyboardType(.decimalPad)
+                        .submitLabel(.done)
+                        .focused($amountIsFocused)
                         .font(.title2.weight(.bold).monospacedDigit())
                         .padding(12)
                         .background(Color.black.opacity(0.055), in: RoundedRectangle(cornerRadius: 12))
+                        .onSubmit(save)
+                        .onChange(of: amountIsFocused) { _, isFocused in
+                            if isFocused { selectAllAmount() }
+                        }
                     Picker("Unit", selection: $unitChoice) {
                         ForEach(availableChoices, id: \.self) { choice in
                             Text(label(for: choice)).tag(choice)
@@ -359,17 +408,8 @@ private struct QuantityEditor: View {
                     nutrient("Fat", preview.fat, suffix: "g")
                     nutrient("Protein", preview.protein, suffix: "g")
                 }
-                Button {
-                    diary.log(
-                        food,
-                        amount: amount,
-                        unit: selectedUnit,
-                        portionID: selectedPortionID,
-                        on: date
-                    )
-                    dismiss()
-                } label: {
-                    Text("Add \(Int(preview.calories.rounded())) calories")
+                Button(action: save) {
+                    Text(entryID == nil ? "Add \(Int(preview.calories.rounded())) calories" : "Save changes")
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
@@ -380,7 +420,7 @@ private struct QuantityEditor: View {
             }
             .padding(18)
             .background(AppTheme.background)
-            .navigationTitle("Quantity")
+            .navigationTitle(entryID == nil ? "Quantity" : "Edit food")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -389,8 +429,14 @@ private struct QuantityEditor: View {
                     }
                     .labelStyle(.iconOnly)
                 }
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Save", action: save)
+                        .disabled(amount <= 0)
+                }
             }
             .onAppear {
+                guard entryID == nil else { return }
                 let preference = diary.preference(for: food)
                 amount = preference.amount
                 switch preference.unit {
@@ -407,7 +453,7 @@ private struct QuantityEditor: View {
                 }
             }
             .onDisappear {
-                if diary.isFavorite(food) {
+                if entryID == nil, diary.isFavorite(food) {
                     diary.rememberPreference(currentPreference, for: food)
                 }
             }
@@ -423,6 +469,39 @@ private struct QuantityEditor: View {
         }
     }
 
+    private func save() {
+        guard amount > 0 else { return }
+        if let entryID {
+            diary.updateEntry(
+                entryID: entryID,
+                amount: amount,
+                unit: selectedUnit,
+                portionID: selectedPortionID
+            )
+        } else {
+            diary.log(
+                food,
+                amount: amount,
+                unit: selectedUnit,
+                portionID: selectedPortionID,
+                on: date
+            )
+        }
+        dismiss()
+    }
+
+    @MainActor
+    private func selectAllAmount() {
+        DispatchQueue.main.async {
+            UIApplication.shared.sendAction(
+                #selector(UIResponder.selectAll(_:)),
+                to: nil,
+                from: nil,
+                for: nil
+            )
+        }
+    }
+
     private func nutrient(_ title: String, _ value: Double, suffix: String) -> some View {
         VStack(spacing: 3) {
             Text(value.cleanAmount + suffix).font(.subheadline.weight(.bold).monospacedDigit())
@@ -434,7 +513,7 @@ private struct QuantityEditor: View {
 
 private struct MealsList: View {
     @EnvironmentObject private var diary: DiaryStore
-    let date: Date
+    let onQuickLog: (SavedMeal) -> Void
 
     var body: some View {
         if diary.document.meals.isEmpty {
@@ -447,7 +526,7 @@ private struct MealsList: View {
             List {
                 ForEach(diary.document.meals) { meal in
                     Button {
-                        diary.logMeal(meal, on: date)
+                        onQuickLog(meal)
                     } label: {
                         HStack {
                             VStack(alignment: .leading) {
@@ -569,65 +648,6 @@ private struct BarcodeLookup: View {
             onSelect(food)
         } else {
             notFound = true
-        }
-    }
-}
-
-private struct CustomFoodForm: View {
-    @EnvironmentObject private var diary: DiaryStore
-    let date: Date
-
-    @State private var name = ""
-    @State private var brand = ""
-    @State private var servingGrams = 100.0
-    @State private var calories = 0.0
-    @State private var carbs = 0.0
-    @State private var fat = 0.0
-    @State private var protein = 0.0
-    @State private var saved = false
-
-    var body: some View {
-        Form {
-            Section("Food") {
-                TextField("Name", text: $name)
-                TextField("Brand (optional)", text: $brand)
-                numberField("Serving weight", value: $servingGrams, suffix: "g")
-            }
-            Section("Per serving") {
-                numberField("Calories", value: $calories, suffix: "cal")
-                numberField("Carbohydrates", value: $carbs, suffix: "g")
-                numberField("Fat", value: $fat, suffix: "g")
-                numberField("Protein", value: $protein, suffix: "g")
-            }
-            Button {
-                let food = diary.addCustomFood(
-                    name: name,
-                    brand: brand,
-                    calories: calories,
-                    carbs: carbs,
-                    fat: fat,
-                    protein: protein,
-                    servingGrams: servingGrams
-                )
-                diary.log(food, amount: 1, unit: .serving, on: date)
-                saved = true
-            } label: {
-                Label(saved ? "Added" : "Save and add", systemImage: saved ? "checkmark.circle.fill" : "plus.circle.fill")
-                    .frame(maxWidth: .infinity)
-            }
-            .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || servingGrams <= 0)
-        }
-        .scrollContentBackground(.hidden)
-    }
-
-    private func numberField(_ title: String, value: Binding<Double>, suffix: String) -> some View {
-        HStack {
-            Text(title)
-            Spacer()
-            TextField("0", value: value, format: .number.precision(.fractionLength(0...2)))
-                .keyboardType(.decimalPad)
-                .multilineTextAlignment(.trailing)
-            Text(suffix).foregroundStyle(.secondary)
         }
     }
 }
