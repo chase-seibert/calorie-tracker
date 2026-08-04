@@ -50,6 +50,14 @@ to one serving.
    of megabytes to several gigabytes. They should be filtered offline to U.S.
    products with complete calorie/macro data before generating the app asset.
 
+Popularity expansion alone does not guarantee personally relevant coverage.
+For example, psyllium is absent from the compact catalog and its generic USDA
+inputs. It is abundant in USDA Branded and broader Open Food Facts, but the U.S.
+OFF matches have low scan counts: top 5,000 does not include them, and top
+25,000 inclusion is tie-dependent. Prefer a small curated supplement or a
+filtered USDA Branded slice for known personal gaps. See the measured probe in
+[Catalog pruning and size options](catalog-sizing.md#coverage-probe-psyllium).
+
 Neither bundled source subset currently has a canonical generic café Americano
 record. Custom foods and saved meals are the preferred way to represent personal
 preparations that are absent from the upstream snapshot.

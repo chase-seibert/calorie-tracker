@@ -18,7 +18,7 @@ struct BarcodeScanner: View {
                 systemImage: "barcode.viewfinder",
                 description: Text("Use manual barcode entry below on this device.")
             )
-            .background(Color.black.opacity(0.05))
+            .background(AppTheme.controlFill)
         }
     }
 }
@@ -69,4 +69,3 @@ private struct LiveBarcodeScanner: UIViewControllerRepresentable {
         }
     }
 }
-

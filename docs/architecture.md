@@ -14,6 +14,13 @@ The SwiftUI app has two local data layers:
 This split keeps a large catalog immutable and fast while making the personal
 data schema easy to evolve and back up.
 
+Diary rows use a small `UIViewRepresentable` collection-view adapter for
+reordering and deletion. `UICollectionView` interactive movement provides the
+long-press lift and live row displacement on iOS 18, while its list layout owns
+the native full-swipe delete action. The adapter reports the final destination
+index to `DiaryStore`, which normalizes and atomically persists display order.
+This avoids overlapping custom drag and swipe gestures inside SwiftUI `List`.
+
 Custom foods and saved meals are separate collections in the personal document.
 Settings presents them together as the Custom catalog while retaining their
 different logging behavior. Remembered quantities are keyed by stable food ID,
@@ -38,3 +45,18 @@ mapped to date, food name, amount, calories, carbohydrates, fat, and protein.
 Imported rows become diary entries and unique foods become the MyFitnessPal
 source. The mapping is deliberately isolated because the exact export supplied
 by the user may require a small adapter update.
+
+## UI testing
+
+The UI-test target launches against an isolated temporary diary when the
+`CALORIE_TRACKER_UI_TEST_FIXTURE` environment variable is set. The reorder test
+performs a real long-press drag, verifies the row moved on screen, relaunches the
+app without resetting the fixture, and verifies the order persisted. It never
+reads or modifies the user's normal Application Support diary.
+
+The UI-test target is intentionally isolated in the shared
+`CalorieTrackerUITests` scheme. Normal app builds and `make test` must not build
+or run it. Run `make ui-test-reorder` when a change affects the logged-food list,
+its collection-view adapter, row gestures, drag behavior, deletion behavior, or
+display-order persistence. Unrelated app and catalog changes should use the
+normal unit-test path only.

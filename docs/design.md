@@ -22,6 +22,10 @@ visible as a compact navigation-title item and continues updating with the diary
 An optional daily calorie goal is configured in Settings. When present, both the
 summary card and compact title show consumed calories followed by a smaller goal
 denominator; without a goal, they retain the single calorie total.
+The summary card presents carbohydrates, fat, and protein as a single stacked
+horizontal bar in that order. Segment widths represent each macro's share of
+total macro grams, and a color-keyed legend retains the exact gram values.
+Tapping the calorie total or macro chart navigates directly to Trends.
 
 The Custom source row in Settings shows separate food and meal counts and opens
 a personal catalog with Custom Foods and Saved Meals sections.
@@ -42,12 +46,19 @@ The Select control beside the Logged heading enters meal selection mode. The
 user explicitly checks one or more entries and names the combination. The
 selected entries are replaced at their first position by one meal entry with the
 same calorie and macro totals; unrelated foods remain in place.
+In selection mode, Cancel and Next remain in a bottom safe-area action bar rather
+than the navigation bar, keeping both actions within easy thumb reach. A
+destructive Delete action in the same bar removes all selected diary entries
+after confirmation.
 Each meal entry exposes a visible actions menu to break the meal back into its
 original food entries in place. This does not delete the reusable saved meal.
+Logging a saved meal later also creates one meal entry rather than separate food
+rows, retaining its original item breakdown for the same break-apart action.
 Outside selection mode, touching and holding any diary row starts reordering.
 Rows animate into their new positions as the dragged item crosses them, and the
 resulting order is stored locally. Long press has no destructive menu; deletion
-is exposed only as the trailing swipe action. The handle remains as a visual cue.
+is exposed only through the native trailing swipe action. Rows do not show a
+persistent reorder handle.
 Tapping a non-meal diary entry opens the quantity editor with its logged amount
 and unit selected. Saving updates that entry in place, recalculates daily totals,
 and remembers the choice for the next time that food is logged.
@@ -60,3 +71,6 @@ provides the same Save action in its keyboard toolbar.
 The app uses a warm off-white background, a coral calorie accent, and blue,
 violet, and green macro accents. Rounded cards provide hierarchy without turning
 the diary into a dashboard of unrelated features.
+These roles use adaptive semantic colors: dark mode switches to grouped dark
+surfaces, elevated cards, and system-aware text while retaining the same accent
+relationships and contrast hierarchy.

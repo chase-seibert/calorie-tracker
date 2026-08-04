@@ -1,5 +1,5 @@
 import SwiftUI
-import UniformTypeIdentifiers
+import UIKit
 
 struct DiaryView: View {
     @EnvironmentObject private var diary: DiaryStore
@@ -11,12 +11,14 @@ struct DiaryView: View {
         return arguments.contains("--show-food-search") || arguments.contains("--show-food-picker")
     }()
     @State private var showingMealName = false
+    @State private var showingDeleteConfirmation = false
     @State private var mealName = ""
     @State private var isSelectingMealItems = false
     @State private var selectedEntryIDs: Set<UUID> = []
     @State private var editingEntry: DiaryEntry?
-    @State private var draggedEntryID: UUID?
     @State private var isMacroSummaryVisible = true
+    @State private var showingTrends = false
+    @State private var diaryEntriesHeight: CGFloat = 0
 
     private var date: Date {
         Calendar.current.date(byAdding: .day, value: dayOffset, to: Calendar.current.startOfDay(for: Date())) ?? Date()
@@ -24,25 +26,48 @@ struct DiaryView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                AppTheme.background.ignoresSafeArea()
+            ScrollViewReader { scrollProxy in
                 ScrollView {
-                    VStack(spacing: 18) {
+                    LazyVStack(spacing: 0) {
                         DateStrip(dayOffset: $dayOffset)
-                        MacroSummary(
-                            nutrients: diary.totals(on: date),
-                            calorieGoal: diary.dailyCalorieGoal
-                        )
-                            .onScrollVisibilityChange(threshold: 0.01) { isVisible in
-                                withAnimation(.easeInOut(duration: 0.16)) {
-                                    isMacroSummaryVisible = isVisible
-                                }
+                            .id("date-strip")
+                            .padding(.horizontal, 16)
+                            .padding(.top, 8)
+                            .padding(.bottom, 7)
+                        Button {
+                            showingTrends = true
+                        } label: {
+                            MacroSummary(
+                                nutrients: diary.totals(on: date),
+                                calorieGoal: diary.dailyCalorieGoal
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityHint("Shows calorie and macro trends over time")
+                        .id("macro-summary")
+                        .onGeometryChange(for: Bool.self) { geometry in
+                            geometry.frame(in: .global).maxY > 120
+                        } action: { isVisible in
+                            withAnimation(.easeInOut(duration: 0.16)) {
+                                isMacroSummaryVisible = isVisible
                             }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 7)
+                        .padding(.bottom, 9)
                         entrySection
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 100)
                 }
+                .background(AppTheme.background.ignoresSafeArea())
+                .contentMargins(.bottom, 20, for: .scrollContent)
+                .task {
+                    guard ProcessInfo.processInfo.arguments.contains("--show-scrolled-diary") else { return }
+                    try? await Task.sleep(for: .milliseconds(250))
+                    scrollProxy.scrollTo("logged-heading", anchor: .top)
+                }
+            }
+            .navigationDestination(isPresented: $showingTrends) {
+                TrendsView()
             }
             .navigationTitle("Calorie Tracker")
             .toolbar {
@@ -71,18 +96,7 @@ struct DiaryView: View {
                         .transition(.opacity.combined(with: .scale(scale: 0.96)))
                     }
                 }
-                if isSelectingMealItems {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") { cancelMealSelection() }
-                    }
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button("Next (\(selectedEntryIDs.count))") {
-                            mealName = ""
-                            showingMealName = true
-                        }
-                        .disabled(selectedEntryIDs.isEmpty)
-                    }
-                } else {
+                if !isSelectingMealItems {
                     ToolbarItem(placement: .topBarTrailing) {
                         NavigationLink {
                             SettingsView(catalog: catalog)
@@ -94,11 +108,40 @@ struct DiaryView: View {
             }
             .safeAreaInset(edge: .bottom) {
                 if isSelectingMealItems {
-                    Text("\(selectedEntryIDs.count) selected")
-                        .font(.subheadline.weight(.semibold))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(.ultraThinMaterial)
+                    HStack(spacing: 12) {
+                        Button {
+                            cancelMealSelection()
+                        } label: {
+                            Text("Cancel")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+
+                        Button(role: .destructive) {
+                            showingDeleteConfirmation = true
+                        } label: {
+                            Text("Delete")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(.red)
+                        .disabled(selectedEntryIDs.isEmpty)
+
+                        Button {
+                            mealName = ""
+                            showingMealName = true
+                        } label: {
+                            Text("Next (\(selectedEntryIDs.count))")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(selectedEntryIDs.isEmpty)
+                    }
+                    .font(.headline)
+                    .controlSize(.large)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(.ultraThinMaterial)
                 } else {
                     Button {
                         showingFoodPicker = true
@@ -132,8 +175,19 @@ struct DiaryView: View {
             } message: {
                 Text("The \(selectedEntryIDs.count) selected item\(selectedEntryIDs.count == 1 ? "" : "s") will be replaced by one meal entry.")
             }
+            .confirmationDialog(
+                "Delete \(selectedEntryIDs.count) selected item\(selectedEntryIDs.count == 1 ? "" : "s")?",
+                isPresented: $showingDeleteConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Delete", role: .destructive) {
+                    deleteSelectedEntries()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This cannot be undone.")
+            }
             .onChange(of: dayOffset) { _, _ in
-                draggedEntryID = nil
                 cancelMealSelection()
             }
         }
@@ -142,7 +196,7 @@ struct DiaryView: View {
     @ViewBuilder
     private var entrySection: some View {
         let entries = diary.entries(on: date)
-        VStack(alignment: .leading, spacing: 12) {
+        Section {
             HStack {
                 Text("Logged")
                     .font(.title3.weight(.bold))
@@ -156,10 +210,17 @@ struct DiaryView: View {
                     .accessibilityHint("Choose foods to save as a meal")
                 }
             }
+            .id("logged-heading")
+            .padding(.horizontal, 16)
+            .padding(.top, 9)
+            .padding(.bottom, 4)
             if isSelectingMealItems, !entries.isEmpty {
-                Text("Choose one or more foods, then tap Next.")
+                Text("Choose foods to save as a meal or delete.")
                     .font(.subheadline)
                     .foregroundStyle(AppTheme.muted)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 5)
             }
             if entries.isEmpty {
                 ContentUnavailableView {
@@ -170,69 +231,57 @@ struct DiaryView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 26)
                 .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 22))
-            } else {
+                .padding(.horizontal, 16)
+                .padding(.vertical, 6)
+            } else if isSelectingMealItems {
                 ForEach(entries) { entry in
-                    if isSelectingMealItems {
-                        Button {
-                            if selectedEntryIDs.contains(entry.id) {
-                                selectedEntryIDs.remove(entry.id)
-                            } else {
-                                selectedEntryIDs.insert(entry.id)
-                            }
-                        } label: {
-                            HStack(spacing: 10) {
-                                Image(systemName: selectedEntryIDs.contains(entry.id) ? "checkmark.circle.fill" : "circle")
-                                    .font(.title3)
-                                    .foregroundStyle(selectedEntryIDs.contains(entry.id) ? AppTheme.protein : AppTheme.muted)
-                                DiaryEntryRow(entry: entry)
-                            }
+                    Button {
+                        if selectedEntryIDs.contains(entry.id) {
+                            selectedEntryIDs.remove(entry.id)
+                        } else {
+                            selectedEntryIDs.insert(entry.id)
                         }
-                        .buttonStyle(.plain)
-                    } else {
-                        SwipeToDeleteRow(
-                            isReordering: draggedEntryID != nil,
-                            onDelete: { diary.delete(entryID: entry.id) }
-                        ) {
-                            DiaryEntryRow(
-                                entry: entry,
-                                showsReorderHandle: true,
-                                onBreakApartMeal: entry.isMeal ? {
-                                    withAnimation(.snappy) {
-                                        diary.breakApartMeal(entryID: entry.id)
-                                    }
-                                } : nil
-                            )
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    guard !entry.isMeal else { return }
-                                    editingEntry = entry
-                                }
-                                .accessibilityAction(named: "Edit quantity") {
-                                    guard !entry.isMeal else { return }
-                                    editingEntry = entry
-                                }
-                                .onDrag {
-                                    draggedEntryID = entry.id
-                                    return NSItemProvider(object: entry.id.uuidString as NSString)
-                                }
-                                .onDrop(
-                                    of: [UTType.text],
-                                    delegate: DiaryEntryReorderDropDelegate(
-                                        targetEntryID: entry.id,
-                                        date: date,
-                                        entries: entries,
-                                        draggedEntryID: $draggedEntryID,
-                                        diary: diary
-                                    )
-                                )
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: selectedEntryIDs.contains(entry.id) ? "checkmark.circle.fill" : "circle")
+                                .font(.title3)
+                                .foregroundStyle(selectedEntryIDs.contains(entry.id) ? AppTheme.protein : AppTheme.muted)
+                            DiaryEntryRow(entry: entry)
                         }
                     }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 6)
                 }
+            } else {
+                ReorderableDiaryEntries(
+                    entries: entries,
+                    contentHeight: $diaryEntriesHeight,
+                    onMove: { entryID, destinationIndex in
+                        diary.moveEntry(entryID, toIndex: destinationIndex, on: date)
+                    },
+                    onEdit: { entry in
+                        guard !entry.isMeal else { return }
+                        editingEntry = entry
+                    },
+                    onBreakApartMeal: { entryID in
+                        withAnimation(.snappy) {
+                            diary.breakApartMeal(entryID: entryID)
+                        }
+                    },
+                    onDelete: { entryID in
+                        withAnimation(.snappy) {
+                            diary.delete(entryID: entryID)
+                        }
+                    }
+                )
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel("Logged foods")
+                .accessibilityValue(entries.map(\.food.name).joined(separator: ", "))
+                .accessibilityIdentifier("logged-foods-reorder-list")
+                .frame(height: max(diaryEntriesHeight, CGFloat(entries.count) * 78))
+                .padding(.horizontal, 16)
             }
-        }
-        .dropDestination(for: String.self) { _, _ in
-            draggedEntryID = nil
-            return true
         }
     }
 
@@ -249,6 +298,13 @@ struct DiaryView: View {
         isSelectingMealItems = false
         selectedEntryIDs = []
     }
+
+    private func deleteSelectedEntries() {
+        withAnimation(.snappy) {
+            diary.deleteEntries(entryIDs: selectedEntryIDs)
+        }
+        cancelMealSelection()
+    }
 }
 
 private struct DateStrip: View {
@@ -261,7 +317,7 @@ private struct DateStrip: View {
             dayButton(offset: 1, title: "Tomorrow")
         }
         .padding(5)
-        .background(Color.black.opacity(0.055), in: Capsule())
+        .background(AppTheme.controlFill, in: Capsule())
     }
 
     private func dayButton(offset: Int, title: String) -> some View {
@@ -277,7 +333,7 @@ private struct DateStrip: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
-            .foregroundStyle(dayOffset == offset ? Color.white : AppTheme.ink)
+            .foregroundStyle(dayOffset == offset ? AppTheme.selectedText : AppTheme.ink)
             .background(dayOffset == offset ? AppTheme.ink : Color.clear, in: Capsule())
         }
         .buttonStyle(.plain)
@@ -297,6 +353,10 @@ private struct MacroSummary: View {
             calories: nutrients.calories,
             goal: calorieGoal
         )
+        let carbs = max(nutrients.carbs, 0)
+        let fat = max(nutrients.fat, 0)
+        let protein = max(nutrients.protein, 0)
+        let macroTotal = carbs + fat + protein
         VStack(alignment: .leading, spacing: 18) {
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: 2) {
@@ -323,10 +383,13 @@ private struct MacroSummary: View {
                     .padding(14)
                     .background(AppTheme.coral.opacity(0.12), in: Circle())
             }
-            HStack(spacing: 8) {
-                macro("Carbs", value: nutrients.carbs, color: AppTheme.carbs)
-                macro("Fat", value: nutrients.fat, color: AppTheme.fat)
-                macro("Protein", value: nutrients.protein, color: AppTheme.protein)
+            VStack(spacing: 10) {
+                stackedMacroBar(carbs: carbs, fat: fat, protein: protein, total: macroTotal)
+                HStack(spacing: 8) {
+                    macroLegend("Carbs", value: nutrients.carbs, color: AppTheme.carbs)
+                    macroLegend("Fat", value: nutrients.fat, color: AppTheme.fat)
+                    macroLegend("Protein", value: nutrients.protein, color: AppTheme.protein)
+                }
             }
         }
         .padding(20)
@@ -334,24 +397,60 @@ private struct MacroSummary: View {
         .shadow(color: .black.opacity(0.04), radius: 14, y: 6)
     }
 
-    private func macro(_ title: String, value: Double, color: Color) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Capsule().fill(color).frame(width: 24, height: 4)
+    private func stackedMacroBar(
+        carbs: Double,
+        fat: Double,
+        protein: Double,
+        total: Double
+    ) -> some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                Capsule()
+                    .fill(AppTheme.controlFill)
+                if total > 0 {
+                    HStack(spacing: 0) {
+                        Rectangle()
+                            .fill(AppTheme.carbs)
+                            .frame(width: geometry.size.width * CGFloat(carbs / total))
+                        Rectangle()
+                            .fill(AppTheme.fat)
+                            .frame(width: geometry.size.width * CGFloat(fat / total))
+                        Rectangle()
+                            .fill(AppTheme.protein)
+                            .frame(width: geometry.size.width * CGFloat(protein / total))
+                    }
+                    .clipShape(Capsule())
+                }
+            }
+        }
+        .frame(height: 12)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(
+            "Carbs, \(carbs.cleanAmount) grams; fat, \(fat.cleanAmount) grams; protein, \(protein.cleanAmount) grams"
+        )
+    }
+
+    private func macroLegend(_ title: String, value: Double, color: Color) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(spacing: 5) {
+                Circle()
+                    .fill(color)
+                    .frame(width: 7, height: 7)
+                Text(title)
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.muted)
+            }
             Text("\(value.cleanAmount)g")
                 .font(.headline.monospacedDigit())
-            Text(title)
-                .font(.caption)
-                .foregroundStyle(AppTheme.muted)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(10)
-        .background(color.opacity(0.075), in: RoundedRectangle(cornerRadius: 14))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(title), \(value.cleanAmount) grams")
     }
 }
 
 private struct DiaryEntryRow: View {
     let entry: DiaryEntry
-    var showsReorderHandle = false
     var onBreakApartMeal: (() -> Void)? = nil
 
     var body: some View {
@@ -396,15 +495,6 @@ private struct DiaryEntryRow: View {
                 }
                 .accessibilityLabel("Meal actions")
             }
-            if showsReorderHandle {
-                Image(systemName: "line.3.horizontal")
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(AppTheme.muted)
-                    .frame(width: 28, height: 44)
-                    .contentShape(Rectangle())
-                    .accessibilityLabel("Reorder \(entry.food.name)")
-                    .accessibilityHint("Touch and hold the row, then drag to change its position")
-            }
         }
         .padding(14)
         .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 18))
@@ -420,117 +510,201 @@ private struct DiaryEntryRow: View {
     }
 }
 
-private struct DiaryEntryReorderDropDelegate: DropDelegate {
-    let targetEntryID: UUID
-    let date: Date
+private struct ReorderableDiaryEntries: UIViewRepresentable {
     let entries: [DiaryEntry]
-    @Binding var draggedEntryID: UUID?
-    let diary: DiaryStore
+    @Binding var contentHeight: CGFloat
+    let onMove: (UUID, Int) -> Void
+    let onEdit: (DiaryEntry) -> Void
+    let onBreakApartMeal: (UUID) -> Void
+    let onDelete: (UUID) -> Void
 
-    func dropEntered(info: DropInfo) {
-        guard
-            let draggedEntryID,
-            draggedEntryID != targetEntryID,
-            let sourceIndex = entries.firstIndex(where: { $0.id == draggedEntryID }),
-            let targetIndex = entries.firstIndex(where: { $0.id == targetEntryID })
-        else { return }
+    func makeCoordinator() -> Coordinator {
+        Coordinator(parent: self)
+    }
 
-        withAnimation(.snappy) {
-            diary.moveEntry(
-                draggedEntryID,
-                relativeTo: targetEntryID,
-                placeAfterTarget: targetIndex > sourceIndex,
-                on: date
-            )
+    func makeUIView(context: Context) -> IntrinsicCollectionView {
+        var configuration = UICollectionLayoutListConfiguration(appearance: .plain)
+        configuration.backgroundColor = .clear
+        configuration.showsSeparators = false
+        configuration.trailingSwipeActionsConfigurationProvider = { [weak coordinator = context.coordinator] indexPath in
+            coordinator?.swipeActions(at: indexPath)
         }
+
+        let layout = UICollectionViewCompositionalLayout.list(using: configuration)
+        let collectionView = IntrinsicCollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .clear
+        collectionView.isScrollEnabled = false
+        collectionView.dataSource = context.coordinator
+        collectionView.register(
+            UICollectionViewCell.self,
+            forCellWithReuseIdentifier: Coordinator.reuseIdentifier
+        )
+
+        let longPress = UILongPressGestureRecognizer(
+            target: context.coordinator,
+            action: #selector(Coordinator.handleLongPress(_:))
+        )
+        longPress.minimumPressDuration = 0.45
+        collectionView.addGestureRecognizer(longPress)
+        context.coordinator.collectionView = collectionView
+        collectionView.reloadData()
+        reportContentHeight(from: collectionView)
+        return collectionView
     }
 
-    func dropUpdated(info: DropInfo) -> DropProposal? {
-        DropProposal(operation: .move)
+    func updateUIView(_ collectionView: IntrinsicCollectionView, context: Context) {
+        context.coordinator.parent = self
+        context.coordinator.apply(entries: entries, to: collectionView)
+        reportContentHeight(from: collectionView)
     }
 
-    func performDrop(info: DropInfo) -> Bool {
-        draggedEntryID = nil
-        return true
+    private func reportContentHeight(from collectionView: IntrinsicCollectionView) {
+        let heightBinding = $contentHeight
+        collectionView.onContentHeightChange = { height in
+            guard height > 0, abs(heightBinding.wrappedValue - height) > 0.5 else { return }
+            DispatchQueue.main.async {
+                heightBinding.wrappedValue = height
+            }
+        }
+        collectionView.layoutIfNeeded()
+    }
+
+    final class Coordinator: NSObject, UICollectionViewDataSource {
+        static let reuseIdentifier = "DiaryEntryCell"
+
+        var parent: ReorderableDiaryEntries
+        var currentEntries: [DiaryEntry]
+        weak var collectionView: UICollectionView?
+        private(set) var isReordering = false
+
+        init(parent: ReorderableDiaryEntries) {
+            self.parent = parent
+            currentEntries = parent.entries
+        }
+
+        func apply(entries: [DiaryEntry], to collectionView: UICollectionView) {
+            guard currentEntries.map(\.id) != entries.map(\.id) else {
+                currentEntries = entries
+                return
+            }
+            guard !isReordering else { return }
+            currentEntries = entries
+            collectionView.reloadData()
+            collectionView.invalidateIntrinsicContentSize()
+        }
+
+        func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+            currentEntries.count
+        }
+
+        func collectionView(
+            _ collectionView: UICollectionView,
+            cellForItemAt indexPath: IndexPath
+        ) -> UICollectionViewCell {
+            let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: Self.reuseIdentifier,
+                for: indexPath
+            )
+            guard currentEntries.indices.contains(indexPath.item) else { return cell }
+            let entry = currentEntries[indexPath.item]
+            cell.accessibilityIdentifier = "diary-entry-\(entry.food.sourceID)"
+            cell.backgroundConfiguration = UIBackgroundConfiguration.clear()
+            cell.contentConfiguration = UIHostingConfiguration { [weak self] in
+                DiaryEntryRow(
+                    entry: entry,
+                    onBreakApartMeal: entry.isMeal ? {
+                        self?.parent.onBreakApartMeal(entry.id)
+                    } : nil
+                )
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    guard !entry.isMeal else { return }
+                    self?.parent.onEdit(entry)
+                }
+                .accessibilityAction(named: "Edit quantity") {
+                    guard !entry.isMeal else { return }
+                    self?.parent.onEdit(entry)
+                }
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("diary-entry-\(entry.food.sourceID)")
+                .padding(.vertical, 6)
+            }
+            .margins(.all, 0)
+            .minSize(height: 78)
+            .background(Color.clear)
+            return cell
+        }
+
+        func collectionView(_ collectionView: UICollectionView, canMoveItemAt indexPath: IndexPath) -> Bool {
+            true
+        }
+
+        func collectionView(
+            _ collectionView: UICollectionView,
+            moveItemAt sourceIndexPath: IndexPath,
+            to destinationIndexPath: IndexPath
+        ) {
+            guard
+                currentEntries.indices.contains(sourceIndexPath.item),
+                destinationIndexPath.item >= 0,
+                destinationIndexPath.item < currentEntries.count
+            else { return }
+
+            let movedEntry = currentEntries.remove(at: sourceIndexPath.item)
+            currentEntries.insert(movedEntry, at: destinationIndexPath.item)
+            parent.onMove(movedEntry.id, destinationIndexPath.item)
+        }
+
+        func swipeActions(at indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+            guard currentEntries.indices.contains(indexPath.item) else { return nil }
+            let entryID = currentEntries[indexPath.item].id
+            let delete = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, completion in
+                self?.parent.onDelete(entryID)
+                completion(true)
+            }
+            delete.image = UIImage(systemName: "trash")
+            let configuration = UISwipeActionsConfiguration(actions: [delete])
+            configuration.performsFirstActionWithFullSwipe = true
+            return configuration
+        }
+
+        @objc func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
+            guard let collectionView else { return }
+            let location = gesture.location(in: collectionView)
+
+            switch gesture.state {
+            case .began:
+                guard let indexPath = collectionView.indexPathForItem(at: location) else { return }
+                isReordering = collectionView.beginInteractiveMovementForItem(at: indexPath)
+            case .changed where isReordering:
+                collectionView.updateInteractiveMovementTargetPosition(location)
+            case .ended where isReordering:
+                collectionView.endInteractiveMovement()
+                isReordering = false
+            case .cancelled, .failed:
+                guard isReordering else { return }
+                collectionView.cancelInteractiveMovement()
+                isReordering = false
+            default:
+                break
+            }
+        }
     }
 }
 
-private struct SwipeToDeleteRow<Content: View>: View {
-    let isReordering: Bool
-    let onDelete: () -> Void
-    private let content: () -> Content
+private final class IntrinsicCollectionView: UICollectionView {
+    var onContentHeightChange: ((CGFloat) -> Void)?
 
-    @State private var restingOffset: CGFloat = 0
-    @GestureState private var dragOffset: CGFloat = 0
-
-    private let actionWidth: CGFloat = 84
-
-    init(
-        isReordering: Bool,
-        onDelete: @escaping () -> Void,
-        @ViewBuilder content: @escaping () -> Content
-    ) {
-        self.isReordering = isReordering
-        self.onDelete = onDelete
-        self.content = content
-    }
-
-    var body: some View {
-        ZStack(alignment: .trailing) {
-            Button(role: .destructive, action: delete) {
-                Label("Delete", systemImage: "trash")
-                    .labelStyle(.iconOnly)
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: actionWidth)
-                    .frame(maxHeight: .infinity)
-                    .background(Color.red)
-            }
-            .buttonStyle(.plain)
-
-            content()
-                .offset(x: displayedOffset)
-        }
-        .clipShape(RoundedRectangle(cornerRadius: 18))
-        .simultaneousGesture(swipeGesture)
-        .accessibilityAction(named: "Delete", delete)
-        .onChange(of: isReordering) { _, isReordering in
-            if isReordering { restingOffset = 0 }
+    override var contentSize: CGSize {
+        didSet {
+            guard oldValue != contentSize else { return }
+            invalidateIntrinsicContentSize()
+            onContentHeightChange?(contentSize.height)
         }
     }
 
-    private var displayedOffset: CGFloat {
-        min(0, max(-actionWidth, restingOffset + dragOffset))
-    }
-
-    private var swipeGesture: some Gesture {
-        DragGesture(minimumDistance: 14)
-            .updating($dragOffset) { value, state, _ in
-                guard
-                    !isReordering,
-                    abs(value.translation.width) > abs(value.translation.height)
-                else { return }
-                state = value.translation.width
-            }
-            .onEnded { value in
-                guard
-                    !isReordering,
-                    abs(value.translation.width) > abs(value.translation.height)
-                else { return }
-
-                let projectedOffset = restingOffset + value.predictedEndTranslation.width
-                if projectedOffset < -(actionWidth * 1.65) {
-                    delete()
-                } else {
-                    withAnimation(.snappy) {
-                        restingOffset = projectedOffset < -(actionWidth / 2) ? -actionWidth : 0
-                    }
-                }
-            }
-    }
-
-    private func delete() {
-        withAnimation(.snappy) { onDelete() }
+    override var intrinsicContentSize: CGSize {
+        CGSize(width: UIView.noIntrinsicMetric, height: contentSize.height)
     }
 }
 

@@ -142,7 +142,7 @@ struct FoodPickerView: View {
             }
         }
         .padding(12)
-        .background(Color.black.opacity(0.055), in: RoundedRectangle(cornerRadius: 14))
+        .background(AppTheme.controlFill, in: RoundedRectangle(cornerRadius: 14))
         .padding(.horizontal, 16)
         .padding(.top, 10)
     }
@@ -161,8 +161,8 @@ struct FoodPickerView: View {
                         .fixedSize()
                         .padding(.horizontal, 5)
                         .padding(.vertical, 8)
-                        .foregroundStyle(mode == item ? Color.white : AppTheme.ink)
-                        .background(mode == item ? AppTheme.ink : Color.black.opacity(0.055), in: Capsule())
+                        .foregroundStyle(mode == item ? AppTheme.selectedText : AppTheme.ink)
+                        .background(mode == item ? AppTheme.ink : AppTheme.controlFill, in: Capsule())
                 }
                 .buttonStyle(.plain)
             }
@@ -390,7 +390,7 @@ struct QuantityEditor: View {
                         .focused($amountIsFocused)
                         .font(.title2.weight(.bold).monospacedDigit())
                         .padding(12)
-                        .background(Color.black.opacity(0.055), in: RoundedRectangle(cornerRadius: 12))
+                        .background(AppTheme.controlFill, in: RoundedRectangle(cornerRadius: 12))
                         .onSubmit(save)
                         .onChange(of: amountIsFocused) { _, isFocused in
                             if isFocused { selectAllAmount() }

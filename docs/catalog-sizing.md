@@ -94,13 +94,39 @@ needed fields; this pipeline follows that guidance. See the official
 [search documentation](https://openfoodfacts.github.io/documentation/docs/Product-Opener/v2/search/get-search/)
 and [bulk-export guidance](https://openfoodfacts.github.io/search-a-licious/users/tutorial/).
 
+## Coverage probe: psyllium
+
+Psyllium is a useful example of why total row count and personal coverage are
+different goals. A probe on August 4, 2026 found:
+
+- no `psyllium` match in the checked-in catalog or its downloaded USDA
+  Foundation, SR Legacy, and FNDDS inputs;
+- 780 USDA Branded search matches, including dedicated NOW psyllium powder and
+  whole-husk products with tablespoon household servings;
+- 271 full-text Open Food Facts matches globally, 77 of them U.S.-tagged;
+- the best U.S. Open Food Facts psyllium matches had only one recorded scan,
+  while the product at the 5,000-item popularity cutoff had three scans.
+
+Consequently, OFF top 5,000 does not cover psyllium. OFF top 25,000 may select
+some one-scan products, but inclusion is not reliable because many products tie
+at that rank and the pipeline has no secondary tie-breaker aimed at personal
+relevance. The full or a large filtered OFF export covers it, while USDA Branded
+is the strongest source for recognizable U.S. psyllium products and useful
+household portions.
+
+Sources: [FoodData Central API](https://api.nal.usda.gov/fdc/v1/foods/search?api_key=DEMO_KEY&query=psyllium&pageSize=20&dataType=Branded),
+[Open Food Facts Search-a-licious](https://search.openfoodfacts.org/search?q=psyllium&page_size=20),
+and the local SQLite/source-snapshot inspection recorded in this repository.
+
 ## Recommended next preset
 
-For this personal app, the recommended next experiment is the top 25,000
-U.S.-tagged Open Food Facts products while keeping the complete generic USDA
-subset. It should remain comfortably below 20 MiB, materially improve packaged
-food and barcode coverage, and avoid the duplicate/stale-product volume of the
-full USDA Branded dataset.
+For broad packaged-food coverage, the recommended next experiment remains the
+top 25,000 U.S.-tagged Open Food Facts products while keeping the complete
+generic USDA subset. It should remain comfortably below 20 MiB, materially
+improve barcode coverage, and avoid the duplicate/stale-product volume of the
+full USDA Branded dataset. It should not be treated as sufficient for known
+low-popularity personal foods. Add a small, explicit personal coverage list or
+build a narrowly filtered USDA Branded supplement for gaps such as psyllium.
 
 Small refreshes can use the existing API workflow:
 
@@ -119,7 +145,8 @@ Every catalog-size experiment should record:
 
 1. candidate and retained counts by source;
 2. final SQLite size after `ANALYZE` and `VACUUM`;
-3. exact-query success for a personal test list;
+3. exact-query success for a personal test list, initially including Americano
+   and psyllium as known coverage gaps;
 4. median and worst-case on-device search latency;
 5. the percentage of OFF/Branded rows with all four tracked macros;
 6. duplicate-looking results for common terms such as egg, butter, milk, and

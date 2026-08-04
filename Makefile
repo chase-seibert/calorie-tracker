@@ -11,10 +11,11 @@ GENERIC_SIM_DESTINATION := generic/platform=iOS Simulator
 
 DEVICE_ID ?= 00008150-000E41422E40401C
 DEVELOPMENT_TEAM ?= 96NAC4VTEN
+PHONE_DESTINATION_TIMEOUT ?= 60
 PYTHON ?= python3
 OFF_PAGES ?= 10
 
-.PHONY: setup format lint test build clean catalog catalog-refresh sim-build sim-launch phone-build phone-install phone-launch phone-deploy
+.PHONY: setup format lint test ui-test-reorder build clean catalog catalog-refresh sim-build sim-launch phone-build phone-install phone-launch phone-deploy phone-wifi-check phone-wifi-deploy
 
 setup: catalog
 
@@ -25,7 +26,10 @@ lint:
 	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -configuration $(CONFIGURATION) -destination '$(GENERIC_SIM_DESTINATION)' -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO analyze
 
 test:
-	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO test
+	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -only-testing:CalorieTrackerTests test
+
+ui-test-reorder:
+	xcodebuild -project $(PROJECT) -scheme CalorieTrackerUITests -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -only-testing:CalorieTrackerUITests/DiaryReorderingUITests/testLongPressDragReordersVisuallyAndPersists test
 
 build: sim-build
 
@@ -68,6 +72,7 @@ phone-build:
 	  -scheme $(SCHEME) \
 	  -configuration $(CONFIGURATION) \
 	  -destination 'platform=iOS,id=$(DEVICE_ID)' \
+	  -destination-timeout $(PHONE_DESTINATION_TIMEOUT) \
 	  -derivedDataPath $(DERIVED_DATA) \
 	  CODE_SIGN_STYLE=Automatic \
 	  DEVELOPMENT_TEAM=$(DEVELOPMENT_TEAM) \
@@ -82,3 +87,20 @@ phone-launch:
 	xcrun devicectl device process launch --device $(DEVICE_ID) --terminate-existing $(BUNDLE_ID)
 
 phone-deploy: phone-build phone-install phone-launch
+
+phone-wifi-check:
+	@set -eu; \
+	if ! xcrun devicectl list devices \
+	  --filter "UDID == '$(DEVICE_ID)' AND State == 'available'" \
+	  --columns UDID \
+	  --hide-headers \
+	  --timeout $(PHONE_DESTINATION_TIMEOUT) | rg -Fq "$(DEVICE_ID)"; then \
+	  echo "No reachable paired iPhone with UDID $(DEVICE_ID)."; \
+	  echo "In Xcode, open Manage Devices from the run-destination menu, pair the iPhone, and select it as the build destination."; \
+	  echo "Then disconnect the cable, keep the Mac and unlocked iPhone on the same network, and retry: make phone-wifi-deploy"; \
+	  exit 1; \
+	fi
+
+phone-wifi-deploy: phone-wifi-check
+	@echo "Deploying to paired iPhone over Xcode's available device connection..."
+	@$(MAKE) phone-deploy

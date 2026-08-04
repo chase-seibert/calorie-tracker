@@ -56,6 +56,43 @@ final class CalorieTrackerTests: XCTestCase {
     }
 
     @MainActor
+    func testDeletingMultipleEntriesRemovesOnlySelectedItemsAndPersists() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let fileURL = folder.appendingPathComponent("diary.json")
+        let day = Date()
+        let store = DiaryStore(fileURL: fileURL)
+
+        func food(_ name: String, calories: Double) -> Food {
+            Food(
+                sourceID: name.lowercased(),
+                source: .custom,
+                name: name,
+                brand: nil,
+                barcode: nil,
+                nutrients: MacroNutrients(calories: calories, carbs: 1, fat: 1, protein: 1),
+                baseAmountGrams: 100,
+                servingGrams: nil,
+                servingDescription: nil
+            )
+        }
+
+        store.log(food("Toast", calories: 100), amount: 100, unit: .grams, on: day)
+        store.log(food("Eggs", calories: 200), amount: 100, unit: .grams, on: day)
+        store.log(food("Coffee", calories: 5), amount: 100, unit: .grams, on: day)
+        let selectedIDs = Set(
+            store.entries(on: day)
+                .filter { $0.food.name != "Eggs" }
+                .map(\.id)
+        )
+
+        store.deleteEntries(entryIDs: selectedIDs)
+
+        XCTAssertEqual(store.entries(on: day).map(\.food.name), ["Eggs"])
+        XCTAssertEqual(store.totals(on: day).calories, 200)
+        XCTAssertEqual(DiaryStore(fileURL: fileURL).entries(on: day).map(\.food.name), ["Eggs"])
+    }
+
+    @MainActor
     func testEditingLoggedFoodUpdatesEntryTotalsPreferenceAndPersistence() throws {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let fileURL = folder.appendingPathComponent("diary.json")
@@ -276,6 +313,57 @@ final class CalorieTrackerTests: XCTestCase {
         let expandedReload = DiaryStore(fileURL: fileURL)
         XCTAssertEqual(expandedReload.entries(on: day).map(\.food.name), ["Coffee", "Eggs", "Toast"])
         XCTAssertEqual(expandedReload.totals(on: day), totalsBefore)
+    }
+
+    @MainActor
+    func testLoggingSavedMealCreatesOneBreakableDiaryEntry() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let fileURL = folder.appendingPathComponent("diary.json")
+        let day = Date()
+        let store = DiaryStore(fileURL: fileURL)
+
+        func food(_ name: String, calories: Double) -> Food {
+            Food(
+                sourceID: name.lowercased(),
+                source: .custom,
+                name: name,
+                brand: nil,
+                barcode: nil,
+                nutrients: MacroNutrients(calories: calories, carbs: calories / 10, fat: 1, protein: 2),
+                baseAmountGrams: 100,
+                servingGrams: nil,
+                servingDescription: nil
+            )
+        }
+
+        store.log(food("Coffee", calories: 5), amount: 100, unit: .grams, on: day)
+        store.saveMeal(
+            name: "Breakfast",
+            items: [
+                MealItem(id: UUID(), food: food("Toast", calories: 100), amount: 100, unit: .grams),
+                MealItem(id: UUID(), food: food("Eggs", calories: 200), amount: 100, unit: .grams)
+            ]
+        )
+        let savedMeal = try XCTUnwrap(store.document.meals.first)
+
+        store.logMeal(savedMeal, on: day)
+
+        let loggedEntries = store.entries(on: day)
+        XCTAssertEqual(loggedEntries.map(\.food.name), ["Breakfast", "Coffee"])
+        let mealEntry = try XCTUnwrap(loggedEntries.first)
+        XCTAssertTrue(mealEntry.isMeal)
+        XCTAssertEqual(mealEntry.savedMealID, savedMeal.id)
+        XCTAssertEqual(mealEntry.mealItems?.count, 2)
+        XCTAssertEqual(mealEntry.nutrients.calories, 300)
+        XCTAssertEqual(store.totals(on: day).calories, 305)
+
+        let reloaded = DiaryStore(fileURL: fileURL)
+        XCTAssertEqual(reloaded.entries(on: day).map(\.food.name), ["Breakfast", "Coffee"])
+        reloaded.breakApartMeal(entryID: mealEntry.id)
+
+        XCTAssertEqual(reloaded.entries(on: day).map(\.food.name), ["Toast", "Eggs", "Coffee"])
+        XCTAssertTrue(reloaded.entries(on: day).allSatisfy { !$0.isMeal })
+        XCTAssertEqual(reloaded.totals(on: day).calories, 305)
     }
 
     func testMyFitnessPalCSVImport() throws {
