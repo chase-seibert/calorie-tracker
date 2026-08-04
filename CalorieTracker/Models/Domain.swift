@@ -57,15 +57,24 @@ struct MacroNutrients: Codable, Hashable, Sendable {
 struct DailyCalorieProgress: Equatable, Sendable {
     let consumed: Int
     let goal: Int?
+    let remaining: Int?
+    let fraction: Double?
 
     init(calories: Double, goal: Int?) {
         consumed = Int(calories.rounded())
         self.goal = goal.flatMap { $0 > 0 ? $0 : nil }
+        if let goal = self.goal {
+            remaining = max(goal - consumed, 0)
+            fraction = min(max(Double(consumed) / Double(goal), 0), 1)
+        } else {
+            remaining = nil
+            fraction = nil
+        }
     }
 
     var accessibilityLabel: String {
-        if let goal {
-            return "\(consumed) of \(goal) calories"
+        if let remaining {
+            return "\(consumed) calories, \(remaining) left"
         }
         return "\(consumed) calories"
     }

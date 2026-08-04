@@ -23,13 +23,17 @@ final class CalorieTrackerTests: XCTestCase {
         let progress = DailyCalorieProgress(calories: 1_234.5, goal: 2_000)
         XCTAssertEqual(progress.consumed, 1_235)
         XCTAssertEqual(progress.goal, 2_000)
+        XCTAssertEqual(progress.remaining, 765)
+        XCTAssertEqual(progress.fraction ?? -1, 0.6175, accuracy: 0.0001)
+        XCTAssertEqual(DailyCalorieProgress(calories: 2_100, goal: 2_000).remaining, 0)
+        XCTAssertEqual(DailyCalorieProgress(calories: 2_100, goal: 2_000).fraction, 1)
         XCTAssertEqual(
             DailyCalorieProgress(calories: 1_234.4, goal: nil).accessibilityLabel,
             "1234 calories"
         )
         XCTAssertEqual(
             DailyCalorieProgress(calories: 1_234.4, goal: 2_000).accessibilityLabel,
-            "1234 of 2000 calories"
+            "1234 calories, 766 left"
         )
     }
 

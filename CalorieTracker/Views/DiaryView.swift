@@ -82,8 +82,8 @@ struct DiaryView: View {
                                 .foregroundStyle(AppTheme.coral)
                             Text(calorieProgress.consumed.formatted())
                                 .font(.headline.monospacedDigit())
-                            if let goal = calorieProgress.goal {
-                                Text("/ \(goal.formatted())")
+                            if let remaining = calorieProgress.remaining {
+                                Text("/ \(remaining.formatted())")
                                     .font(.caption.weight(.semibold).monospacedDigit())
                                     .foregroundStyle(AppTheme.muted)
                             }
@@ -348,6 +348,38 @@ private struct DateStrip: View {
     }
 }
 
+private struct CalorieProgressIcon: View {
+    let progress: Double?
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(AppTheme.coral.opacity(0.12))
+                .frame(width: 48, height: 48)
+
+            Image(systemName: "flame.fill")
+                .font(.title)
+                .foregroundStyle(AppTheme.coral)
+
+            Circle()
+                .stroke(AppTheme.coral.opacity(0.2), lineWidth: 3)
+
+            if let progress {
+                Circle()
+                    .trim(from: 0, to: progress)
+                    .stroke(
+                        AppTheme.coral,
+                        style: StrokeStyle(lineWidth: 3, lineCap: .round)
+                    )
+                    .rotationEffect(.degrees(-90))
+            }
+        }
+        .frame(width: 60, height: 60)
+        .animation(.easeInOut(duration: 0.25), value: progress)
+        .accessibilityHidden(true)
+    }
+}
+
 private struct MacroSummary: View {
     let nutrients: MacroNutrients
     let calorieGoal: Int?
@@ -368,8 +400,8 @@ private struct MacroSummary: View {
                         Text(calorieProgress.consumed.formatted())
                             .font(.system(size: 44, weight: .bold, design: .rounded))
                             .foregroundStyle(AppTheme.ink)
-                        if let goal = calorieProgress.goal {
-                            Text("/ \(goal.formatted())")
+                        if let remaining = calorieProgress.remaining {
+                            Text("/ \(remaining.formatted())")
                                 .font(.title3.weight(.semibold).monospacedDigit())
                                 .foregroundStyle(AppTheme.muted)
                         }
@@ -381,11 +413,7 @@ private struct MacroSummary: View {
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(calorieProgress.accessibilityLabel)
                 Spacer()
-                Image(systemName: "flame.fill")
-                    .font(.title)
-                    .foregroundStyle(AppTheme.coral)
-                    .padding(14)
-                    .background(AppTheme.coral.opacity(0.12), in: Circle())
+                CalorieProgressIcon(progress: calorieProgress.fraction)
             }
             VStack(spacing: 10) {
                 stackedMacroBar(carbs: carbs, fat: fat, protein: protein, total: macroTotal)
