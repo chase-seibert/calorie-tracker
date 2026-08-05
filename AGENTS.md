@@ -23,10 +23,11 @@ workflow is missing.
 - `make catalog-refresh`: download current source snapshots and rebuild the catalog.
 - `make phone-deploy`: build, install, and launch on Chase's iPhone.
 
-When a Codex-sandboxed simulator command reports that CoreSimulator is
-unavailable, do not wait for it to recover: retry the command with host-side
-execution permission. If that is unavailable, run `make sim-compile` and
-report the simulator tests as unverified.
+Run `make test` with host-side execution permission. Codex's restricted
+sandbox cannot connect to CoreSimulator even when the local simulator service
+is healthy. Do not wait for a sandboxed test command to recover. If host-side
+execution is unavailable, run `make sim-compile` and report the simulator
+tests as unverified.
 
 ## Documentation index
 
