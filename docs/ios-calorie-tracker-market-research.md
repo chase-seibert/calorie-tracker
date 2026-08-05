@@ -22,29 +22,37 @@ The practical answer is therefore **hundreds of iOS competitors: at least 338
 explicitly calorie-branded apps and roughly 470 obvious calorie/macro/nutrition
 trackers**. A more exact number would imply precision Apple does not provide.
 
-The proposed app has a real audience, but **“fast” is not differentiated as a
-claim**. MyNetDiary, MacroFactor, Foodnoms, FitBee, Calory, Cal AI, and several
-small offline apps all explicitly claim speed or simplicity. **Local operation
-is meaningfully different from the ten largest tracker-first competitors, but
-it is no longer unique among indie apps.** Calories-Tracker, Caltopia,
-BiteDeck, Simple Calories, Easy Calorie, and other recent apps already advertise
-some combination of on-device storage, offline use, no account, and no ads.
+The proposed app has a real audience, but neither **“fast” nor “two taps” is
+unique by itself**. Lifesum documents a two-tap recent-food path from its diary,
+Carb Manager offers two-tap multi-add for visible foods with the default
+serving, and Foodnoms can log configured favorites from Shortcuts in one tap.
+**Local operation is meaningfully different from the ten largest tracker-first
+competitors, but it is no longer unique among indie apps.** The defendable
+position is the combination and consistency: routine foods in two taps inside
+the app, a useful catalog that remains searchable offline, no account, and no
+commercial interruption in the logging path.
 
 The strongest launch position is a narrower, demonstrable promise:
 
-> **Log food, not screen time.**  
-> Log repeat foods in two taps from your diary. Search instantly—even in
-> airplane mode. No account, no ads, and your diary stays on your iPhone.
+> **Your usual foods. Two taps. Even offline.**
+>
+> Log a routine food from the diary in two taps, or search the built-in catalog
+> in airplane mode. No account, no ads, and your diary stays on your iPhone.
 
 That positioning turns implementation details into user outcomes. It also fits
 the existing product unusually well: recent/frequent/favorite foods, remembered
-quantities, saved meals, immediately focused search, a local FTS index, and a
-MyFitnessPal import are all evidence for the promise.
+quantities, saved meals, immediately focused search, and a local FTS index are
+all evidence for the promise. It deliberately does **not** compete on weight
+loss coaching, long-term weight history, specialized macro plans, social
+features, or AI estimation.
 
 The recommended business model is **free core functionality plus a quiet,
-optional in-app tip jar**, with no prompts in the logging path. If meaningful
-revenue becomes a goal, a modest paid-up-front price or one-time Supporter
-purchase fits the promise much better than advertisements or a subscription.
+optional in-app tip jar**, with no prompts in the logging path. Apple expressly
+allows tipping a developer through In-App Purchase. Three repeatable consumable
+products at round U.S. prices—**$5, $10, and $25**—fit the intent and require no
+developer-operated payment server. The purchase itself still uses Apple's
+StoreKit service and therefore requires connectivity at that moment; food
+logging does not.
 
 ## 1. How large is the market?
 
@@ -193,88 +201,136 @@ would weaken the offline promise and introduce inherently uncertain portions.
 The less common combination is:
 
 - A meaningful catalog that works fully offline.
-- No developer account or cloud dependency.
+- No user account or developer-operated cloud dependency.
 - No ads or upsell interruption.
-- Exact, source-visible calories and macros rather than a photo estimate.
-- A repeat-food workflow optimized as the primary use case.
-- A credible way to import history from an incumbent.
+- A repeat-food workflow optimized as the primary use case, not hidden behind
+  general search or a paid tier.
+- Basic calorie and macro totals without weight coaching, diet specialization,
+  social features, or an AI estimation layer.
 
 That combination is the opportunity, but it must be expressed and proven more
 specifically than “simple and fast.”
 
-## 3. Is “fast, local, and simple” differentiated?
+## 3. Is “two taps, local, and offline” differentiated?
 
 ### Verdict
 
-**It is a good product strategy but an insufficient marketing position on its
-own.**
+**The combination is differentiated; the tap count alone is not.** Public
+product documentation is sufficient to disprove a unique “only two taps” or
+unqualified “fewest taps” claim. Several large apps can equal two taps for a
+favorable repeat case, and a few can beat it after the user configures a
+shortcut or repeating meal.
 
-| Proposed claim | Market reality | Verdict |
+For this analysis, a tap counts from a visible diary or log screen until the
+food is committed. Typing, scrolling, setup, and closing a still-open picker are
+reported separately. That convention matters: vendors often call a plus button
+“one-tap logging” after excluding the tap needed to reach it.
+
+### Repeat-food tap validation: top ten
+
+| App | Best documented repeat path | What the evidence supports |
 |---|---|---|
-| Fast | MyNetDiary, MacroFactor, Foodnoms, FitBee, Calory, and AI scanners all claim speed | Crowded and subjective unless benchmarked |
-| Simple | Nearly every smaller tracker says simple, easy, clean, or minimal | Commodity language |
-| No ads | MyNetDiary, Foodnoms, FitBee, and several indies already promise it | Valuable proof point, not a standalone category |
-| No account | MyNetDiary, YAZIO, Foodnoms, and many offline indies allow immediate use | Valuable friction reducer, not unique |
-| Local/offline | Uncommon among the top ten, but increasingly common among new indie apps | Meaningfully different from incumbents, not unique overall |
-| Fewest taps for repeat foods | Few products define and demonstrate this exact job | Strongest potential wedge |
-| Incumbent-history import into local recents | Rare and highly relevant to switchers | Strong secondary differentiator |
+| MyFitnessPal | Tap **Add Food/Log** from Diary or Today, then the **+** beside a visible History result | **Two taps can be achieved.** Its [Quick Log](https://support.myfitnesspal.com/hc/en-us/articles/360032622491-Quick-Log) commits the current portion directly, and [History appears on the search page](https://support.myfitnesspal.com/hc/en-us/articles/12338510991117-Suggested-Searches). The blue global + route takes an extra choice. |
+| Lose It! | Log → Add under meal → choose food → confirm serving → Add/Save → Done | The [official flow](https://loseit.zendesk.com/hc/en-us/articles/49210381551380-How-to-Log-Food-in-Lose-It) is more than two taps even when recent foods are shown. |
+| Carb Manager | Meal **Add Food**, then **+ Add** beside a visible previously logged food | **Two taps to commit** the default serving, with a separate Close action to leave the picker. This is documented in [Multi-Add](https://help.carbmanager.com/docs/en/log-one-or-more-foods). |
+| Cal AI | Photo capture is the promoted path | No public first-party documentation establishes a repeat-food tap count; no “fewest taps” conclusion is supportable. |
+| MyNetDiary | **Same** copies yesterday's meal with its amounts | MyNetDiary documents a [one-click Same shortcut](https://www.mynetdiary.com/helpFoodEntry.html), although its public help does not establish whether the current iPhone placement is identical. It is still evidence that copying yesterday is established competitor behavior. |
+| Lifesum | Open a diary meal, then tap **+** beside a Recent item or Same as Yesterday | **Two taps is an explicit traditional-tracking pattern.** Lifesum documents both [Traditional Food Tracking](https://help.lifesum.com/en/article/traditional-food-tracking-4nzcd7/) and the iOS [Recent and Same as Yesterday](https://help.lifesum.com/en/article/find-your-recently-tracked-meals-with-same-as-yesterday-ios-1so21mw/) section. Its newer AI-tracking layout can add an extra mode choice. |
+| Cronometer | Tap **Log Items** on the daily repeating-food prompt | **One confirmation can log all configured repeats**, but [Repeating Foods](https://support.cronometer.com/hc/en-us/articles/16510562495764-Mobile-Set-Repeating-Foods) is a Gold feature and requires setup. Normal search takes more steps. |
+| Healthi | Recent/history features are marketed, but no current first-party tap walkthrough was found | Exact count unverified; it cannot be used to support either a win or a loss. |
+| Fooducate | Favorites and history are available, but no current first-party tap walkthrough was found | Exact count unverified. Its primary value proposition is food quality guidance, not routine-entry speed. |
+| YAZIO | Add under a meal, then access Foods or Favorites | Public help shows where [Favorites](https://help.yazio.com/hc/en-us/articles/208230949-Managing-your-favorites-foods-and-recipes) live but does not document the remaining commit taps. Its [diary search ranking](https://help.yazio.com/hc/en-us/articles/6478854221713-How-does-the-Diary-search-bar-work) already prioritizes foods by time of day. |
 
-“All local data” is also developer language. Users care about its consequences:
-instant results, functionality in a grocery-store dead zone, no login, no
-privacy bargain, and no lost access when a service changes its terms.
+This is a desk audit of current first-party documentation, not an instrumented
+test of every current binary. It validates the strategic conclusion—two taps is
+not unique—but a public superlative such as “fewest taps of any calorie
+tracker” would require a hands-on, versioned benchmark.
+
+### Repeat-food validation: fast and indie competitors
+
+| App | Relevant capability | Competitive implication |
+|---|---|---|
+| Foodnoms | Smart Suggestions use time of day and recent behavior; its Shortcuts actions use day of week, can reuse the last portion, copy yesterday, and can be run with [one tap](https://foodnoms.com/help/siri-and-shortcuts/) | **Closest routine-first competitor.** It already implements much of the proposed learning model and can beat two taps from a widget, Spotlight, or Shortcut. |
+| FitBee | Markets “free, fast, no ads,” plus widgets, scanning, and a large online catalog | Strong no-ad convenience competitor; exact repeat count remains unverified in public first-party material. |
+| Calories-Tracker | Claims under-five-second logging, no account, no ads, and an offline USDA/Open Food Facts database | **Closest architecture and promise.** Its small installed footprint does not make its positioning less relevant. |
+| Caltopia | Private offline diary and downloaded USDA catalog; adds on-device AI | Direct local-first competitor, but broader capture positioning and little visible adoption. |
+| BiteDeck | On-device diary, no account or ads, broad bundled catalog, scans, Health sync, and exports | Direct local-first competitor with more surface area; exact repeat path is not publicly documented. |
+| MacroFactor | Smart history and copy/paste inside a paid coaching product | A polished routine workflow, but the brand and business model center adaptive macro coaching. |
+| Calory | Quick Value, Siri, widgets, and Watch entry | Can minimize taps when the user already knows the calorie value; it does not make a fully offline food catalog the core promise. |
+
+### What is actually differentiated
+
+| Claim | Market reality | Role in positioning |
+|---|---|---|
+| Two-tap repeat | Equaled by MyFitnessPal, Lifesum, and Carb Manager in favorable paths; beaten by configured Cronometer and Foodnoms flows | Concrete promise and design standard, **not** a unique claim |
+| Useful catalog fully offline | Rare among the top ten; present in a handful of indies | Primary differentiator |
+| No account ever | MyNetDiary and some indies reduce or avoid signup, but most scaled products are account/cloud businesses | Strong supporting differentiator |
+| No ads, feed, paywall interruption, or social layer | Individual pieces are common; the whole exclusion set is not | Strong proof of focus |
+| Routine suggestions computed locally | Foodnoms and YAZIO already personalize suggestions, but not as part of a fully local, account-free catalog promise | Best feature direction; differentiated as part of the combination |
+| No weight program, diet specialization, or AI estimation | Most leaders use at least one of these as their engagement or acquisition engine | Sharpens the target and protects scope; it is an exclusion, not the headline |
+
+“All local data” is developer language. The user outcome is: the app starts
+without registration, ordinary logging never waits for a service, the catalog
+works in a grocery-store dead zone, and personal entries are not held by an
+account the developer operates.
 
 ### Closest competitors
 
-#### 1. MyNetDiary — closest scaled marketing competitor
-
-[MyNetDiary](https://apps.apple.com/us/app/calorie-counter-mynetdiary/id287529757)
-is the most important competitor even though its product is much broader. It
-explicitly promises logging in seconds, no ads, no required account, verified
-foods, favorites and recents, and fewer taps than the market leader. It also
-offers automatic logging for regular meals in Premium. The proposed app cannot
-credibly own “fast and no ads” without showing why its local, routine-first flow
-is faster or calmer than MyNetDiary.
-
-#### 2. Foodnoms — closest established Apple-native competitor
+#### 1. Foodnoms — closest routine-first competitor
 
 [Foodnoms](https://apps.apple.com/us/app/nutrition-tracker-foodnoms/id1479461686)
-describes itself as fast, powerful, and easy, with smart suggestions, Siri and
-Shortcuts, widgets, Apple Health, iCloud sync, no advertising, recipes, and
-meals. It has 7.2K U.S. ratings and a $39.99 annual plan among its listed offers.
-It is broader in nutrients and Apple surfaces but depends on online/iCloud
-capabilities and monetizes several convenience features. It sets a high bar for
-native polish.
+is the most direct feature competitor. It explicitly promises a focused,
+friction-free tracker without intrusive ads; [Smart Suggestions](https://foodnoms.com/help/about-foodnoms/)
+use time of day and recent foods. Its Shortcuts support adds day-of-week
+suggestions, last-portion reuse, copy-yesterday, widgets, Spotlight, and
+one-tap actions. This means time-aware suggestions are good product design, but
+not a new category. The opening is to make them automatic, free, entirely
+on-device, and available inside the primary diary without configuration.
 
-#### 3. FitBee — closest modern no-ad speed competitor
+#### 2. MyFitnessPal, Lifesum, and Carb Manager — tap-count competitors
 
-[FitBee](https://apps.apple.com/us/app/fitbee-calorie-macro-counter/id6443979108)
-markets itself as a “free, fast, no-ads tracker,” with a million-food database,
-free barcode and nutrition-label scanning, photo logging, recipes, widgets, and
-Apple Health. Its App Store privacy label says some health, account, identity,
-and usage data may be linked to the user. The proposed app has a cleaner local
-privacy architecture, but FitBee can make a more feature-rich first impression.
+These scaled apps can match the proposed two-tap repeat path under the right
+conditions. They are much broader products, however: accounts, subscriptions,
+AI capture, programs, content, advertising or upsells, and cloud dependencies
+surround the core diary. The proposed app can win on **consistency and absence
+of friction**, not on the numerical tap count for one cherry-picked case.
 
-#### 4. Calories-Tracker — closest architectural and workflow competitor
+#### 3. MyNetDiary — closest scaled positioning competitor
+
+[MyNetDiary](https://apps.apple.com/us/app/calorie-counter-mynetdiary/id287529757)
+promises logging in seconds, no ads, no required account, verified foods,
+favorites, recents, and fewer taps than the market leader. It also offers
+automatic logging for regular meals in Premium. It is the strongest warning
+against generic “fast, private, no ads” copy. The distinction is that the
+proposed app makes offline, routine-first logging the entire product, not one
+workflow inside a weight-loss platform.
+
+#### 4. Calories-Tracker — closest architecture and compact promise
 
 [Calories-Tracker](https://apps.apple.com/us/app/calories-tracker/id6780212512)
 claims logging in under five seconds, no account, no ads, free-forever access,
 a built-in offline database, and combined Open Food Facts and USDA search. This
-is extremely close to the proposed promise and data strategy. It currently has
-too little visible rating history to be a popularity threat, but it proves that
-the words “offline USDA + Open Food Facts” cannot be the whole differentiation.
+is extremely close. The proposed app must beat it through a visibly better
+routine surface—remembered quantities, time-aware suggestions, and
+repeat-yesterday—not through the same list of architectural claims.
 
-#### 5. Caltopia and BiteDeck — closest local-first product competitors
+#### 5. Caltopia and BiteDeck — closest local-first feature competitors
 
 [Caltopia](https://apps.apple.com/us/app/caltopia-calorie-tracker/id6769532300)
 offers a private offline diary, a 48,000-food USDA download, on-device AI,
 voice entry, no telemetry, and a $14.99 lifetime unlock.
 [BiteDeck](https://apps.apple.com/us/app/bitedeck-calorie-tracker/id6767685124)
 claims an on-device diary, no account or ads, 151,700 foods, restaurant coverage,
-barcode and label scanning, Health sync, and exports. Both are very new and
-lightly rated, but they directly contest the privacy/offline niche.
+barcode and label scanning, Health sync, and exports. Both directly contest
+private/on-device tracking and add more surface area. Their breadth leaves room
+for a stricter routine utility, but neither “offline” nor “private” is unique.
 
 #### Other relevant substitutes
 
+- [FitBee](https://apps.apple.com/us/app/fitbee-calorie-macro-counter/id6443979108)
+  markets a free, fast, no-ad tracker with widgets, scanning, recipes, and
+  Apple Health. Its online catalog and broader feature set make the proposed
+  app's local architecture cleaner, but FitBee makes a richer first impression.
 - [MacroFactor](https://apps.apple.com/us/app/macrofactor-macro-tracker/id1553503471)
   calls itself the fastest macro tracker, uses smart history and copy/paste, is
   ad-free, and adds an adaptive coaching algorithm. It costs $71.99/year and
@@ -289,80 +345,91 @@ lightly rated, but they directly contest the privacy/offline niche.
 
 ### How to make the current position defensible
 
-Do not claim “fastest” until the app has a repeatable benchmark. Instead, own a
-specific job and publish the evidence:
+The moat will not be a single tap count. It should be an operating system for
+product decisions:
 
-1. **Define the routine path.** From the diary, a recent or favorite food should
-   log in two taps: Add, then the row's plus button. Once the add sheet is open,
-   the repeat food is one tap.
-2. **Define the search path.** The keyboard is ready immediately; results update
-   during typing; the displayed serving logs from the row without a detail page.
-3. **Define the availability promise.** Diary, search, favorites, saved meals,
-   edits, trends, and barcode matches in the bundled catalog work in airplane
-   mode.
-4. **Measure responsiveness.** Set and test targets for cold launch, time to
-   focused search, local query latency, and time to log representative repeat
-   and new foods. Prefer a visible real-world demo over an unsupported adjective.
-5. **Protect the path.** No onboarding wall, upgrade modal, content card,
-   streak celebration, recommendation, or review request may interrupt food
-   entry.
-6. **Make switching part of speed.** A MyFitnessPal import should seed recents,
-   quantities, and personal foods so a switcher is fast on day one, not only
-   after weeks of use.
+1. **Adopt a tap budget.** A routine food is two taps from the diary. “Repeat
+   yesterday” is two taps for the whole meal or day: invoke, confirm. Quantity
+   changes remain inline and never require a detail screen.
+2. **Optimize the whole ordinary day.** Measure median taps per logged item
+   across a seven-day routine, not only the fastest isolated flow. Time-of-day
+   and day-of-week suggestions should put the likely item under the user's
+   thumb before typing.
+3. **Make offline a hard guarantee.** First launch, diary, built-in catalog
+   search, favorites, saved meals, repeat-yesterday, edits, and totals all work
+   in airplane mode. Barcode matches work when the code exists locally.
+4. **Remember without surveillance.** Learn recent portions and routine timing
+   locally. Provide a simple reset/forget control. No account or server-side
+   profile is needed.
+5. **Protect the logging path.** No onboarding wall, weight prompt, upgrade
+   modal, tip request, content card, streak celebration, review request, or AI
+   affordance may interrupt entry.
+6. **Keep exclusions visible.** Basic calories, protein, fat, and carbs are
+   enough. Do not drift into weight coaching, keto identity, social activity,
+   decade-scale analytics, or AI merely to fill a roadmap.
+7. **Benchmark the promise continuously.** Keep versioned screen recordings
+   and UI tests for routine food, repeat-yesterday, new search, quantity edit,
+   and airplane-mode flows against the closest current competitors.
 
-The App Store video can make this legible in ten seconds: enable airplane mode,
-launch directly into today's diary, log a repeat food, search and add a second
-food, and show the updated totals. Competitors can copy words; the demonstration
-is harder to dismiss.
+Safe public copy is **“Your usual foods in two taps—even offline.”** Avoid
+“the only,” “fastest,” or “fewest of any app” until a current hands-on benchmark
+supports it. The App Store video can prove the combination in ten seconds:
+enable airplane mode, log a suggested repeat in two taps, repeat yesterday,
+search the local catalog, and show updated calories and basic macros.
 
 ## 4. Recommended launch position
 
 ### Positioning statement
 
 For people who track food every day and are tired of bloated subscription apps,
-**Calorie Tracker is the private iPhone diary that logs routine foods in the
-fewest practical taps and works instantly offline**. Unlike all-in-one fitness
-platforms, it has no account, ads, feed, coaching, or server wait—only the
-calories and macros the user came to record.
+**Calorie Tracker is the offline iPhone diary built to minimize taps for foods
+you eat routinely**. It puts likely foods and remembered portions first,
+commits a routine food in two taps, and never requires an account or network
+round trip for logging. It tracks calories and basic macros, then gets out of
+the way.
 
 ### Suggested message hierarchy
 
-**Headline:** Log food, not screen time.
+**Headline:** Your usual foods. Two taps. Even offline.
 
-**Subheadline:** One-tap repeats and instant offline search. No account. No ads.
-Your diary stays on your iPhone.
+**Subheadline:** A calorie and basic-macro diary with local suggestions and a
+built-in catalog. No account, ads, feed, or server wait.
 
 **Proof points:**
 
 - Recent, frequent, favorite, and saved meals are ready before typing.
+- Time-of-day and day-of-week suggestions are learned on the iPhone.
+- Repeat yesterday with one action and one confirmation.
 - Every search result shows exactly what quantity and calories the plus button
   will log.
 - Remembered portions mean less editing tomorrow.
-- USDA, Open Food Facts, and imported MyFitnessPal history search together on
-  the phone.
+- USDA and Open Food Facts catalog entries search together on the phone.
 - Calories, carbs, fat, and protein stay prominent; everything else stays out
   of the way.
 
 ### Positioning guardrails
 
-- Lead with **the user's saved time**, not database architecture.
+- Lead with **fewer taps for the foods people actually repeat**, with offline as
+  the reason the experience is dependable.
 - Use “private” only with concrete explanation: no account, no developer
   server, and personal diary storage on the device.
-- Avoid “most accurate” while Open Food Facts and imported data can contain
-  source errors. Prefer “source-visible” or “no mystery estimates.”
-- Avoid “fastest” until a documented comparison supports it.
+- Say “two taps from the diary,” not “one tap,” and show the exact path.
+- Avoid market-wide superlatives such as “fewest” or “fastest” until a current
+  hands-on comparison supports them. “Built for fewer taps” is defensible;
+  “fewest of any app” is not yet.
 - Do not promise the largest catalog. The bundled catalog is intentionally much
   smaller than the millions claimed by incumbents. Promise fast relevant
-  results, transparent sources, easy custom foods, and improving coverage.
+  results, easy custom foods, and improving coverage.
 - Treat barcode scanning as useful coverage, not as the central identity.
+- Do not position around weight loss, weight history, specialized macro diets,
+  AI, coaching, social activity, or decade-scale reporting. Local Apple-model
+  assistance may later shorten entry, but it is an implementation tool rather
+  than the promise.
 
-## 5. Three alternative value-proposition hypotheses
+## 5. Chosen hypothesis: the routine-first tracker
 
-These are stronger as testable hypotheses than as simultaneous launch messages.
-The product should lead with one and allow the others to serve as supporting
-proof.
-
-### Hypothesis A: The routine-first tracker
+The routine-first hypothesis should become the product strategy rather than one
+of several simultaneous messages.
 
 > **The calorie tracker for people who eat the same things.** Your usual foods
 > and meals are ready when you need them; most days, there is almost nothing to
@@ -372,82 +439,56 @@ proof.
 stable breakfast/lunch rotation who finds repetition tedious rather than
 informative.
 
-**Why there may be a gap:** Most products optimize the novel-food search or
-promote camera AI. Daily retention is dominated by ordinary repeated meals.
-History and favorites exist elsewhere, but few brands make the repeated routine
-the whole product promise.
+**Why there may be a gap:** Most products optimize novel-food search, weight
+loss guidance, or camera AI. Ordinary tracking is dominated by repeated foods.
+History and favorites exist almost everywhere, but few brands make the routine
+the whole product promise while also guaranteeing a useful offline catalog and
+no account.
 
 **Features that would strengthen it:**
 
 - Time-of-day and day-of-week suggestions computed locally.
-- “Repeat yesterday,” “repeat last Tuesday,” and multi-select batch logging.
+- “Repeat yesterday” and multi-select batch logging. “Repeat last Tuesday” can
+  follow only if observed behavior shows it is useful.
 - Optional recurring meal templates that require confirmation rather than
   silently modifying the diary.
 - App Intent, Spotlight, Lock Screen, and widget actions for top foods and meals.
 - A weekly “time saved” summary computed on device.
 
-**Risk:** It can feel narrow before the app learns the user's routine. The
-MyFitnessPal import is the best solution because it can personalize recents on
-the first day.
+**Risk:** It can feel narrow before the app learns the user's routine. Mitigate
+that without an importer: ship useful meal-time defaults, make local search
+excellent, let people favorite during the first log, and begin suggestions
+after only a small number of entries. The pitch is that establishing a new
+routine is cheap because logging itself is cheap—not that the app preserves a
+decade of old records.
 
-### Hypothesis B: The trustworthy nutrition ledger
+### How differentiated is routine-first?
 
-> **Track numbers you can explain.** Every food shows its source, serving, and
-> nutrition basis—no mystery duplicates and no AI-guessed portions.
+It is **moderately differentiated as a position, not as a feature set**.
+Foodnoms already has the deepest comparable routine machinery. YAZIO ranks
+search results by time of day. Cronometer has scheduled repeats, and Lifesum and
+MyNetDiary expose yesterday shortcuts. The gap is therefore not “nobody helps
+with routines.” The gap is a product whose entire hierarchy is:
 
-**Target user:** Food-scale users, athletes, data-conscious users, and people
-frustrated by duplicate or implausible crowd-sourced entries.
+1. Predict the routine locally.
+2. Commit it with almost no interaction.
+3. Work the same way without connectivity.
+4. Avoid every unrelated engagement and monetization surface.
 
-**Why there may be a gap:** MyFitnessPal competes on database size; Cronometer
-competes on nutrient depth; AI apps compete on effortless estimation. There is
-room for a simpler calorie-and-macro product that emphasizes provenance and
-serving clarity without exposing 95 nutrients.
+That is narrow enough to guide tradeoffs. A feature belongs at launch only when
+it reduces taps, improves offline coverage, or makes the local diary more
+reliable. Weight tracking, specialized macro programs, social sharing, AI
+estimation, coaching, and long-horizon analytics fail that test.
 
-**Features that would strengthen it:**
+### Recommended feature order
 
-- A clear USDA/OFF/imported/custom source trail and last-updated date.
-- “Per 100 g,” package serving, and natural portions shown without ambiguous
-  conversions.
-- Local duplicate suppression and a simple report/correct flow.
-- An on-device nutrition-label scanner that creates an editable custom food,
-  without pretending to infer a plate's weight.
-- Export that preserves source IDs and original values.
-
-**Risk:** Accuracy depends on upstream data and measured portions. The promise
-must be transparency and control, not clinical correctness.
-
-### Hypothesis C: The escape hatch from subscription trackers
-
-> **Leave your old calorie app, not your history.** Import your diary, keep it
-> private, and own a portable nutrition record with no account or lock-in.
-
-**Target user:** A dissatisfied MyFitnessPal, Lose It!, or spreadsheet user who
-wants a quieter app but has years of history and custom foods.
-
-**Why there may be a gap:** Many privacy-first apps start with an empty diary.
-That makes switching costly precisely for the users most motivated to leave an
-incumbent. Migration plus local ownership is more concrete than generic privacy.
-
-**Features that would strengthen it:**
-
-- Robust MyFitnessPal import with a preview, validation, and reversible merge.
-- Generic CSV mapping for other services.
-- Human-readable CSV and versioned JSON export at any time.
-- Local backup/restore through the Files picker; optional HealthKit mirroring,
-  clearly separated from the app's own storage.
-- A migration report showing imported days, foods, skipped rows, and fixes.
-
-**Risk:** It is an excellent acquisition wedge but not a complete retention
-story. Pair it with the routine-first workflow after import.
-
-### Hypothesis priority
-
-1. **Routine-first** has the best fit with the current implementation and the
-   clearest durable behavioral benefit.
-2. **Trustworthy ledger** is the best way to distinguish exact logging from the
-   AI-photo wave.
-3. **Escape hatch** is the best launch campaign or switching funnel, especially
-   after the importer is validated against real exports.
+1. Time-of-day suggestions computed locally from recent entries.
+2. Repeat yesterday for a meal, with a preview and one confirmation.
+3. Day-of-week weighting once enough local history exists.
+4. App Intent and widget entry for people who want a configured one-tap path.
+5. Optional on-device Apple-model input assistance only if it reduces steps and
+   preserves deterministic confirmation; never make it the brand or a launch
+   dependency.
 
 ## 6. Monetization analysis and recommendation
 
@@ -476,51 +517,120 @@ Several nearby indies demonstrate alternatives:
 
 No top-ten product uses tips as its primary business model. That makes tips
 unlikely to maximize revenue, but the stated objective is sustainability and
-trust rather than revenue maximization.
+trust rather than revenue maximization. Proceeds are the customer price minus
+Apple's applicable commission and taxes; the tip amounts are not the amounts
+ultimately deposited to the developer.
 
 ### Recommended model
 
 **Launch the complete core app for free, with an optional “Support Calorie
 Tracker” section in Settings.**
 
-- Offer consumable tips at a few clear levels, such as $4.99, $14.99, and
-  $39.99.
+- Offer three repeatable consumable tips at round U.S. price points: **$5,
+  $10, and $25**. Always render StoreKit's localized `displayPrice`; Apple will
+  calculate comparable prices in other storefronts, which may not remain round
+  in every currency.
 - Never show a support prompt while adding, editing, deleting, or reviewing
   food.
 - Do not use a fake sale, countdown, trial, nag badge, or repeated modal.
-- If a one-time Supporter purchase is added, keep the functional logging core
-  complete. Appropriate extras are alternate icons or themes—not search speed,
-  barcode access, import, export, or data ownership.
+- Do not attach logging functionality to a tip. It is thanks, not an unlock.
 - Explain the economics plainly: “No ads, no account, no subscription. If the
   app is useful, you can support its continued maintenance.”
 
 Apple's current [App Review Guideline
 3.1.1](https://developer.apple.com/app-store/review/guidelines/#in-app-purchase)
-allows customers to tip developers through in-app purchase. StoreKit supports
-[consumable and non-consumable
-IAPs](https://developer.apple.com/help/app-store-connect/reference/in-app-purchases-and-subscriptions/in-app-purchase-types).
-Use the term **tip** or **support**, not charitable donation, unless the seller
-is actually an approved nonprofit.
+expressly says apps may enable customers to tip a developer through In-App
+Purchase. A tip that can be given repeatedly maps to Apple's
+[consumable](https://developer.apple.com/help/app-store-connect/reference/in-app-purchases-and-subscriptions/in-app-purchase-types)
+product type: it is used once and can be purchased again. Use **tip** or
+**support**, not charitable donation, unless the seller is actually an approved
+nonprofit.
+
+### Compliant tip-jar implementation
+
+#### App Store Connect
+
+1. Have the Account Holder accept the [Paid Apps
+   Agreement](https://developer.apple.com/help/app-store-connect/manage-agreements/sign-and-update-agreements/)
+   and complete banking and tax setup. This is required even when the app
+   itself is free.
+2. Create three **Consumable** In-App Purchases under Monetization, for example
+   `tip.small`, `tip.medium`, and `tip.large`. Product IDs cannot be changed or
+   reused, so use stable reverse-DNS IDs in the real configuration.
+3. Give them plain localized names such as “Small Tip,” “Medium Tip,” and
+   “Large Tip,” and a description such as “Optional support for development.”
+4. Set the United States base prices to $5, $10, and $25. Apple offers up to
+   800 standard price points and can [generate comparable localized
+   prices](https://developer.apple.com/help/app-store-connect/manage-in-app-purchases/set-a-price-for-an-in-app-purchase/)
+   for other storefronts.
+5. Supply the required App Review screenshot showing the Settings support
+   screen. In Review Notes, say: “These are optional consumable tips. They do
+   not unlock features or affect calorie tracking. Open Settings → Support
+   Calorie Tracker.” Add the IAPs to the App Review submission.
+
+#### StoreKit 2 in the app
+
+- Load all three products with `Product.products(for:)` and show each product's
+  `displayName` and localized `displayPrice`. Do not hard-code `$5` into the
+  button label.
+- Start `product.purchase()` only after the person deliberately taps a tip
+  button. StoreKit presents Apple's system confirmation sheet.
+- On `.success`, accept only a verified transaction, show a brief thank-you,
+  and call `finish()` on the transaction. Handle `.pending`, cancellation, and
+  errors without blocking or changing the logging experience.
+- No developer server is required for a low-stakes consumable tip. StoreKit 2
+  provides signed transactions that can be verified on the device. A server
+  would be useful for cross-platform entitlements or fraud-sensitive digital
+  goods, neither of which applies here.
+- Consumable tips are not restorable entitlements, so do not show a misleading
+  “Restore Tips” button. If a future **non-consumable** Supporter badge or theme
+  is added, that is a separate product and must have a restore path.
+- The tip screen may be unavailable offline and that is acceptable. Label a
+  load failure calmly and leave it in Settings; the diary and catalog must
+  remain fully functional. “No network required” should describe tracking, not
+  the App Store payment transaction.
+
+Test the flow first with a synced StoreKit configuration and Xcode's local
+[StoreKit test environment](https://developer.apple.com/documentation/xcode/setting-up-storekit-testing-in-xcode/),
+then in Apple's sandbox. Cover success, cancellation, pending approval, failed
+product loading, interrupted purchase, and repeat purchases of the same
+consumable.
+
+### Tip-screen copy and behavior
+
+Suggested text:
+
+> **Support Calorie Tracker**
+>
+> Calorie Tracker has no ads, account, or subscription. Every feature is free.
+> If it saves you time, you can leave an optional tip to support maintenance.
+
+Use three ordinary buttons populated from StoreKit—for example “Small Tip ·
+$5,” “Medium Tip · $10,” and “Large Tip · $25”—followed by “Tips are optional
+and do not unlock features.” Do not exchange a tip for an App Store rating,
+review, referral, or other action. Keep the screen discoverable in Settings and
+never place it between the user and food entry.
 
 ### If revenue becomes more important
 
-The next-best model is a **$4.99-$9.99 paid-up-front app** or a **single
-$9.99-$19.99 lifetime unlock after a useful free trial**. Both align price with
+The next-best model is a **$5-$10 paid-up-front app** or a **single
+$10-$20 lifetime unlock after a useful free trial**. Both align price with
 the absence of ongoing service costs. A paid-up-front app will reduce installs
 and make trial harder; a lifetime unlock adds purchase UI but improves initial
 discovery. Test those only if maintenance requires revenue beyond tips.
 
 Do not add advertisements. Do not introduce a server-dependent feature solely
-to justify a subscription. If a future feature truly creates recurring cost,
-such as optional cloud AI, price that feature separately while keeping local
-logging independent.
+to justify a subscription. On-device Apple-model input assistance, if it is
+ever useful, should remain a local entry accelerator rather than a new business
+model or marketing identity.
 
 ## 7. Validation plan before committing the positioning
 
 ### Competitive workflow benchmark
 
-Test the proposed app, MyFitnessPal, MyNetDiary, Foodnoms, FitBee, MacroFactor,
-and one offline indie against the same jobs:
+Test the proposed app, MyFitnessPal, Lifesum, Carb Manager, Cronometer,
+MyNetDiary, Foodnoms, and Calories-Tracker against the same jobs on current iOS
+builds:
 
 1. Cold launch and log a food used yesterday.
 2. Log a favorite with its previous serving.
@@ -528,20 +638,23 @@ and one offline indie against the same jobs:
 4. Scan and log a packaged food.
 5. Change the quantity of an already logged food.
 6. Save three foods as a meal and log it again.
-7. Repeat the core jobs in airplane mode.
+7. Repeat yesterday's breakfast.
+8. Repeat the core jobs in airplane mode.
 
-Record taps, elapsed time, network failures, paywall interruptions, incorrect or
-ambiguous results, and whether the keyboard is ready. Run each test several
-times after the initial setup. The market claim should use the exact workflow
-where the app wins rather than an average engineered to produce “fastest.”
+Record taps to commit, taps to return to the diary, typing, elapsed time,
+network failures, setup requirements, paid-tier restrictions, and commercial
+interruptions separately. Run each test several times after initial setup. Also
+score a representative seven-day meal routine; that is a better measure of the
+position than one best-case favorite.
 
 ### Positioning tests
 
-Show three App Store-style concepts to current trackers and recent quitters:
+Show three App Store-style executions of the same strategic position to current
+trackers and recent quitters:
 
-1. **Speed:** “Log food, not screen time.”
+1. **Concrete:** “Your usual foods. Two taps. Even offline.”
 2. **Routine:** “The calorie tracker for people who eat the same things.”
-3. **Ownership:** “Leave your old tracker, not your history.”
+3. **Relief:** “No account. No ads. No feed. Just log it.”
 
 Ask which they would download, what they believe each promise means, and what
 proof they require. Do not ask whether they “like” the ideas. Give each person a
@@ -549,13 +662,16 @@ real logging task in the prototype and observe where the promise breaks.
 
 ### Launch decision criteria
 
-The speed position is ready when:
+The routine/offline position is ready when:
 
-- Repeat logging is visibly faster than the selected competitors.
+- A visible routine item commits in two taps from the diary with its remembered
+  serving.
+- Repeat yesterday requires no more than one invocation and one confirmation.
+- A seven-day benchmark demonstrates a lower ordinary tap burden than the
+  selected competitors, even if a competitor can match one isolated flow.
 - All core flows succeed in airplane mode.
 - The catalog covers a representative set of the target users' actual foods or
   makes a custom entry fast.
-- MyFitnessPal import reliably seeds useful history.
 - No monetization or onboarding surface interrupts the core job.
 - App Store screenshots can prove the benefit without a paragraph of
   explanation.
@@ -563,15 +679,18 @@ The speed position is ready when:
 ## 8. Final recommendation
 
 Proceed with the current product direction, but sharpen the market thesis from
-**“a very fast local calorie tracker”** to **“the routine-first private calorie
-tracker.”** Speed, offline operation, no ads, and no account are the proof.
-Repeated meals and incumbent-history import are the differentiators.
+**“a very fast local calorie tracker”** to **“the offline, routine-first calorie
+tracker.”** The lead promise is usual foods in two taps; the structural
+advantage is that the same diary and catalog work without an account, ads, or a
+network round trip.
 
 The strategic discipline matters more than adding another headline feature.
-The top of the market is racing toward AI coaches, photo estimation, GLP-1
-programs, meal plans, content, and communities. This app should become the
-opposite: a trustworthy instrument that opens, records, and gets out of the
-way.
+The top of the market is racing toward AI coaches, photo estimation, weight
+programs, specialized diets, content, and communities. This app should become
+the opposite: a quiet instrument for calories and basic macros that predicts
+the routine locally, records it with almost no interaction, and gets out of the
+way. Optional tips at $5, $10, and $25 are the monetization model most aligned
+with that promise.
 
 ## Source notes
 
@@ -582,6 +701,9 @@ the tables and competitor sections. Additional primary sources:
 - [Apple iTunes Search API documentation](https://developer.apple.com/library/archive/documentation/AudioVideo/Conceptual/iTuneSearchAPI/Searching.html)
 - [Apple App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/)
 - [Apple In-App Purchase types](https://developer.apple.com/help/app-store-connect/reference/in-app-purchases-and-subscriptions/in-app-purchase-types)
+- [Apple In-App Purchase pricing](https://developer.apple.com/help/app-store-connect/manage-in-app-purchases/set-a-price-for-an-in-app-purchase/)
+- [Apple StoreKit 2](https://developer.apple.com/storekit/)
+- [Apple StoreKit testing in Xcode](https://developer.apple.com/documentation/xcode/setting-up-storekit-testing-in-xcode/)
 - [Apple's 2026 announcement of Siri camera nutrition insights](https://www.apple.com/newsroom/2026/06/apple-introduces-siri-ai-a-profoundly-more-capable-and-personal-assistant/)
 
 App descriptions and privacy labels are developer-supplied and are not
