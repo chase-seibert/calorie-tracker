@@ -193,6 +193,7 @@ struct DiaryView: View {
                 Text("This cannot be undone.")
             }
             .onChange(of: dayOffset) { _, _ in
+                diaryEntriesHeight = CGFloat(diary.entries(on: date).count) * 78
                 cancelMealSelection()
             }
         }
@@ -322,11 +323,12 @@ private struct DateStrip: View {
         }
         .padding(5)
         .background(AppTheme.controlFill, in: Capsule())
+        .animation(.snappy, value: dayOffset)
     }
 
     private func dayButton(offset: Int, title: String) -> some View {
         Button {
-            withAnimation(.snappy) { dayOffset = offset }
+            dayOffset = offset
         } label: {
             VStack(spacing: 2) {
                 Text(title)
