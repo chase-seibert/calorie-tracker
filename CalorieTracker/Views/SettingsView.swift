@@ -9,7 +9,6 @@ struct SettingsView: View {
     @State private var importing = false
     @State private var importMessage: String?
     @State private var importError: String?
-    @State private var confirmingClear = false
     @State private var syncingNutrition = false
     @AppStorage("defaultWeightUnit") private var defaultWeightUnit = LogUnit.ounces.rawValue
 
@@ -145,13 +144,6 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
             }
 
-            Section {
-                Button("Clear diary and personal data", systemImage: "trash", role: .destructive) {
-                    confirmingClear = true
-                }
-            } footer: {
-                Text("Removes entries, favorites, saved meals, custom foods, remembered quantities, the daily goal, and imported history. Bundled catalogs are unchanged.")
-            }
         }
         .scrollContentBackground(.hidden)
         .background(AppTheme.background)
@@ -169,14 +161,6 @@ struct SettingsView: View {
             Button("OK") { importError = nil }
         } message: {
             Text(importError ?? "Unknown error")
-        }
-        .confirmationDialog(
-            "Clear all personal data?",
-            isPresented: $confirmingClear,
-            titleVisibility: .visible
-        ) {
-            Button("Clear personal data", role: .destructive) { diary.clearPersonalData() }
-            Button("Cancel", role: .cancel) {}
         }
     }
 
