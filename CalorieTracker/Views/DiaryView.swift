@@ -182,7 +182,7 @@ struct DiaryView: View {
                     .padding(.horizontal, 16)
                     .padding(.top, 12)
                     .padding(.bottom, 0)
-                    .background(.ultraThinMaterial.opacity(0.58))
+                    .background(.ultraThinMaterial.opacity(0.78))
                 }
             }
             .sheet(isPresented: $showingFoodPicker) {
