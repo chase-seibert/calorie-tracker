@@ -19,6 +19,7 @@ struct DiaryView: View {
     @State private var isMacroSummaryVisible = true
     @State private var showingTrends = false
     @State private var diaryEntriesHeight: CGFloat = 0
+    @State private var foodPickerMode: FoodPickerView.Mode?
 
     private var date: Date {
         Calendar.current.date(byAdding: .day, value: dayOffset, to: Calendar.current.startOfDay(for: Date())) ?? Date()
@@ -160,23 +161,32 @@ struct DiaryView: View {
                     .padding(.vertical, 8)
                     .background(.ultraThinMaterial)
                 } else {
-                    Button {
-                        showingFoodPicker = true
-                    } label: {
-                        Label("Log food", systemImage: "plus")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
+                    VStack(spacing: 0) {
+                        Button {
+                            foodPickerMode = nil
+                            showingFoodPicker = true
+                        } label: {
+                            Label("Log food", systemImage: "magnifyingglass")
+                                .font(.headline)
+                                .padding(.horizontal, 8)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .clipShape(Capsule())
+
+                        FoodPickerModeStrip(selection: $foodPickerMode) { _ in
+                            showingFoodPicker = true
+                        }
                     }
-                    .buttonStyle(.borderedProminent)
-                    .clipShape(Capsule())
-                    .padding(.horizontal, 40)
-                    .padding(.vertical, 10)
-                    .background(.ultraThinMaterial)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+                    .padding(.bottom, 0)
+                    .background(.ultraThinMaterial.opacity(0.58))
                 }
             }
             .sheet(isPresented: $showingFoodPicker) {
-                FoodPickerView(date: date, catalog: catalog)
+                FoodPickerView(date: date, catalog: catalog, initialMode: foodPickerMode)
                     .environmentObject(diary)
             }
             .sheet(item: $editingEntry) { entry in

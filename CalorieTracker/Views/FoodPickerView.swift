@@ -25,12 +25,20 @@ struct FoodPickerView: View {
     @State private var isSearching = false
     @FocusState private var searchIsFocused: Bool
 
+    init(date: Date, catalog: CatalogStore, initialMode: Mode? = nil) {
+        self.date = date
+        self.catalog = catalog
+        _mode = State(initialValue: initialMode)
+    }
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
                 searchControls
                 if query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    modeStrip
+                    FoodPickerModeStrip(selection: $mode) { _ in
+                        searchIsFocused = false
+                    }
                 }
                 Divider()
                 Group {
@@ -120,6 +128,7 @@ struct FoodPickerView: View {
                     .presentationDetents([.medium, .large])
             }
             .task {
+                guard mode == nil else { return }
                 try? await Task.sleep(for: .milliseconds(180))
                 searchIsFocused = true
             }
@@ -166,30 +175,6 @@ struct FoodPickerView: View {
         .padding(.top, 10)
     }
 
-    private var modeStrip: some View {
-        FlowLayout(spacing: 6) {
-            ForEach(Mode.allCases) { item in
-                Button {
-                    withAnimation(.snappy) {
-                        mode = item
-                        searchIsFocused = false
-                    }
-                } label: {
-                    Text(item.rawValue)
-                        .font(.caption.weight(.semibold))
-                        .fixedSize()
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 8)
-                        .foregroundStyle(mode == item ? AppTheme.selectedText : AppTheme.ink)
-                        .background(mode == item ? AppTheme.ink : AppTheme.controlFill, in: Capsule())
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-    }
-
     private func quickLog(_ food: Food) {
         diary.quickLog(food, on: date)
         dismiss()
@@ -198,6 +183,43 @@ struct FoodPickerView: View {
     private func logMeal(_ meal: SavedMeal) {
         diary.logMeal(meal, on: date)
         dismiss()
+    }
+}
+
+struct FoodPickerModeStrip: View {
+    @Binding var selection: FoodPickerView.Mode?
+    let onSelect: (FoodPickerView.Mode) -> Void
+
+    var body: some View {
+        FlowLayout(spacing: 6) {
+            ForEach(FoodPickerView.Mode.allCases) { item in
+                Button {
+                    withAnimation(.snappy) {
+                        selection = item
+                        onSelect(item)
+                    }
+                } label: {
+                    Group {
+                        if item == .scan {
+                            Image(systemName: "barcode.viewfinder")
+                        } else {
+                            Text(item.rawValue)
+                        }
+                    }
+                    .font(.caption.weight(.semibold))
+                    .frame(height: 16)
+                    .fixedSize()
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 8)
+                    .foregroundStyle(selection == item ? AppTheme.selectedText : AppTheme.ink)
+                    .background(selection == item ? AppTheme.ink : AppTheme.controlFill, in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(item.rawValue)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
     }
 }
 
