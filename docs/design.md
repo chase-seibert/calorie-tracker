@@ -34,10 +34,10 @@ The Custom source row in Settings shows separate food and meal counts and opens
 a personal catalog with Custom Foods and Saved Meals sections.
 
 The add-food sheet opens with an already-focused search field and keyboard.
-Before typing, it shows combined For You suggestions plus wrapped filters for
-Recent, Frequent, Favorites, Meals, and Scan without a redundant section title.
-Typing immediately replaces the suggestions with combined MyFitnessPal, USDA,
-and Open Food Facts results; Search is not a separate mode or source picker.
+Before typing, it shows Recent by default plus filters for Frequent, Favorites,
+Meals, and Scan on one line in portrait mode. Typing immediately replaces the
+recent foods with combined MyFitnessPal, USDA, and Open Food Facts results;
+Search is not a separate mode or source picker.
 
 Every food row displays the quantity and calories that will be logged. Its
 trailing + button logs that displayed remembered or default quantity and closes

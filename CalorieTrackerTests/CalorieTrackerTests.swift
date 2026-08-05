@@ -504,7 +504,7 @@ final class CalorieTrackerTests: XCTestCase {
     }
 
     @MainActor
-    func testQuickLogUsesDisplayedPreferenceAndSuggestionsAreUnique() throws {
+    func testQuickLogUsesDisplayedPreferenceAndFavoritesRemainAvailable() throws {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let store = DiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
         let peanutButter = Food(
@@ -539,8 +539,8 @@ final class CalorieTrackerTests: XCTestCase {
         let entry = try XCTUnwrap(store.entries(on: Date()).first)
         XCTAssertEqual(entry.amount, preference.amount)
         XCTAssertEqual(entry.unit, preference.unit)
-        XCTAssertEqual(store.suggestedFoods.filter { $0.id == peanutButter.id }.count, 1)
-        XCTAssertTrue(store.suggestedFoods.contains { $0.id == banana.id })
+        XCTAssertTrue(store.recentFoods.contains { $0.id == peanutButter.id })
+        XCTAssertTrue(store.document.favorites.contains { $0.id == banana.id })
     }
 
     @MainActor

@@ -201,14 +201,6 @@ final class DiaryStore: ObservableObject {
         )
     }
 
-    var suggestedFoods: [Food] {
-        let candidates = Array(recentFoods.prefix(12)) +
-            Array(frequentFoods.prefix(12)) +
-            document.favorites
-        var seen = Set<String>()
-        return candidates.filter { seen.insert($0.id).inserted }.prefix(30).map { $0 }
-    }
-
     var frequentFoods: [Food] {
         let cutoff = calendar.date(byAdding: .day, value: -90, to: Date()) ?? .distantPast
         let recentEntries = document.entries.filter { $0.date >= cutoff && !$0.isMeal }

@@ -3,7 +3,6 @@ import UIKit
 
 struct FoodPickerView: View {
     enum Mode: String, CaseIterable, Identifiable {
-        case suggested = "For You"
         case recent = "Recent"
         case frequent = "Frequent"
         case favorites = "Favorites"
@@ -18,7 +17,7 @@ struct FoodPickerView: View {
     let date: Date
     let catalog: CatalogStore
 
-    @State private var mode: Mode = .suggested
+    @State private var mode: Mode = .recent
     @State private var selectedFood: Food?
     @State private var selectedMeal: SavedMeal?
     @State private var query = ProcessInfo.processInfo.arguments.contains("--show-food-search") ? "banana" : ""
@@ -45,14 +44,6 @@ struct FoodPickerView: View {
                         )
                     } else {
                         switch mode {
-                        case .suggested:
-                            QuickFoodList(
-                                title: nil,
-                                emptyMessage: "Your recent, frequent, and favorite foods will appear here.",
-                                foods: diary.suggestedFoods,
-                                onQuickLog: quickLog,
-                                onEdit: { selectedFood = $0 }
-                            )
                         case .recent:
                             QuickFoodList(
                                 title: "Logged recently",
