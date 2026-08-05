@@ -228,6 +228,39 @@ final class CalorieTrackerTests: XCTestCase {
     }
 
     @MainActor
+    func testFavoriteMealPersistsAndIsRemovedWhenMealIsDeleted() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let fileURL = folder.appendingPathComponent("diary.json")
+        let food = Food(
+            sourceID: "favorite-meal-food",
+            source: .custom,
+            name: "Toast",
+            brand: nil,
+            barcode: nil,
+            nutrients: MacroNutrients(calories: 100, carbs: 20, fat: 1, protein: 3),
+            baseAmountGrams: 100,
+            servingGrams: nil,
+            servingDescription: nil
+        )
+        let store = DiaryStore(fileURL: fileURL)
+
+        store.saveMeal(
+            name: "Breakfast",
+            items: [MealItem(id: UUID(), food: food, amount: 100, unit: .grams)]
+        )
+        let meal = try XCTUnwrap(store.document.meals.first)
+        store.toggleFavorite(meal)
+
+        let reloaded = DiaryStore(fileURL: fileURL)
+        XCTAssertTrue(reloaded.isFavorite(meal))
+        XCTAssertEqual(reloaded.favoriteMeals.map(\.id), [meal.id])
+
+        reloaded.deleteMeal(meal)
+        XCTAssertTrue(reloaded.favoriteMeals.isEmpty)
+        XCTAssertFalse(reloaded.document.favoriteMealIDs.contains(meal.id))
+    }
+
+    @MainActor
     func testCustomFoodsAndMealsRemainSeparatePersonalCatalogItems() {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let store = DiaryStore(fileURL: folder.appendingPathComponent("diary.json"))

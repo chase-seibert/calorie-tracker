@@ -129,6 +129,18 @@ struct DiaryView: View {
                         .buttonStyle(.bordered)
                         .tint(.red)
                         .disabled(selectedEntryIDs.isEmpty)
+                        .confirmationDialog(
+                            "Delete \(selectedEntryIDs.count) selected item\(selectedEntryIDs.count == 1 ? "" : "s")?",
+                            isPresented: $showingDeleteConfirmation,
+                            titleVisibility: .visible
+                        ) {
+                            Button("Delete", role: .destructive) {
+                                deleteSelectedEntries()
+                            }
+                            Button("Cancel", role: .cancel) {}
+                        } message: {
+                            Text("This cannot be undone.")
+                        }
 
                         Button {
                             mealName = ""
@@ -179,18 +191,6 @@ struct DiaryView: View {
                     .disabled(mealName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             } message: {
                 Text("The \(selectedEntryIDs.count) selected item\(selectedEntryIDs.count == 1 ? "" : "s") will be replaced by one meal entry.")
-            }
-            .confirmationDialog(
-                "Delete \(selectedEntryIDs.count) selected item\(selectedEntryIDs.count == 1 ? "" : "s")?",
-                isPresented: $showingDeleteConfirmation,
-                titleVisibility: .visible
-            ) {
-                Button("Delete", role: .destructive) {
-                    deleteSelectedEntries()
-                }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("This cannot be undone.")
             }
             .onChange(of: dayOffset) { _, _ in
                 diaryEntriesHeight = CGFloat(diary.entries(on: date).count) * 78

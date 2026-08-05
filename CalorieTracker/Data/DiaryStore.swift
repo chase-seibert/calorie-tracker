@@ -194,6 +194,26 @@ final class DiaryStore: ObservableObject {
         persist()
     }
 
+    var favoriteMeals: [SavedMeal] {
+        document.favoriteMealIDs.compactMap { mealID in
+            document.meals.first { $0.id == mealID }
+        }
+    }
+
+    func isFavorite(_ meal: SavedMeal) -> Bool {
+        document.favoriteMealIDs.contains(meal.id)
+    }
+
+    func toggleFavorite(_ meal: SavedMeal) {
+        guard document.meals.contains(where: { $0.id == meal.id }) else { return }
+        if let index = document.favoriteMealIDs.firstIndex(of: meal.id) {
+            document.favoriteMealIDs.remove(at: index)
+        } else {
+            document.favoriteMealIDs.insert(meal.id, at: 0)
+        }
+        persist()
+    }
+
     var recentFoods: [Food] {
         uniqueFoods(
             from: document.entries.filter { !$0.isMeal }.sorted { $0.loggedAt > $1.loggedAt },
@@ -338,6 +358,7 @@ final class DiaryStore: ObservableObject {
 
     func deleteMeal(_ meal: SavedMeal) {
         document.meals.removeAll { $0.id == meal.id }
+        document.favoriteMealIDs.removeAll { $0 == meal.id }
         persist()
     }
 

@@ -216,6 +216,7 @@ struct DiaryDocument: Codable, Sendable {
     var dailyCalorieGoal: Int? = nil
     var entries: [DiaryEntry] = []
     var favorites: [Food] = []
+    var favoriteMealIDs: [UUID] = []
     var meals: [SavedMeal] = []
     var rememberedQuantities: [String: QuantityPreference] = [:]
     var customFoods: [Food] = []
@@ -229,6 +230,7 @@ struct DiaryDocument: Codable, Sendable {
         case dailyCalorieGoal
         case entries
         case favorites
+        case favoriteMealIDs
         case meals
         case rememberedQuantities
         case customFoods
@@ -242,6 +244,7 @@ struct DiaryDocument: Codable, Sendable {
         dailyCalorieGoal = try container.decodeIfPresent(Int.self, forKey: .dailyCalorieGoal)
         entries = try container.decodeIfPresent([DiaryEntry].self, forKey: .entries) ?? []
         favorites = try container.decodeIfPresent([Food].self, forKey: .favorites) ?? []
+        favoriteMealIDs = try container.decodeIfPresent([UUID].self, forKey: .favoriteMealIDs) ?? []
         meals = try container.decodeIfPresent([SavedMeal].self, forKey: .meals) ?? []
         rememberedQuantities = try container.decodeIfPresent(
             [String: QuantityPreference].self,

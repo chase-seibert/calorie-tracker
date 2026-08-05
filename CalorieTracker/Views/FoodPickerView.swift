@@ -61,12 +61,16 @@ struct FoodPickerView: View {
                                 onEdit: { selectedFood = $0 }
                             )
                         case .favorites:
-                            QuickFoodList(
-                                title: "Favorites",
-                                emptyMessage: "Star any food to keep it here.",
+                            FavoritesList(
                                 foods: diary.document.favorites,
-                                onQuickLog: quickLog,
-                                onEdit: { selectedFood = $0 }
+                                meals: diary.favoriteMeals,
+                                onQuickLogFood: quickLog,
+                                onEditFood: { selectedFood = $0 },
+                                onQuickLogMeal: { meal in
+                                    diary.logMeal(meal, on: date)
+                                    dismiss()
+                                },
+                                onEditMeal: { selectedMeal = $0 }
                             )
                         case .meals:
                             MealsList(
@@ -500,7 +504,19 @@ struct QuantityEditor: View {
             .navigationTitle(navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                if !isMealEditor {
+                if isMealEditor,
+                   let mealID,
+                   let meal = diary.document.meals.first(where: { $0.id == mealID }) {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(
+                            diary.isFavorite(meal) ? "Unfavorite" : "Favorite",
+                            systemImage: diary.isFavorite(meal) ? "star.fill" : "star"
+                        ) {
+                            diary.toggleFavorite(meal)
+                        }
+                        .labelStyle(.iconOnly)
+                    }
+                } else if !isMealEditor {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button(diary.isFavorite(food) ? "Unfavorite" : "Favorite", systemImage: diary.isFavorite(food) ? "star.fill" : "star") {
                             diary.toggleFavorite(food, preference: currentPreference)
@@ -792,6 +808,79 @@ private struct NameEditor: View {
     }
 }
 
+private struct FavoritesList: View {
+    @EnvironmentObject private var diary: DiaryStore
+    let foods: [Food]
+    let meals: [SavedMeal]
+    let onQuickLogFood: (Food) -> Void
+    let onEditFood: (Food) -> Void
+    let onQuickLogMeal: (SavedMeal) -> Void
+    let onEditMeal: (SavedMeal) -> Void
+
+    var body: some View {
+        if foods.isEmpty, meals.isEmpty {
+            ContentUnavailableView(
+                "No favorites",
+                systemImage: "star",
+                description: Text("Star any food or meal to keep it here.")
+            )
+        } else {
+            List {
+                if !foods.isEmpty {
+                    Section("Foods") {
+                        ForEach(foods) { food in
+                            FoodResultRow(
+                                food: food,
+                                preference: diary.preference(for: food),
+                                actionTitle: "Add",
+                                action: { onQuickLogFood(food) }
+                            )
+                            .contentShape(Rectangle())
+                            .onTapGesture { onEditFood(food) }
+                        }
+                    }
+                }
+                if !meals.isEmpty {
+                    Section("Meals") {
+                        ForEach(meals) { meal in
+                            MealListActionRow(
+                                meal: meal,
+                                onQuickLog: { onQuickLogMeal(meal) },
+                                onEdit: { onEditMeal(meal) }
+                            )
+                            .swipeActions {
+                                Button("Delete", role: .destructive) { diary.deleteMeal(meal) }
+                            }
+                        }
+                    }
+                }
+            }
+            .scrollContentBackground(.hidden)
+        }
+    }
+}
+
+private struct MealListActionRow: View {
+    let meal: SavedMeal
+    let onQuickLog: () -> Void
+    let onEdit: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            MealListRow(meal: meal)
+                .contentShape(Rectangle())
+                .onTapGesture(perform: onEdit)
+            Button("Add", systemImage: "plus", action: onQuickLog)
+                .labelStyle(.iconOnly)
+                .font(.headline.weight(.bold))
+                .buttonStyle(.borderedProminent)
+                .buttonBorderShape(.circle)
+                .frame(width: 44, height: 44)
+                .accessibilityLabel("Add \(meal.name)")
+        }
+    }
+}
+
 private struct MealsList: View {
     @EnvironmentObject private var diary: DiaryStore
     let onQuickLog: (SavedMeal) -> Void
@@ -807,20 +896,11 @@ private struct MealsList: View {
         } else {
             List {
                 ForEach(diary.document.meals) { meal in
-                    HStack(spacing: 12) {
-                        MealListRow(meal: meal)
-                            .contentShape(Rectangle())
-                            .onTapGesture { onEdit(meal) }
-                        Button("Add", systemImage: "plus.circle.fill") {
-                            onQuickLog(meal)
-                        }
-                        .labelStyle(.iconOnly)
-                        .font(.headline.weight(.bold))
-                        .buttonStyle(.borderedProminent)
-                        .buttonBorderShape(.circle)
-                        .frame(width: 44, height: 44)
-                        .accessibilityLabel("Add \(meal.name)")
-                    }
+                    MealListActionRow(
+                        meal: meal,
+                        onQuickLog: { onQuickLog(meal) },
+                        onEdit: { onEdit(meal) }
+                    )
                     .swipeActions {
                         Button("Delete", role: .destructive) { diary.deleteMeal(meal) }
                     }
