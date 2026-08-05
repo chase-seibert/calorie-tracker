@@ -18,6 +18,9 @@ struct FoodPickerView: View {
     let catalog: CatalogStore
 
     @State private var mode: Mode?
+    @State private var recentItemsSnapshot: [FoodPickerItem] = []
+    @State private var frequentItemsSnapshot: [FoodPickerItem] = []
+    @State private var didLoadInitialSnapshot = false
     @State private var selectedFood: Food?
     @State private var selectedMeal: SavedMeal?
     @State private var query = ProcessInfo.processInfo.arguments.contains("--show-food-search") ? "banana" : ""
@@ -36,8 +39,9 @@ struct FoodPickerView: View {
             VStack(spacing: 0) {
                 searchControls
                 if query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    FoodPickerModeStrip(selection: $mode) { _ in
+                    FoodPickerModeStrip(selection: $mode) { selectedMode in
                         searchIsFocused = false
+                        refreshItems(for: selectedMode)
                     }
                 }
                 Divider()
@@ -58,7 +62,7 @@ struct FoodPickerView: View {
                                     title: "Logged recently",
                                     emptyTitle: "No suggestions yet",
                                     emptyMessage: "Foods or meals you log will appear here.",
-                                    items: diary.recentItems,
+                                    items: recentItemsSnapshot,
                                     onQuickLogFood: quickLog,
                                     onEditFood: { selectedFood = $0 },
                                     onQuickLogMeal: logMeal,
@@ -70,7 +74,7 @@ struct FoodPickerView: View {
                                     title: "Most used · 90 days",
                                     emptyTitle: "No suggestions yet",
                                     emptyMessage: "Your most-used foods and meals will appear here.",
-                                    items: diary.frequentItems,
+                                    items: frequentItemsSnapshot,
                                     onQuickLogFood: quickLog,
                                     onEditFood: { selectedFood = $0 },
                                     onQuickLogMeal: logMeal,
@@ -93,7 +97,6 @@ struct FoodPickerView: View {
                                 MealsList(
                                     onQuickLog: { meal in
                                         diary.logMeal(meal, on: date)
-                                        dismiss()
                                     },
                                     onEdit: { selectedMeal = $0 }
                                 )
@@ -115,6 +118,9 @@ struct FoodPickerView: View {
             .navigationTitle("Log food")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    FoodPickerCalorieSummary(date: date)
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
                 }
@@ -131,6 +137,11 @@ struct FoodPickerView: View {
                 guard mode == nil else { return }
                 try? await Task.sleep(for: .milliseconds(180))
                 searchIsFocused = true
+            }
+            .onAppear {
+                guard !didLoadInitialSnapshot, let mode else { return }
+                didLoadInitialSnapshot = true
+                refreshItems(for: mode)
             }
             .task(id: query) {
                 let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -177,12 +188,50 @@ struct FoodPickerView: View {
 
     private func quickLog(_ food: Food) {
         diary.quickLog(food, on: date)
-        dismiss()
     }
 
     private func logMeal(_ meal: SavedMeal) {
         diary.logMeal(meal, on: date)
-        dismiss()
+    }
+
+    private func refreshItems(for mode: Mode) {
+        switch mode {
+        case .recent:
+            recentItemsSnapshot = diary.recentItems
+        case .frequent:
+            frequentItemsSnapshot = diary.frequentItems
+        default:
+            break
+        }
+    }
+}
+
+private struct FoodPickerCalorieSummary: View {
+    @EnvironmentObject private var diary: DiaryStore
+    let date: Date
+
+    var body: some View {
+        let calorieProgress = DailyCalorieProgress(
+            calories: diary.totals(on: date).calories,
+            goal: diary.dailyCalorieGoal
+        )
+
+        HStack(spacing: 5) {
+            Image(systemName: "flame.fill")
+                .foregroundStyle(AppTheme.coral)
+            Text(calorieProgress.consumed.formatted())
+                .font(.headline.monospacedDigit())
+            if let goal = calorieProgress.goal {
+                Text("/ \(goal.formatted())")
+                    .font(.caption.weight(.semibold).monospacedDigit())
+                    .foregroundStyle(AppTheme.muted)
+            }
+            Text("cal")
+                .font(.subheadline)
+                .foregroundStyle(AppTheme.muted)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(calorieProgress.accessibilityLabel)
     }
 }
 
@@ -297,13 +346,12 @@ struct FoodResultRow: View {
             }
             Spacer()
             if let actionTitle, let action {
-                Button(actionTitle, systemImage: "plus", action: action)
-                    .labelStyle(.iconOnly)
-                    .font(.headline.weight(.bold))
-                    .buttonStyle(.borderedProminent)
-                    .buttonBorderShape(.circle)
+                AddConfirmationButton(
+                    actionTitle: actionTitle,
+                    itemName: food.name,
+                    action: action
+                )
                     .frame(minWidth: 44, minHeight: 44)
-                    .accessibilityLabel("\(actionTitle) \(food.name)")
             } else {
                 Image(systemName: "chevron.right")
                     .font(.caption.weight(.bold))
@@ -332,6 +380,42 @@ struct FoodResultRow: View {
         case .serving:
             "\(preference.amount.cleanAmount) \(food.portion(id: preference.portionID)?.label ?? "serving")"
         }
+    }
+}
+
+private struct AddConfirmationButton: View {
+    let actionTitle: String
+    let itemName: String
+    let action: () -> Void
+
+    @State private var isAdded = false
+    @State private var feedbackID = UUID()
+
+    var body: some View {
+        Button {
+            action()
+            let currentFeedbackID = UUID()
+            withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) {
+                feedbackID = currentFeedbackID
+                isAdded = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                guard feedbackID == currentFeedbackID else { return }
+                withAnimation(.easeOut(duration: 0.2)) {
+                    isAdded = false
+                }
+            }
+        } label: {
+            Image(systemName: isAdded ? "checkmark" : "plus")
+                .font(.headline.weight(.bold))
+                .contentTransition(.symbolEffect(.replace))
+                .symbolEffect(.bounce, value: feedbackID)
+        }
+        .buttonStyle(.borderedProminent)
+        .buttonBorderShape(.circle)
+        .tint(isAdded ? AppTheme.protein : AppTheme.coral)
+        .accessibilityLabel(isAdded ? "Added \(itemName)" : "\(actionTitle) \(itemName)")
+        .accessibilityHint(isAdded ? "Ready to add again" : "Adds the displayed quantity")
     }
 }
 
@@ -877,13 +961,12 @@ private struct MealListActionRow: View {
             MealListRow(meal: meal)
                 .contentShape(Rectangle())
                 .onTapGesture(perform: onEdit)
-            Button("Add", systemImage: "plus", action: onQuickLog)
-                .labelStyle(.iconOnly)
-                .font(.headline.weight(.bold))
-                .buttonStyle(.borderedProminent)
-                .buttonBorderShape(.circle)
+            AddConfirmationButton(
+                actionTitle: "Add",
+                itemName: meal.name,
+                action: onQuickLog
+            )
                 .frame(width: 44, height: 44)
-                .accessibilityLabel("Add \(meal.name)")
         }
     }
 }

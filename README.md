@@ -29,3 +29,6 @@ provenance and refresh instructions.
 
 Catalog filtering and larger offline-size options are documented in
 `docs/catalog-sizing.md`.
+
+The iOS competitive landscape, positioning options, and monetization analysis
+are documented in `docs/ios-calorie-tracker-market-research.md`.
