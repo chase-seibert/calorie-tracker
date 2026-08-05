@@ -269,11 +269,6 @@ struct DiaryView: View {
                     onEdit: { entry in
                         editingEntry = entry
                     },
-                    onBreakApartMeal: { entryID in
-                        withAnimation(.snappy) {
-                            diary.breakApartMeal(entryID: entryID)
-                        }
-                    },
                     onDelete: { entryID in
                         withAnimation(.snappy) {
                             diary.delete(entryID: entryID)
@@ -506,7 +501,6 @@ private struct MacroSummary: View {
 
 private struct DiaryEntryRow: View {
     let entry: DiaryEntry
-    var onBreakApartMeal: (() -> Void)? = nil
 
     var body: some View {
         HStack(spacing: 12) {
@@ -538,18 +532,6 @@ private struct DiaryEntryRow: View {
             Text("cal")
                 .font(.caption2)
                 .foregroundStyle(AppTheme.muted)
-            if let onBreakApartMeal {
-                Menu {
-                    Button("Break apart meal", systemImage: "rectangle.split.3x1", action: onBreakApartMeal)
-                } label: {
-                    Image(systemName: "ellipsis.circle")
-                        .font(.title3)
-                        .foregroundStyle(AppTheme.muted)
-                        .frame(width: 32, height: 44)
-                        .contentShape(Rectangle())
-                }
-                .accessibilityLabel("Meal actions")
-            }
         }
         .padding(14)
         .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 18))
@@ -570,7 +552,6 @@ private struct ReorderableDiaryEntries: UIViewRepresentable {
     @Binding var contentHeight: CGFloat
     let onMove: (UUID, Int) -> Void
     let onEdit: (DiaryEntry) -> Void
-    let onBreakApartMeal: (UUID) -> Void
     let onDelete: (UUID) -> Void
 
     func makeCoordinator() -> Coordinator {
@@ -662,12 +643,7 @@ private struct ReorderableDiaryEntries: UIViewRepresentable {
             cell.accessibilityIdentifier = "diary-entry-\(entry.food.sourceID)"
             cell.backgroundConfiguration = UIBackgroundConfiguration.clear()
             cell.contentConfiguration = UIHostingConfiguration { [weak self] in
-                DiaryEntryRow(
-                    entry: entry,
-                    onBreakApartMeal: entry.isMeal ? {
-                        self?.parent.onBreakApartMeal(entry.id)
-                    } : nil
-                )
+                DiaryEntryRow(entry: entry)
                 .contentShape(Rectangle())
                 .onTapGesture {
                     self?.parent.onEdit(entry)

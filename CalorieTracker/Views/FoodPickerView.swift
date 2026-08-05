@@ -465,6 +465,15 @@ struct QuantityEditor: View {
                         nutrient("Protein", preview.protein, suffix: "g")
                     }
 
+                    Button(action: save) {
+                        Text(saveTitle)
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(amount <= 0)
+
                     if isMealEditor, !mealItems.isEmpty {
                         VStack(alignment: .leading, spacing: 10) {
                             Text("Contains")
@@ -477,14 +486,13 @@ struct QuantityEditor: View {
                         .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 16))
                     }
 
-                    Button(action: save) {
-                        Text(saveTitle)
+                    if isMealEditor, entryID != nil {
+                        Button("Break apart meal", systemImage: "rectangle.split.3x1", action: breakApartMeal)
                             .font(.headline)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
+                            .buttonStyle(.bordered)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(amount <= 0)
                 }
                 .padding(18)
             }
@@ -617,6 +625,12 @@ struct QuantityEditor: View {
                 on: date
             )
         }
+        dismiss()
+    }
+
+    private func breakApartMeal() {
+        guard let entryID else { return }
+        diary.breakApartMeal(entryID: entryID)
         dismiss()
     }
 

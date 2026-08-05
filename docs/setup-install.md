@@ -5,7 +5,11 @@
 Run `make sim-launch`. The target builds with signing disabled, boots the default
 iPhone 17 Pro simulator, installs the app, and launches it.
 
-Run `make test` for unit tests and `make lint` for Xcode static analysis. Run
+Run `make test` for unit tests and `make lint` for Xcode static analysis. `make
+test` requires CoreSimulator and the configured simulator to be available; it
+now reports that prerequisite immediately instead of waiting for Xcode's
+destination discovery. When CoreSimulator is unavailable, use `make
+sim-compile` for a simulator-independent source compile check. Run
 `make ui-test-reorder` for the focused simulator test that performs an actual
 long-press row drag and verifies the new order survives an app relaunch.
 The UI-test target is isolated in its own shared Xcode scheme, so normal builds
