@@ -9,6 +9,8 @@ SIM_DEVICE_NAME ?= iPhone 17 Pro
 SIM_DESTINATION ?= platform=iOS Simulator,name=$(SIM_DEVICE_NAME)
 GENERIC_SIM_DESTINATION := generic/platform=iOS Simulator
 SIMULATOR_DESTINATION_TIMEOUT ?= 15
+SIMULATOR_FIXTURE ?= device
+SIMULATOR_FIXTURE_RESET ?= 1
 
 DEVICE_ID ?= 00008150-000E41422E40401C
 DEVELOPMENT_TEAM ?= 96NAC4VTEN
@@ -18,7 +20,7 @@ OFF_PAGES ?= 10
 DEBUG_CATALOG_DIR := data/work/catalogs
 DEBUG_REPORT_DIR := data/work/catalog-reports
 
-.PHONY: setup format lint simulator-ready test ui-test-reorder build clean catalog catalog-refresh catalog-debug-off-search-10000 catalog-debug-gap catalog-debug-report catalog-debug sim-compile sim-build sim-launch phone-build phone-install phone-launch phone-deploy phone-wifi-check phone-wifi-deploy
+.PHONY: setup format lint simulator-ready test ui-test-reorder ui-test-fixture build clean catalog catalog-refresh catalog-debug-off-search-10000 catalog-debug-gap catalog-debug-report catalog-debug sim-compile sim-build sim-launch phone-build phone-install phone-launch phone-deploy phone-wifi-check phone-wifi-deploy
 
 setup: catalog
 
@@ -46,6 +48,9 @@ test: simulator-ready
 
 ui-test-reorder: simulator-ready
 	xcodebuild -project $(PROJECT) -scheme CalorieTrackerUITests -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -destination-timeout $(SIMULATOR_DESTINATION_TIMEOUT) -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -only-testing:CalorieTrackerUITests/DiaryReorderingUITests/testLongPressDragReordersVisuallyAndPersists test
+
+ui-test-fixture: simulator-ready
+	xcodebuild -project $(PROJECT) -scheme CalorieTrackerUITests -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -destination-timeout $(SIMULATOR_DESTINATION_TIMEOUT) -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testDeviceFixtureShowsRelativeDays test
 
 build: sim-build
 
@@ -96,6 +101,14 @@ sim-launch: sim-build
 	xcrun simctl boot "$$UDID" >/dev/null 2>&1 || true; \
 	xcrun simctl bootstatus "$$UDID" -b; \
 	open -a Simulator --args -CurrentDeviceUDID "$$UDID"; \
+	if [ "$(SIMULATOR_FIXTURE)" = "device" ]; then \
+		xcrun simctl spawn "$$UDID" launchctl setenv CALORIE_TRACKER_FIXTURE device; \
+		xcrun simctl spawn "$$UDID" launchctl setenv CALORIE_TRACKER_DISABLE_SIMULATOR_FIXTURE 0; \
+	else \
+		xcrun simctl spawn "$$UDID" launchctl setenv CALORIE_TRACKER_FIXTURE none; \
+		xcrun simctl spawn "$$UDID" launchctl setenv CALORIE_TRACKER_DISABLE_SIMULATOR_FIXTURE 1; \
+	fi; \
+	xcrun simctl spawn "$$UDID" launchctl setenv CALORIE_TRACKER_FIXTURE_RESET "$(SIMULATOR_FIXTURE_RESET)"; \
 	xcrun simctl install "$$UDID" "$(DERIVED_DATA)/Build/Products/Debug-iphonesimulator/$(APP_NAME).app"; \
 	xcrun simctl launch "$$UDID" $(BUNDLE_ID)
 

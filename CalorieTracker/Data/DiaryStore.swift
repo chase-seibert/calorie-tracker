@@ -9,16 +9,33 @@ final class DiaryStore: ObservableObject {
     private let fileURL: URL
     private let calendar: Calendar
     private let healthKit: HealthKitStore?
+    private let defaultWeightUnit: LogUnit?
 
     init(
         fileURL: URL? = nil,
         calendar: Calendar = .current,
-        healthKit: HealthKitStore? = nil
+        healthKit: HealthKitStore? = nil,
+        defaultWeightUnit: LogUnit? = nil
     ) {
         self.calendar = calendar
         self.fileURL = fileURL ?? Self.defaultFileURL()
         self.healthKit = healthKit
+        self.defaultWeightUnit = defaultWeightUnit
         self.document = Self.load(from: self.fileURL) ?? DiaryDocument()
+    }
+
+    init(
+        document: DiaryDocument,
+        fileURL: URL? = nil,
+        calendar: Calendar = .current,
+        healthKit: HealthKitStore? = nil,
+        defaultWeightUnit: LogUnit? = nil
+    ) {
+        self.calendar = calendar
+        self.fileURL = fileURL ?? Self.defaultFileURL()
+        self.healthKit = healthKit
+        self.defaultWeightUnit = defaultWeightUnit
+        self.document = document
     }
 
     func entries(on date: Date) -> [DiaryEntry] {
@@ -153,7 +170,8 @@ final class DiaryStore: ObservableObject {
         if let remembered = document.rememberedQuantities[food.id] {
             return remembered
         }
-        let rawDefault = UserDefaults.standard.string(forKey: "defaultWeightUnit") ?? LogUnit.ounces.rawValue
+        let rawDefault = defaultWeightUnit?.rawValue ??
+            UserDefaults.standard.string(forKey: "defaultWeightUnit") ?? LogUnit.ounces.rawValue
         let unit = LogUnit(rawValue: rawDefault) ?? .ounces
         return QuantityPreference(amount: unit == .ounces ? 1 : 100, unit: unit)
     }

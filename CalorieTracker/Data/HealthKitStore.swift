@@ -18,11 +18,19 @@ final class HealthKitStore: ObservableObject {
     private var pendingOperation: Task<Void, Never>?
 
     init() {
+#if targetEnvironment(simulator)
+        authorizationState = .unavailable
+#else
         refreshAuthorizationState()
+#endif
     }
 
     var isAvailable: Bool {
+#if targetEnvironment(simulator)
+        false
+#else
         HKHealthStore.isHealthDataAvailable()
+#endif
     }
 
     func refreshAuthorizationState() {
@@ -52,7 +60,8 @@ final class HealthKitStore: ObservableObject {
 
     @discardableResult
     func sync(entries: [DiaryEntry]) -> Task<Void, Never> {
-        enqueue { [weak self] in
+        guard isAvailable else { return Task {} }
+        return enqueue { [weak self] in
             guard let self else { return }
             for entry in entries {
                 await replaceSamples(for: entry)
@@ -61,6 +70,7 @@ final class HealthKitStore: ObservableObject {
     }
 
     func delete(entries: [DiaryEntry]) {
+        guard isAvailable else { return }
         enqueue { [weak self] in
             guard let self else { return }
             for entry in entries {

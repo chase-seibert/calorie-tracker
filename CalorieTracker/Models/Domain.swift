@@ -271,6 +271,13 @@ struct DiaryDocument: Codable, Sendable {
     }
 }
 
+struct DiaryFixture: Codable, Sendable {
+    let fixtureVersion: Int
+    let capturedReferenceDate: Date
+    let defaultWeightUnit: LogUnit?
+    var document: DiaryDocument
+}
+
 extension Double {
     var cleanAmount: String {
         if rounded() == self { return String(Int(self)) }

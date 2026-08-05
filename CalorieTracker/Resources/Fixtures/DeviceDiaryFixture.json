@@ -1,0 +1,2929 @@
+{
+  "fixtureVersion": 1,
+  "capturedReferenceDate": "2026-08-05T07:00:00Z",
+  "defaultWeightUnit": "oz",
+  "document": {
+    "customFoodNames": {
+      "usda:2707527": "Pistachios"
+    },
+    "customFoods": [],
+    "dailyCalorieGoal": 2270,
+    "entries": [
+      {
+        "amount": 1,
+        "date": "2026-08-03T07:00:00Z",
+        "displayOrder": 5,
+        "food": {
+          "baseAmountGrams": 100,
+          "name": "Coffee, espresso",
+          "nutrients": {
+            "calories": 9,
+            "carbs": 1.67,
+            "fat": 0.18,
+            "protein": 0.12
+          },
+          "servingDescription": "1 1 fl oz",
+          "servingGrams": 30,
+          "source": "usda",
+          "sourceID": "2710378"
+        },
+        "id": "F555F4D2-2C28-445A-A3D9-8F1468D30651",
+        "loggedAt": "2026-08-03T22:45:10Z",
+        "nutrients": {
+          "calories": 2.6999999999999997,
+          "carbs": 0.501,
+          "fat": 0.054,
+          "protein": 0.036
+        },
+        "unit": "serving"
+      },
+      {
+        "amount": 2,
+        "date": "2026-08-03T07:00:00Z",
+        "displayOrder": 12,
+        "food": {
+          "baseAmountGrams": 100,
+          "name": "Cheese, cheddar",
+          "nutrients": {
+            "calories": 408,
+            "carbs": 2.44,
+            "fat": 34,
+            "protein": 23.3
+          },
+          "servingDescription": "1 slice",
+          "servingGrams": 17,
+          "source": "usda",
+          "sourceID": "328637"
+        },
+        "id": "2E3B27D4-1E8A-4669-8406-7EF47F53C53A",
+        "loggedAt": "2026-08-03T22:46:19Z",
+        "nutrients": {
+          "calories": 231.33210870000002,
+          "carbs": 1.3834567285000001,
+          "fat": 19.277675725,
+          "protein": 13.210877776250001
+        },
+        "unit": "oz"
+      },
+      {
+        "amount": 4,
+        "date": "2026-08-03T07:00:00Z",
+        "displayOrder": 11,
+        "food": {
+          "baseAmountGrams": 100,
+          "name": "Eggs, Grade A, Large, egg yolk",
+          "nutrients": {
+            "calories": 334,
+            "carbs": 1.02,
+            "fat": 28.8,
+            "protein": 16.2
+          },
+          "servingDescription": "1 yolk",
+          "servingGrams": 17,
+          "source": "usda",
+          "sourceID": "748236"
+        },
+        "id": "26E9DDFB-8192-4E67-BE6C-4B07D214026C",
+        "loggedAt": "2026-08-03T22:47:09Z",
+        "nutrients": {
+          "calories": 227.12,
+          "carbs": 0.6936000000000001,
+          "fat": 19.584000000000003,
+          "protein": 11.016
+        },
+        "unit": "serving"
+      },
+      {
+        "amount": 1,
+        "date": "2026-08-03T07:00:00Z",
+        "displayOrder": 10,
+        "food": {
+          "baseAmountGrams": 100,
+          "name": "Butter, stick",
+          "nutrients": {
+            "calories": 743,
+            "carbs": 0.06,
+            "fat": 82.2,
+            "protein": 0.85
+          },
+          "servingDescription": "1 1 stick",
+          "servingGrams": 113,
+          "source": "usda",
+          "sourceID": "2710155"
+        },
+        "id": "FD0BFA4A-7B30-47FB-B4AE-8F5B81649E03",
+        "loggedAt": "2026-08-03T22:47:47Z",
+        "nutrients": {
+          "calories": 210.63695681875004,
+          "carbs": 0.017009713875000002,
+          "fat": 23.303308008750005,
+          "protein": 0.2409709465625
+        },
+        "unit": "oz"
+      },
+      {
+        "amount": 1,
+        "date": "2026-08-03T07:00:00Z",
+        "displayOrder": 9,
+        "food": {
+          "baseAmountGrams": 100,
+          "name": "Pistachios",
+          "nutrients": {
+            "calories": 572,
+            "carbs": 28.3,
+            "fat": 45.8,
+            "protein": 21
+          },
+          "portions": [
+            {
+              "grams": 0.5,
+              "id": "298498",
+              "label": "nut"
+            },
+            {
+              "grams": 128,
+              "id": "298499",
+              "label": "cup, without shell"
+            },
+            {
+              "grams": 58,
+              "id": "298500",
+              "label": "cup, in shell, yields"
+            },
+            {
+              "grams": 58,
+              "id": "298501",
+              "label": "cup, NFS"
+            },
+            {
+              "grams": 28.35,
+              "id": "298502",
+              "label": "oz, without shell"
+            },
+            {
+              "grams": 15,
+              "id": "298503",
+              "label": "oz, in shell, yields"
+            },
+            {
+              "grams": 28.35,
+              "id": "298504",
+              "label": "oz, NFS"
+            },
+            {
+              "grams": 50,
+              "id": "298505",
+              "label": "package"
+            },
+            {
+              "grams": 28,
+              "id": "298506",
+              "label": "serving"
+            }
+          ],
+          "servingDescription": "1 nut",
+          "servingGrams": 0.5,
+          "source": "usda",
+          "sourceID": "2707527"
+        },
+        "id": "01C6A645-4333-4CFE-880F-6B4809AF264F",
+        "loggedAt": "2026-08-04T00:42:00Z",
+        "nutrients": {
+          "calories": 162.159272275,
+          "carbs": 8.022915044375,
+          "fat": 12.984081591250002,
+          "protein": 5.953399856250001
+        },
+        "unit": "oz"
+      },
+      {
+        "amount": 1,
+        "date": "2026-08-03T07:00:00Z",
+        "displayOrder": 8,
+        "food": {
+          "barcode": "0851770003926",
+          "baseAmountGrams": 100,
+          "brand": "Orgain",
+          "name": "Organic Protein",
+          "nutrients": {
+            "calories": 326.086956521739,
+            "carbs": 32.6086956521739,
+            "fat": 7.60869565217391,
+            "protein": 45.6521739130435
+          },
+          "portions": [
+            {
+              "grams": 46,
+              "id": "off-serving",
+              "label": "2 SCOOPS (46 g)"
+            }
+          ],
+          "servingDescription": "2 SCOOPS (46 g)",
+          "servingGrams": 46,
+          "source": "off",
+          "sourceID": "0851770003926"
+        },
+        "id": "1467D3CD-97F1-4022-B115-A86B5A46543F",
+        "loggedAt": "2026-08-04T01:02:35Z",
+        "nutrients": {
+          "calories": 149.99999999999994,
+          "carbs": 14.999999999999995,
+          "fat": 3.499999999999999,
+          "protein": 21.00000000000001
+        },
+        "portionID": "off-serving",
+        "unit": "serving"
+      },
+      {
+        "amount": 8,
+        "date": "2026-08-03T07:00:00Z",
+        "displayOrder": 7,
+        "food": {
+          "baseAmountGrams": 100,
+          "name": "Almond milk, unsweetened",
+          "nutrients": {
+            "calories": 15,
+            "carbs": 0.34,
+            "fat": 1.22,
+            "protein": 0.55
+          },
+          "portions": [
+            {
+              "grams": 244,
+              "id": "290628",
+              "label": "cup"
+            },
+            {
+              "grams": 30.5,
+              "id": "290629",
+              "label": "fl oz"
+            },
+            {
+              "grams": 2.5,
+              "id": "290630",
+              "label": "Guideline amount per fl oz of beverage"
+            },
+            {
+              "grams": 61,
+              "id": "290631",
+              "label": "Guideline amount per cup of hot cereal"
+            },
+            {
+              "grams": 244,
+              "id": "290632",
+              "label": "serving"
+            }
+          ],
+          "servingDescription": "1 cup",
+          "servingGrams": 244,
+          "source": "usda",
+          "sourceID": "2705409"
+        },
+        "id": "6BEA0E6E-242E-4DC5-94EB-6094F0EC1C58",
+        "loggedAt": "2026-08-04T01:03:24Z",
+        "nutrients": {
+          "calories": 34.019427750000006,
+          "carbs": 0.7711070290000002,
+          "fat": 2.7669134570000002,
+          "protein": 1.2473790175000004
+        },
+        "unit": "oz"
+      },
+      {
+        "amount": 1,
+        "date": "2026-08-03T07:00:00Z",
+        "displayOrder": 6,
+        "food": {
+          "baseAmountGrams": 100,
+          "name": "Banana, raw",
+          "nutrients": {
+            "calories": 97,
+            "carbs": 22.7,
+            "fat": 0.28,
+            "protein": 0.74
+          },
+          "portions": [
+            {
+              "grams": 126,
+              "id": "306100",
+              "label": "banana"
+            },
+            {
+              "grams": 6,
+              "id": "306101",
+              "label": "slice"
+            },
+            {
+              "grams": 150,
+              "id": "306102",
+              "label": "cup"
+            },
+            {
+              "grams": 225,
+              "id": "306103",
+              "label": "cup, mashed"
+            },
+            {
+              "grams": 15,
+              "id": "306104",
+              "label": "linear inch"
+            },
+            {
+              "grams": 126,
+              "id": "306105",
+              "label": "serving"
+            }
+          ],
+          "servingDescription": "1 banana",
+          "servingGrams": 126,
+          "source": "usda",
+          "sourceID": "2709224"
+        },
+        "id": "35B7ED89-CCC4-4FC9-9E18-438376F8BF0B",
+        "loggedAt": "2026-08-04T01:03:37Z",
+        "nutrients": {
+          "calories": 122.22,
+          "carbs": 28.602,
+          "fat": 0.35280000000000006,
+          "protein": 0.9324
+        },
+        "portionID": "306100",
+        "unit": "serving"
+      },
+      {
+        "amount": 1,
+        "date": "2026-08-03T07:00:00Z",
+        "displayOrder": 4,
+        "food": {
+          "baseAmountGrams": 100,
+          "name": "Peanut butter",
+          "nutrients": {
+            "calories": 598,
+            "carbs": 22.3,
+            "fat": 51.4,
+            "protein": 22.2
+          },
+          "portions": [
+            {
+              "grams": 16,
+              "id": "298558",
+              "label": "tablespoon"
+            },
+            {
+              "grams": 45,
+              "id": "298559",
+              "label": "single serving"
+            },
+            {
+              "grams": 16,
+              "id": "298560",
+              "label": "Guideline amount per slice of bread/roll"
+            },
+            {
+              "grams": 32,
+              "id": "298561",
+              "label": "Guideline amount per sandwich"
+            },
+            {
+              "grams": 32,
+              "id": "298562",
+              "label": "serving"
+            }
+          ],
+          "servingDescription": "1 tablespoon",
+          "servingGrams": 16,
+          "source": "usda",
+          "sourceID": "2707537"
+        },
+        "id": "D3DE6E6E-15CF-452B-A557-D4939C5A94CD",
+        "loggedAt": "2026-08-04T02:00:08Z",
+        "nutrients": {
+          "calories": 169.53014828750003,
+          "carbs": 6.321943656875001,
+          "fat": 14.571654886250002,
+          "protein": 6.293594133750001
+        },
+        "unit": "oz"
+      },
+      {
+        "amount": 2,
+        "date": "2026-08-03T07:00:00Z",
+        "displayOrder": 3,
+        "food": {
+          "baseAmountGrams": 100,
+          "name": "Cheese, Parmesan, hard",
+          "nutrients": {
+            "calories": 412,
+            "carbs": 8.36,
+            "fat": 28.8,
+            "protein": 29.9
+          },
+          "portions": [
+            {
+              "grams": 10.3,
+              "id": "291710",
+              "label": "cubic inch"
+            },
+            {
+              "grams": 142,
+              "id": "291711",
+              "label": "5 oz package"
+            },
+            {
+              "grams": 28.35,
+              "id": "291712",
+              "label": "oz"
+            },
+            {
+              "grams": 5,
+              "id": "291713",
+              "label": "serving"
+            },
+            {
+              "grams": 5,
+              "id": "291714",
+              "label": "tablespoon"
+            }
+          ],
+          "servingDescription": "1 cubic inch",
+          "servingGrams": 10.3,
+          "source": "usda",
+          "sourceID": "2705730"
+        },
+        "id": "8BAE9E71-E41B-47B5-9DAB-73A0AB5F9AF2",
+        "loggedAt": "2026-08-04T02:25:19Z",
+        "nutrients": {
+          "calories": 233.60007055000003,
+          "carbs": 4.7400402665,
+          "fat": 16.329325320000002,
+          "protein": 16.95301482875
+        },
+        "unit": "oz"
+      },
+      {
+        "amount": 5,
+        "date": "2026-08-03T07:00:00Z",
+        "displayOrder": 2,
+        "food": {
+          "barcode": "0747479000413",
+          "baseAmountGrams": 100,
+          "brand": "Rao's Homemade",
+          "name": "Marinara",
+          "nutrients": {
+            "calories": 80,
+            "carbs": 4.8,
+            "fat": 5.6,
+            "protein": 1.6
+          },
+          "portions": [
+            {
+              "grams": 125,
+              "id": "off-serving",
+              "label": "0.5 cup (125 g)"
+            }
+          ],
+          "servingDescription": "0.5 cup (125 g)",
+          "servingGrams": 125,
+          "source": "off",
+          "sourceID": "0747479000413"
+        },
+        "id": "65138970-B65E-4CAE-ADB1-73EE3DA98115",
+        "loggedAt": "2026-08-04T02:29:58Z",
+        "nutrients": {
+          "calories": 113.3980925,
+          "carbs": 6.8038855499999995,
+          "fat": 7.937866475,
+          "protein": 2.2679618500000003
+        },
+        "unit": "oz"
+      },
+      {
+        "amount": 16,
+        "date": "2026-08-03T07:00:00Z",
+        "displayOrder": 1,
+        "food": {
+          "baseAmountGrams": 100,
+          "name": "Ravioli, cheese-filled, canned",
+          "nutrients": {
+            "calories": 77,
+            "carbs": 13.6,
+            "fat": 1.45,
+            "protein": 2.48
+          },
+          "portions": [
+            {
+              "grams": 242,
+              "id": "92302",
+              "label": "cup"
+            }
+          ],
+          "servingDescription": "1 cup",
+          "servingGrams": 242,
+          "source": "usda",
+          "sourceID": "173328"
+        },
+        "id": "D0687989-CA73-46E1-AB93-343885321D81",
+        "loggedAt": "2026-08-04T02:31:01Z",
+        "nutrients": {
+          "calories": 349.2661249,
+          "carbs": 61.68856232,
+          "fat": 6.577089365000001,
+          "protein": 11.249090776000001
+        },
+        "unit": "oz"
+      },
+      {
+        "amount": 1,
+        "date": "2026-08-03T07:00:00Z",
+        "displayOrder": 0,
+        "food": {
+          "baseAmountGrams": 100,
+          "name": "Plum, raw",
+          "nutrients": {
+            "calories": 46,
+            "carbs": 11.4,
+            "fat": 0.28,
+            "protein": 0.7
+          },
+          "portions": [
+            {
+              "grams": 75,
+              "id": "306269",
+              "label": "fruit"
+            },
+            {
+              "grams": 155,
+              "id": "306270",
+              "label": "cup"
+            },
+            {
+              "grams": 75,
+              "id": "306271",
+              "label": "serving"
+            }
+          ],
+          "servingDescription": "1 fruit",
+          "servingGrams": 75,
+          "source": "usda",
+          "sourceID": "2709265"
+        },
+        "id": "543A1C9A-58C9-4753-8410-EA2EE2B63D26",
+        "loggedAt": "2026-08-04T03:45:38Z",
+        "nutrients": {
+          "calories": 34.5,
+          "carbs": 8.55,
+          "fat": 0.21000000000000002,
+          "protein": 0.5249999999999999
+        },
+        "portionID": "306269",
+        "unit": "serving"
+      },
+      {
+        "amount": 1,
+        "date": "2026-08-04T07:00:00Z",
+        "displayOrder": 0,
+        "food": {
+          "baseAmountGrams": 1,
+          "name": "Chili, no rice",
+          "nutrients": {
+            "calories": 1003.22924745,
+            "carbs": 56.238409041,
+            "fat": 55.53543728750003,
+            "protein": 66.02583008875
+          },
+          "portions": [
+            {
+              "grams": 1,
+              "id": "saved-meal",
+              "label": "meal"
+            }
+          ],
+          "servingDescription": "1 meal",
+          "servingGrams": 1,
+          "source": "custom",
+          "sourceID": "saved-meal-32B0CAC9-90A2-4CB1-932A-70F837708E83"
+        },
+        "id": "708B8DB4-948A-440A-94A3-57D1ABDE91D3",
+        "loggedAt": "2026-08-04T19:31:31Z",
+        "mealItems": [
+          {
+            "amount": 3,
+            "food": {
+              "barcode": "0073420000110",
+              "baseAmountGrams": 100,
+              "brand": "Daisy",
+              "name": "Sour Cream",
+              "nutrients": {
+                "calories": 200,
+                "carbs": 3.33333333333333,
+                "fat": 16.6666666666667,
+                "protein": 3.33333333333333
+              },
+              "portions": [
+                {
+                  "grams": 30,
+                  "id": "off-serving",
+                  "label": "2 tbsp (30 g)"
+                }
+              ],
+              "servingDescription": "2 tbsp (30 g)",
+              "servingGrams": 30,
+              "source": "off",
+              "sourceID": "0073420000110"
+            },
+            "id": "E7264627-3265-4E12-B766-3F6E9EC7AE11",
+            "unit": "oz"
+          },
+          {
+            "amount": 2,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Cheese, cheddar",
+              "nutrients": {
+                "calories": 408,
+                "carbs": 2.44,
+                "fat": 34,
+                "protein": 23.3
+              },
+              "servingDescription": "1 slice",
+              "servingGrams": 17,
+              "source": "usda",
+              "sourceID": "328637"
+            },
+            "id": "EDE5BFA6-B280-44B2-8F1E-2885CFDFAA5C",
+            "unit": "oz"
+          },
+          {
+            "amount": 2,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Chili with meat and beans",
+              "nutrients": {
+                "calories": 118,
+                "carbs": 10.2,
+                "fat": 4.33,
+                "protein": 9.8
+              },
+              "portions": [
+                {
+                  "grams": 255,
+                  "id": "295109",
+                  "label": "cup"
+                },
+                {
+                  "grams": 255,
+                  "id": "295110",
+                  "label": "serving"
+                }
+              ],
+              "servingDescription": "1 cup",
+              "servingGrams": 255,
+              "source": "usda",
+              "sourceID": "2706375"
+            },
+            "id": "36B31130-95BB-43D7-8CF7-993B6857E246",
+            "portionID": "295109",
+            "unit": "serving"
+          }
+        ],
+        "nutrients": {
+          "calories": 1003.22924745,
+          "carbs": 56.238409041,
+          "fat": 55.53543728750003,
+          "protein": 66.02583008875
+        },
+        "portionID": "saved-meal",
+        "savedMealID": "32B0CAC9-90A2-4CB1-932A-70F837708E83",
+        "unit": "serving"
+      },
+      {
+        "amount": 1,
+        "date": "2026-08-04T07:00:00Z",
+        "displayOrder": 1,
+        "food": {
+          "baseAmountGrams": 1,
+          "name": "Turkey sandwich",
+          "nutrients": {
+            "calories": 722.3741987481251,
+            "carbs": 45.945505138225,
+            "fat": 46.338146033506256,
+            "protein": 30.360354800256253
+          },
+          "portions": [
+            {
+              "grams": 1,
+              "id": "saved-meal",
+              "label": "meal"
+            }
+          ],
+          "servingDescription": "1 meal",
+          "servingGrams": 1,
+          "source": "custom",
+          "sourceID": "saved-meal-10F80352-06D8-4ABB-9357-32131DF55242"
+        },
+        "id": "0613F33B-968E-407C-B74D-D9EB94D9FC5B",
+        "loggedAt": "2026-08-04T19:13:18Z",
+        "mealItems": [
+          {
+            "amount": 1.2,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Mayonnaise, regular",
+              "nutrients": {
+                "calories": 680,
+                "carbs": 0.57,
+                "fat": 74.8,
+                "protein": 0.96
+              },
+              "portions": [
+                {
+                  "grams": 220,
+                  "id": "309655",
+                  "label": "cup"
+                },
+                {
+                  "grams": 13.8,
+                  "id": "309656",
+                  "label": "tablespoon"
+                },
+                {
+                  "grams": 12,
+                  "id": "309657",
+                  "label": "packet"
+                },
+                {
+                  "grams": 9,
+                  "id": "309658",
+                  "label": "serving"
+                },
+                {
+                  "grams": 28,
+                  "id": "309659",
+                  "label": "dipping-size container"
+                },
+                {
+                  "grams": 14,
+                  "id": "309660",
+                  "label": "Guideline amount on regular sandwich"
+                },
+                {
+                  "grams": 28,
+                  "id": "309661",
+                  "label": "Guideline amount on large sandwich"
+                },
+                {
+                  "grams": 28,
+                  "id": "309662",
+                  "label": "Guideline amount in salad"
+                }
+              ],
+              "servingDescription": "1 cup",
+              "servingGrams": 220,
+              "source": "usda",
+              "sourceID": "2710204"
+            },
+            "id": "C0A6C68C-A6F2-4502-9607-12A49C3F83CE",
+            "unit": "oz"
+          },
+          {
+            "amount": 3.2,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Turkey, white, rotisserie, deli cut",
+              "nutrients": {
+                "calories": 112,
+                "carbs": 7.7,
+                "fat": 3,
+                "protein": 13.5
+              },
+              "portions": [
+                {
+                  "grams": 48,
+                  "id": "94663",
+                  "label": "1.69 oz (1 serving)"
+                }
+              ],
+              "servingDescription": "1 1.69 oz (1 serving)",
+              "servingGrams": 48,
+              "source": "usda",
+              "sourceID": "174613"
+            },
+            "id": "F0860D21-9A73-4665-944E-78581117FE53",
+            "unit": "oz"
+          },
+          {
+            "amount": 1.6,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Cheese, cheddar",
+              "nutrients": {
+                "calories": 408,
+                "carbs": 2.44,
+                "fat": 34,
+                "protein": 23.3
+              },
+              "servingDescription": "1 slice",
+              "servingGrams": 17,
+              "source": "usda",
+              "sourceID": "328637"
+            },
+            "id": "829E18E6-A1C5-482B-AAA5-F68DD359551E",
+            "unit": "oz"
+          },
+          {
+            "amount": 2.7,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Bread, white",
+              "nutrients": {
+                "calories": 267,
+                "carbs": 49.2,
+                "fat": 3.59,
+                "protein": 9.43
+              },
+              "portions": [
+                {
+                  "grams": 24,
+                  "id": "298809",
+                  "label": "small or thin/very thin slice"
+                },
+                {
+                  "grams": 28,
+                  "id": "298810",
+                  "label": "medium or regular slice"
+                },
+                {
+                  "grams": 43,
+                  "id": "298811",
+                  "label": "large or thick slice"
+                },
+                {
+                  "grams": 13,
+                  "id": "298812",
+                  "label": "slice, crust not eaten"
+                },
+                {
+                  "grams": 10,
+                  "id": "298813",
+                  "label": "slice, snack-size"
+                },
+                {
+                  "grams": 40,
+                  "id": "298814",
+                  "label": "cup"
+                },
+                {
+                  "grams": 2.8,
+                  "id": "298815",
+                  "label": "cubic inch"
+                },
+                {
+                  "grams": 28,
+                  "id": "298816",
+                  "label": "serving"
+                }
+              ],
+              "servingDescription": "1 small or thin/very thin slice",
+              "servingGrams": 24,
+              "source": "usda",
+              "sourceID": "2707598"
+            },
+            "id": "0AB771E7-4368-4F3B-9E75-A59268C0622D",
+            "unit": "oz"
+          }
+        ],
+        "nutrients": {
+          "calories": 722.3741987481251,
+          "carbs": 45.945505138225,
+          "fat": 46.338146033506256,
+          "protein": 30.360354800256253
+        },
+        "portionID": "saved-meal",
+        "savedMealID": "10F80352-06D8-4ABB-9357-32131DF55242",
+        "unit": "serving"
+      },
+      {
+        "amount": 1,
+        "date": "2026-08-04T07:00:00Z",
+        "displayOrder": 2,
+        "food": {
+          "baseAmountGrams": 1,
+          "name": "Tea with honey",
+          "nutrients": {
+            "calories": 18.52349523125,
+            "carbs": 5.00069904625,
+            "fat": 0,
+            "protein": 0.018
+          },
+          "portions": [
+            {
+              "grams": 1,
+              "id": "saved-meal",
+              "label": "meal"
+            }
+          ],
+          "servingDescription": "1 meal",
+          "servingGrams": 1,
+          "source": "custom",
+          "sourceID": "saved-meal-F77EC203-3BB0-421B-BB27-900DDF210DB4"
+        },
+        "id": "F5C64903-14F3-42B0-BF78-0FC402310E68",
+        "loggedAt": "2026-08-04T17:45:33Z",
+        "mealItems": [
+          {
+            "amount": 1,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Tea, hot, herbal",
+              "nutrients": {
+                "calories": 1,
+                "carbs": 0.2,
+                "fat": 0,
+                "protein": 0
+              },
+              "portions": [
+                {
+                  "grams": 30,
+                  "id": "311085",
+                  "label": "fl oz"
+                },
+                {
+                  "grams": 360,
+                  "id": "311086",
+                  "label": "serving"
+                },
+                {
+                  "grams": 240,
+                  "id": "311087",
+                  "label": "cup"
+                },
+                {
+                  "grams": 360,
+                  "id": "311088",
+                  "label": "small"
+                },
+                {
+                  "grams": 480,
+                  "id": "311089",
+                  "label": "medium"
+                },
+                {
+                  "grams": 600,
+                  "id": "311090",
+                  "label": "large"
+                }
+              ],
+              "servingDescription": "1 fl oz",
+              "servingGrams": 30,
+              "source": "usda",
+              "sourceID": "2710502"
+            },
+            "id": "E416C2CC-18AC-46B6-A095-4F6E0313DD43",
+            "unit": "oz"
+          },
+          {
+            "amount": 0.3,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Honey",
+              "nutrients": {
+                "calories": 304,
+                "carbs": 82.4,
+                "fat": 0,
+                "protein": 0.3
+              },
+              "portions": [
+                {
+                  "grams": 20,
+                  "id": "309975",
+                  "label": "tablespoon"
+                },
+                {
+                  "grams": 14,
+                  "id": "309976",
+                  "label": "single serving container"
+                },
+                {
+                  "grams": 320,
+                  "id": "309977",
+                  "label": "cup"
+                },
+                {
+                  "grams": 2.4,
+                  "id": "309978",
+                  "label": "Guideline amount per fl oz of beverage"
+                },
+                {
+                  "grams": 10,
+                  "id": "309979",
+                  "label": "Guideline amount per slice of bread/roll"
+                },
+                {
+                  "grams": 7,
+                  "id": "309980",
+                  "label": "serving"
+                }
+              ],
+              "servingDescription": "1 tablespoon",
+              "servingGrams": 20,
+              "source": "usda",
+              "sourceID": "2710281"
+            },
+            "id": "CBA21ACA-E934-4CF2-A090-67F96B93C74F",
+            "portionID": "309975",
+            "unit": "serving"
+          }
+        ],
+        "nutrients": {
+          "calories": 18.52349523125,
+          "carbs": 5.00069904625,
+          "fat": 0,
+          "protein": 0.018
+        },
+        "portionID": "saved-meal",
+        "savedMealID": "F77EC203-3BB0-421B-BB27-900DDF210DB4",
+        "unit": "serving"
+      },
+      {
+        "amount": 1,
+        "date": "2026-08-04T07:00:00Z",
+        "displayOrder": 3,
+        "food": {
+          "baseAmountGrams": 100,
+          "name": "Pistachios",
+          "nutrients": {
+            "calories": 572,
+            "carbs": 28.3,
+            "fat": 45.8,
+            "protein": 21
+          },
+          "portions": [
+            {
+              "grams": 0.5,
+              "id": "298498",
+              "label": "nut"
+            },
+            {
+              "grams": 128,
+              "id": "298499",
+              "label": "cup, without shell"
+            },
+            {
+              "grams": 58,
+              "id": "298500",
+              "label": "cup, in shell, yields"
+            },
+            {
+              "grams": 58,
+              "id": "298501",
+              "label": "cup, NFS"
+            },
+            {
+              "grams": 28.35,
+              "id": "298502",
+              "label": "oz, without shell"
+            },
+            {
+              "grams": 15,
+              "id": "298503",
+              "label": "oz, in shell, yields"
+            },
+            {
+              "grams": 28.35,
+              "id": "298504",
+              "label": "oz, NFS"
+            },
+            {
+              "grams": 50,
+              "id": "298505",
+              "label": "package"
+            },
+            {
+              "grams": 28,
+              "id": "298506",
+              "label": "serving"
+            }
+          ],
+          "servingDescription": "1 nut",
+          "servingGrams": 0.5,
+          "source": "usda",
+          "sourceID": "2707527"
+        },
+        "id": "2CAEC552-3793-4FCE-807F-A5DC41D990A1",
+        "loggedAt": "2026-08-04T17:44:16Z",
+        "nutrients": {
+          "calories": 162.159272275,
+          "carbs": 8.022915044375,
+          "fat": 12.984081591250002,
+          "protein": 5.953399856250001
+        },
+        "unit": "oz"
+      },
+      {
+        "amount": 1,
+        "date": "2026-08-04T07:00:00Z",
+        "displayOrder": 4,
+        "food": {
+          "baseAmountGrams": 1,
+          "name": "Cappuccino",
+          "nutrients": {
+            "calories": 78.29872833333339,
+            "carbs": 6.643396677083338,
+            "fat": 3.833936416666663,
+            "protein": 3.815936416666663
+          },
+          "portions": [
+            {
+              "grams": 1,
+              "id": "saved-meal",
+              "label": "meal"
+            }
+          ],
+          "servingDescription": "1 meal",
+          "servingGrams": 1,
+          "source": "custom",
+          "sourceID": "saved-meal-B4176616-B011-437F-B1B6-1C8CF89B6162"
+        },
+        "id": "16C6C319-5804-43D5-9047-78C184C44750",
+        "loggedAt": "2026-08-04T12:28:47Z",
+        "mealItems": [
+          {
+            "amount": 4,
+            "food": {
+              "barcode": "0078742351865",
+              "baseAmountGrams": 100,
+              "brand": "Great Value",
+              "name": "Whole Milk",
+              "nutrients": {
+                "calories": 66.6666666666667,
+                "carbs": 5.41666666666667,
+                "fat": 3.33333333333333,
+                "protein": 3.33333333333333
+              },
+              "servingDescription": "1 Serving (1 cup)",
+              "source": "off",
+              "sourceID": "0078742351865"
+            },
+            "id": "1FCBE3B7-FE66-4F15-B9C7-B10CCEE23690",
+            "unit": "oz"
+          },
+          {
+            "amount": 30,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Coffee, espresso",
+              "nutrients": {
+                "calories": 9,
+                "carbs": 1.67,
+                "fat": 0.18,
+                "protein": 0.12
+              },
+              "portions": [
+                {
+                  "grams": 30,
+                  "id": "310467",
+                  "label": "fl oz"
+                },
+                {
+                  "grams": 60,
+                  "id": "310468",
+                  "label": "espresso cup (2 fl oz)"
+                },
+                {
+                  "grams": 60,
+                  "id": "310469",
+                  "label": "serving"
+                }
+              ],
+              "servingDescription": "1 fl oz",
+              "servingGrams": 30,
+              "source": "usda",
+              "sourceID": "2710378"
+            },
+            "id": "68DAA32B-5B3E-46BA-8946-FF71FBECA570",
+            "unit": "g"
+          }
+        ],
+        "nutrients": {
+          "calories": 78.29872833333339,
+          "carbs": 6.643396677083338,
+          "fat": 3.833936416666663,
+          "protein": 3.815936416666663
+        },
+        "portionID": "saved-meal",
+        "savedMealID": "B4176616-B011-437F-B1B6-1C8CF89B6162",
+        "unit": "serving"
+      },
+      {
+        "amount": 1,
+        "date": "2026-08-04T07:00:00Z",
+        "displayOrder": 5,
+        "food": {
+          "baseAmountGrams": 1,
+          "name": "Protein shake",
+          "nutrients": {
+            "calories": 475.7695760374999,
+            "carbs": 50.695050685874996,
+            "fat": 21.19136834325,
+            "protein": 29.473373151250012
+          },
+          "portions": [
+            {
+              "grams": 1,
+              "id": "saved-meal",
+              "label": "meal"
+            }
+          ],
+          "servingDescription": "1 meal",
+          "servingGrams": 1,
+          "source": "custom",
+          "sourceID": "saved-meal-29648EB1-9DD0-49DF-91BF-1D9312F4BF9B"
+        },
+        "id": "CBE25BAF-AE10-4C05-9C0A-8AF731DB2B5A",
+        "loggedAt": "2026-08-04T13:27:03Z",
+        "mealItems": [
+          {
+            "amount": 1,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Peanut butter",
+              "nutrients": {
+                "calories": 598,
+                "carbs": 22.3,
+                "fat": 51.4,
+                "protein": 22.2
+              },
+              "portions": [
+                {
+                  "grams": 16,
+                  "id": "298558",
+                  "label": "tablespoon"
+                },
+                {
+                  "grams": 45,
+                  "id": "298559",
+                  "label": "single serving"
+                },
+                {
+                  "grams": 16,
+                  "id": "298560",
+                  "label": "Guideline amount per slice of bread/roll"
+                },
+                {
+                  "grams": 32,
+                  "id": "298561",
+                  "label": "Guideline amount per sandwich"
+                },
+                {
+                  "grams": 32,
+                  "id": "298562",
+                  "label": "serving"
+                }
+              ],
+              "servingDescription": "1 tablespoon",
+              "servingGrams": 16,
+              "source": "usda",
+              "sourceID": "2707537"
+            },
+            "id": "35C26664-F64E-40AE-B2DC-D94F5C77AEE6",
+            "unit": "oz"
+          },
+          {
+            "amount": 1,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Banana, raw",
+              "nutrients": {
+                "calories": 97,
+                "carbs": 22.7,
+                "fat": 0.28,
+                "protein": 0.74
+              },
+              "portions": [
+                {
+                  "grams": 126,
+                  "id": "306100",
+                  "label": "banana"
+                },
+                {
+                  "grams": 6,
+                  "id": "306101",
+                  "label": "slice"
+                },
+                {
+                  "grams": 150,
+                  "id": "306102",
+                  "label": "cup"
+                },
+                {
+                  "grams": 225,
+                  "id": "306103",
+                  "label": "cup, mashed"
+                },
+                {
+                  "grams": 15,
+                  "id": "306104",
+                  "label": "linear inch"
+                },
+                {
+                  "grams": 126,
+                  "id": "306105",
+                  "label": "serving"
+                }
+              ],
+              "servingDescription": "1 banana",
+              "servingGrams": 126,
+              "source": "usda",
+              "sourceID": "2709224"
+            },
+            "id": "11CD67E7-A927-4DC6-91E2-A925C79F776B",
+            "portionID": "306100",
+            "unit": "serving"
+          },
+          {
+            "amount": 8,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Almond milk, unsweetened",
+              "nutrients": {
+                "calories": 15,
+                "carbs": 0.34,
+                "fat": 1.22,
+                "protein": 0.55
+              },
+              "portions": [
+                {
+                  "grams": 244,
+                  "id": "290628",
+                  "label": "cup"
+                },
+                {
+                  "grams": 30.5,
+                  "id": "290629",
+                  "label": "fl oz"
+                },
+                {
+                  "grams": 2.5,
+                  "id": "290630",
+                  "label": "Guideline amount per fl oz of beverage"
+                },
+                {
+                  "grams": 61,
+                  "id": "290631",
+                  "label": "Guideline amount per cup of hot cereal"
+                },
+                {
+                  "grams": 244,
+                  "id": "290632",
+                  "label": "serving"
+                }
+              ],
+              "servingDescription": "1 cup",
+              "servingGrams": 244,
+              "source": "usda",
+              "sourceID": "2705409"
+            },
+            "id": "7A2024EF-CA16-4F3F-B6DB-C20BEB0C9025",
+            "unit": "oz"
+          },
+          {
+            "amount": 1,
+            "food": {
+              "barcode": "0851770003926",
+              "baseAmountGrams": 100,
+              "brand": "Orgain",
+              "name": "Organic Protein",
+              "nutrients": {
+                "calories": 326.086956521739,
+                "carbs": 32.6086956521739,
+                "fat": 7.60869565217391,
+                "protein": 45.6521739130435
+              },
+              "portions": [
+                {
+                  "grams": 46,
+                  "id": "off-serving",
+                  "label": "2 SCOOPS (46 g)"
+                }
+              ],
+              "servingDescription": "2 SCOOPS (46 g)",
+              "servingGrams": 46,
+              "source": "off",
+              "sourceID": "0851770003926"
+            },
+            "id": "BC52EEC2-622A-4B7F-BBB4-A881C547097C",
+            "portionID": "off-serving",
+            "unit": "serving"
+          }
+        ],
+        "nutrients": {
+          "calories": 475.7695760374999,
+          "carbs": 50.695050685874996,
+          "fat": 21.19136834325,
+          "protein": 29.473373151250012
+        },
+        "portionID": "saved-meal",
+        "savedMealID": "29648EB1-9DD0-49DF-91BF-1D9312F4BF9B",
+        "unit": "serving"
+      },
+      {
+        "amount": 1,
+        "date": "2026-08-04T07:00:00Z",
+        "displayOrder": -1,
+        "food": {
+          "baseAmountGrams": 100,
+          "name": "Plum, raw",
+          "nutrients": {
+            "calories": 46,
+            "carbs": 11.4,
+            "fat": 0.28,
+            "protein": 0.7
+          },
+          "portions": [
+            {
+              "grams": 75,
+              "id": "306269",
+              "label": "fruit"
+            },
+            {
+              "grams": 155,
+              "id": "306270",
+              "label": "cup"
+            },
+            {
+              "grams": 75,
+              "id": "306271",
+              "label": "serving"
+            }
+          ],
+          "servingDescription": "1 fruit",
+          "servingGrams": 75,
+          "source": "usda",
+          "sourceID": "2709265"
+        },
+        "id": "4DCEF162-7CB0-4381-BB95-E4057CBD9985",
+        "loggedAt": "2026-08-05T00:17:19Z",
+        "nutrients": {
+          "calories": 34.5,
+          "carbs": 8.55,
+          "fat": 0.21000000000000002,
+          "protein": 0.5249999999999999
+        },
+        "portionID": "306269",
+        "unit": "serving"
+      },
+      {
+        "amount": 3,
+        "date": "2026-08-04T07:00:00Z",
+        "displayOrder": -2,
+        "food": {
+          "baseAmountGrams": 100,
+          "name": "Rice, white, cooked, glutinous",
+          "nutrients": {
+            "calories": 96,
+            "carbs": 21,
+            "fat": 0.19,
+            "protein": 2.01
+          },
+          "portions": [
+            {
+              "grams": 174,
+              "id": "302922",
+              "label": "cup, cooked"
+            },
+            {
+              "grams": 130,
+              "id": "302923",
+              "label": "serving"
+            }
+          ],
+          "servingDescription": "1 cup, cooked",
+          "servingGrams": 174,
+          "source": "usda",
+          "sourceID": "2708422"
+        },
+        "id": "CEA4A470-7623-4B76-81D7-B048463F5B8B",
+        "loggedAt": "2026-08-05T01:06:26Z",
+        "nutrients": {
+          "calories": 81.6466266,
+          "carbs": 17.86019956875,
+          "fat": 0.16159228181250002,
+          "protein": 1.7094762444375
+        },
+        "unit": "oz"
+      },
+      {
+        "amount": 1,
+        "date": "2026-08-04T07:00:00Z",
+        "displayOrder": -3,
+        "food": {
+          "baseAmountGrams": 100,
+          "name": "Blueberries, raw",
+          "nutrients": {
+            "calories": 63.9,
+            "carbs": 14.6,
+            "fat": 0.306,
+            "protein": 0.703
+          },
+          "portions": [
+            {
+              "grams": 140,
+              "id": "312663",
+              "label": "RACC"
+            }
+          ],
+          "servingDescription": "1 RACC",
+          "servingGrams": 140,
+          "source": "usda",
+          "sourceID": "2346411"
+        },
+        "id": "59974BF2-D320-43A5-AED6-90288BA294ED",
+        "loggedAt": "2026-08-05T03:28:00Z",
+        "nutrients": {
+          "calories": 18.115345276875,
+          "carbs": 4.13903037625,
+          "fat": 0.08674954076250001,
+          "protein": 0.19929714756875
+        },
+        "unit": "oz"
+      },
+      {
+        "amount": 1,
+        "date": "2026-08-05T07:00:00Z",
+        "displayOrder": -1,
+        "food": {
+          "baseAmountGrams": 1,
+          "name": "Cappuccino",
+          "nutrients": {
+            "calories": 78.29872833333339,
+            "carbs": 6.643396677083338,
+            "fat": 3.833936416666663,
+            "protein": 3.815936416666663
+          },
+          "portions": [
+            {
+              "grams": 1,
+              "id": "saved-meal",
+              "label": "meal"
+            }
+          ],
+          "servingDescription": "1 meal",
+          "servingGrams": 1,
+          "source": "custom",
+          "sourceID": "saved-meal-B4176616-B011-437F-B1B6-1C8CF89B6162"
+        },
+        "id": "0B57AF52-C2FB-4C27-95CE-1C540D07797F",
+        "loggedAt": "2026-08-05T12:53:51Z",
+        "mealItems": [
+          {
+            "amount": 4,
+            "food": {
+              "barcode": "0078742351865",
+              "baseAmountGrams": 100,
+              "brand": "Great Value",
+              "name": "Whole Milk",
+              "nutrients": {
+                "calories": 66.6666666666667,
+                "carbs": 5.41666666666667,
+                "fat": 3.33333333333333,
+                "protein": 3.33333333333333
+              },
+              "servingDescription": "1 Serving (1 cup)",
+              "source": "off",
+              "sourceID": "0078742351865"
+            },
+            "id": "1FCBE3B7-FE66-4F15-B9C7-B10CCEE23690",
+            "unit": "oz"
+          },
+          {
+            "amount": 30,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Coffee, espresso",
+              "nutrients": {
+                "calories": 9,
+                "carbs": 1.67,
+                "fat": 0.18,
+                "protein": 0.12
+              },
+              "portions": [
+                {
+                  "grams": 30,
+                  "id": "310467",
+                  "label": "fl oz"
+                },
+                {
+                  "grams": 60,
+                  "id": "310468",
+                  "label": "espresso cup (2 fl oz)"
+                },
+                {
+                  "grams": 60,
+                  "id": "310469",
+                  "label": "serving"
+                }
+              ],
+              "servingDescription": "1 fl oz",
+              "servingGrams": 30,
+              "source": "usda",
+              "sourceID": "2710378"
+            },
+            "id": "68DAA32B-5B3E-46BA-8946-FF71FBECA570",
+            "unit": "g"
+          }
+        ],
+        "nutrients": {
+          "calories": 78.29872833333339,
+          "carbs": 6.643396677083338,
+          "fat": 3.833936416666663,
+          "protein": 3.815936416666663
+        },
+        "portionID": "saved-meal",
+        "savedMealID": "B4176616-B011-437F-B1B6-1C8CF89B6162",
+        "unit": "serving"
+      },
+      {
+        "amount": 1,
+        "date": "2026-08-05T07:00:00Z",
+        "displayOrder": -2,
+        "food": {
+          "baseAmountGrams": 1,
+          "name": "Protein shake",
+          "nutrients": {
+            "calories": 475.7695760374999,
+            "carbs": 50.695050685874996,
+            "fat": 21.19136834325,
+            "protein": 29.473373151250012
+          },
+          "portions": [
+            {
+              "grams": 1,
+              "id": "saved-meal",
+              "label": "meal"
+            }
+          ],
+          "servingDescription": "1 meal",
+          "servingGrams": 1,
+          "source": "custom",
+          "sourceID": "saved-meal-29648EB1-9DD0-49DF-91BF-1D9312F4BF9B"
+        },
+        "id": "D558688A-655A-4641-BF8A-A05EC7CF5F20",
+        "loggedAt": "2026-08-05T12:53:57Z",
+        "mealItems": [
+          {
+            "amount": 1,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Peanut butter",
+              "nutrients": {
+                "calories": 598,
+                "carbs": 22.3,
+                "fat": 51.4,
+                "protein": 22.2
+              },
+              "portions": [
+                {
+                  "grams": 16,
+                  "id": "298558",
+                  "label": "tablespoon"
+                },
+                {
+                  "grams": 45,
+                  "id": "298559",
+                  "label": "single serving"
+                },
+                {
+                  "grams": 16,
+                  "id": "298560",
+                  "label": "Guideline amount per slice of bread/roll"
+                },
+                {
+                  "grams": 32,
+                  "id": "298561",
+                  "label": "Guideline amount per sandwich"
+                },
+                {
+                  "grams": 32,
+                  "id": "298562",
+                  "label": "serving"
+                }
+              ],
+              "servingDescription": "1 tablespoon",
+              "servingGrams": 16,
+              "source": "usda",
+              "sourceID": "2707537"
+            },
+            "id": "35C26664-F64E-40AE-B2DC-D94F5C77AEE6",
+            "unit": "oz"
+          },
+          {
+            "amount": 1,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Banana, raw",
+              "nutrients": {
+                "calories": 97,
+                "carbs": 22.7,
+                "fat": 0.28,
+                "protein": 0.74
+              },
+              "portions": [
+                {
+                  "grams": 126,
+                  "id": "306100",
+                  "label": "banana"
+                },
+                {
+                  "grams": 6,
+                  "id": "306101",
+                  "label": "slice"
+                },
+                {
+                  "grams": 150,
+                  "id": "306102",
+                  "label": "cup"
+                },
+                {
+                  "grams": 225,
+                  "id": "306103",
+                  "label": "cup, mashed"
+                },
+                {
+                  "grams": 15,
+                  "id": "306104",
+                  "label": "linear inch"
+                },
+                {
+                  "grams": 126,
+                  "id": "306105",
+                  "label": "serving"
+                }
+              ],
+              "servingDescription": "1 banana",
+              "servingGrams": 126,
+              "source": "usda",
+              "sourceID": "2709224"
+            },
+            "id": "11CD67E7-A927-4DC6-91E2-A925C79F776B",
+            "portionID": "306100",
+            "unit": "serving"
+          },
+          {
+            "amount": 8,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Almond milk, unsweetened",
+              "nutrients": {
+                "calories": 15,
+                "carbs": 0.34,
+                "fat": 1.22,
+                "protein": 0.55
+              },
+              "portions": [
+                {
+                  "grams": 244,
+                  "id": "290628",
+                  "label": "cup"
+                },
+                {
+                  "grams": 30.5,
+                  "id": "290629",
+                  "label": "fl oz"
+                },
+                {
+                  "grams": 2.5,
+                  "id": "290630",
+                  "label": "Guideline amount per fl oz of beverage"
+                },
+                {
+                  "grams": 61,
+                  "id": "290631",
+                  "label": "Guideline amount per cup of hot cereal"
+                },
+                {
+                  "grams": 244,
+                  "id": "290632",
+                  "label": "serving"
+                }
+              ],
+              "servingDescription": "1 cup",
+              "servingGrams": 244,
+              "source": "usda",
+              "sourceID": "2705409"
+            },
+            "id": "7A2024EF-CA16-4F3F-B6DB-C20BEB0C9025",
+            "unit": "oz"
+          },
+          {
+            "amount": 1,
+            "food": {
+              "barcode": "0851770003926",
+              "baseAmountGrams": 100,
+              "brand": "Orgain",
+              "name": "Organic Protein",
+              "nutrients": {
+                "calories": 326.086956521739,
+                "carbs": 32.6086956521739,
+                "fat": 7.60869565217391,
+                "protein": 45.6521739130435
+              },
+              "portions": [
+                {
+                  "grams": 46,
+                  "id": "off-serving",
+                  "label": "2 SCOOPS (46 g)"
+                }
+              ],
+              "servingDescription": "2 SCOOPS (46 g)",
+              "servingGrams": 46,
+              "source": "off",
+              "sourceID": "0851770003926"
+            },
+            "id": "BC52EEC2-622A-4B7F-BBB4-A881C547097C",
+            "portionID": "off-serving",
+            "unit": "serving"
+          }
+        ],
+        "nutrients": {
+          "calories": 475.7695760374999,
+          "carbs": 50.695050685874996,
+          "fat": 21.19136834325,
+          "protein": 29.473373151250012
+        },
+        "portionID": "saved-meal",
+        "savedMealID": "29648EB1-9DD0-49DF-91BF-1D9312F4BF9B",
+        "unit": "serving"
+      }
+    ],
+    "favoriteMealIDs": [
+      "32B0CAC9-90A2-4CB1-932A-70F837708E83"
+    ],
+    "favorites": [
+      {
+        "baseAmountGrams": 100,
+        "name": "Honey",
+        "nutrients": {
+          "calories": 304,
+          "carbs": 82.4,
+          "fat": 0,
+          "protein": 0.3
+        },
+        "portions": [
+          {
+            "grams": 20,
+            "id": "309975",
+            "label": "tablespoon"
+          },
+          {
+            "grams": 14,
+            "id": "309976",
+            "label": "single serving container"
+          },
+          {
+            "grams": 320,
+            "id": "309977",
+            "label": "cup"
+          },
+          {
+            "grams": 2.4,
+            "id": "309978",
+            "label": "Guideline amount per fl oz of beverage"
+          },
+          {
+            "grams": 10,
+            "id": "309979",
+            "label": "Guideline amount per slice of bread/roll"
+          },
+          {
+            "grams": 7,
+            "id": "309980",
+            "label": "serving"
+          }
+        ],
+        "servingDescription": "1 tablespoon",
+        "servingGrams": 20,
+        "source": "usda",
+        "sourceID": "2710281"
+      },
+      {
+        "baseAmountGrams": 100,
+        "name": "Banana, raw",
+        "nutrients": {
+          "calories": 97,
+          "carbs": 22.7,
+          "fat": 0.28,
+          "protein": 0.74
+        },
+        "portions": [
+          {
+            "grams": 126,
+            "id": "306100",
+            "label": "banana"
+          },
+          {
+            "grams": 6,
+            "id": "306101",
+            "label": "slice"
+          },
+          {
+            "grams": 150,
+            "id": "306102",
+            "label": "cup"
+          },
+          {
+            "grams": 225,
+            "id": "306103",
+            "label": "cup, mashed"
+          },
+          {
+            "grams": 15,
+            "id": "306104",
+            "label": "linear inch"
+          },
+          {
+            "grams": 126,
+            "id": "306105",
+            "label": "serving"
+          }
+        ],
+        "servingDescription": "1 banana",
+        "servingGrams": 126,
+        "source": "usda",
+        "sourceID": "2709224"
+      },
+      {
+        "baseAmountGrams": 100,
+        "name": "Pistachios",
+        "nutrients": {
+          "calories": 572,
+          "carbs": 28.3,
+          "fat": 45.8,
+          "protein": 21
+        },
+        "portions": [
+          {
+            "grams": 0.5,
+            "id": "298498",
+            "label": "nut"
+          },
+          {
+            "grams": 128,
+            "id": "298499",
+            "label": "cup, without shell"
+          },
+          {
+            "grams": 58,
+            "id": "298500",
+            "label": "cup, in shell, yields"
+          },
+          {
+            "grams": 58,
+            "id": "298501",
+            "label": "cup, NFS"
+          },
+          {
+            "grams": 28.35,
+            "id": "298502",
+            "label": "oz, without shell"
+          },
+          {
+            "grams": 15,
+            "id": "298503",
+            "label": "oz, in shell, yields"
+          },
+          {
+            "grams": 28.35,
+            "id": "298504",
+            "label": "oz, NFS"
+          },
+          {
+            "grams": 50,
+            "id": "298505",
+            "label": "package"
+          },
+          {
+            "grams": 28,
+            "id": "298506",
+            "label": "serving"
+          }
+        ],
+        "servingDescription": "1 nut",
+        "servingGrams": 0.5,
+        "source": "usda",
+        "sourceID": "2707527"
+      },
+      {
+        "baseAmountGrams": 100,
+        "name": "Butter, stick",
+        "nutrients": {
+          "calories": 743,
+          "carbs": 0.06,
+          "fat": 82.2,
+          "protein": 0.85
+        },
+        "servingDescription": "1 1 stick",
+        "servingGrams": 113,
+        "source": "usda",
+        "sourceID": "2710155"
+      },
+      {
+        "baseAmountGrams": 100,
+        "name": "Eggs, Grade A, Large, egg yolk",
+        "nutrients": {
+          "calories": 334,
+          "carbs": 1.02,
+          "fat": 28.8,
+          "protein": 16.2
+        },
+        "servingDescription": "1 yolk",
+        "servingGrams": 17,
+        "source": "usda",
+        "sourceID": "748236"
+      },
+      {
+        "baseAmountGrams": 100,
+        "name": "Cheese, cheddar",
+        "nutrients": {
+          "calories": 408,
+          "carbs": 2.44,
+          "fat": 34,
+          "protein": 23.3
+        },
+        "servingDescription": "1 slice",
+        "servingGrams": 17,
+        "source": "usda",
+        "sourceID": "328637"
+      },
+      {
+        "baseAmountGrams": 100,
+        "name": "Peanut butter",
+        "nutrients": {
+          "calories": 598,
+          "carbs": 22.3,
+          "fat": 51.4,
+          "protein": 22.2
+        },
+        "portions": [
+          {
+            "grams": 16,
+            "id": "298558",
+            "label": "tablespoon"
+          },
+          {
+            "grams": 45,
+            "id": "298559",
+            "label": "single serving"
+          },
+          {
+            "grams": 16,
+            "id": "298560",
+            "label": "Guideline amount per slice of bread/roll"
+          },
+          {
+            "grams": 32,
+            "id": "298561",
+            "label": "Guideline amount per sandwich"
+          },
+          {
+            "grams": 32,
+            "id": "298562",
+            "label": "serving"
+          }
+        ],
+        "servingDescription": "1 tablespoon",
+        "servingGrams": 16,
+        "source": "usda",
+        "sourceID": "2707537"
+      },
+      {
+        "baseAmountGrams": 100,
+        "name": "Egg, whole, raw",
+        "nutrients": {
+          "calories": 143,
+          "carbs": 0.96,
+          "fat": 9.96,
+          "protein": 12.4
+        },
+        "portions": [
+          {
+            "grams": 50,
+            "id": "297263",
+            "label": "egg"
+          },
+          {
+            "grams": 245,
+            "id": "297264",
+            "label": "cup"
+          },
+          {
+            "grams": 50,
+            "id": "297265",
+            "label": "serving"
+          }
+        ],
+        "servingDescription": "1 egg",
+        "servingGrams": 50,
+        "source": "usda",
+        "sourceID": "2707152"
+      }
+    ],
+    "importedFoods": [],
+    "meals": [
+      {
+        "id": "3C4BA44C-33D9-4055-8F85-9B91654AB55C",
+        "items": [
+          {
+            "amount": 0.3,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Honey",
+              "nutrients": {
+                "calories": 304,
+                "carbs": 82.4,
+                "fat": 0,
+                "protein": 0.3
+              },
+              "portions": [
+                {
+                  "grams": 20,
+                  "id": "309975",
+                  "label": "tablespoon"
+                },
+                {
+                  "grams": 14,
+                  "id": "309976",
+                  "label": "single serving container"
+                },
+                {
+                  "grams": 320,
+                  "id": "309977",
+                  "label": "cup"
+                },
+                {
+                  "grams": 2.4,
+                  "id": "309978",
+                  "label": "Guideline amount per fl oz of beverage"
+                },
+                {
+                  "grams": 10,
+                  "id": "309979",
+                  "label": "Guideline amount per slice of bread/roll"
+                },
+                {
+                  "grams": 7,
+                  "id": "309980",
+                  "label": "serving"
+                }
+              ],
+              "servingDescription": "1 tablespoon",
+              "servingGrams": 20,
+              "source": "usda",
+              "sourceID": "2710281"
+            },
+            "id": "709FB83B-3EFE-40A1-9273-830BC57679E5",
+            "portionID": "309975",
+            "unit": "serving"
+          },
+          {
+            "amount": 1,
+            "food": {
+              "baseAmountGrams": 1,
+              "name": "Chili, no rice",
+              "nutrients": {
+                "calories": 1003.22924745,
+                "carbs": 56.238409041,
+                "fat": 55.53543728750003,
+                "protein": 66.02583008875
+              },
+              "portions": [
+                {
+                  "grams": 1,
+                  "id": "saved-meal",
+                  "label": "meal"
+                }
+              ],
+              "servingDescription": "1 meal",
+              "servingGrams": 1,
+              "source": "custom",
+              "sourceID": "saved-meal-32B0CAC9-90A2-4CB1-932A-70F837708E83"
+            },
+            "id": "71C7E913-25AD-44A3-840C-84572D8A4EED",
+            "portionID": "saved-meal",
+            "unit": "serving"
+          }
+        ],
+        "name": "Test"
+      },
+      {
+        "id": "32B0CAC9-90A2-4CB1-932A-70F837708E83",
+        "items": [
+          {
+            "amount": 3,
+            "food": {
+              "barcode": "0073420000110",
+              "baseAmountGrams": 100,
+              "brand": "Daisy",
+              "name": "Sour Cream",
+              "nutrients": {
+                "calories": 200,
+                "carbs": 3.33333333333333,
+                "fat": 16.6666666666667,
+                "protein": 3.33333333333333
+              },
+              "portions": [
+                {
+                  "grams": 30,
+                  "id": "off-serving",
+                  "label": "2 tbsp (30 g)"
+                }
+              ],
+              "servingDescription": "2 tbsp (30 g)",
+              "servingGrams": 30,
+              "source": "off",
+              "sourceID": "0073420000110"
+            },
+            "id": "E7264627-3265-4E12-B766-3F6E9EC7AE11",
+            "unit": "oz"
+          },
+          {
+            "amount": 2,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Cheese, cheddar",
+              "nutrients": {
+                "calories": 408,
+                "carbs": 2.44,
+                "fat": 34,
+                "protein": 23.3
+              },
+              "servingDescription": "1 slice",
+              "servingGrams": 17,
+              "source": "usda",
+              "sourceID": "328637"
+            },
+            "id": "EDE5BFA6-B280-44B2-8F1E-2885CFDFAA5C",
+            "unit": "oz"
+          },
+          {
+            "amount": 2,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Chili with meat and beans",
+              "nutrients": {
+                "calories": 118,
+                "carbs": 10.2,
+                "fat": 4.33,
+                "protein": 9.8
+              },
+              "portions": [
+                {
+                  "grams": 255,
+                  "id": "295109",
+                  "label": "cup"
+                },
+                {
+                  "grams": 255,
+                  "id": "295110",
+                  "label": "serving"
+                }
+              ],
+              "servingDescription": "1 cup",
+              "servingGrams": 255,
+              "source": "usda",
+              "sourceID": "2706375"
+            },
+            "id": "36B31130-95BB-43D7-8CF7-993B6857E246",
+            "portionID": "295109",
+            "unit": "serving"
+          }
+        ],
+        "name": "Chili, no rice"
+      },
+      {
+        "id": "10F80352-06D8-4ABB-9357-32131DF55242",
+        "items": [
+          {
+            "amount": 1.2,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Mayonnaise, regular",
+              "nutrients": {
+                "calories": 680,
+                "carbs": 0.57,
+                "fat": 74.8,
+                "protein": 0.96
+              },
+              "portions": [
+                {
+                  "grams": 220,
+                  "id": "309655",
+                  "label": "cup"
+                },
+                {
+                  "grams": 13.8,
+                  "id": "309656",
+                  "label": "tablespoon"
+                },
+                {
+                  "grams": 12,
+                  "id": "309657",
+                  "label": "packet"
+                },
+                {
+                  "grams": 9,
+                  "id": "309658",
+                  "label": "serving"
+                },
+                {
+                  "grams": 28,
+                  "id": "309659",
+                  "label": "dipping-size container"
+                },
+                {
+                  "grams": 14,
+                  "id": "309660",
+                  "label": "Guideline amount on regular sandwich"
+                },
+                {
+                  "grams": 28,
+                  "id": "309661",
+                  "label": "Guideline amount on large sandwich"
+                },
+                {
+                  "grams": 28,
+                  "id": "309662",
+                  "label": "Guideline amount in salad"
+                }
+              ],
+              "servingDescription": "1 cup",
+              "servingGrams": 220,
+              "source": "usda",
+              "sourceID": "2710204"
+            },
+            "id": "C0A6C68C-A6F2-4502-9607-12A49C3F83CE",
+            "unit": "oz"
+          },
+          {
+            "amount": 3.2,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Turkey, white, rotisserie, deli cut",
+              "nutrients": {
+                "calories": 112,
+                "carbs": 7.7,
+                "fat": 3,
+                "protein": 13.5
+              },
+              "portions": [
+                {
+                  "grams": 48,
+                  "id": "94663",
+                  "label": "1.69 oz (1 serving)"
+                }
+              ],
+              "servingDescription": "1 1.69 oz (1 serving)",
+              "servingGrams": 48,
+              "source": "usda",
+              "sourceID": "174613"
+            },
+            "id": "F0860D21-9A73-4665-944E-78581117FE53",
+            "unit": "oz"
+          },
+          {
+            "amount": 1.6,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Cheese, cheddar",
+              "nutrients": {
+                "calories": 408,
+                "carbs": 2.44,
+                "fat": 34,
+                "protein": 23.3
+              },
+              "servingDescription": "1 slice",
+              "servingGrams": 17,
+              "source": "usda",
+              "sourceID": "328637"
+            },
+            "id": "829E18E6-A1C5-482B-AAA5-F68DD359551E",
+            "unit": "oz"
+          },
+          {
+            "amount": 2.7,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Bread, white",
+              "nutrients": {
+                "calories": 267,
+                "carbs": 49.2,
+                "fat": 3.59,
+                "protein": 9.43
+              },
+              "portions": [
+                {
+                  "grams": 24,
+                  "id": "298809",
+                  "label": "small or thin/very thin slice"
+                },
+                {
+                  "grams": 28,
+                  "id": "298810",
+                  "label": "medium or regular slice"
+                },
+                {
+                  "grams": 43,
+                  "id": "298811",
+                  "label": "large or thick slice"
+                },
+                {
+                  "grams": 13,
+                  "id": "298812",
+                  "label": "slice, crust not eaten"
+                },
+                {
+                  "grams": 10,
+                  "id": "298813",
+                  "label": "slice, snack-size"
+                },
+                {
+                  "grams": 40,
+                  "id": "298814",
+                  "label": "cup"
+                },
+                {
+                  "grams": 2.8,
+                  "id": "298815",
+                  "label": "cubic inch"
+                },
+                {
+                  "grams": 28,
+                  "id": "298816",
+                  "label": "serving"
+                }
+              ],
+              "servingDescription": "1 small or thin/very thin slice",
+              "servingGrams": 24,
+              "source": "usda",
+              "sourceID": "2707598"
+            },
+            "id": "0AB771E7-4368-4F3B-9E75-A59268C0622D",
+            "unit": "oz"
+          }
+        ],
+        "name": "Turkey sandwich"
+      },
+      {
+        "id": "F77EC203-3BB0-421B-BB27-900DDF210DB4",
+        "items": [
+          {
+            "amount": 1,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Tea, hot, herbal",
+              "nutrients": {
+                "calories": 1,
+                "carbs": 0.2,
+                "fat": 0,
+                "protein": 0
+              },
+              "portions": [
+                {
+                  "grams": 30,
+                  "id": "311085",
+                  "label": "fl oz"
+                },
+                {
+                  "grams": 360,
+                  "id": "311086",
+                  "label": "serving"
+                },
+                {
+                  "grams": 240,
+                  "id": "311087",
+                  "label": "cup"
+                },
+                {
+                  "grams": 360,
+                  "id": "311088",
+                  "label": "small"
+                },
+                {
+                  "grams": 480,
+                  "id": "311089",
+                  "label": "medium"
+                },
+                {
+                  "grams": 600,
+                  "id": "311090",
+                  "label": "large"
+                }
+              ],
+              "servingDescription": "1 fl oz",
+              "servingGrams": 30,
+              "source": "usda",
+              "sourceID": "2710502"
+            },
+            "id": "E416C2CC-18AC-46B6-A095-4F6E0313DD43",
+            "unit": "oz"
+          },
+          {
+            "amount": 0.3,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Honey",
+              "nutrients": {
+                "calories": 304,
+                "carbs": 82.4,
+                "fat": 0,
+                "protein": 0.3
+              },
+              "portions": [
+                {
+                  "grams": 20,
+                  "id": "309975",
+                  "label": "tablespoon"
+                },
+                {
+                  "grams": 14,
+                  "id": "309976",
+                  "label": "single serving container"
+                },
+                {
+                  "grams": 320,
+                  "id": "309977",
+                  "label": "cup"
+                },
+                {
+                  "grams": 2.4,
+                  "id": "309978",
+                  "label": "Guideline amount per fl oz of beverage"
+                },
+                {
+                  "grams": 10,
+                  "id": "309979",
+                  "label": "Guideline amount per slice of bread/roll"
+                },
+                {
+                  "grams": 7,
+                  "id": "309980",
+                  "label": "serving"
+                }
+              ],
+              "servingDescription": "1 tablespoon",
+              "servingGrams": 20,
+              "source": "usda",
+              "sourceID": "2710281"
+            },
+            "id": "CBA21ACA-E934-4CF2-A090-67F96B93C74F",
+            "portionID": "309975",
+            "unit": "serving"
+          }
+        ],
+        "name": "Tea with honey"
+      },
+      {
+        "id": "B4176616-B011-437F-B1B6-1C8CF89B6162",
+        "items": [
+          {
+            "amount": 4,
+            "food": {
+              "barcode": "0078742351865",
+              "baseAmountGrams": 100,
+              "brand": "Great Value",
+              "name": "Whole Milk",
+              "nutrients": {
+                "calories": 66.6666666666667,
+                "carbs": 5.41666666666667,
+                "fat": 3.33333333333333,
+                "protein": 3.33333333333333
+              },
+              "servingDescription": "1 Serving (1 cup)",
+              "source": "off",
+              "sourceID": "0078742351865"
+            },
+            "id": "1FCBE3B7-FE66-4F15-B9C7-B10CCEE23690",
+            "unit": "oz"
+          },
+          {
+            "amount": 30,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Coffee, espresso",
+              "nutrients": {
+                "calories": 9,
+                "carbs": 1.67,
+                "fat": 0.18,
+                "protein": 0.12
+              },
+              "portions": [
+                {
+                  "grams": 30,
+                  "id": "310467",
+                  "label": "fl oz"
+                },
+                {
+                  "grams": 60,
+                  "id": "310468",
+                  "label": "espresso cup (2 fl oz)"
+                },
+                {
+                  "grams": 60,
+                  "id": "310469",
+                  "label": "serving"
+                }
+              ],
+              "servingDescription": "1 fl oz",
+              "servingGrams": 30,
+              "source": "usda",
+              "sourceID": "2710378"
+            },
+            "id": "68DAA32B-5B3E-46BA-8946-FF71FBECA570",
+            "unit": "g"
+          }
+        ],
+        "name": "Cappuccino"
+      },
+      {
+        "id": "29648EB1-9DD0-49DF-91BF-1D9312F4BF9B",
+        "items": [
+          {
+            "amount": 1,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Peanut butter",
+              "nutrients": {
+                "calories": 598,
+                "carbs": 22.3,
+                "fat": 51.4,
+                "protein": 22.2
+              },
+              "portions": [
+                {
+                  "grams": 16,
+                  "id": "298558",
+                  "label": "tablespoon"
+                },
+                {
+                  "grams": 45,
+                  "id": "298559",
+                  "label": "single serving"
+                },
+                {
+                  "grams": 16,
+                  "id": "298560",
+                  "label": "Guideline amount per slice of bread/roll"
+                },
+                {
+                  "grams": 32,
+                  "id": "298561",
+                  "label": "Guideline amount per sandwich"
+                },
+                {
+                  "grams": 32,
+                  "id": "298562",
+                  "label": "serving"
+                }
+              ],
+              "servingDescription": "1 tablespoon",
+              "servingGrams": 16,
+              "source": "usda",
+              "sourceID": "2707537"
+            },
+            "id": "35C26664-F64E-40AE-B2DC-D94F5C77AEE6",
+            "unit": "oz"
+          },
+          {
+            "amount": 1,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Banana, raw",
+              "nutrients": {
+                "calories": 97,
+                "carbs": 22.7,
+                "fat": 0.28,
+                "protein": 0.74
+              },
+              "portions": [
+                {
+                  "grams": 126,
+                  "id": "306100",
+                  "label": "banana"
+                },
+                {
+                  "grams": 6,
+                  "id": "306101",
+                  "label": "slice"
+                },
+                {
+                  "grams": 150,
+                  "id": "306102",
+                  "label": "cup"
+                },
+                {
+                  "grams": 225,
+                  "id": "306103",
+                  "label": "cup, mashed"
+                },
+                {
+                  "grams": 15,
+                  "id": "306104",
+                  "label": "linear inch"
+                },
+                {
+                  "grams": 126,
+                  "id": "306105",
+                  "label": "serving"
+                }
+              ],
+              "servingDescription": "1 banana",
+              "servingGrams": 126,
+              "source": "usda",
+              "sourceID": "2709224"
+            },
+            "id": "11CD67E7-A927-4DC6-91E2-A925C79F776B",
+            "portionID": "306100",
+            "unit": "serving"
+          },
+          {
+            "amount": 8,
+            "food": {
+              "baseAmountGrams": 100,
+              "name": "Almond milk, unsweetened",
+              "nutrients": {
+                "calories": 15,
+                "carbs": 0.34,
+                "fat": 1.22,
+                "protein": 0.55
+              },
+              "portions": [
+                {
+                  "grams": 244,
+                  "id": "290628",
+                  "label": "cup"
+                },
+                {
+                  "grams": 30.5,
+                  "id": "290629",
+                  "label": "fl oz"
+                },
+                {
+                  "grams": 2.5,
+                  "id": "290630",
+                  "label": "Guideline amount per fl oz of beverage"
+                },
+                {
+                  "grams": 61,
+                  "id": "290631",
+                  "label": "Guideline amount per cup of hot cereal"
+                },
+                {
+                  "grams": 244,
+                  "id": "290632",
+                  "label": "serving"
+                }
+              ],
+              "servingDescription": "1 cup",
+              "servingGrams": 244,
+              "source": "usda",
+              "sourceID": "2705409"
+            },
+            "id": "7A2024EF-CA16-4F3F-B6DB-C20BEB0C9025",
+            "unit": "oz"
+          },
+          {
+            "amount": 1,
+            "food": {
+              "barcode": "0851770003926",
+              "baseAmountGrams": 100,
+              "brand": "Orgain",
+              "name": "Organic Protein",
+              "nutrients": {
+                "calories": 326.086956521739,
+                "carbs": 32.6086956521739,
+                "fat": 7.60869565217391,
+                "protein": 45.6521739130435
+              },
+              "portions": [
+                {
+                  "grams": 46,
+                  "id": "off-serving",
+                  "label": "2 SCOOPS (46 g)"
+                }
+              ],
+              "servingDescription": "2 SCOOPS (46 g)",
+              "servingGrams": 46,
+              "source": "off",
+              "sourceID": "0851770003926"
+            },
+            "id": "BC52EEC2-622A-4B7F-BBB4-A881C547097C",
+            "portionID": "off-serving",
+            "unit": "serving"
+          }
+        ],
+        "name": "Protein shake"
+      }
+    ],
+    "rememberedQuantities": {
+      "off:0073420000110": {
+        "amount": 3,
+        "unit": "oz"
+      },
+      "off:0078742351865": {
+        "amount": 4,
+        "unit": "oz"
+      },
+      "off:0747479000413": {
+        "amount": 5,
+        "unit": "oz"
+      },
+      "off:0851770003926": {
+        "amount": 1,
+        "portionID": "off-serving",
+        "unit": "serving"
+      },
+      "usda:173328": {
+        "amount": 16,
+        "unit": "oz"
+      },
+      "usda:174613": {
+        "amount": 3.2,
+        "unit": "oz"
+      },
+      "usda:2346411": {
+        "amount": 1,
+        "unit": "oz"
+      },
+      "usda:2705409": {
+        "amount": 8,
+        "unit": "oz"
+      },
+      "usda:2705730": {
+        "amount": 2,
+        "unit": "oz"
+      },
+      "usda:2706375": {
+        "amount": 2,
+        "portionID": "295109",
+        "unit": "serving"
+      },
+      "usda:2707527": {
+        "amount": 1,
+        "unit": "oz"
+      },
+      "usda:2707537": {
+        "amount": 1,
+        "unit": "oz"
+      },
+      "usda:2707598": {
+        "amount": 2.7,
+        "unit": "oz"
+      },
+      "usda:2708422": {
+        "amount": 3,
+        "unit": "oz"
+      },
+      "usda:2709224": {
+        "amount": 1,
+        "portionID": "306100",
+        "unit": "serving"
+      },
+      "usda:2709265": {
+        "amount": 1,
+        "portionID": "306269",
+        "unit": "serving"
+      },
+      "usda:2710155": {
+        "amount": 1,
+        "unit": "oz"
+      },
+      "usda:2710204": {
+        "amount": 1.2,
+        "unit": "oz"
+      },
+      "usda:2710281": {
+        "amount": 0.3,
+        "portionID": "309975",
+        "unit": "serving"
+      },
+      "usda:2710378": {
+        "amount": 30,
+        "unit": "g"
+      },
+      "usda:2710502": {
+        "amount": 1,
+        "unit": "oz"
+      },
+      "usda:328637": {
+        "amount": 2,
+        "unit": "oz"
+      },
+      "usda:748236": {
+        "amount": 4,
+        "portionID": "legacy-serving",
+        "unit": "serving"
+      }
+    },
+    "schemaVersion": 1
+  }
+}
+

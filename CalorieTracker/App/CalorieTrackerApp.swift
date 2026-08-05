@@ -44,6 +44,19 @@ private enum LaunchConfiguration {
             }
             return store
         }
+
+        #if targetEnvironment(simulator)
+        let usesDefaultSimulatorFixture = environment["CALORIE_TRACKER_DISABLE_SIMULATOR_FIXTURE"] != "1"
+        #else
+        let usesDefaultSimulatorFixture = false
+        #endif
+
+        if environment["CALORIE_TRACKER_FIXTURE"] == "device" || usesDefaultSimulatorFixture {
+            return DiaryFixtureLoader.makeDeviceStore(
+                healthKit: healthKit,
+                reset: environment["CALORIE_TRACKER_FIXTURE_RESET"] == "1" || usesDefaultSimulatorFixture
+            )
+        }
 #endif
         return DiaryStore(healthKit: healthKit)
     }

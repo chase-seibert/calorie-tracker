@@ -56,6 +56,22 @@ Imported rows become diary entries and unique foods become the MyFitnessPal
 source. The mapping is deliberately isolated because the exact export supplied
 by the user may require a small adapter update.
 
+## Simulator fixture mode
+
+Debug builds running in the iOS Simulator load the checked-in
+`CalorieTracker/Resources/Fixtures/DeviceDiaryFixture.json` instead of the
+normal Application Support diary. The fixture is a date-relative snapshot of
+the device diary: its captured current day is rebased to the simulator's
+current day at launch, preserving the previous day's history and leaving the
+next day empty. It includes the captured goal, favorites, saved meals,
+remembered quantities, renamed food names, and all available diary history.
+
+`make sim-launch` resets the fixture before each launch. Use
+`make sim-launch SIMULATOR_FIXTURE=none` for a normal simulator diary. In
+Xcode, set `CALORIE_TRACKER_DISABLE_SIMULATOR_FIXTURE=1` for the same result.
+UI tests can opt into the same data with `CALORIE_TRACKER_FIXTURE=device` and
+`CALORIE_TRACKER_FIXTURE_RESET=1`.
+
 ## UI testing
 
 The UI-test target launches against an isolated temporary diary when the
