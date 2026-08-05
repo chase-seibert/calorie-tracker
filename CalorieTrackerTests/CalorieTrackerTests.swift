@@ -25,8 +25,10 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(progress.goal, 2_000)
         XCTAssertEqual(progress.remaining, 765)
         XCTAssertEqual(progress.fraction ?? -1, 0.6175, accuracy: 0.0001)
-        XCTAssertEqual(DailyCalorieProgress(calories: 2_100, goal: 2_000).remaining, 0)
-        XCTAssertEqual(DailyCalorieProgress(calories: 2_100, goal: 2_000).fraction, 1)
+        let overGoal = DailyCalorieProgress(calories: 2_100, goal: 2_000)
+        XCTAssertEqual(overGoal.remaining, 0)
+        XCTAssertEqual(overGoal.over, 100)
+        XCTAssertEqual(overGoal.fraction, 1)
         XCTAssertEqual(
             DailyCalorieProgress(calories: 1_234.4, goal: nil).accessibilityLabel,
             "1234 calories"
@@ -35,6 +37,7 @@ final class CalorieTrackerTests: XCTestCase {
             DailyCalorieProgress(calories: 1_234.4, goal: 2_000).accessibilityLabel,
             "1234 calories, 766 left"
         )
+        XCTAssertEqual(overGoal.accessibilityLabel, "2100 calories, 100 over")
     }
 
     @MainActor

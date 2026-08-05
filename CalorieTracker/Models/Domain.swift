@@ -58,21 +58,28 @@ struct DailyCalorieProgress: Equatable, Sendable {
     let consumed: Int
     let goal: Int?
     let remaining: Int?
+    let over: Int?
     let fraction: Double?
 
     init(calories: Double, goal: Int?) {
         consumed = Int(calories.rounded())
         self.goal = goal.flatMap { $0 > 0 ? $0 : nil }
         if let goal = self.goal {
-            remaining = max(goal - consumed, 0)
+            let difference = goal - consumed
+            remaining = max(difference, 0)
+            over = max(-difference, 0)
             fraction = min(max(Double(consumed) / Double(goal), 0), 1)
         } else {
             remaining = nil
+            over = nil
             fraction = nil
         }
     }
 
     var accessibilityLabel: String {
+        if let over, over > 0 {
+            return "\(consumed) calories, \(over) over"
+        }
         if let remaining {
             return "\(consumed) calories, \(remaining) left"
         }

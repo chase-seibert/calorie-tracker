@@ -351,6 +351,7 @@ private struct DateStrip: View {
 private struct CalorieProgressIcon: View {
     let progress: Double?
     let remaining: Int?
+    let over: Int?
 
     var body: some View {
         VStack(spacing: 3) {
@@ -376,8 +377,14 @@ private struct CalorieProgressIcon: View {
                         .rotationEffect(.degrees(-90))
                 }
             }
+            .frame(width: 60, height: 60)
 
-            if let remaining {
+            if let over, over > 0 {
+                Text("\(over.formatted()) over")
+                    .font(.caption2.weight(.semibold).monospacedDigit())
+                    .foregroundStyle(AppTheme.muted)
+                    .fixedSize()
+            } else if let remaining {
                 Text("\(remaining.formatted()) left")
                     .font(.caption2.weight(.semibold).monospacedDigit())
                     .foregroundStyle(AppTheme.muted)
@@ -425,7 +432,8 @@ private struct MacroSummary: View {
                 Spacer()
                 CalorieProgressIcon(
                     progress: calorieProgress.fraction,
-                    remaining: calorieProgress.remaining
+                    remaining: calorieProgress.remaining,
+                    over: calorieProgress.over
                 )
             }
             VStack(spacing: 10) {
