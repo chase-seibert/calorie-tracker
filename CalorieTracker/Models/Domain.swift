@@ -211,6 +211,18 @@ struct SavedMeal: Codable, Hashable, Identifiable, Sendable {
     }
 }
 
+enum FoodPickerItem: Identifiable, Hashable, Sendable {
+    case food(Food)
+    case meal(SavedMeal)
+
+    var id: String {
+        switch self {
+        case let .food(food): "food:\(food.id)"
+        case let .meal(meal): "meal:\(meal.id.uuidString)"
+        }
+    }
+}
+
 struct DiaryDocument: Codable, Sendable {
     var schemaVersion = 2
     var dailyCalorieGoal: Int? = nil

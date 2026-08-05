@@ -200,6 +200,13 @@ final class DiaryStore: ObservableObject {
         }
     }
 
+    var favoriteItems: [FoodPickerItem] {
+        interspersedItems(
+            foods: document.favorites,
+            meals: favoriteMeals
+        )
+    }
+
     func isFavorite(_ meal: SavedMeal) -> Bool {
         document.favoriteMealIDs.contains(meal.id)
     }
@@ -221,6 +228,20 @@ final class DiaryStore: ObservableObject {
         )
     }
 
+    var recentItems: [FoodPickerItem] {
+        var seen = Set<String>()
+        return document.entries
+            .sorted { $0.loggedAt > $1.loggedAt }
+            .compactMap { entry -> FoodPickerItem? in
+                guard let item = pickerItem(for: entry), seen.insert(item.id).inserted else {
+                    return nil
+                }
+                return item
+            }
+            .prefix(30)
+            .map { $0 }
+    }
+
     var frequentFoods: [Food] {
         let cutoff = calendar.date(byAdding: .day, value: -90, to: Date()) ?? .distantPast
         let recentEntries = document.entries.filter { $0.date >= cutoff && !$0.isMeal }
@@ -235,6 +256,27 @@ final class DiaryStore: ObservableObject {
             .compactMap { $0.max(by: { $0.loggedAt < $1.loggedAt })?.food }
             .prefix(30)
             .map(displayedFood)
+    }
+
+    var frequentItems: [FoodPickerItem] {
+        let cutoff = calendar.date(byAdding: .day, value: -90, to: Date()) ?? .distantPast
+        let recentEntries = document.entries.filter { $0.date >= cutoff }
+        let grouped = Dictionary(grouping: recentEntries, by: pickerItemKey(for:))
+
+        return grouped.values
+            .compactMap { entries -> (item: FoodPickerItem, count: Int, latest: Date)? in
+                guard
+                    let latestEntry = entries.max(by: { $0.loggedAt < $1.loggedAt }),
+                    let item = pickerItem(for: latestEntry)
+                else { return nil }
+                return (item, entries.count, latestEntry.loggedAt)
+            }
+            .sorted {
+                if $0.count == $1.count { return $0.latest > $1.latest }
+                return $0.count > $1.count
+            }
+            .prefix(30)
+            .map(\.item)
     }
 
     func addCustomFood(
@@ -533,6 +575,42 @@ final class DiaryStore: ObservableObject {
             if foods.count == limit { break }
         }
         return foods
+    }
+
+    private func pickerItem(for entry: DiaryEntry) -> FoodPickerItem? {
+        if entry.isMeal {
+            guard
+                let savedMealID = entry.savedMealID,
+                let meal = document.meals.first(where: { $0.id == savedMealID })
+            else { return nil }
+            return .meal(meal)
+        }
+        return .food(displayedFood(entry.food))
+    }
+
+    private func pickerItemKey(for entry: DiaryEntry) -> String {
+        if let savedMealID = entry.savedMealID {
+            return "meal:\(savedMealID.uuidString)"
+        }
+        return "food:\(entry.food.id)"
+    }
+
+    private func interspersedItems(foods: [Food], meals: [SavedMeal]) -> [FoodPickerItem] {
+        var items: [FoodPickerItem] = []
+        var foodIndex = 0
+        var mealIndex = 0
+
+        while foodIndex < foods.count || mealIndex < meals.count {
+            if foodIndex < foods.count {
+                items.append(.food(displayedFood(foods[foodIndex])))
+                foodIndex += 1
+            }
+            if mealIndex < meals.count {
+                items.append(.meal(meals[mealIndex]))
+                mealIndex += 1
+            }
+        }
+        return items
     }
 
     private var personalFoods: [Food] {

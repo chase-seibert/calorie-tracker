@@ -577,6 +577,38 @@ final class CalorieTrackerTests: XCTestCase {
     }
 
     @MainActor
+    func testRecentAndFrequentItemsMixSavedMealsWithFoods() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let store = DiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
+        let toast = Food(
+            sourceID: "mixed-toast",
+            source: .custom,
+            name: "Toast",
+            brand: nil,
+            barcode: nil,
+            nutrients: MacroNutrients(calories: 100, carbs: 20, fat: 1, protein: 3),
+            baseAmountGrams: 100,
+            servingGrams: nil,
+            servingDescription: nil
+        )
+        store.saveMeal(
+            name: "Breakfast",
+            items: [MealItem(id: UUID(), food: toast, amount: 100, unit: .grams)]
+        )
+        let breakfast = try XCTUnwrap(store.document.meals.first)
+        let day = Date()
+
+        store.log(toast, amount: 100, unit: .grams, on: day)
+        store.logMeal(breakfast, on: day)
+        store.logMeal(breakfast, on: day)
+
+        XCTAssertEqual(store.recentItems.count, 2)
+        XCTAssertTrue(store.recentItems.contains { if case .meal = $0 { true } else { false } })
+        XCTAssertTrue(store.recentItems.contains { if case .food = $0 { true } else { false } })
+        XCTAssertEqual(store.frequentItems.first?.id, "meal:\(breakfast.id.uuidString)")
+    }
+
+    @MainActor
     func testMealQuantityScalesMacrosAndConstituentFoodsWhenLoggedAndEdited() throws {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let fileURL = folder.appendingPathComponent("diary.json")

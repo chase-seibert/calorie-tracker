@@ -17,7 +17,7 @@ struct FoodPickerView: View {
     let date: Date
     let catalog: CatalogStore
 
-    @State private var mode: Mode = .recent
+    @State private var mode: Mode?
     @State private var selectedFood: Food?
     @State private var selectedMeal: SavedMeal?
     @State private var query = ProcessInfo.processInfo.arguments.contains("--show-food-search") ? "banana" : ""
@@ -43,45 +43,61 @@ struct FoodPickerView: View {
                             onEdit: { selectedFood = $0 }
                         )
                     } else {
-                        switch mode {
-                        case .recent:
-                            QuickFoodList(
-                                title: "Logged recently",
-                                emptyMessage: "Foods you log will appear here.",
-                                foods: diary.recentFoods,
-                                onQuickLog: quickLog,
-                                onEdit: { selectedFood = $0 }
+                        if let mode {
+                            switch mode {
+                            case .recent:
+                                FoodPickerList(
+                                    title: "Logged recently",
+                                    emptyTitle: "No suggestions yet",
+                                    emptyMessage: "Foods or meals you log will appear here.",
+                                    items: diary.recentItems,
+                                    onQuickLogFood: quickLog,
+                                    onEditFood: { selectedFood = $0 },
+                                    onQuickLogMeal: logMeal,
+                                    onEditMeal: { selectedMeal = $0 },
+                                    onDeleteMeal: diary.deleteMeal
+                                )
+                            case .frequent:
+                                FoodPickerList(
+                                    title: "Most used · 90 days",
+                                    emptyTitle: "No suggestions yet",
+                                    emptyMessage: "Your most-used foods and meals will appear here.",
+                                    items: diary.frequentItems,
+                                    onQuickLogFood: quickLog,
+                                    onEditFood: { selectedFood = $0 },
+                                    onQuickLogMeal: logMeal,
+                                    onEditMeal: { selectedMeal = $0 },
+                                    onDeleteMeal: diary.deleteMeal
+                                )
+                            case .favorites:
+                                FoodPickerList(
+                                    title: nil,
+                                    emptyTitle: "No favorites",
+                                    emptyMessage: "Star any food or meal to keep it here.",
+                                    items: diary.favoriteItems,
+                                    onQuickLogFood: quickLog,
+                                    onEditFood: { selectedFood = $0 },
+                                    onQuickLogMeal: logMeal,
+                                    onEditMeal: { selectedMeal = $0 },
+                                    onDeleteMeal: diary.deleteMeal
+                                )
+                            case .meals:
+                                MealsList(
+                                    onQuickLog: { meal in
+                                        diary.logMeal(meal, on: date)
+                                        dismiss()
+                                    },
+                                    onEdit: { selectedMeal = $0 }
+                                )
+                            case .scan:
+                                BarcodeLookup(catalog: catalog, onSelect: { selectedFood = diary.displayedFood($0) })
+                            }
+                        } else {
+                            ContentUnavailableView(
+                                "Search for food",
+                                systemImage: "magnifyingglass",
+                                description: Text("Search by name, brand, or barcode.")
                             )
-                        case .frequent:
-                            QuickFoodList(
-                                title: "Most used · 90 days",
-                                emptyMessage: "Your most-used foods will appear here.",
-                                foods: diary.frequentFoods,
-                                onQuickLog: quickLog,
-                                onEdit: { selectedFood = $0 }
-                            )
-                        case .favorites:
-                            FavoritesList(
-                                foods: diary.document.favorites,
-                                meals: diary.favoriteMeals,
-                                onQuickLogFood: quickLog,
-                                onEditFood: { selectedFood = $0 },
-                                onQuickLogMeal: { meal in
-                                    diary.logMeal(meal, on: date)
-                                    dismiss()
-                                },
-                                onEditMeal: { selectedMeal = $0 }
-                            )
-                        case .meals:
-                            MealsList(
-                                onQuickLog: { meal in
-                                    diary.logMeal(meal, on: date)
-                                    dismiss()
-                                },
-                                onEdit: { selectedMeal = $0 }
-                            )
-                        case .scan:
-                            BarcodeLookup(catalog: catalog, onSelect: { selectedFood = diary.displayedFood($0) })
                         }
                     }
                 }
@@ -178,31 +194,52 @@ struct FoodPickerView: View {
         diary.quickLog(food, on: date)
         dismiss()
     }
+
+    private func logMeal(_ meal: SavedMeal) {
+        diary.logMeal(meal, on: date)
+        dismiss()
+    }
 }
 
-private struct QuickFoodList: View {
+private struct FoodPickerList: View {
     @EnvironmentObject private var diary: DiaryStore
     let title: String?
+    let emptyTitle: String
     let emptyMessage: String
-    let foods: [Food]
-    let onQuickLog: (Food) -> Void
-    let onEdit: (Food) -> Void
+    let items: [FoodPickerItem]
+    let onQuickLogFood: (Food) -> Void
+    let onEditFood: (Food) -> Void
+    let onQuickLogMeal: (SavedMeal) -> Void
+    let onEditMeal: (SavedMeal) -> Void
+    let onDeleteMeal: (SavedMeal) -> Void
 
     var body: some View {
-        if foods.isEmpty {
-            ContentUnavailableView(title ?? "No suggestions yet", systemImage: "fork.knife.circle", description: Text(emptyMessage))
+        if items.isEmpty {
+            ContentUnavailableView(emptyTitle, systemImage: "fork.knife.circle", description: Text(emptyMessage))
         } else {
             List {
                 Section {
-                    ForEach(foods) { food in
-                        FoodResultRow(
-                            food: food,
-                            preference: diary.preference(for: food),
-                            actionTitle: "Add",
-                            action: { onQuickLog(food) }
-                        )
+                    ForEach(items) { item in
+                        switch item {
+                        case let .food(food):
+                            FoodResultRow(
+                                food: food,
+                                preference: diary.preference(for: food),
+                                actionTitle: "Add",
+                                action: { onQuickLogFood(food) }
+                            )
                             .contentShape(Rectangle())
-                            .onTapGesture { onEdit(food) }
+                            .onTapGesture { onEditFood(food) }
+                        case let .meal(meal):
+                            MealListActionRow(
+                                meal: meal,
+                                onQuickLog: { onQuickLogMeal(meal) },
+                                onEdit: { onEditMeal(meal) }
+                            )
+                            .swipeActions {
+                                Button("Delete", role: .destructive) { onDeleteMeal(meal) }
+                            }
+                        }
                     }
                 } header: {
                     if let title { Text(title) }
@@ -808,58 +845,6 @@ private struct NameEditor: View {
     }
 }
 
-private struct FavoritesList: View {
-    @EnvironmentObject private var diary: DiaryStore
-    let foods: [Food]
-    let meals: [SavedMeal]
-    let onQuickLogFood: (Food) -> Void
-    let onEditFood: (Food) -> Void
-    let onQuickLogMeal: (SavedMeal) -> Void
-    let onEditMeal: (SavedMeal) -> Void
-
-    var body: some View {
-        if foods.isEmpty, meals.isEmpty {
-            ContentUnavailableView(
-                "No favorites",
-                systemImage: "star",
-                description: Text("Star any food or meal to keep it here.")
-            )
-        } else {
-            List {
-                if !foods.isEmpty {
-                    Section("Foods") {
-                        ForEach(foods) { food in
-                            FoodResultRow(
-                                food: food,
-                                preference: diary.preference(for: food),
-                                actionTitle: "Add",
-                                action: { onQuickLogFood(food) }
-                            )
-                            .contentShape(Rectangle())
-                            .onTapGesture { onEditFood(food) }
-                        }
-                    }
-                }
-                if !meals.isEmpty {
-                    Section("Meals") {
-                        ForEach(meals) { meal in
-                            MealListActionRow(
-                                meal: meal,
-                                onQuickLog: { onQuickLogMeal(meal) },
-                                onEdit: { onEditMeal(meal) }
-                            )
-                            .swipeActions {
-                                Button("Delete", role: .destructive) { diary.deleteMeal(meal) }
-                            }
-                        }
-                    }
-                }
-            }
-            .scrollContentBackground(.hidden)
-        }
-    }
-}
-
 private struct MealListActionRow: View {
     let meal: SavedMeal
     let onQuickLog: () -> Void
@@ -915,14 +900,23 @@ private struct MealListRow: View {
     let meal: SavedMeal
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 3) {
-            Text(meal.name)
-                .font(.body.weight(.semibold))
-                .lineLimit(2)
-            Text("\(meal.items.count) item\(meal.items.count == 1 ? "" : "s") · \(macroDescription)")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .lineLimit(2)
+        HStack(spacing: 12) {
+            Text("Meal")
+                .font(.system(size: 9, weight: .bold, design: .rounded))
+                .foregroundStyle(AppTheme.coral)
+                .frame(width: 38, height: 38)
+                .background(AppTheme.coral.opacity(0.12), in: Circle())
+                .accessibilityLabel("Saved meal")
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(meal.name)
+                    .font(.body.weight(.semibold))
+                    .lineLimit(2)
+                Text("\(meal.items.count) item\(meal.items.count == 1 ? "" : "s") · \(macroDescription)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
