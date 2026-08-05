@@ -50,7 +50,8 @@ final class HealthKitStore: ObservableObject {
         sync(entries: entries)
     }
 
-    func sync(entries: [DiaryEntry]) {
+    @discardableResult
+    func sync(entries: [DiaryEntry]) -> Task<Void, Never> {
         enqueue { [weak self] in
             guard let self else { return }
             for entry in entries {
@@ -97,13 +98,16 @@ final class HealthKitStore: ObservableObject {
         return success && authorizationState != .denied
     }
 
-    private func enqueue(_ operation: @escaping @MainActor () async -> Void) {
+    @discardableResult
+    private func enqueue(_ operation: @escaping @MainActor () async -> Void) -> Task<Void, Never> {
         let previous = pendingOperation
-        pendingOperation = Task { @MainActor in
+        let task = Task { @MainActor in
             await previous?.value
             guard !Task.isCancelled else { return }
             await operation()
         }
+        pendingOperation = task
+        return task
     }
 
     private func replaceSamples(for entry: DiaryEntry) async {

@@ -10,7 +10,10 @@ struct SettingsView: View {
     @State private var importMessage: String?
     @State private var importError: String?
     @State private var confirmingClear = false
+    @State private var syncingNutrition = false
     @AppStorage("defaultWeightUnit") private var defaultWeightUnit = LogUnit.ounces.rawValue
+
+    private let minimumSyncSpinnerDuration: TimeInterval = 0.35
 
     var body: some View {
         Form {
@@ -63,9 +66,21 @@ struct SettingsView: View {
                 case .authorized:
                     Label("Connected", systemImage: "checkmark.circle.fill")
                         .foregroundStyle(AppTheme.protein)
-                    Button("Sync logged nutrition", systemImage: "arrow.triangle.2.circlepath") {
-                        healthKit.sync(entries: diary.document.entries)
+                    Button {
+                        Task {
+                            await syncLoggedNutrition()
+                        }
+                    } label: {
+                        if syncingNutrition {
+                            HStack {
+                                ProgressView()
+                                Text("Syncing logged nutrition…")
+                            }
+                        } else {
+                            Label("Sync logged nutrition", systemImage: "arrow.triangle.2.circlepath")
+                        }
                     }
+                    .disabled(syncingNutrition)
                 case .notDetermined:
                     Button("Connect Apple Health", systemImage: "heart.fill") {
                         Task {
@@ -163,6 +178,20 @@ struct SettingsView: View {
             Button("Clear personal data", role: .destructive) { diary.clearPersonalData() }
             Button("Cancel", role: .cancel) {}
         }
+    }
+
+    private func syncLoggedNutrition() async {
+        syncingNutrition = true
+        let startedAt = Date()
+
+        await healthKit.sync(entries: diary.document.entries).value
+
+        let remainingDuration = minimumSyncSpinnerDuration - Date().timeIntervalSince(startedAt)
+        if remainingDuration > 0 {
+            try? await Task.sleep(nanoseconds: UInt64(remainingDuration * 1_000_000_000))
+        }
+
+        syncingNutrition = false
     }
 
     private func sourceRow(_ source: FoodSource, count: Int) -> some View {
