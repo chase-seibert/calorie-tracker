@@ -33,7 +33,10 @@ USDA_DOWNLOADS = {
     "survey": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_survey_food_json_2024-10-31.zip",
 }
 
-OFF_SEARCH_URL = "https://world.openfoodfacts.org/api/v2/search"
+# The .net host is the current API host used in the official examples and is
+# less likely to redirect or reject long-running paginated downloads.
+OFF_SEARCH_URL = "https://world.openfoodfacts.net/api/v2/search"
+OFF_FULL_TEXT_SEARCH_URL = "https://search.openfoodfacts.org/search"
 OFF_FIELDS = ",".join(
     [
         "code",
@@ -76,6 +79,16 @@ def parse_args() -> argparse.Namespace:
         default=10,
         help="100 Open Food Facts products per page (default: 1,000 products)",
     )
+    parser.add_argument(
+        "--off-products",
+        type=int,
+        help="Select an exact cached Open Food Facts product set, such as 5,000 or 25,000",
+    )
+    parser.add_argument(
+        "--off-search",
+        action="store_true",
+        help="Use the Search-a-licious U.S. popularity snapshot instead of the legacy API",
+    )
     return parser.parse_args()
 
 
@@ -98,15 +111,32 @@ def download_usda() -> None:
         download_file(url, DOWNLOADS / f"usda-{name}.zip")
 
 
-def download_off(pages: int) -> None:
-    destination = DOWNLOADS / f"open-food-facts-us-top-{pages * 100}.jsonl"
+def download_off(pages: int, page_size: int = 100) -> None:
+    destination = DOWNLOADS / f"open-food-facts-us-top-{pages * page_size}.jsonl"
     if destination.exists() and destination.stat().st_size > 0:
         print(f"Using cached {destination.name}")
         return
     destination.parent.mkdir(parents=True, exist_ok=True)
     temporary = destination.with_suffix(".jsonl.partial")
-    with temporary.open("w", encoding="utf-8") as output:
-        for page in range(1, pages + 1):
+    progress = destination.with_suffix(".jsonl.progress")
+    progress_is_compatible = False
+    if progress.exists():
+        progress_values = progress.read_text(encoding="utf-8").strip().split(",")
+        if len(progress_values) == 2 and int(progress_values[1]) == page_size:
+            start_page = int(progress_values[0]) + 1
+            progress_is_compatible = True
+        else:
+            start_page = 1
+    elif temporary.exists() and temporary.stat().st_size > 0:
+        # A pre-progress partial from an earlier build contains complete pages:
+        # each response is written atomically before the next request starts.
+        line_count = sum(1 for _ in temporary.open(encoding="utf-8"))
+        start_page = max(1, math.ceil(line_count / 100) + 1)
+    else:
+        start_page = 1
+    mode = "a" if progress_is_compatible else "w"
+    with temporary.open(mode, encoding="utf-8") as output:
+        for page in range(start_page, pages + 1):
             parameters = urllib.parse.urlencode(
                 {
                     "countries_tags_en": "united-states",
@@ -120,9 +150,49 @@ def download_off(pages: int) -> None:
             payload = fetch_json_with_backoff(f"{OFF_SEARCH_URL}?{parameters}")
             for product in payload.get("products", []):
                 output.write(json.dumps(product, ensure_ascii=False, separators=(",", ":")) + "\n")
+            output.flush()
+            progress.write_text(f"{page},{page_size}", encoding="utf-8")
             if page != pages:
                 time.sleep(6.1)  # Respect the documented 10 search requests/minute.
     temporary.replace(destination)
+    progress.unlink(missing_ok=True)
+
+
+def download_off_search(products: int) -> None:
+    destination = DOWNLOADS / f"open-food-facts-search-us-filtered-top-{products}.jsonl"
+    if destination.exists() and destination.stat().st_size > 0:
+        print(f"Using cached {destination.name}")
+        return
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = destination.with_suffix(".jsonl.partial")
+    page_size = min(products, 1_000)
+    pages = math.ceil(products / page_size)
+    progress = destination.with_suffix(".jsonl.progress")
+    start_page = int(progress.read_text(encoding="utf-8")) + 1 if progress.exists() else 1
+    mode = "a" if start_page > 1 else "w"
+    with temporary.open(mode, encoding="utf-8") as output:
+        for page in range(start_page, pages + 1):
+            parameters = urllib.parse.urlencode(
+                {
+                    "q": 'countries_tags:"en:united-states"',
+                    "sort_by": "unique_scans_n",
+                    "page": page,
+                    "page_size": page_size,
+                }
+            )
+            print(f"Downloading Open Food Facts Search-a-licious page {page}/{pages}")
+            payload = fetch_json_with_backoff(f"{OFF_FULL_TEXT_SEARCH_URL}?{parameters}")
+            hits = payload.get("hits", [])
+            for offset, product in enumerate(hits):
+                if isinstance(product, dict):
+                    product["_catalog_rank"] = products - ((page - 1) * page_size + offset)
+                    output.write(json.dumps(product, ensure_ascii=False, separators=(",", ":")) + "\n")
+            output.flush()
+            progress.write_text(str(page), encoding="utf-8")
+            if page != pages:
+                time.sleep(6.1)
+    temporary.replace(destination)
+    progress.unlink(missing_ok=True)
 
 
 def fetch_json_with_backoff(url: str, attempts: int = 6) -> dict:
@@ -277,14 +347,23 @@ def first_amount(values: dict[int, tuple[float, str]], identifier: int) -> float
     return values.get(identifier, (0.0, ""))[0]
 
 
-def off_foods() -> Iterator[CatalogFood]:
-    candidates = sorted(
-        DOWNLOADS.glob("open-food-facts-us-top-*.jsonl"),
-        key=lambda path: int(re.search(r"top-(\d+)", path.name).group(1)),  # type: ignore[union-attr]
-    )
+def off_foods(products: int | None = None, search: bool = False) -> Iterator[CatalogFood]:
+    prefix = "open-food-facts-search-us-filtered-top-" if search else "open-food-facts-us-top-"
+    candidates = {
+        int(match.group(1)): path
+        for path in DOWNLOADS.glob(f"{prefix}*.jsonl")
+        if (match := re.search(r"top-(\d+)", path.name))
+    }
     if not candidates:
         return
-    path = candidates[-1]
+    if products is None:
+        products = max(candidates)
+    path = candidates.get(products)
+    if path is None:
+        available = ", ".join(f"{value:,}" for value in sorted(candidates))
+        raise FileNotFoundError(
+            f"No cached Open Food Facts set for {products:,} products; available: {available}"
+        )
     print(f"Importing {path.name}")
     with path.open(encoding="utf-8") as source:
         for line in source:
@@ -321,7 +400,7 @@ def off_foods() -> Iterator[CatalogFood]:
                 serving_grams=serving_grams or None,
                 serving_description=serving_description,
                 portions=portions,
-                rank=int(finite_number(raw.get("unique_scans_n"))),
+                rank=int(finite_number(raw.get("_catalog_rank", raw.get("unique_scans_n")))),
             )
 
 
@@ -439,9 +518,14 @@ def main() -> int:
     arguments = parse_args()
     if arguments.download:
         download_usda()
-        download_off(arguments.off_pages)
+        if arguments.off_search:
+            download_off_search(arguments.off_products or 10_000)
+        elif arguments.off_products:
+            download_off(1, page_size=arguments.off_products)
+        else:
+            download_off(arguments.off_pages)
 
-    upstream = list(usda_foods()) + list(off_foods())
+    upstream = list(usda_foods()) + list(off_foods(arguments.off_products, search=arguments.off_search))
     foods: Iterable[CatalogFood]
     if upstream:
         foods = upstream

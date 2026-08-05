@@ -82,8 +82,8 @@ struct DiaryView: View {
                                 .foregroundStyle(AppTheme.coral)
                             Text(calorieProgress.consumed.formatted())
                                 .font(.headline.monospacedDigit())
-                            if let remaining = calorieProgress.remaining {
-                                Text("/ \(remaining.formatted())")
+                            if let goal = calorieProgress.goal {
+                                Text("/ \(goal.formatted())")
                                     .font(.caption.weight(.semibold).monospacedDigit())
                                     .foregroundStyle(AppTheme.muted)
                             }
@@ -350,31 +350,41 @@ private struct DateStrip: View {
 
 private struct CalorieProgressIcon: View {
     let progress: Double?
+    let remaining: Int?
 
     var body: some View {
-        ZStack {
-            Circle()
-                .fill(AppTheme.coral.opacity(0.12))
-                .frame(width: 48, height: 48)
-
-            Image(systemName: "flame.fill")
-                .font(.title)
-                .foregroundStyle(AppTheme.coral)
-
-            Circle()
-                .stroke(AppTheme.coral.opacity(0.2), lineWidth: 3)
-
-            if let progress {
+        VStack(spacing: 3) {
+            ZStack {
                 Circle()
-                    .trim(from: 0, to: progress)
-                    .stroke(
-                        AppTheme.coral,
-                        style: StrokeStyle(lineWidth: 3, lineCap: .round)
-                    )
-                    .rotationEffect(.degrees(-90))
+                    .fill(AppTheme.coral.opacity(0.12))
+                    .frame(width: 48, height: 48)
+
+                Image(systemName: "flame.fill")
+                    .font(.title)
+                    .foregroundStyle(AppTheme.coral)
+
+                Circle()
+                    .stroke(AppTheme.coral.opacity(0.2), lineWidth: 3)
+
+                if let progress {
+                    Circle()
+                        .trim(from: 0, to: progress)
+                        .stroke(
+                            AppTheme.coral,
+                            style: StrokeStyle(lineWidth: 3, lineCap: .round)
+                        )
+                        .rotationEffect(.degrees(-90))
+                }
+            }
+
+            if let remaining {
+                Text("\(remaining.formatted()) left")
+                    .font(.caption2.weight(.semibold).monospacedDigit())
+                    .foregroundStyle(AppTheme.muted)
+                    .fixedSize()
             }
         }
-        .frame(width: 60, height: 60)
+        .frame(minWidth: 60)
         .animation(.easeInOut(duration: 0.25), value: progress)
         .accessibilityHidden(true)
     }
@@ -400,8 +410,8 @@ private struct MacroSummary: View {
                         Text(calorieProgress.consumed.formatted())
                             .font(.system(size: 44, weight: .bold, design: .rounded))
                             .foregroundStyle(AppTheme.ink)
-                        if let remaining = calorieProgress.remaining {
-                            Text("/ \(remaining.formatted())")
+                        if let goal = calorieProgress.goal {
+                            Text("/ \(goal.formatted())")
                                 .font(.title3.weight(.semibold).monospacedDigit())
                                 .foregroundStyle(AppTheme.muted)
                         }
@@ -413,7 +423,10 @@ private struct MacroSummary: View {
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(calorieProgress.accessibilityLabel)
                 Spacer()
-                CalorieProgressIcon(progress: calorieProgress.fraction)
+                CalorieProgressIcon(
+                    progress: calorieProgress.fraction,
+                    remaining: calorieProgress.remaining
+                )
             }
             VStack(spacing: 10) {
                 stackedMacroBar(carbs: carbs, fat: fat, protein: protein, total: macroTotal)

@@ -3,6 +3,9 @@
 See [Catalog pruning and size options](catalog-sizing.md) for the exact current
 filters, measured row costs, and larger catalog projections.
 
+See [Foods to add or investigate](missing-foods.md) for the running list of
+personal coverage gaps and their current match counts.
+
 ## USDA FoodData Central
 
 The current catalog imports Foundation Foods, SR Legacy, and FNDDS. USDA Branded

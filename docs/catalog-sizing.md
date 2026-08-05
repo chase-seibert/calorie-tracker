@@ -120,13 +120,15 @@ and the local SQLite/source-snapshot inspection recorded in this repository.
 
 ## Recommended next preset
 
-For broad packaged-food coverage, the recommended next experiment remains the
-top 25,000 U.S.-tagged Open Food Facts products while keeping the complete
-generic USDA subset. It should remain comfortably below 20 MiB, materially
-improve barcode coverage, and avoid the duplicate/stale-product volume of the
-full USDA Branded dataset. It should not be treated as sufficient for known
-low-popularity personal foods. Add a small, explicit personal coverage list or
-build a narrowly filtered USDA Branded supplement for gaps such as psyllium.
+For broad packaged-food coverage, the top 25,000 U.S.-tagged Open Food Facts
+products remain a useful future bulk-export projection while keeping the
+complete generic USDA subset. The current concrete offline debug preset is the
+Search-a-licious top 10,000 U.S.-filtered snapshot, because the legacy paginated
+API does not currently provide a reliable unauthenticated path to 25,000 rows.
+The 10,000-row preset materially improves barcode coverage but should not be
+treated as sufficient for known low-popularity personal foods. The targeted
+gap catalog and a small USDA Branded supplement remain better options for gaps
+such as psyllium.
 
 Small refreshes can use the existing API workflow:
 

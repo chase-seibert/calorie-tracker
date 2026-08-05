@@ -14,8 +14,10 @@ DEVELOPMENT_TEAM ?= 96NAC4VTEN
 PHONE_DESTINATION_TIMEOUT ?= 60
 PYTHON ?= python3
 OFF_PAGES ?= 10
+DEBUG_CATALOG_DIR := data/work/catalogs
+DEBUG_REPORT_DIR := data/work/catalog-reports
 
-.PHONY: setup format lint test ui-test-reorder build clean catalog catalog-refresh sim-build sim-launch phone-build phone-install phone-launch phone-deploy phone-wifi-check phone-wifi-deploy
+.PHONY: setup format lint test ui-test-reorder build clean catalog catalog-refresh catalog-debug-off-search-10000 catalog-debug-gap catalog-debug-report catalog-debug sim-build sim-launch phone-build phone-install phone-launch phone-deploy phone-wifi-check phone-wifi-deploy
 
 setup: catalog
 
@@ -41,6 +43,21 @@ catalog:
 
 catalog-refresh:
 	$(PYTHON) scripts/build_food_catalog.py --download --off-pages $(OFF_PAGES) --output CalorieTracker/Resources/FoodCatalog.sqlite3
+
+catalog-debug-off-search-10000:
+	$(PYTHON) scripts/build_food_catalog.py --download --off-search --off-products 10000 --output $(DEBUG_CATALOG_DIR)/catalog-off-search-top-10000.sqlite3
+
+catalog-debug-gap:
+	$(PYTHON) scripts/build_gap_catalog.py --output $(DEBUG_CATALOG_DIR)/catalog-gap-search.sqlite3
+
+catalog-debug-report:
+	$(PYTHON) scripts/probe_catalog_coverage.py \
+	  --catalog bundled=CalorieTracker/Resources/FoodCatalog.sqlite3 \
+	  --catalog off-search-top-10000=$(DEBUG_CATALOG_DIR)/catalog-off-search-top-10000.sqlite3 \
+	  --catalog gap-search=$(DEBUG_CATALOG_DIR)/catalog-gap-search.sqlite3 \
+	  --output $(DEBUG_REPORT_DIR)/missing-foods.md
+
+catalog-debug: catalog-debug-off-search-10000 catalog-debug-gap catalog-debug-report
 
 sim-build:
 	xcodebuild \
