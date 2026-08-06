@@ -71,7 +71,7 @@ struct FoodPickerView: View {
                                 )
                             case .frequent:
                                 FoodPickerList(
-                                    title: "Most used · 90 days",
+                                    title: "Most used · 30 days",
                                     emptyTitle: "No suggestions yet",
                                     emptyMessage: "Your most-used foods and meals will appear here.",
                                     items: frequentItemsSnapshot,
@@ -985,7 +985,7 @@ private struct MealsList: View {
             )
         } else {
             List {
-                ForEach(diary.document.meals) { meal in
+                ForEach(diary.alphabetizedMeals) { meal in
                     MealListActionRow(
                         meal: meal,
                         onQuickLog: { onQuickLog(meal) },

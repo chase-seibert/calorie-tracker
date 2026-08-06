@@ -224,11 +224,12 @@ enum FoodPickerItem: Identifiable, Hashable, Sendable {
 }
 
 struct DiaryDocument: Codable, Sendable {
-    var schemaVersion = 2
+    var schemaVersion = 3
     var dailyCalorieGoal: Int? = nil
     var entries: [DiaryEntry] = []
     var favorites: [Food] = []
     var favoriteMealIDs: [UUID] = []
+    var favoriteItemOrder: [String] = []
     var meals: [SavedMeal] = []
     var rememberedQuantities: [String: QuantityPreference] = [:]
     var customFoods: [Food] = []
@@ -243,6 +244,7 @@ struct DiaryDocument: Codable, Sendable {
         case entries
         case favorites
         case favoriteMealIDs
+        case favoriteItemOrder
         case meals
         case rememberedQuantities
         case customFoods
@@ -257,6 +259,7 @@ struct DiaryDocument: Codable, Sendable {
         entries = try container.decodeIfPresent([DiaryEntry].self, forKey: .entries) ?? []
         favorites = try container.decodeIfPresent([Food].self, forKey: .favorites) ?? []
         favoriteMealIDs = try container.decodeIfPresent([UUID].self, forKey: .favoriteMealIDs) ?? []
+        favoriteItemOrder = try container.decodeIfPresent([String].self, forKey: .favoriteItemOrder) ?? []
         meals = try container.decodeIfPresent([SavedMeal].self, forKey: .meals) ?? []
         rememberedQuantities = try container.decodeIfPresent(
             [String: QuantityPreference].self,

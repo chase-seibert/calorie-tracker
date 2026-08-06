@@ -203,11 +203,13 @@ final class DiaryStore: ObservableObject {
     func toggleFavorite(_ food: Food, preference: QuantityPreference? = nil) {
         if let index = document.favorites.firstIndex(where: { $0.id == food.id }) {
             document.favorites.remove(at: index)
+            removeFavoriteOrder(for: "food:\(food.id)")
         } else {
             document.favorites.insert(displayedFood(food), at: 0)
             if let preference {
                 document.rememberedQuantities[food.id] = preference
             }
+            insertFavoriteOrder(for: "food:\(food.id)")
         }
         persist()
     }
@@ -222,7 +224,15 @@ final class DiaryStore: ObservableObject {
         interspersedItems(
             foods: document.favorites,
             meals: favoriteMeals
-        )
+        ).sorted {
+            let leftName = favoriteItemName($0)
+            let rightName = favoriteItemName($1)
+            let comparison = leftName.localizedCaseInsensitiveCompare(rightName)
+            if comparison == .orderedSame {
+                return $0.id < $1.id
+            }
+            return comparison == .orderedAscending
+        }
     }
 
     func isFavorite(_ meal: SavedMeal) -> Bool {
@@ -233,10 +243,22 @@ final class DiaryStore: ObservableObject {
         guard document.meals.contains(where: { $0.id == meal.id }) else { return }
         if let index = document.favoriteMealIDs.firstIndex(of: meal.id) {
             document.favoriteMealIDs.remove(at: index)
+            removeFavoriteOrder(for: "meal:\(meal.id.uuidString)")
         } else {
             document.favoriteMealIDs.insert(meal.id, at: 0)
+            insertFavoriteOrder(for: "meal:\(meal.id.uuidString)")
         }
         persist()
+    }
+
+    var alphabetizedMeals: [SavedMeal] {
+        document.meals.sorted {
+            let comparison = $0.name.localizedCaseInsensitiveCompare($1.name)
+            if comparison == .orderedSame {
+                return $0.id.uuidString < $1.id.uuidString
+            }
+            return comparison == .orderedAscending
+        }
     }
 
     var recentFoods: [Food] {
@@ -261,7 +283,7 @@ final class DiaryStore: ObservableObject {
     }
 
     var frequentFoods: [Food] {
-        let cutoff = calendar.date(byAdding: .day, value: -90, to: Date()) ?? .distantPast
+        let cutoff = calendar.date(byAdding: .day, value: -30, to: Date()) ?? .distantPast
         let recentEntries = document.entries.filter { $0.date >= cutoff && !$0.isMeal }
         let grouped = Dictionary(grouping: recentEntries, by: { $0.food.id })
         return grouped.values
@@ -277,7 +299,7 @@ final class DiaryStore: ObservableObject {
     }
 
     var frequentItems: [FoodPickerItem] {
-        let cutoff = calendar.date(byAdding: .day, value: -90, to: Date()) ?? .distantPast
+        let cutoff = calendar.date(byAdding: .day, value: -30, to: Date()) ?? .distantPast
         let recentEntries = document.entries.filter { $0.date >= cutoff }
         let grouped = Dictionary(grouping: recentEntries, by: pickerItemKey(for:))
 
@@ -412,6 +434,7 @@ final class DiaryStore: ObservableObject {
     func deleteCustomFood(_ food: Food) {
         document.customFoods.removeAll { $0.id == food.id }
         document.favorites.removeAll { $0.id == food.id }
+        removeFavoriteOrder(for: "food:\(food.id)")
         document.rememberedQuantities.removeValue(forKey: food.id)
         persist()
     }
@@ -419,6 +442,7 @@ final class DiaryStore: ObservableObject {
     func deleteMeal(_ meal: SavedMeal) {
         document.meals.removeAll { $0.id == meal.id }
         document.favoriteMealIDs.removeAll { $0 == meal.id }
+        removeFavoriteOrder(for: "meal:\(meal.id.uuidString)")
         persist()
     }
 
@@ -629,6 +653,29 @@ final class DiaryStore: ObservableObject {
             }
         }
         return items
+    }
+
+    private func favoriteItemName(_ item: FoodPickerItem) -> String {
+        switch item {
+        case let .food(food): food.name
+        case let .meal(meal): meal.name
+        }
+    }
+
+    private func insertFavoriteOrder(for itemID: String) {
+        if document.favoriteItemOrder.isEmpty {
+            document.favoriteItemOrder = interspersedItems(
+                foods: document.favorites,
+                meals: favoriteMeals
+            ).map(\.id).filter { $0 != itemID }
+        } else {
+            document.favoriteItemOrder.removeAll { $0 == itemID }
+        }
+        document.favoriteItemOrder.insert(itemID, at: 0)
+    }
+
+    private func removeFavoriteOrder(for itemID: String) {
+        document.favoriteItemOrder.removeAll { $0 == itemID }
     }
 
     private var personalFoods: [Food] {

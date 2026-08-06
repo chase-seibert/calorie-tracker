@@ -6,9 +6,12 @@ struct DiaryView: View {
     let catalog: CatalogStore
 
     @State private var dayOffset = 0
-    @State private var showingFoodPicker = {
+    @State private var foodPickerLaunch: FoodPickerLaunch? = {
         let arguments = ProcessInfo.processInfo.arguments
-        return arguments.contains("--show-food-search") || arguments.contains("--show-food-picker")
+        guard arguments.contains("--show-food-search") || arguments.contains("--show-food-picker") else {
+            return nil
+        }
+        return .search
     }()
     @State private var showingMealName = false
     @State private var showingDeleteConfirmation = false
@@ -164,7 +167,7 @@ struct DiaryView: View {
                     VStack(spacing: 0) {
                         Button {
                             foodPickerMode = nil
-                            showingFoodPicker = true
+                            foodPickerLaunch = .search
                         } label: {
                             Label("Log food", systemImage: "magnifyingglass")
                                 .font(.headline)
@@ -175,8 +178,8 @@ struct DiaryView: View {
                         .buttonStyle(.borderedProminent)
                         .clipShape(Capsule())
 
-                        FoodPickerModeStrip(selection: $foodPickerMode) { _ in
-                            showingFoodPicker = true
+                        FoodPickerModeStrip(selection: $foodPickerMode) { selectedMode in
+                            foodPickerLaunch = .mode(selectedMode)
                         }
                     }
                     .padding(.horizontal, 16)
@@ -185,8 +188,8 @@ struct DiaryView: View {
                     .background(.ultraThinMaterial.opacity(0.78))
                 }
             }
-            .sheet(isPresented: $showingFoodPicker) {
-                FoodPickerView(date: date, catalog: catalog, initialMode: foodPickerMode)
+            .sheet(item: $foodPickerLaunch) { launch in
+                FoodPickerView(date: date, catalog: catalog, initialMode: launch.initialMode)
                     .environmentObject(diary)
             }
             .sheet(item: $editingEntry) { entry in
@@ -314,6 +317,29 @@ struct DiaryView: View {
             diary.deleteEntries(entryIDs: selectedEntryIDs)
         }
         cancelMealSelection()
+    }
+}
+
+enum FoodPickerLaunch: Identifiable {
+    case search
+    case mode(FoodPickerView.Mode)
+
+    var id: String {
+        switch self {
+        case .search:
+            "search"
+        case let .mode(mode):
+            "mode-\(mode.rawValue)"
+        }
+    }
+
+    var initialMode: FoodPickerView.Mode? {
+        switch self {
+        case .search:
+            nil
+        case let .mode(mode):
+            mode
+        }
     }
 }
 

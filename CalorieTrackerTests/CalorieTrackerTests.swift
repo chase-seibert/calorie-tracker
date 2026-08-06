@@ -3,6 +3,13 @@ import XCTest
 @testable import CalorieTracker
 
 final class CalorieTrackerTests: XCTestCase {
+    func testFoodPickerLaunchPreservesRequestedMode() {
+        let launch = FoodPickerLaunch.mode(.meals)
+
+        XCTAssertEqual(launch.initialMode?.rawValue, FoodPickerView.Mode.meals.rawValue)
+        XCTAssertNil(FoodPickerLaunch.search.initialMode)
+    }
+
     @MainActor
     func testDailyCalorieGoalPersistsAndCanBeRemoved() {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
@@ -245,19 +252,25 @@ final class CalorieTrackerTests: XCTestCase {
         let store = DiaryStore(fileURL: fileURL)
 
         store.saveMeal(
-            name: "Breakfast",
+            name: "Zebra meal",
             items: [MealItem(id: UUID(), food: food, amount: 100, unit: .grams)]
         )
         let meal = try XCTUnwrap(store.document.meals.first)
+        store.toggleFavorite(food)
         store.toggleFavorite(meal)
 
         let reloaded = DiaryStore(fileURL: fileURL)
         XCTAssertTrue(reloaded.isFavorite(meal))
         XCTAssertEqual(reloaded.favoriteMeals.map(\.id), [meal.id])
+        XCTAssertEqual(
+            reloaded.favoriteItems.map(\.id),
+            ["food:\(food.id)", "meal:\(meal.id.uuidString)"]
+        )
 
         reloaded.deleteMeal(meal)
         XCTAssertTrue(reloaded.favoriteMeals.isEmpty)
         XCTAssertFalse(reloaded.document.favoriteMealIDs.contains(meal.id))
+        XCTAssertEqual(reloaded.favoriteItems.map(\.id), ["food:\(food.id)"])
     }
 
     @MainActor
@@ -277,13 +290,18 @@ final class CalorieTrackerTests: XCTestCase {
             name: "Coffee",
             items: [MealItem(id: UUID(), food: americano, amount: 1, unit: .serving, portionID: "custom-serving")]
         )
+        store.saveMeal(
+            name: "Breakfast",
+            items: [MealItem(id: UUID(), food: americano, amount: 1, unit: .serving, portionID: "custom-serving")]
+        )
 
         XCTAssertEqual(store.document.customFoods.count, 1)
-        XCTAssertEqual(store.document.meals.count, 1)
+        XCTAssertEqual(store.document.meals.count, 2)
+        XCTAssertEqual(store.alphabetizedMeals.map(\.name), ["Breakfast", "Coffee"])
 
         store.deleteCustomFood(americano)
         XCTAssertTrue(store.document.customFoods.isEmpty)
-        XCTAssertEqual(store.document.meals.count, 1)
+        XCTAssertEqual(store.document.meals.count, 2)
     }
 
     @MainActor
@@ -602,10 +620,25 @@ final class CalorieTrackerTests: XCTestCase {
         store.logMeal(breakfast, on: day)
         store.logMeal(breakfast, on: day)
 
-        XCTAssertEqual(store.recentItems.count, 2)
+        let oldFood = Food(
+            sourceID: "old-frequent-food",
+            source: .custom,
+            name: "Old frequent food",
+            brand: nil,
+            barcode: nil,
+            nutrients: .zero,
+            baseAmountGrams: 100,
+            servingGrams: nil,
+            servingDescription: nil
+        )
+        let oldDate = Calendar.current.date(byAdding: .day, value: -31, to: day) ?? day
+        store.log(oldFood, amount: 100, unit: .grams, on: oldDate)
+
+        XCTAssertEqual(store.recentItems.count, 3)
         XCTAssertTrue(store.recentItems.contains { if case .meal = $0 { true } else { false } })
         XCTAssertTrue(store.recentItems.contains { if case .food = $0 { true } else { false } })
         XCTAssertEqual(store.frequentItems.first?.id, "meal:\(breakfast.id.uuidString)")
+        XCTAssertFalse(store.frequentItems.contains { $0.id == "food:\(oldFood.id)" })
     }
 
     @MainActor
