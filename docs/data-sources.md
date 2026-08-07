@@ -65,6 +65,25 @@ Neither bundled source subset currently has a canonical generic café Americano
 record. Custom foods and saved meals are the preferred way to represent personal
 preparations that are absent from the upstream snapshot.
 
+## Grouped catalog experiment
+
+Run `make catalog-grouped-report` to build a non-production catalog experiment
+under `data/work/`. The generated database preserves every source row, maps each
+row to a canonical food group, and exposes one representative search row per
+group. Its HTML report summarizes consolidation, representative selection, and
+preparation families whose nutrition ranges require review.
+
+The grouping is intentionally heuristic. Alternate preparations remain indexed
+as aliases, but a canonical record's nutrients must not be treated as equivalent
+to every member preparation without a product decision and data-quality review.
+
+Run `make catalog-family-report` for the more structured entity-resolution
+experiment. It produces a separate database with three levels: canonical food
+families, nutrition-bearing preparation variants, and original source records.
+It includes both a family-level search index and a variant-level search index so
+generic queries can return fewer rows while explicit preparation queries retain
+the correct nutrition.
+
 ## MyFitnessPal
 
 MyFitnessPal history is user-owned personal data and is never bundled. It is

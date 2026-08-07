@@ -20,7 +20,7 @@ OFF_PAGES ?= 10
 DEBUG_CATALOG_DIR := data/work/catalogs
 DEBUG_REPORT_DIR := data/work/catalog-reports
 
-.PHONY: setup format lint simulator-ready test ui-test-reorder ui-test-fixture build clean catalog catalog-refresh catalog-debug-off-search-10000 catalog-debug-gap catalog-debug-report catalog-debug sim-compile sim-build sim-launch phone-build phone-install phone-launch phone-deploy phone-wifi-check phone-wifi-deploy
+.PHONY: setup format lint simulator-ready test ui-test-reorder ui-test-fixture build clean catalog catalog-refresh catalog-grouped-report catalog-family-report catalog-debug-off-search-10000 catalog-debug-gap catalog-debug-report catalog-debug sim-compile sim-build sim-launch phone-build phone-install phone-launch phone-deploy phone-wifi-check phone-wifi-deploy
 
 setup: catalog
 
@@ -62,6 +62,18 @@ catalog:
 
 catalog-refresh:
 	$(PYTHON) scripts/build_food_catalog.py --download --off-pages $(OFF_PAGES) --output CalorieTracker/Resources/FoodCatalog.sqlite3
+
+catalog-grouped-report:
+	$(PYTHON) scripts/build_grouped_food_catalog.py \
+	  --input CalorieTracker/Resources/FoodCatalog.sqlite3 \
+	  --output $(DEBUG_CATALOG_DIR)/grouped-food-catalog.sqlite3 \
+	  --report $(DEBUG_REPORT_DIR)/grouped-food-catalog.html
+
+catalog-family-report:
+	$(PYTHON) scripts/build_food_family_catalog.py \
+	  --input CalorieTracker/Resources/FoodCatalog.sqlite3 \
+	  --output $(DEBUG_CATALOG_DIR)/food-family-catalog.sqlite3 \
+	  --report $(DEBUG_REPORT_DIR)/food-family-catalog.html
 
 catalog-debug-off-search-10000:
 	$(PYTHON) scripts/build_food_catalog.py --download --off-search --off-products 10000 --output $(DEBUG_CATALOG_DIR)/catalog-off-search-top-10000.sqlite3
