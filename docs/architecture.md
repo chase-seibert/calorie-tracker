@@ -45,6 +45,12 @@ long-press lift and live row displacement on iOS 18, while its list layout owns
 the native full-swipe delete action. The adapter reports the final destination
 index to `DiaryStore`, which normalizes and atomically persists display order.
 This avoids overlapping custom drag and swipe gestures inside SwiftUI `List`.
+Because the collection is non-scrolling inside the diary's SwiftUI scroll view,
+it disables UIKit's automatic safe-area content-inset adjustment. The diary's
+few top-level sections use eager vertical layout, avoiding stale lazy-stack
+positions while the collection reports a new intrinsic height. The persistent
+logging controls reserve the bottom safe area but ignore keyboard-only safe-area
+changes from the food-picker sheet so they remain anchored after dismissal.
 
 Custom foods and saved meals are separate collections in the personal document.
 Settings presents them together as the Custom catalog while retaining their

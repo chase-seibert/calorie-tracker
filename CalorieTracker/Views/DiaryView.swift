@@ -43,7 +43,7 @@ struct DiaryView: View {
         NavigationStack {
             ScrollViewReader { scrollProxy in
                 ScrollView {
-                    LazyVStack(spacing: 0) {
+                    VStack(spacing: 0) {
                         DateStrip(dayOffset: $dayOffset)
                             .id("date-strip")
                             .padding(.horizontal, 16)
@@ -169,7 +169,7 @@ struct DiaryView: View {
                     }
                 }
             }
-            .safeAreaInset(edge: .bottom) {
+            .safeAreaInset(edge: .bottom, spacing: 0) {
                 if isSelectingMealItems {
                     HStack(spacing: 8) {
                         Button {
@@ -263,8 +263,11 @@ struct DiaryView: View {
                     .padding(.top, 12)
                     .padding(.bottom, 0)
                     .background(.ultraThinMaterial.opacity(0.78))
+                    .accessibilityElement(children: .contain)
+                    .accessibilityIdentifier("diary-log-food-actions")
                 }
             }
+            .ignoresSafeArea(.keyboard, edges: .bottom)
             .sheet(item: $foodPickerLaunch) { launch in
                 FoodPickerView(date: date, catalog: catalog, initialMode: launch.initialMode)
                     .environmentObject(diary)
@@ -328,10 +331,11 @@ struct DiaryView: View {
     @ViewBuilder
     private var entrySection: some View {
         let entries = diary.entries(on: date)
-        Section {
+        VStack(spacing: 0) {
             HStack {
                 Text("Logged")
                     .font(.title3.weight(.bold))
+                    .accessibilityIdentifier("logged-heading-label")
                 Spacer()
                 if !entries.isEmpty, !isSelectingMealItems, !isCheatDay {
                     Button("Select") {
@@ -989,6 +993,13 @@ private struct ReorderableDiaryEntries: UIViewRepresentable {
         let collectionView = IntrinsicCollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .clear
         collectionView.isScrollEnabled = false
+        collectionView.contentInsetAdjustmentBehavior = .never
+        collectionView.automaticallyAdjustsScrollIndicatorInsets = false
+        collectionView.contentInset = .zero
+        collectionView.scrollIndicatorInsets = .zero
+        collectionView.scrollsToTop = false
+        collectionView.alwaysBounceVertical = false
+        collectionView.clipsToBounds = true
         collectionView.dataSource = context.coordinator
         collectionView.register(
             UICollectionViewCell.self,
