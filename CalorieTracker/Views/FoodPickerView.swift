@@ -237,12 +237,18 @@ private struct FoodPickerCalorieSummary: View {
 
 struct FoodPickerModeStrip: View {
     @Binding var selection: FoodPickerView.Mode?
+    var isEnabled = true
+    var onDisabledTap: (() -> Void)? = nil
     let onSelect: (FoodPickerView.Mode) -> Void
 
     var body: some View {
         FlowLayout(spacing: 6) {
             ForEach(FoodPickerView.Mode.allCases) { item in
                 Button {
+                    guard isEnabled else {
+                        onDisabledTap?()
+                        return
+                    }
                     withAnimation(.snappy) {
                         selection = item
                         onSelect(item)
@@ -262,6 +268,7 @@ struct FoodPickerModeStrip: View {
                     .padding(.vertical, 8)
                     .foregroundStyle(selection == item ? AppTheme.selectedText : AppTheme.ink)
                     .background(selection == item ? AppTheme.ink : AppTheme.controlFill, in: Capsule())
+                    .opacity(isEnabled ? 1 : 0.45)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(item.rawValue)

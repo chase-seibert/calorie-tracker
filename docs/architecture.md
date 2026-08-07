@@ -8,9 +8,9 @@ The SwiftUI app has two local data layers:
    FTS5 search index. `CatalogStore` performs source-filtered search and barcode
    lookup without loading the catalog into memory.
 2. A small writable JSON document in Application Support managed by `DiaryStore`.
-   It holds diary entries, favorites, meals, remembered quantities, custom foods,
-   imported MyFitnessPal records, and stable-ID custom food names. Writes are
-   atomic.
+   It holds diary entries, day statuses, the streak tracking start date,
+   favorites, meals, remembered quantities, custom foods, imported MyFitnessPal
+   records, and stable-ID custom food names. Writes are atomic.
 
 This split keeps a large catalog immutable and fast while making the personal
 data schema easy to evolve and back up.
@@ -21,6 +21,23 @@ protein. Each sample uses the diary entry UUID as a sync identifier, so edits
 replace the previous samples and deletions remove only samples created by this
 app. Authorization is requested only from Settings; HealthKit synchronization
 is skipped until write access is granted.
+
+On launch, `DiaryStore` finalizes every elapsed day since tracking began. Empty
+days become gap days. When a calorie goal exists, nonempty days below 75% or
+above 130% of the goal become automatic cheat days. Manual cheat-day labels are
+authoritative. Logging into an automatic gap removes the label; undoing a cheat
+day removes its optional calorie-only adjustment and restores normal logging.
+
+Cheat days without an estimated adjustment preserve their local food entries
+but replace this app's HealthKit samples for that date with zero-valued nutrition
+samples. Cheat days with an adjustment sync their logged entries plus the
+adjustment. Stable per-day HealthKit sync identifiers let later undo operations
+remove the zero override safely.
+
+The current streak walks backward across consecutive non-special days that have
+food entries. An empty current day is ignored until it ends. The streak report
+derives averages, calorie and macro ranges, and the most frequently logged food
+or meal from those dates.
 
 Diary rows use a small `UIViewRepresentable` collection-view adapter for
 reordering and deletion. `UICollectionView` interactive movement provides the

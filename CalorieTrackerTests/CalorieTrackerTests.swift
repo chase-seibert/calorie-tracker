@@ -719,3 +719,177 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(DiaryStore(fileURL: fileURL).document.meals.first?.name, "New breakfast")
     }
 }
+
+extension CalorieTrackerTests {
+    @MainActor
+    func testPastDaysAutomaticallyBecomeGapOrThresholdCheatDays() throws {
+        let calendar = testCalendar
+        let days = (1...6).map { testDate(day: $0) }
+        var document = DiaryDocument()
+        document.dailyCalorieGoal = 2_000
+        document.trackingStartDate = days[0]
+        document.entries = [
+            testEntry(calories: 1_600, date: days[0], name: "On target"),
+            testEntry(calories: 1_499, date: days[2], name: "Under target"),
+            testEntry(calories: 2_600, date: days[3], name: "Boundary"),
+            testEntry(calories: 2_601, date: days[4], name: "Over target")
+        ]
+        let fileURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathComponent("diary.json")
+
+        let store = DiaryStore(
+            document: document,
+            fileURL: fileURL,
+            calendar: calendar,
+            referenceDate: days[5]
+        )
+
+        XCTAssertNil(store.status(on: days[0]))
+        XCTAssertEqual(store.status(on: days[1])?.kind, .gap)
+        XCTAssertEqual(store.status(on: days[2])?.kind, .cheat)
+        XCTAssertNil(store.status(on: days[3]))
+        XCTAssertEqual(store.status(on: days[4])?.kind, .cheat)
+        XCTAssertTrue(store.document.dayStatuses.allSatisfy { $0.source == .automatic })
+    }
+
+    @MainActor
+    func testNoGoalOnlyClassifiesEmptyPastDaysAsGaps() {
+        let days = (1...4).map { testDate(day: $0) }
+        var document = DiaryDocument()
+        document.trackingStartDate = days[0]
+        document.entries = [testEntry(calories: 20, date: days[0], name: "Snack")]
+        let store = DiaryStore(
+            document: document,
+            fileURL: temporaryDiaryURL(),
+            calendar: testCalendar,
+            referenceDate: days[3]
+        )
+
+        XCTAssertNil(store.status(on: days[0]))
+        XCTAssertEqual(store.status(on: days[1])?.kind, .gap)
+        XCTAssertEqual(store.status(on: days[2])?.kind, .gap)
+    }
+
+    @MainActor
+    func testLoggingFoodOnGapDayClearsGapStatus() {
+        let yesterday = testDate(day: 1)
+        let today = testDate(day: 2)
+        var document = DiaryDocument()
+        document.trackingStartDate = yesterday
+        let store = DiaryStore(
+            document: document,
+            fileURL: temporaryDiaryURL(),
+            calendar: testCalendar,
+            referenceDate: today
+        )
+        XCTAssertEqual(store.status(on: yesterday)?.kind, .gap)
+
+        store.log(testFood(calories: 300, name: "Breakfast"), amount: 1, unit: .serving, on: yesterday)
+
+        XCTAssertNil(store.status(on: yesterday))
+        XCTAssertEqual(store.entries(on: yesterday).count, 1)
+    }
+
+    @MainActor
+    func testManualCheatDayAdjustmentPersistsAndUndoPreservesFood() throws {
+        let day = testDate(day: 1)
+        let fileURL = temporaryDiaryURL()
+        let store = DiaryStore(fileURL: fileURL, calendar: testCalendar, referenceDate: day)
+        store.log(testFood(calories: 450, name: "Breakfast"), amount: 1, unit: .serving, on: day)
+
+        store.markCheatDay(on: day, adjustmentCalories: 1_000)
+
+        XCTAssertEqual(store.status(on: day)?.kind, .cheat)
+        XCTAssertEqual(store.status(on: day)?.source, .manual)
+        XCTAssertEqual(store.status(on: day)?.adjustmentCalories, 1_000)
+        XCTAssertEqual(store.totals(on: day).calories, 1_450, accuracy: 0.001)
+        XCTAssertEqual(store.entries(on: day).filter(\.isCheatDayAdjustment).count, 1)
+
+        store.markCheatDay(on: day, adjustmentCalories: 1_500)
+
+        XCTAssertEqual(store.status(on: day)?.adjustmentCalories, 1_500)
+        XCTAssertEqual(store.totals(on: day).calories, 1_950, accuracy: 0.001)
+        XCTAssertEqual(store.entries(on: day).filter(\.isCheatDayAdjustment).count, 1)
+        let reloaded = DiaryStore(fileURL: fileURL, calendar: testCalendar, referenceDate: day)
+        XCTAssertEqual(reloaded.status(on: day)?.adjustmentCalories, 1_500)
+
+        reloaded.undoCheatDay(on: day)
+
+        XCTAssertNil(reloaded.status(on: day))
+        XCTAssertEqual(reloaded.entries(on: day).map(\.food.name), ["Breakfast"])
+        XCTAssertEqual(reloaded.totals(on: day).calories, 450, accuracy: 0.001)
+    }
+
+    @MainActor
+    func testStreakSummaryUsesConsecutiveLoggedDaysAndStopsAtCheatDay() {
+        let days = (1...3).map { testDate(day: $0) }
+        var document = DiaryDocument()
+        document.trackingStartDate = days[0]
+        document.entries = [
+            testEntry(calories: 1_800, date: days[0], name: "Toast"),
+            testEntry(calories: 2_000, date: days[1], name: "Toast")
+        ]
+        let store = DiaryStore(
+            document: document,
+            fileURL: temporaryDiaryURL(),
+            calendar: testCalendar,
+            referenceDate: days[2]
+        )
+
+        let summary = store.streak(referenceDate: days[2])
+        XCTAssertEqual(summary.dayCount, 2)
+        XCTAssertEqual(summary.averageNutrients.calories, 1_900, accuracy: 0.001)
+        XCTAssertEqual(summary.minimumNutrients.calories, 1_800, accuracy: 0.001)
+        XCTAssertEqual(summary.maximumNutrients.calories, 2_000, accuracy: 0.001)
+        XCTAssertEqual(summary.mostPopularItem, "Toast")
+
+        store.markCheatDay(on: days[1])
+        XCTAssertEqual(store.streak(referenceDate: days[2]).dayCount, 0)
+    }
+
+    private var testCalendar: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        return calendar
+    }
+
+    private func testDate(day: Int) -> Date {
+        testCalendar.date(from: DateComponents(year: 2026, month: 7, day: day))!
+    }
+
+    private func temporaryDiaryURL() -> URL {
+        FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathComponent("diary.json")
+    }
+
+    private func testFood(calories: Double, name: String) -> Food {
+        Food(
+            sourceID: name.lowercased().replacingOccurrences(of: " ", with: "-"),
+            source: .custom,
+            name: name,
+            brand: nil,
+            barcode: nil,
+            nutrients: MacroNutrients(calories: calories, carbs: calories / 20, fat: calories / 100, protein: calories / 25),
+            baseAmountGrams: 1,
+            servingGrams: 1,
+            servingDescription: "1 serving",
+            portions: [FoodPortion(id: "serving", label: "serving", grams: 1)]
+        )
+    }
+
+    private func testEntry(calories: Double, date: Date, name: String) -> DiaryEntry {
+        let food = testFood(calories: calories, name: name)
+        return DiaryEntry(
+            id: UUID(),
+            date: date,
+            food: food,
+            amount: 1,
+            unit: .serving,
+            nutrients: food.nutrients,
+            loggedAt: date,
+            portionID: "serving"
+        )
+    }
+}

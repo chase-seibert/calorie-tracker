@@ -27,6 +27,7 @@
 		200000000000000000000013 /* DiaryFixtureLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000017 /* DiaryFixtureLoader.swift */; };
 		200000000000000000000014 /* DeviceDiaryFixture.json in Resources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000018 /* DeviceDiaryFixture.json */; };
 		200000000000000000000015 /* DeviceFixtureUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000019 /* DeviceFixtureUITests.swift */; };
+		200000000000000000000016 /* StreakReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30000000000000000000001A /* StreakReportView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +61,7 @@
 		300000000000000000000017 /* DiaryFixtureLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryFixtureLoader.swift; sourceTree = "<group>"; };
 		300000000000000000000018 /* DeviceDiaryFixture.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = DeviceDiaryFixture.json; sourceTree = "<group>"; };
 		300000000000000000000019 /* DeviceFixtureUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceFixtureUITests.swift; sourceTree = "<group>"; };
+		30000000000000000000001A /* StreakReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakReportView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,7 +76,7 @@
 		700000000000000000000003 /* App */ = {isa = PBXGroup; path = App; sourceTree = "<group>"; children = (300000000000000000000001 /* CalorieTrackerApp.swift */,); };
 		700000000000000000000004 /* Models */ = {isa = PBXGroup; path = Models; sourceTree = "<group>"; children = (300000000000000000000002 /* Domain.swift */,); };
 		700000000000000000000005 /* Data */ = {isa = PBXGroup; path = Data; sourceTree = "<group>"; children = (300000000000000000000003 /* DiaryStore.swift */, 300000000000000000000017 /* DiaryFixtureLoader.swift */, 300000000000000000000004 /* CatalogStore.swift */, 300000000000000000000005 /* MyFitnessPalImporter.swift */, 300000000000000000000014 /* HealthKitStore.swift */,); };
-		700000000000000000000006 /* Views */ = {isa = PBXGroup; path = Views; sourceTree = "<group>"; children = (300000000000000000000006 /* RootView.swift */, 300000000000000000000007 /* DiaryView.swift */, 300000000000000000000008 /* FoodPickerView.swift */, 300000000000000000000009 /* BarcodeScanner.swift */, 30000000000000000000000A /* TrendsView.swift */, 30000000000000000000000B /* SettingsView.swift */,); };
+		700000000000000000000006 /* Views */ = {isa = PBXGroup; path = Views; sourceTree = "<group>"; children = (300000000000000000000006 /* RootView.swift */, 300000000000000000000007 /* DiaryView.swift */, 300000000000000000000008 /* FoodPickerView.swift */, 300000000000000000000009 /* BarcodeScanner.swift */, 30000000000000000000000A /* TrendsView.swift */, 30000000000000000000001A /* StreakReportView.swift */, 30000000000000000000000B /* SettingsView.swift */,); };
 		700000000000000000000007 /* CalorieTrackerTests */ = {isa = PBXGroup; path = CalorieTrackerTests; sourceTree = "<group>"; children = (30000000000000000000000E /* CalorieTrackerTests.swift */,); };
 		700000000000000000000008 /* Frameworks */ = {isa = PBXGroup; children = (30000000000000000000000D /* libsqlite3.tbd */, 300000000000000000000015 /* HealthKit.framework */,); name = Frameworks; sourceTree = "<group>"; };
 		700000000000000000000009 /* Products */ = {isa = PBXGroup; children = (30000000000000000000000F /* CalorieTracker.app */, 300000000000000000000010 /* CalorieTrackerTests.xctest */, 300000000000000000000013 /* CalorieTrackerUITests.xctest */,); name = Products; sourceTree = "<group>"; };
@@ -100,7 +102,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		900000000000000000000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (200000000000000000000001, 200000000000000000000002, 200000000000000000000003, 200000000000000000000004, 200000000000000000000005, 200000000000000000000006, 200000000000000000000007, 200000000000000000000008, 200000000000000000000009, 20000000000000000000000A, 20000000000000000000000B, 200000000000000000000011, 200000000000000000000013,); runOnlyForDeploymentPostprocessing = 0; };
+		900000000000000000000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (200000000000000000000001, 200000000000000000000002, 200000000000000000000003, 200000000000000000000004, 200000000000000000000005, 200000000000000000000006, 200000000000000000000007, 200000000000000000000008, 200000000000000000000009, 20000000000000000000000A, 20000000000000000000000B, 200000000000000000000011, 200000000000000000000013, 200000000000000000000016,); runOnlyForDeploymentPostprocessing = 0; };
 		900000000000000000000002 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (20000000000000000000000E,); runOnlyForDeploymentPostprocessing = 0; };
 		900000000000000000000003 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (200000000000000000000010, 200000000000000000000015,); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */

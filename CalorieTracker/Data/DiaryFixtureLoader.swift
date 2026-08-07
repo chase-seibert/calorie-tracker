@@ -67,6 +67,14 @@ enum DiaryFixtureLoader {
         let dayOffset = calendar.dateComponents([.day], from: sourceDay, to: destinationDay).day ?? 0
 
         var document = source
+        document.trackingStartDate = source.trackingStartDate.flatMap {
+            calendar.date(byAdding: .day, value: dayOffset, to: $0)
+        }
+        document.dayStatuses = source.dayStatuses.map { status in
+            var rebased = status
+            rebased.date = calendar.date(byAdding: .day, value: dayOffset, to: status.date) ?? status.date
+            return rebased
+        }
         document.entries = source.entries.map { entry in
             var rebased = entry
             rebased.date = calendar.date(byAdding: .day, value: dayOffset, to: entry.date) ?? entry.date

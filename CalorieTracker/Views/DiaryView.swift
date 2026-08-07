@@ -20,13 +20,24 @@ struct DiaryView: View {
     @State private var selectedEntryIDs: Set<UUID> = []
     @State private var editingEntry: DiaryEntry?
     @State private var isMacroSummaryVisible = true
-    @State private var showingTrends = false
+    @State private var showingTrends = ProcessInfo.processInfo.arguments.contains("--show-trends")
+    @State private var showingStreak = ProcessInfo.processInfo.arguments.contains("--show-streak-report")
     @State private var diaryEntriesHeight: CGFloat = 0
     @State private var foodPickerMode: FoodPickerView.Mode?
+    @State private var showingToolbarCheatPopover = false
+    @State private var showingBannerCheatPopover = false
+    @State private var showingLogFoodCheatPopover = false
+    @State private var showingModeStripCheatPopover = false
+    @State private var showingLoggedEntriesCheatPopover = false
+    @State private var didSeedDebugScreenshot = false
 
     private var date: Date {
         Calendar.current.date(byAdding: .day, value: dayOffset, to: Calendar.current.startOfDay(for: Date())) ?? Date()
     }
+
+    private var selectedDayStatus: DayStatus? { diary.status(on: date) }
+    private var isCheatDay: Bool { selectedDayStatus?.kind == .cheat }
+    private var isFutureDay: Bool { date > Calendar.current.startOfDay(for: Date()) }
 
     var body: some View {
         NavigationStack {
@@ -38,6 +49,30 @@ struct DiaryView: View {
                             .padding(.horizontal, 16)
                             .padding(.top, 8)
                             .padding(.bottom, 7)
+                        if let status = selectedDayStatus {
+                            if status.kind == .cheat {
+                                Button {
+                                    showingBannerCheatPopover = true
+                                } label: {
+                                    DayStatusBanner(status: status)
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityHint("Undo this cheat day")
+                                .cheatDayPopover(
+                                    isPresented: $showingBannerCheatPopover,
+                                    date: date,
+                                    isCheatDay: isCheatDay,
+                                    arrowEdge: .top,
+                                    onConfirm: confirmCheatDayAction
+                                )
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 7)
+                            } else {
+                                DayStatusBanner(status: status)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 7)
+                            }
+                        }
                         Button {
                             showingTrends = true
                         } label: {
@@ -73,6 +108,9 @@ struct DiaryView: View {
             .navigationDestination(isPresented: $showingTrends) {
                 TrendsView()
             }
+            .navigationDestination(isPresented: $showingStreak) {
+                StreakReportView()
+            }
             .navigationTitle("Calorie Tracker")
             .toolbar {
                 if !isMacroSummaryVisible {
@@ -101,7 +139,28 @@ struct DiaryView: View {
                     }
                 }
                 if !isSelectingMealItems {
-                    ToolbarItem(placement: .topBarTrailing) {
+                    ToolbarItemGroup(placement: .topBarTrailing) {
+                        Button {
+                            showingToolbarCheatPopover = true
+                        } label: {
+                            CheatDayToolbarIcon(isCheatDay: isCheatDay)
+                        }
+                        .tint(AppTheme.coral)
+                        .disabled(isFutureDay)
+                        .accessibilityLabel(isCheatDay ? "Undo cheat day" : "Mark cheat day")
+
+                        Button {
+                            showingStreak = true
+                        } label: {
+                            HStack(spacing: 2) {
+                                Image(systemName: "bolt.fill")
+                                Text(diary.currentStreak.dayCount.formatted())
+                                    .font(.subheadline.weight(.bold).monospacedDigit())
+                            }
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel("\(diary.currentStreak.dayCount) day streak")
+                        }
+
                         NavigationLink {
                             SettingsView(catalog: catalog)
                         } label: {
@@ -166,8 +225,7 @@ struct DiaryView: View {
                 } else {
                     VStack(spacing: 0) {
                         Button {
-                            foodPickerMode = nil
-                            foodPickerLaunch = .search
+                            beginLoggingFood()
                         } label: {
                             Label("Log food", systemImage: "magnifyingglass")
                                 .font(.headline)
@@ -177,10 +235,29 @@ struct DiaryView: View {
                         }
                         .buttonStyle(.borderedProminent)
                         .clipShape(Capsule())
+                        .opacity(isCheatDay ? 0.5 : 1)
+                        .cheatDayPopover(
+                            isPresented: $showingLogFoodCheatPopover,
+                            date: date,
+                            isCheatDay: isCheatDay,
+                            arrowEdge: .bottom,
+                            onConfirm: confirmCheatDayAction
+                        )
 
-                        FoodPickerModeStrip(selection: $foodPickerMode) { selectedMode in
+                        FoodPickerModeStrip(
+                            selection: $foodPickerMode,
+                            isEnabled: !isCheatDay,
+                            onDisabledTap: { showingModeStripCheatPopover = true }
+                        ) { selectedMode in
                             foodPickerLaunch = .mode(selectedMode)
                         }
+                        .cheatDayPopover(
+                            isPresented: $showingModeStripCheatPopover,
+                            date: date,
+                            isCheatDay: isCheatDay,
+                            arrowEdge: .bottom,
+                            onConfirm: confirmCheatDayAction
+                        )
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 12)
@@ -209,7 +286,43 @@ struct DiaryView: View {
                 diaryEntriesHeight = CGFloat(diary.entries(on: date).count) * 78
                 cancelMealSelection()
             }
+            .task {
+#if DEBUG
+                guard !didSeedDebugScreenshot else { return }
+                didSeedDebugScreenshot = true
+                let arguments = ProcessInfo.processInfo.arguments
+                if arguments.contains("--seed-special-days") {
+                    diary.seedSpecialDaysForScreenshots()
+                }
+                if arguments.contains("--seed-today-cheat") {
+                    diary.markCheatDay(on: Date(), adjustmentCalories: 1_000)
+                }
+                if arguments.contains("--show-cheat-day-dialog")
+                    || arguments.contains("--show-banner-cheat-popover")
+                    || arguments.contains("--show-log-food-cheat-popover") {
+                    try? await Task.sleep(for: .milliseconds(500))
+                    showingToolbarCheatPopover = arguments.contains("--show-cheat-day-dialog")
+                    showingBannerCheatPopover = arguments.contains("--show-banner-cheat-popover")
+                    showingLogFoodCheatPopover = arguments.contains("--show-log-food-cheat-popover")
+                }
+#endif
+            }
         }
+        .overlay {
+            if showingToolbarCheatPopover {
+                ToolbarCheatDayOverlay(
+                    date: date,
+                    isCheatDay: isCheatDay,
+                    onConfirm: {
+                        confirmCheatDayAction()
+                        showingToolbarCheatPopover = false
+                    },
+                    onDismiss: { showingToolbarCheatPopover = false }
+                )
+                .transition(.opacity.combined(with: .scale(scale: 0.98, anchor: .topTrailing)))
+            }
+        }
+        .animation(.easeInOut(duration: 0.16), value: showingToolbarCheatPopover)
     }
 
     @ViewBuilder
@@ -220,7 +333,7 @@ struct DiaryView: View {
                 Text("Logged")
                     .font(.title3.weight(.bold))
                 Spacer()
-                if !entries.isEmpty, !isSelectingMealItems {
+                if !entries.isEmpty, !isSelectingMealItems, !isCheatDay {
                     Button("Select") {
                         selectedEntryIDs = []
                         isSelectingMealItems = true
@@ -240,6 +353,18 @@ struct DiaryView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 16)
                     .padding(.bottom, 5)
+            }
+            if isCheatDay {
+                CheatDayAdjustmentPicker(
+                    selectedCalories: selectedDayStatus?.adjustmentCalories,
+                    onSelect: { calories in
+                        withAnimation(.snappy) {
+                            diary.markCheatDay(on: date, adjustmentCalories: calories)
+                        }
+                    }
+                )
+                .padding(.horizontal, 16)
+                .padding(.vertical, 6)
             }
             if entries.isEmpty {
                 ContentUnavailableView {
@@ -280,7 +405,11 @@ struct DiaryView: View {
                         diary.moveEntry(entryID, toIndex: destinationIndex, on: date)
                     },
                     onEdit: { entry in
-                        editingEntry = entry
+                        if isCheatDay {
+                            showingLoggedEntriesCheatPopover = true
+                        } else if !entry.isCheatDayAdjustment {
+                            editingEntry = entry
+                        }
                     },
                     onDelete: { entryID in
                         withAnimation(.snappy) {
@@ -294,6 +423,13 @@ struct DiaryView: View {
                 .accessibilityIdentifier("logged-foods-reorder-list")
                 .frame(height: max(diaryEntriesHeight, CGFloat(entries.count) * 78))
                 .padding(.horizontal, 16)
+                .cheatDayPopover(
+                    isPresented: $showingLoggedEntriesCheatPopover,
+                    date: date,
+                    isCheatDay: isCheatDay,
+                    arrowEdge: .top,
+                    onConfirm: confirmCheatDayAction
+                )
             }
         }
     }
@@ -317,6 +453,207 @@ struct DiaryView: View {
             diary.deleteEntries(entryIDs: selectedEntryIDs)
         }
         cancelMealSelection()
+    }
+
+    private func beginLoggingFood() {
+        guard !isCheatDay else {
+            showingLogFoodCheatPopover = true
+            return
+        }
+        foodPickerMode = nil
+        foodPickerLaunch = .search
+    }
+
+    private func confirmCheatDayAction() {
+        if isCheatDay {
+            diary.undoCheatDay(on: date)
+        } else {
+            diary.markCheatDay(on: date)
+        }
+    }
+}
+
+private struct CheatDayToolbarIcon: View {
+    let isCheatDay: Bool
+
+    var body: some View {
+        Image(systemName: isCheatDay
+              ? "takeoutbag.and.cup.and.straw.fill"
+              : "takeoutbag.and.cup.and.straw")
+            .font(.body)
+    }
+}
+
+private struct ToolbarCheatDayOverlay: View {
+    let date: Date
+    let isCheatDay: Bool
+    let onConfirm: () -> Void
+    let onDismiss: () -> Void
+
+    var body: some View {
+        GeometryReader { proxy in
+            ZStack(alignment: .topTrailing) {
+                Color.black.opacity(0.06)
+                    .ignoresSafeArea()
+                    .contentShape(Rectangle())
+                    .onTapGesture(perform: onDismiss)
+
+                VStack(spacing: -1) {
+                    UpwardCaret()
+                        .fill(.regularMaterial)
+                        .frame(width: 24, height: 13)
+                        .offset(x: 7)
+                    CheatDayActionPopover(
+                        date: date,
+                        isCheatDay: isCheatDay,
+                        onConfirm: onConfirm
+                    )
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 30, style: .continuous))
+                    .shadow(color: .black.opacity(0.13), radius: 22, y: 8)
+                }
+                .padding(.top, max(proxy.safeAreaInsets.top - 12, 0))
+                .padding(.trailing, 8)
+            }
+        }
+    }
+}
+
+private struct UpwardCaret: Shape {
+    func path(in rect: CGRect) -> Path {
+        Path { path in
+            path.move(to: CGPoint(x: rect.midX, y: rect.minY))
+            path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+            path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+            path.closeSubpath()
+        }
+    }
+}
+
+private struct CheatDayPopoverModifier: ViewModifier {
+    @Binding var isPresented: Bool
+    let date: Date
+    let isCheatDay: Bool
+    let arrowEdge: Edge
+    let onConfirm: () -> Void
+
+    private var attachmentAnchor: PopoverAttachmentAnchor {
+        arrowEdge == .top ? .point(.bottom) : .point(.top)
+    }
+
+    func body(content: Content) -> some View {
+        content.popover(
+            isPresented: $isPresented,
+            attachmentAnchor: attachmentAnchor,
+            arrowEdge: arrowEdge
+        ) {
+            CheatDayActionPopover(date: date, isCheatDay: isCheatDay) {
+                onConfirm()
+                isPresented = false
+            }
+            .presentationCompactAdaptation(.popover)
+        }
+    }
+}
+
+private extension View {
+    func cheatDayPopover(
+        isPresented: Binding<Bool>,
+        date: Date,
+        isCheatDay: Bool,
+        arrowEdge: Edge,
+        onConfirm: @escaping () -> Void
+    ) -> some View {
+        modifier(CheatDayPopoverModifier(
+            isPresented: isPresented,
+            date: date,
+            isCheatDay: isCheatDay,
+            arrowEdge: arrowEdge,
+            onConfirm: onConfirm
+        ))
+    }
+}
+
+private struct CheatDayActionPopover: View {
+    let date: Date
+    let isCheatDay: Bool
+    let onConfirm: () -> Void
+
+    private var relativeDayName: String {
+        if Calendar.current.isDateInToday(date) { return "Today" }
+        if Calendar.current.isDateInYesterday(date) { return "Yesterday" }
+        return date.formatted(.dateTime.month(.abbreviated).day())
+    }
+
+    private var formattedDate: String {
+        date.formatted(.dateTime.weekday(.wide).month(.wide).day().year())
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text(isCheatDay ? "Undo \(relativeDayName) Cheat Day?" : "Mark \(relativeDayName) as a Cheat Day?")
+                .font(.headline)
+            Text(isCheatDay
+                 ? "\(formattedDate) will return to normal logging. Any cheat day adjustment will be removed."
+                 : "Any food already logged for \(formattedDate) will be kept.")
+                .font(.subheadline)
+                .foregroundStyle(AppTheme.muted)
+                .fixedSize(horizontal: false, vertical: true)
+            Button(isCheatDay ? "Undo Cheat Day" : "Yes", action: onConfirm)
+                .font(.headline)
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 11)
+                .background(AppTheme.coral, in: Capsule())
+                .buttonStyle(.plain)
+        }
+        .padding(18)
+        .frame(width: 310)
+    }
+}
+
+private struct CheatDayAdjustmentPicker: View {
+    let selectedCalories: Int?
+    let onSelect: (Int) -> Void
+
+    private let options = [500, 1_000, 1_500, 2_000]
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 4)
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            Text("Estimated extra calories")
+                .font(.subheadline.weight(.semibold))
+            LazyVGrid(columns: columns, spacing: 6) {
+                ForEach(options, id: \.self) { calories in
+                    let isSelected = selectedCalories == calories
+                    Button {
+                        onSelect(calories)
+                    } label: {
+                        HStack(spacing: 3) {
+                            if isSelected {
+                                Image(systemName: "checkmark")
+                                    .font(.caption2.weight(.black))
+                            }
+                            Text("+\(calories.formatted())")
+                                .font(.caption.weight(.bold).monospacedDigit())
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.75)
+                        }
+                        .foregroundStyle(isSelected ? .white : AppTheme.coral)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 9)
+                        .background(isSelected ? AppTheme.coral : AppTheme.coral.opacity(0.12), in: Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Estimate \(calories) additional calories")
+                    .accessibilityAddTraits(isSelected ? .isSelected : [])
+                }
+            }
+            Text("Choosing another amount replaces the current estimate.")
+                .font(.caption2)
+                .foregroundStyle(AppTheme.muted)
+        }
+        .padding(13)
+        .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 18))
     }
 }
 
@@ -378,6 +715,45 @@ private struct DateStrip: View {
 
     private func date(_ offset: Int) -> Date {
         Calendar.current.date(byAdding: .day, value: offset, to: Date()) ?? Date()
+    }
+}
+
+private struct DayStatusBanner: View {
+    let status: DayStatus
+
+    private var color: Color {
+        status.kind == .gap ? AppTheme.gapDay : AppTheme.cheatDay
+    }
+
+    var body: some View {
+        HStack(spacing: 10) {
+            if status.kind == .gap {
+                Image(systemName: "pause.circle.fill")
+                    .font(.title3)
+                    .padding(.horizontal, 4)
+            } else {
+                Image(systemName: "takeoutbag.and.cup.and.straw.fill")
+                    .font(.title3)
+                    .padding(.horizontal, 4)
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                Text(status.kind.title)
+                    .font(.subheadline.weight(.bold))
+                if status.kind == .gap {
+                    Text("Nothing was logged after the day ended.")
+                } else if let adjustment = status.adjustmentCalories {
+                    Text("Includes a \(adjustment.formatted()) calorie estimate.")
+                } else {
+                    Text("Food is preserved; Apple Health receives zero nutrition.")
+                }
+            }
+            .font(.caption)
+            Spacer()
+        }
+        .foregroundStyle(color)
+        .padding(14)
+        .background(color.opacity(0.12), in: RoundedRectangle(cornerRadius: 18))
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -540,7 +916,14 @@ private struct DiaryEntryRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            if !entry.isMeal {
+            if entry.isCheatDayAdjustment {
+                Image(systemName: "plusminus.circle.fill")
+                    .font(.title2)
+                    .foregroundStyle(AppTheme.cheatDay)
+                    .frame(width: 38, height: 38)
+                    .background(AppTheme.cheatDay.opacity(0.12), in: Circle())
+                    .accessibilityLabel("Cheat day adjustment")
+            } else if !entry.isMeal {
                 SourceBadge(source: entry.food.source)
             } else {
                 Text("Meal")
@@ -698,7 +1081,8 @@ private struct ReorderableDiaryEntries: UIViewRepresentable {
         }
 
         func collectionView(_ collectionView: UICollectionView, canMoveItemAt indexPath: IndexPath) -> Bool {
-            true
+            guard currentEntries.indices.contains(indexPath.item) else { return false }
+            return !currentEntries[indexPath.item].isCheatDayAdjustment
         }
 
         func collectionView(
@@ -719,6 +1103,7 @@ private struct ReorderableDiaryEntries: UIViewRepresentable {
 
         func swipeActions(at indexPath: IndexPath) -> UISwipeActionsConfiguration? {
             guard currentEntries.indices.contains(indexPath.item) else { return nil }
+            guard !currentEntries[indexPath.item].isCheatDayAdjustment else { return nil }
             let entryID = currentEntries[indexPath.item].id
             let delete = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, completion in
                 self?.parent.onDelete(entryID)

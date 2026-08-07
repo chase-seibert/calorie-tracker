@@ -15,13 +15,15 @@ final class DiaryStore: ObservableObject {
         fileURL: URL? = nil,
         calendar: Calendar = .current,
         healthKit: HealthKitStore? = nil,
-        defaultWeightUnit: LogUnit? = nil
+        defaultWeightUnit: LogUnit? = nil,
+        referenceDate: Date = Date()
     ) {
         self.calendar = calendar
         self.fileURL = fileURL ?? Self.defaultFileURL()
         self.healthKit = healthKit
         self.defaultWeightUnit = defaultWeightUnit
         self.document = Self.load(from: self.fileURL) ?? DiaryDocument()
+        prepareDayTracking(referenceDate: referenceDate)
     }
 
     init(
@@ -29,13 +31,15 @@ final class DiaryStore: ObservableObject {
         fileURL: URL? = nil,
         calendar: Calendar = .current,
         healthKit: HealthKitStore? = nil,
-        defaultWeightUnit: LogUnit? = nil
+        defaultWeightUnit: LogUnit? = nil,
+        referenceDate: Date = Date()
     ) {
         self.calendar = calendar
         self.fileURL = fileURL ?? Self.defaultFileURL()
         self.healthKit = healthKit
         self.defaultWeightUnit = defaultWeightUnit
         self.document = document
+        prepareDayTracking(referenceDate: referenceDate)
     }
 
     func entries(on date: Date) -> [DiaryEntry] {
@@ -53,16 +57,156 @@ final class DiaryStore: ObservableObject {
         entries(on: date).reduce(.zero) { $0 + $1.nutrients }
     }
 
+    func status(on date: Date) -> DayStatus? {
+        document.dayStatuses.first { calendar.isDate($0.date, inSameDayAs: date) }
+    }
+
+    func canLogFood(on date: Date) -> Bool {
+        status(on: date)?.kind != .cheat
+    }
+
     var dailyCalorieGoal: Int? {
         document.dailyCalorieGoal
     }
 
     func setDailyCalorieGoal(_ goal: Int?) {
         document.dailyCalorieGoal = goal.flatMap { $0 > 0 ? $0 : nil }
+        finalizePastDays(referenceDate: Date())
         persist()
+        syncAllHealthData()
     }
 
+    func markCheatDay(on date: Date, adjustmentCalories: Int? = nil) {
+        let day = calendar.startOfDay(for: date)
+        let normalizedAdjustment = adjustmentCalories.flatMap { $0 > 0 ? $0 : nil }
+        let oldAdjustments = entries(on: day).filter(\.isCheatDayAdjustment)
+        document.entries.removeAll {
+            calendar.isDate($0.date, inSameDayAs: day) && $0.isCheatDayAdjustment
+        }
+
+        upsertStatus(DayStatus(
+            date: day,
+            kind: .cheat,
+            source: .manual,
+            adjustmentCalories: normalizedAdjustment
+        ))
+
+        if let normalizedAdjustment {
+            document.entries.append(makeCheatDayAdjustment(
+                calories: normalizedAdjustment,
+                on: day
+            ))
+        }
+
+        persist()
+        healthKit?.delete(entries: oldAdjustments)
+        syncHealthData(on: day)
+    }
+
+    func undoCheatDay(on date: Date) {
+        guard status(on: date)?.kind == .cheat else { return }
+        let day = calendar.startOfDay(for: date)
+        let adjustments = entries(on: day).filter(\.isCheatDayAdjustment)
+        document.dayStatuses.removeAll { calendar.isDate($0.date, inSameDayAs: day) }
+        document.entries.removeAll {
+            calendar.isDate($0.date, inSameDayAs: day) && $0.isCheatDayAdjustment
+        }
+        persist()
+        healthKit?.delete(entries: adjustments)
+        syncHealthData(on: day)
+    }
+
+    func finalizePastDays(referenceDate: Date = Date()) {
+        let today = calendar.startOfDay(for: referenceDate)
+        guard
+            let trackingStartDate = document.trackingStartDate.map(calendar.startOfDay(for:)),
+            let yesterday = calendar.date(byAdding: .day, value: -1, to: today),
+            trackingStartDate <= yesterday
+        else { return }
+
+        var day = trackingStartDate
+        while day <= yesterday {
+            reconcileAutomaticStatus(on: day)
+            guard let nextDay = calendar.date(byAdding: .day, value: 1, to: day) else { break }
+            day = nextDay
+        }
+    }
+
+    var currentStreak: StreakSummary {
+        streak(referenceDate: Date())
+    }
+
+    func streak(referenceDate: Date) -> StreakSummary {
+        let today = calendar.startOfDay(for: referenceDate)
+        var cursor = today
+
+        if status(on: today) == nil && ordinaryEntries(on: today).isEmpty {
+            guard let yesterday = calendar.date(byAdding: .day, value: -1, to: today) else {
+                return .empty
+            }
+            cursor = yesterday
+        }
+
+        let lowerBound = document.trackingStartDate.map(calendar.startOfDay(for:)) ?? today
+        var dates: [Date] = []
+        while cursor >= lowerBound {
+            guard status(on: cursor) == nil, !ordinaryEntries(on: cursor).isEmpty else { break }
+            dates.append(cursor)
+            guard let previous = calendar.date(byAdding: .day, value: -1, to: cursor) else { break }
+            cursor = previous
+        }
+
+        guard !dates.isEmpty else { return .empty }
+        let nutrients = dates.map(totals(on:))
+        let count = Double(nutrients.count)
+        let total = nutrients.reduce(.zero, +)
+        let minimum = MacroNutrients(
+            calories: nutrients.map(\.calories).min() ?? 0,
+            carbs: nutrients.map(\.carbs).min() ?? 0,
+            fat: nutrients.map(\.fat).min() ?? 0,
+            protein: nutrients.map(\.protein).min() ?? 0
+        )
+        let maximum = MacroNutrients(
+            calories: nutrients.map(\.calories).max() ?? 0,
+            carbs: nutrients.map(\.carbs).max() ?? 0,
+            fat: nutrients.map(\.fat).max() ?? 0,
+            protein: nutrients.map(\.protein).max() ?? 0
+        )
+
+        return StreakSummary(
+            dates: dates,
+            averageNutrients: total.scaled(by: 1 / count),
+            minimumNutrients: minimum,
+            maximumNutrients: maximum,
+            mostPopularItem: mostPopularItem(on: Set(dates))
+        )
+    }
+
+    func syncAllHealthData() {
+        let groupedEntries = Dictionary(grouping: document.entries, by: { calendar.startOfDay(for: $0.date) })
+        let statusDays = document.dayStatuses.map { calendar.startOfDay(for: $0.date) }
+        for day in Set(groupedEntries.keys).union(statusDays) {
+            syncHealthData(on: day)
+        }
+    }
+
+#if DEBUG
+    func seedSpecialDaysForScreenshots(referenceDate: Date = Date()) {
+        let today = calendar.startOfDay(for: referenceDate)
+        guard
+            let gapStart = calendar.date(byAdding: .day, value: -4, to: today),
+            let cheatDay = calendar.date(byAdding: .day, value: -2, to: today)
+        else { return }
+        document.trackingStartDate = gapStart
+        upsertStatus(DayStatus(date: cheatDay, kind: .cheat, source: .manual))
+        finalizePastDays(referenceDate: referenceDate)
+        persist()
+    }
+#endif
+
     func log(_ food: Food, amount: Double, unit: LogUnit, portionID: String? = nil, on date: Date) {
+        guard canLogFood(on: date) else { return }
+        clearAutomaticStatus(on: date)
         let clampedAmount = max(amount, 0.01)
         let foodToLog = displayedFood(food)
         let entry = DiaryEntry(
@@ -87,16 +231,21 @@ final class DiaryStore: ObservableObject {
     }
 
     func delete(entryID: UUID) {
-        let deletedEntries = document.entries.filter { $0.id == entryID }
-        document.entries.removeAll { $0.id == entryID }
+        let deletedEntries = document.entries.filter { $0.id == entryID && !$0.isCheatDayAdjustment }
+        guard !deletedEntries.isEmpty else { return }
+        document.entries.removeAll { $0.id == entryID && !$0.isCheatDayAdjustment }
         persist()
         healthKit?.delete(entries: deletedEntries)
     }
 
     func deleteEntries(entryIDs: Set<UUID>) {
         guard !entryIDs.isEmpty else { return }
-        let deletedEntries = document.entries.filter { entryIDs.contains($0.id) }
-        document.entries.removeAll { entryIDs.contains($0.id) }
+        let deletedEntries = document.entries.filter {
+            entryIDs.contains($0.id) && !$0.isCheatDayAdjustment
+        }
+        document.entries.removeAll {
+            entryIDs.contains($0.id) && !$0.isCheatDayAdjustment
+        }
         persist()
         healthKit?.delete(entries: deletedEntries)
     }
@@ -109,7 +258,9 @@ final class DiaryStore: ObservableObject {
     ) {
         guard
             let index = document.entries.firstIndex(where: { $0.id == entryID }),
-            !document.entries[index].isMeal
+            !document.entries[index].isMeal,
+            !document.entries[index].isCheatDayAdjustment,
+            canLogFood(on: document.entries[index].date)
         else { return }
 
         let clampedAmount = max(amount, 0.01)
@@ -263,7 +414,8 @@ final class DiaryStore: ObservableObject {
 
     var recentFoods: [Food] {
         uniqueFoods(
-            from: document.entries.filter { !$0.isMeal }.sorted { $0.loggedAt > $1.loggedAt },
+            from: document.entries.filter { !$0.isMeal && !$0.isCheatDayAdjustment }
+                .sorted { $0.loggedAt > $1.loggedAt },
             limit: 30
         )
     }
@@ -271,6 +423,7 @@ final class DiaryStore: ObservableObject {
     var recentItems: [FoodPickerItem] {
         var seen = Set<String>()
         return document.entries
+            .filter { !$0.isCheatDayAdjustment }
             .sorted { $0.loggedAt > $1.loggedAt }
             .compactMap { entry -> FoodPickerItem? in
                 guard let item = pickerItem(for: entry), seen.insert(item.id).inserted else {
@@ -284,7 +437,9 @@ final class DiaryStore: ObservableObject {
 
     var frequentFoods: [Food] {
         let cutoff = calendar.date(byAdding: .day, value: -30, to: Date()) ?? .distantPast
-        let recentEntries = document.entries.filter { $0.date >= cutoff && !$0.isMeal }
+        let recentEntries = document.entries.filter {
+            $0.date >= cutoff && !$0.isMeal && !$0.isCheatDayAdjustment
+        }
         let grouped = Dictionary(grouping: recentEntries, by: { $0.food.id })
         return grouped.values
             .sorted {
@@ -300,7 +455,7 @@ final class DiaryStore: ObservableObject {
 
     var frequentItems: [FoodPickerItem] {
         let cutoff = calendar.date(byAdding: .day, value: -30, to: Date()) ?? .distantPast
-        let recentEntries = document.entries.filter { $0.date >= cutoff }
+        let recentEntries = document.entries.filter { $0.date >= cutoff && !$0.isCheatDayAdjustment }
         let grouped = Dictionary(grouping: recentEntries, by: pickerItemKey(for:))
 
         return grouped.values
@@ -354,10 +509,12 @@ final class DiaryStore: ObservableObject {
 
     func saveMeal(name: String, replacing entryIDs: Set<UUID>, on date: Date) {
         let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !normalizedName.isEmpty, !entryIDs.isEmpty else { return }
+        guard !normalizedName.isEmpty, !entryIDs.isEmpty, canLogFood(on: date) else { return }
 
         let dayEntries = entries(on: date)
-        let selectedEntries = dayEntries.filter { entryIDs.contains($0.id) }
+        let selectedEntries = dayEntries.filter {
+            entryIDs.contains($0.id) && !$0.isCheatDayAdjustment
+        }
         guard !selectedEntries.isEmpty else { return }
 
         let meal = SavedMeal(
@@ -397,7 +554,8 @@ final class DiaryStore: ObservableObject {
     func breakApartMeal(entryID: UUID) {
         guard
             let mealEntry = document.entries.first(where: { $0.id == entryID }),
-            mealEntry.isMeal
+            mealEntry.isMeal,
+            canLogFood(on: mealEntry.date)
         else { return }
 
         let items = mealEntry.mealItems ?? document.meals.first { $0.id == mealEntry.savedMealID }?.items
@@ -447,7 +605,8 @@ final class DiaryStore: ObservableObject {
     }
 
     func logMeal(_ meal: SavedMeal, amount: Double = 1, on date: Date) {
-        guard !meal.items.isEmpty, amount > 0 else { return }
+        guard !meal.items.isEmpty, amount > 0, canLogFood(on: date) else { return }
+        clearAutomaticStatus(on: date)
         let entry = makeMealEntry(
             for: meal,
             amount: amount,
@@ -464,7 +623,8 @@ final class DiaryStore: ObservableObject {
         guard
             let index = document.entries.firstIndex(where: { $0.id == entryID }),
             document.entries[index].isMeal,
-            amount > 0
+            amount > 0,
+            canLogFood(on: document.entries[index].date)
         else { return }
 
         let entry = document.entries[index]
@@ -587,6 +747,9 @@ final class DiaryStore: ObservableObject {
     func importMyFitnessPal(data: Data) throws -> ImportSummary {
         let result = try MyFitnessPalImporter.parse(data: data, calendar: calendar)
         document.entries.append(contentsOf: result.entries)
+        for entry in result.entries {
+            clearAutomaticStatus(on: entry.date)
+        }
         let existingIDs = Set(document.importedFoods.map(\.id))
         document.importedFoods.append(contentsOf: result.foods.filter { !existingIDs.contains($0.id) })
         persist()
@@ -596,9 +759,16 @@ final class DiaryStore: ObservableObject {
 
     func clearPersonalData() {
         let deletedEntries = document.entries
+        let zeroOverrideDays = document.dayStatuses
+            .filter { $0.kind == .cheat && $0.adjustmentCalories == nil }
+            .map(\.date)
         document = DiaryDocument()
+        document.trackingStartDate = calendar.startOfDay(for: Date())
         persist()
         healthKit?.delete(entries: deletedEntries)
+        for day in zeroOverrideDays {
+            healthKit?.deleteZeroNutrition(on: day)
+        }
     }
 
     func totalsByDay(numberOfDays: Int = 30) -> [(date: Date, nutrients: MacroNutrients)] {
@@ -606,6 +776,122 @@ final class DiaryStore: ObservableObject {
         return (0..<numberOfDays).reversed().compactMap { offset in
             guard let date = calendar.date(byAdding: .day, value: -offset, to: today) else { return nil }
             return (date, totals(on: date))
+        }
+    }
+
+    private func prepareDayTracking(referenceDate: Date) {
+        let today = calendar.startOfDay(for: referenceDate)
+        document.schemaVersion = 4
+        document.dayStatuses = document.dayStatuses.map { status in
+            var normalized = status
+            normalized.date = calendar.startOfDay(for: status.date)
+            return normalized
+        }
+
+        if document.trackingStartDate == nil {
+            let firstEntryDay = document.entries.map { calendar.startOfDay(for: $0.date) }.min()
+            let firstStatusDay = document.dayStatuses.map { calendar.startOfDay(for: $0.date) }.min()
+            document.trackingStartDate = [firstEntryDay, firstStatusDay]
+                .compactMap { $0 }
+                .min() ?? today
+        } else {
+            document.trackingStartDate = document.trackingStartDate.map(calendar.startOfDay(for:))
+        }
+
+        finalizePastDays(referenceDate: referenceDate)
+        persist()
+    }
+
+    private func reconcileAutomaticStatus(on date: Date) {
+        let day = calendar.startOfDay(for: date)
+        if let existing = status(on: day), existing.source == .manual {
+            return
+        }
+
+        document.dayStatuses.removeAll {
+            calendar.isDate($0.date, inSameDayAs: day) && $0.source == .automatic
+        }
+        let entries = ordinaryEntries(on: day)
+        if entries.isEmpty {
+            upsertStatus(DayStatus(date: day, kind: .gap, source: .automatic))
+            return
+        }
+
+        guard let goal = dailyCalorieGoal, goal > 0 else { return }
+        let ratio = entries.reduce(.zero) { $0 + $1.nutrients }.calories / Double(goal)
+        if ratio < 0.75 || ratio > 1.30 {
+            upsertStatus(DayStatus(date: day, kind: .cheat, source: .automatic))
+        }
+    }
+
+    private func upsertStatus(_ status: DayStatus) {
+        document.dayStatuses.removeAll {
+            calendar.isDate($0.date, inSameDayAs: status.date)
+        }
+        document.dayStatuses.append(status)
+        document.dayStatuses.sort { $0.date < $1.date }
+    }
+
+    private func clearAutomaticStatus(on date: Date) {
+        document.dayStatuses.removeAll {
+            calendar.isDate($0.date, inSameDayAs: date) && $0.source == .automatic
+        }
+    }
+
+    private func ordinaryEntries(on date: Date) -> [DiaryEntry] {
+        entries(on: date).filter { !$0.isCheatDayAdjustment }
+    }
+
+    private func makeCheatDayAdjustment(calories: Int, on date: Date) -> DiaryEntry {
+        let food = Food(
+            sourceID: "cheat-day-adjustment",
+            source: .custom,
+            name: "Cheat day adjustment",
+            brand: nil,
+            barcode: nil,
+            nutrients: MacroNutrients(calories: Double(calories), carbs: 0, fat: 0, protein: 0),
+            baseAmountGrams: 1,
+            servingGrams: 1,
+            servingDescription: "1 adjustment",
+            portions: [FoodPortion(id: "cheat-day-adjustment", label: "adjustment", grams: 1)]
+        )
+        return DiaryEntry(
+            id: UUID(),
+            date: calendar.startOfDay(for: date),
+            food: food,
+            amount: 1,
+            unit: .serving,
+            nutrients: food.nutrients,
+            loggedAt: Date(),
+            portionID: "cheat-day-adjustment",
+            displayOrder: nextDisplayOrder(on: date),
+            kind: .cheatDayAdjustment
+        )
+    }
+
+    private func mostPopularItem(on dates: Set<Date>) -> String? {
+        let entries = document.entries.filter {
+            !$0.isCheatDayAdjustment && dates.contains(calendar.startOfDay(for: $0.date))
+        }
+        let grouped = Dictionary(grouping: entries, by: { $0.food.name })
+        return grouped.max { left, right in
+            if left.value.count == right.value.count {
+                return left.key.localizedCaseInsensitiveCompare(right.key) == .orderedDescending
+            }
+            return left.value.count < right.value.count
+        }?.key
+    }
+
+    private func syncHealthData(on date: Date) {
+        guard let healthKit else { return }
+        let dayEntries = entries(on: date)
+        let dayStatus = status(on: date)
+        if dayStatus?.kind == .cheat, dayStatus?.adjustmentCalories == nil {
+            healthKit.delete(entries: dayEntries)
+            healthKit.syncZeroNutrition(on: calendar.startOfDay(for: date))
+        } else {
+            healthKit.deleteZeroNutrition(on: calendar.startOfDay(for: date))
+            healthKit.sync(entries: dayEntries)
         }
     }
 
@@ -681,7 +967,7 @@ final class DiaryStore: ObservableObject {
     private var personalFoods: [Food] {
         var seen = Set<String>()
         let candidates = document.entries
-            .filter { !$0.isMeal }
+            .filter { !$0.isMeal && !$0.isCheatDayAdjustment }
             .sorted { $0.loggedAt > $1.loggedAt }
             .map(\.food) + document.favorites + document.customFoods + document.importedFoods
         return candidates.compactMap { food in

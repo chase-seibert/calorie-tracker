@@ -16,6 +16,11 @@ keeps the diary and food search on-device.
 - Barcode scanning and manual barcode entry.
 - Custom foods and MyFitnessPal CSV import entry point.
 - Daily calorie and macro trend charts.
+- Automatic gap and calorie-goal-based cheat days, plus manual cheat-day
+  adjustments and undo.
+- A toolbar streak counter with calorie, macro, range, and most-logged-item
+  reporting.
+- Gap and cheat-day markers in calorie and macro trends.
 
 ## Build and run
 

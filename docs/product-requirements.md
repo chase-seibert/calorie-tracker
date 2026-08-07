@@ -46,6 +46,14 @@
 - As a user leaving MyFitnessPal, I want to import its export so that my history
   and personal recents can become the third data source.
 - As a user looking for patterns, I want calorie and macro trends by day.
+- As someone who sometimes takes a day off from tracking, I want an empty past
+  day recorded as a gap day and removed automatically if I later log food.
+- As someone whose log may be intentionally incomplete, I want past days below
+  75% or above 130% of my optional calorie goal classified as cheat days, with
+  a manual override and optional calorie estimate.
+- As someone building a consistent habit, I want a visible streak count and a
+  report covering calories, macros, ranges, and my most-logged item during the
+  current streak.
 
 ## Interaction and presentation requirements
 
@@ -64,6 +72,16 @@
   bar, in that order, with exact gram values in its legend.
 - Tapping calories, carbs, fat, or protein in the diary summary navigates to
   Trends.
+- The diary toolbar orders the cheat-day action, lightning-bolt streak count,
+  and Settings from left to right. An active cheat day adds a green check to
+  the orange action icon and disables food logging until the user confirms that
+  they want to undo it from the icon, status banner, or Log Food action.
+- Marking a cheat day uses one Yes action. Once marked, compact estimate pills
+  offer 500, 1,000, 1,500, and 2,000 calories above the Logged list. The chosen
+  value appears as one calorie-only “Cheat day adjustment,” and choosing another
+  value replaces it.
+- Gap and cheat days appear as distinct vertical markers with a key in both
+  trend charts.
 - Light and dark appearances use adaptive backgrounds, elevated cards, primary
   and secondary text, control fills, source badges, macro colors, and action
   colors across Diary, Log Food, quantity editing, Settings, and Trends.

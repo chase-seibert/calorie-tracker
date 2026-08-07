@@ -6,7 +6,13 @@ struct TrendsView: View {
     @State private var range = 30
 
     private var points: [TrendPoint] {
-        diary.totalsByDay(numberOfDays: range).map { TrendPoint(date: $0.date, nutrients: $0.nutrients) }
+        diary.totalsByDay(numberOfDays: range).map {
+            TrendPoint(date: $0.date, nutrients: $0.nutrients, status: diary.status(on: $0.date)?.kind)
+        }
+    }
+
+    private var visibleStatuses: [DayStatusKind] {
+        DayStatusKind.allCases.filter { status in points.contains { $0.status == status } }
     }
 
     var body: some View {
@@ -33,19 +39,26 @@ struct TrendsView: View {
     private func chartCard(title: String, color: Color, value: @escaping (TrendPoint) -> Double) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(title).font(.title3.weight(.bold))
-            Chart(points) { point in
-                LineMark(
-                    x: .value("Date", point.date),
-                    y: .value(title, value(point))
-                )
-                .foregroundStyle(color)
-                .interpolationMethod(.catmullRom)
-                AreaMark(
-                    x: .value("Date", point.date),
-                    y: .value(title, value(point))
-                )
-                .foregroundStyle(LinearGradient(colors: [color.opacity(0.22), .clear], startPoint: .top, endPoint: .bottom))
-                .interpolationMethod(.catmullRom)
+            Chart {
+                ForEach(points) { point in
+                    LineMark(
+                        x: .value("Date", point.date),
+                        y: .value(title, value(point))
+                    )
+                    .foregroundStyle(color)
+                    .interpolationMethod(.catmullRom)
+                    AreaMark(
+                        x: .value("Date", point.date),
+                        y: .value(title, value(point))
+                    )
+                    .foregroundStyle(LinearGradient(colors: [color.opacity(0.22), .clear], startPoint: .top, endPoint: .bottom))
+                    .interpolationMethod(.catmullRom)
+                    if let status = point.status {
+                        RuleMark(x: .value("Special day", point.date))
+                            .foregroundStyle(statusColor(status).opacity(0.5))
+                            .lineStyle(StrokeStyle(lineWidth: 6))
+                    }
+                }
             }
             .chartXAxis {
                 AxisMarks(values: .automatic(desiredCount: 5)) { value in
@@ -54,6 +67,7 @@ struct TrendsView: View {
                 }
             }
             .frame(height: 220)
+            specialDayLegend
         }
         .padding(18)
         .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 22))
@@ -70,6 +84,11 @@ struct TrendsView: View {
                         .foregroundStyle(by: .value("Macro", "Fat"))
                     LineMark(x: .value("Date", point.date), y: .value("Grams", point.nutrients.protein), series: .value("Macro", "Protein"))
                         .foregroundStyle(by: .value("Macro", "Protein"))
+                    if let status = point.status {
+                        RuleMark(x: .value("Special day", point.date))
+                            .foregroundStyle(statusColor(status).opacity(0.5))
+                            .lineStyle(StrokeStyle(lineWidth: 6))
+                    }
                 }
             }
             .chartForegroundStyleScale([
@@ -84,14 +103,42 @@ struct TrendsView: View {
                 }
             }
             .frame(height: 240)
+            specialDayLegend
         }
         .padding(18)
         .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 22))
+    }
+
+    @ViewBuilder
+    private var specialDayLegend: some View {
+        if !visibleStatuses.isEmpty {
+            HStack(spacing: 14) {
+                ForEach(visibleStatuses, id: \.self) { status in
+                    HStack(spacing: 6) {
+                        Capsule()
+                            .fill(statusColor(status))
+                            .frame(width: 6, height: 18)
+                        Text(status.title)
+                            .font(.caption)
+                            .foregroundStyle(AppTheme.muted)
+                    }
+                }
+            }
+            .accessibilityElement(children: .combine)
+        }
+    }
+
+    private func statusColor(_ status: DayStatusKind) -> Color {
+        switch status {
+        case .gap: AppTheme.gapDay
+        case .cheat: AppTheme.cheatDay
+        }
     }
 }
 
 private struct TrendPoint: Identifiable {
     let date: Date
     let nutrients: MacroNutrients
+    let status: DayStatusKind?
     var id: Date { date }
 }

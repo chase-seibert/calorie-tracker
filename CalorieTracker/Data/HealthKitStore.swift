@@ -79,6 +79,30 @@ final class HealthKitStore: ObservableObject {
         }
     }
 
+    @discardableResult
+    func syncZeroNutrition(on date: Date) -> Task<Void, Never> {
+        guard isAvailable else { return Task {} }
+        return enqueue { [weak self] in
+            guard let self else { return }
+            let types = writableQuantityTypes
+            guard !types.isEmpty else { return }
+            for type in types {
+                await deleteSample(of: type, syncIdentifier: dayOverrideIdentifier(for: date, type: type))
+            }
+            await save(zeroSamples(on: date, types: types))
+        }
+    }
+
+    func deleteZeroNutrition(on date: Date) {
+        guard isAvailable else { return }
+        enqueue { [weak self] in
+            guard let self else { return }
+            for type in writableQuantityTypes {
+                await deleteSample(of: type, syncIdentifier: dayOverrideIdentifier(for: date, type: type))
+            }
+        }
+    }
+
     private var quantityTypes: [HKQuantityType] {
         [
             .dietaryEnergyConsumed,
@@ -166,8 +190,44 @@ final class HealthKitStore: ObservableObject {
         }
     }
 
+    private func zeroSamples(on date: Date, types: [HKQuantityType]) -> [HKQuantitySample] {
+        let units: [(HKQuantityTypeIdentifier, HKUnit)] = [
+            (.dietaryEnergyConsumed, .kilocalorie()),
+            (.dietaryCarbohydrates, .gram()),
+            (.dietaryFatTotal, .gram()),
+            (.dietaryProtein, .gram())
+        ]
+
+        return units.compactMap { identifier, unit in
+            guard let type = types.first(where: { $0.identifier == identifier.rawValue }) else { return nil }
+            let metadata: [String: Any] = [
+                HKMetadataKeySyncIdentifier: dayOverrideIdentifier(for: date, type: type),
+                HKMetadataKeySyncVersion: 1,
+                HKMetadataKeyWasUserEntered: true
+            ]
+            return HKQuantitySample(
+                type: type,
+                quantity: HKQuantity(unit: unit, doubleValue: 0),
+                start: date,
+                end: date,
+                metadata: metadata
+            )
+        }
+    }
+
     private func syncIdentifier(for entry: DiaryEntry, type: HKQuantityType) -> String {
         "com.cseibert.CalorieTracker.\(entry.id.uuidString).\(type.identifier)"
+    }
+
+    private func dayOverrideIdentifier(for date: Date, type: HKQuantityType) -> String {
+        let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
+        let day = String(
+            format: "%04d-%02d-%02d",
+            components.year ?? 0,
+            components.month ?? 0,
+            components.day ?? 0
+        )
+        return "com.cseibert.CalorieTracker.day-override.\(day).\(type.identifier)"
     }
 
     private func deleteSample(of type: HKQuantityType, syncIdentifier: String) async {

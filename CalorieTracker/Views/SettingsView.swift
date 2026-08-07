@@ -83,7 +83,8 @@ struct SettingsView: View {
                 case .notDetermined:
                     Button("Connect Apple Health", systemImage: "heart.fill") {
                         Task {
-                            await healthKit.requestAuthorizationAndSync(entries: diary.document.entries)
+                            await healthKit.requestAuthorizationAndSync(entries: [])
+                            diary.syncAllHealthData()
                         }
                     }
                     Text("Writes calories, carbohydrates, fat, and protein for your logged foods and meals.")
@@ -168,7 +169,7 @@ struct SettingsView: View {
         syncingNutrition = true
         let startedAt = Date()
 
-        await healthKit.sync(entries: diary.document.entries).value
+        diary.syncAllHealthData()
 
         let remainingDuration = minimumSyncSpinnerDuration - Date().timeIntervalSince(startedAt)
         if remainingDuration > 0 {

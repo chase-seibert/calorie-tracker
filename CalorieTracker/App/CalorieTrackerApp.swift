@@ -19,7 +19,7 @@ struct CalorieTrackerApp: App {
                 .environmentObject(healthKit)
                 .tint(AppTheme.coral)
                 .task {
-                    healthKit.sync(entries: diary.document.entries)
+                    diary.syncAllHealthData()
                 }
         }
     }
@@ -111,4 +111,6 @@ enum AppTheme {
     static let carbs = Color(uiColor: .systemBlue)
     static let fat = Color(uiColor: .systemPurple)
     static let protein = Color(uiColor: .systemGreen)
+    static let gapDay = Color(uiColor: .systemGray)
+    static let cheatDay = Color(uiColor: .systemOrange)
 }

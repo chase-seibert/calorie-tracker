@@ -54,6 +54,54 @@ struct MacroNutrients: Codable, Hashable, Sendable {
     }
 }
 
+enum DiaryEntryKind: String, Codable, Hashable, Sendable {
+    case cheatDayAdjustment
+}
+
+enum DayStatusKind: String, Codable, CaseIterable, Hashable, Sendable {
+    case gap
+    case cheat
+
+    var title: String {
+        switch self {
+        case .gap: "Gap day"
+        case .cheat: "Cheat day"
+        }
+    }
+}
+
+enum DayStatusSource: String, Codable, Hashable, Sendable {
+    case automatic
+    case manual
+}
+
+struct DayStatus: Codable, Hashable, Identifiable, Sendable {
+    var date: Date
+    var kind: DayStatusKind
+    var source: DayStatusSource
+    var adjustmentCalories: Int? = nil
+
+    var id: Date { date }
+}
+
+struct StreakSummary: Equatable, Sendable {
+    let dates: [Date]
+    let averageNutrients: MacroNutrients
+    let minimumNutrients: MacroNutrients
+    let maximumNutrients: MacroNutrients
+    let mostPopularItem: String?
+
+    var dayCount: Int { dates.count }
+
+    static let empty = StreakSummary(
+        dates: [],
+        averageNutrients: .zero,
+        minimumNutrients: .zero,
+        maximumNutrients: .zero,
+        mostPopularItem: nil
+    )
+}
+
 struct DailyCalorieProgress: Equatable, Sendable {
     let consumed: Int
     let goal: Int?
@@ -181,9 +229,14 @@ struct DiaryEntry: Codable, Hashable, Identifiable, Sendable {
     var displayOrder: Int? = nil
     var savedMealID: UUID? = nil
     var mealItems: [MealItem]? = nil
+    var kind: DiaryEntryKind? = nil
 
     var isMeal: Bool {
         savedMealID != nil || !(mealItems?.isEmpty ?? true)
+    }
+
+    var isCheatDayAdjustment: Bool {
+        kind == .cheatDayAdjustment
     }
 }
 
@@ -224,8 +277,10 @@ enum FoodPickerItem: Identifiable, Hashable, Sendable {
 }
 
 struct DiaryDocument: Codable, Sendable {
-    var schemaVersion = 3
+    var schemaVersion = 4
     var dailyCalorieGoal: Int? = nil
+    var trackingStartDate: Date? = nil
+    var dayStatuses: [DayStatus] = []
     var entries: [DiaryEntry] = []
     var favorites: [Food] = []
     var favoriteMealIDs: [UUID] = []
@@ -241,6 +296,8 @@ struct DiaryDocument: Codable, Sendable {
     private enum CodingKeys: String, CodingKey {
         case schemaVersion
         case dailyCalorieGoal
+        case trackingStartDate
+        case dayStatuses
         case entries
         case favorites
         case favoriteMealIDs
@@ -256,6 +313,8 @@ struct DiaryDocument: Codable, Sendable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         schemaVersion = try container.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
         dailyCalorieGoal = try container.decodeIfPresent(Int.self, forKey: .dailyCalorieGoal)
+        trackingStartDate = try container.decodeIfPresent(Date.self, forKey: .trackingStartDate)
+        dayStatuses = try container.decodeIfPresent([DayStatus].self, forKey: .dayStatuses) ?? []
         entries = try container.decodeIfPresent([DiaryEntry].self, forKey: .entries) ?? []
         favorites = try container.decodeIfPresent([Food].self, forKey: .favorites) ?? []
         favoriteMealIDs = try container.decodeIfPresent([UUID].self, forKey: .favoriteMealIDs) ?? []

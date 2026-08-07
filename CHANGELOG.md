@@ -1,5 +1,11 @@
 # Changelog
 
+- Added automatic gap days and calorie-goal-based cheat days, manual cheat-day
+  marking with optional calorie adjustments, and undo-to-resume logging.
+- Added a lightning-bolt streak counter and streak report with calorie, macro,
+  range, and most-logged-item statistics.
+- Added gap and cheat-day markers to both trend charts and special-day-aware
+  Apple Health synchronization.
 - Added optional Apple Health writes for logged calories, carbohydrates, fat,
   and protein, with update and deletion synchronization.
 
