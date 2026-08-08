@@ -6,8 +6,9 @@
   every time band and entries for yesterday, today, and tomorrow.
 - Clarified multi-food Magic suggestions with a thin accent outline and spacing
   before the next suggestion.
-- Magic suggestions now omit singles and sets that overlap food already logged
-  in today's current meal window.
+- Foods logged today remain eligible for Magic, while singleton suggestions
+  require a same-day historical repeat in the active time band; today's entries
+  never count toward historical eligibility.
 - The default Log Food search sheet now shows Magic suggestions before typing.
 - Added automatic gap days and calorie-goal-based cheat days, manual cheat-day
   marking with optional calorie adjustments, and undo-to-resume logging.

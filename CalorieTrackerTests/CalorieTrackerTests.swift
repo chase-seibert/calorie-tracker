@@ -52,6 +52,7 @@ final class CalorieTrackerTests: XCTestCase {
         let proteinShake = food("protein-shake", "Protein shake")
         let turkeySandwich = food("turkey-sandwich", "Turkey sandwich")
         let tea = food("tea", "Tea with honey")
+        let oneOffBreakfast = food("one-off-breakfast", "One-off breakfast")
         let oldBreakfast = food("old-breakfast", "Old breakfast")
         var oldBreakfastEntry = entry(oldBreakfast, day: 7, hour: 7)
         oldBreakfastEntry.date = calendar.date(byAdding: .day, value: -20, to: oldBreakfastEntry.date)!
@@ -63,6 +64,7 @@ final class CalorieTrackerTests: XCTestCase {
             entry(cappuccino, day: 6, hour: 7),
             entry(proteinShake, day: 6, hour: 7),
             entry(cappuccino, day: 7, hour: 8),
+            entry(oneOffBreakfast, day: 7, hour: 9),
             entry(turkeySandwich, day: 4, hour: 12),
             entry(turkeySandwich, day: 5, hour: 12),
             entry(tea, day: 5, hour: 12),
@@ -85,6 +87,7 @@ final class CalorieTrackerTests: XCTestCase {
             "food:\(proteinShake.id)"
         ])
         XCTAssertTrue(breakfast.contains { $0.items.map(\.id) == ["food:\(cappuccino.id)"] })
+        XCTAssertFalse(breakfast.contains { $0.items.map(\.id) == ["food:\(oneOffBreakfast.id)"] })
         XCTAssertFalse(breakfast.contains { $0.items.contains { $0.id == "food:\(oldBreakfast.id)" } })
 
         let lunch = store.magicSuggestions(at: date(8, 12))
@@ -120,7 +123,7 @@ final class CalorieTrackerTests: XCTestCase {
     }
 
     @MainActor
-    func testMagicSuggestionsSuppressLoggedItemsAndOverlappingSetsInCurrentMeal() throws {
+    func testMagicSuggestionsRequireSameDayHistoricalRepeatForItemsLoggedToday() throws {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = try XCTUnwrap(TimeZone(identifier: "America/Los_Angeles"))
         func date(_ day: Int, _ hour: Int) -> Date {
@@ -159,11 +162,16 @@ final class CalorieTrackerTests: XCTestCase {
 
         let cappuccino = food("cappuccino", "Cappuccino")
         let proteinShake = food("protein-shake", "Protein shake")
+        let oneOff = food("one-off", "One-off lunch")
         let history = [
-            entry(cappuccino, day: 5, hour: 7),
-            entry(proteinShake, day: 5, hour: 7),
-            entry(cappuccino, day: 6, hour: 7),
-            entry(proteinShake, day: 6, hour: 7)
+            entry(cappuccino, day: 5, hour: 12),
+            entry(cappuccino, day: 5, hour: 12),
+            entry(proteinShake, day: 5, hour: 12),
+            entry(proteinShake, day: 5, hour: 12),
+            entry(oneOff, day: 5, hour: 12),
+            entry(cappuccino, day: 6, hour: 12),
+            entry(proteinShake, day: 6, hour: 12),
+            entry(oneOff, day: 6, hour: 12)
         ]
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         var unloggedDocument = DiaryDocument()
@@ -172,28 +180,40 @@ final class CalorieTrackerTests: XCTestCase {
             document: unloggedDocument,
             fileURL: folder.appendingPathComponent("unlogged-diary.json"),
             calendar: calendar,
-            referenceDate: date(8, 9)
+            referenceDate: date(8, 12)
         )
 
-        XCTAssertTrue(unloggedStore.magicSuggestions(at: date(8, 9)).contains {
+        XCTAssertTrue(unloggedStore.magicSuggestions(at: date(8, 12)).contains {
             Set($0.items.map(\.id)) == ["food:\(cappuccino.id)", "food:\(proteinShake.id)"]
         })
 
         var loggedDocument = DiaryDocument()
-        loggedDocument.entries = history + [entry(cappuccino, day: 8, hour: 8)]
+        loggedDocument.entries = history + [
+            entry(cappuccino, day: 8, hour: 8),
+            entry(oneOff, day: 8, hour: 8)
+        ]
         let loggedStore = DiaryStore(
             document: loggedDocument,
             fileURL: folder.appendingPathComponent("logged-diary.json"),
             calendar: calendar,
-            referenceDate: date(8, 9)
+            referenceDate: date(8, 12)
         )
-        let suggestions = loggedStore.magicSuggestions(at: date(8, 9))
+        let suggestions = loggedStore.magicSuggestions(at: date(8, 12), limit: 10)
 
-        XCTAssertFalse(suggestions.contains { suggestion in
-            suggestion.items.contains { $0.id == "food:\(cappuccino.id)" }
+        XCTAssertTrue(suggestions.contains { suggestion in
+            Set(suggestion.items.map(\.id)) == [
+                "food:\(cappuccino.id)",
+                "food:\(proteinShake.id)"
+            ]
+        })
+        XCTAssertTrue(suggestions.contains {
+            $0.items.map(\.id) == ["food:\(cappuccino.id)"]
         })
         XCTAssertTrue(suggestions.contains {
             $0.items.map(\.id) == ["food:\(proteinShake.id)"]
+        })
+        XCTAssertFalse(suggestions.contains { suggestion in
+            suggestion.items.contains { $0.id == "food:\(oneOff.id)" }
         })
     }
 

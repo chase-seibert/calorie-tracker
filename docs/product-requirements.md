@@ -95,6 +95,10 @@
   frequent individual foods remain ahead of weak combinations.
 - A Magic set has one add button. Tapping it creates a normal diary entry for
   each suggested item and never creates a new saved meal from the set.
+- Foods logged today remain eligible for Magic. A single-food suggestion
+  normally requires logs on at least two previous days. If the food is already
+  logged today, at least one previous day must contain two matching logs in the
+  active time band. Today's entries never count toward historical frequency.
 - The diary's compact mode strip omits Scan to remain on one line. Scan remains
   available in the full Log Food sheet.
 - Magic's explanation appears below its suggestions and lists the breakfast,

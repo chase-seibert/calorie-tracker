@@ -54,10 +54,12 @@ set as separate diary entries. The
 explanation sits below the suggestions and states all three time ranges.
 Items inside Magic suggestions use the same source and saved-meal badges as the
 other food lists.
-Magic omits any single or set that overlaps with food already logged today in
-the active time range when the mode opens. The list stays stable after an add so
-the green confirmation checkmark remains visible; reopening Magic applies the
-filter again.
+Foods logged today remain eligible for Magic, but today never contributes to
+recommendation frequency. If an item was logged today, it remains eligible only
+when it was logged at least twice in the same time band on one of the previous
+10 days. See `docs/magic-recommendations.md` for the complete selection and
+ranking rules. The list stays stable after an add so the green confirmation
+checkmark remains visible; reopening Magic recalculates from prior days again.
 
 Every food row displays the quantity and calories that will be logged. Its
 trailing + button logs that displayed remembered or default quantity and closes
