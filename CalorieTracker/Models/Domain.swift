@@ -276,6 +276,54 @@ enum FoodPickerItem: Identifiable, Hashable, Sendable {
     }
 }
 
+enum MagicFoodTimeRange: String, CaseIterable, Identifiable, Sendable {
+    case breakfast
+    case lunch
+    case dinner
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .breakfast: "Breakfast"
+        case .lunch: "Lunch"
+        case .dinner: "Dinner"
+        }
+    }
+
+    var hoursDescription: String {
+        switch self {
+        case .breakfast: "5–11 AM"
+        case .lunch: "11 AM–3 PM"
+        case .dinner: "after 3 PM"
+        }
+    }
+
+    init(date: Date, calendar: Calendar) {
+        let hour = calendar.component(.hour, from: date)
+        switch hour {
+        case 5..<11:
+            self = .breakfast
+        case 11..<15:
+            self = .lunch
+        default:
+            self = .dinner
+        }
+    }
+
+    func contains(_ date: Date, calendar: Calendar) -> Bool {
+        Self(date: date, calendar: calendar) == self
+    }
+}
+
+struct MagicFoodSuggestion: Identifiable, Hashable, Sendable {
+    let items: [FoodPickerItem]
+
+    var id: String {
+        items.map(\.id).sorted().joined(separator: "|")
+    }
+}
+
 struct DiaryDocument: Codable, Sendable {
     var schemaVersion = 4
     var dailyCalorieGoal: Int? = nil

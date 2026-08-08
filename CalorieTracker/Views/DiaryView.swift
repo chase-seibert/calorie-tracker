@@ -8,6 +8,9 @@ struct DiaryView: View {
     @State private var dayOffset = 0
     @State private var foodPickerLaunch: FoodPickerLaunch? = {
         let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains("--show-magic-food-picker") {
+            return .mode(.magic)
+        }
         guard arguments.contains("--show-food-search") || arguments.contains("--show-food-picker") else {
             return nil
         }
@@ -247,6 +250,7 @@ struct DiaryView: View {
                         FoodPickerModeStrip(
                             selection: $foodPickerMode,
                             isEnabled: !isCheatDay,
+                            showsScan: false,
                             onDisabledTap: { showingModeStripCheatPopover = true }
                         ) { selectedMode in
                             foodPickerLaunch = .mode(selectedMode)
@@ -930,12 +934,7 @@ private struct DiaryEntryRow: View {
             } else if !entry.isMeal {
                 SourceBadge(source: entry.food.source)
             } else {
-                Text("Meal")
-                    .font(.system(size: 9, weight: .bold, design: .rounded))
-                    .foregroundStyle(AppTheme.coral)
-                    .frame(width: 38, height: 38)
-                    .background(AppTheme.coral.opacity(0.12), in: Circle())
-                    .accessibilityLabel("Saved meal")
+                MealBadge()
             }
             VStack(alignment: .leading, spacing: 3) {
                 Text(entry.food.name)
@@ -1185,5 +1184,16 @@ struct SourceBadge: View {
         case .myFitnessPal: AppTheme.fat
         case .custom: AppTheme.coral
         }
+    }
+}
+
+struct MealBadge: View {
+    var body: some View {
+        Text("Meal")
+            .font(.system(size: 9, weight: .bold, design: .rounded))
+            .foregroundStyle(AppTheme.coral)
+            .frame(width: 38, height: 38)
+            .background(AppTheme.coral.opacity(0.12), in: Circle())
+            .accessibilityLabel("Saved meal")
     }
 }

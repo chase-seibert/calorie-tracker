@@ -1,5 +1,14 @@
 # Changelog
 
+- Added time-of-day Magic logging with up to four personalized food or food-set
+  suggestions learned on-device from the previous 10 days.
+- Expanded the default date-relative simulator fixture with Magic-ready sets in
+  every time band and entries for yesterday, today, and tomorrow.
+- Clarified multi-food Magic suggestions with a thin accent outline and spacing
+  before the next suggestion.
+- Magic suggestions now omit singles and sets that overlap food already logged
+  in today's current meal window.
+- The default Log Food search sheet now shows Magic suggestions before typing.
 - Added automatic gap days and calorie-goal-based cheat days, manual cheat-day
   marking with optional calorie adjustments, and undo-to-resume logging.
 - Added a lightning-bolt streak counter and streak report with calorie, macro,

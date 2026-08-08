@@ -4,6 +4,12 @@
 
 Run `make sim-launch`. The target builds with signing disabled, boots the default
 iPhone 17 Pro simulator, installs the app, and launches it.
+Debug simulator runs load and reset the date-relative device fixture by default,
+including manual launches from Xcode. The fixture always supplies diary entries
+for yesterday, today, and tomorrow plus unobstructed repeated sets for every
+Magic time band.
+Set `CALORIE_TRACKER_DISABLE_SIMULATOR_FIXTURE=1` in the scheme environment when
+you explicitly need an empty, persistent simulator diary.
 
 Run `make test` for unit tests and `make lint` for Xcode static analysis. `make
 test` requires CoreSimulator and the configured simulator to be available; it

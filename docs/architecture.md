@@ -59,6 +59,16 @@ so the same portion is available from favorites and later catalog searches.
 Custom names use the same stable IDs, allowing a rename to flow through existing
 diary entries and future personal search results.
 
+Magic suggestions are derived on-device from `DiaryDocument`; no learned state
+or personal history leaves the phone. `DiaryStore` filters the most recent 10
+days by the entry's actual local logging time, groups unique items by diary day,
+and ranks individual frequency alongside two- and three-item co-occurrence.
+Combinations must repeat on at least two days and appear on at least 60% as many
+days as their most frequent member. This prevents weak incidental groupings from
+displacing a strong singleton. Logging a suggested set reuses normal quick-log
+and saved-meal paths once per item, so the suggestion itself never becomes a
+combined meal entry.
+
 ## Catalog schema
 
 Every food is normalized to a base quantity and unit plus calories, carbs, fat,
@@ -84,12 +94,17 @@ by the user may require a small adapter update.
 Debug builds running in the iOS Simulator load the checked-in
 `CalorieTracker/Resources/Fixtures/DeviceDiaryFixture.json` instead of the
 normal Application Support diary. The fixture is a date-relative snapshot of
-the device diary: its captured current day is rebased to the simulator's
-current day at launch, preserving the previous day's history and leaving the
-next day empty. It includes the captured goal, favorites, saved meals,
-remembered quantities, renamed food names, and all available diary history.
+the device diary: its captured current day is rebased to the simulator's current
+day at launch. The loader also normalizes repeated breakfast, lunch, and dinner
+sets across the two previous days, then gives today and tomorrow unrelated sample
+entries. This keeps Magic populated in every time range without treating a
+suggested set as already logged, while ensuring Yesterday, Today, and Tomorrow
+always contain diary rows. It includes the captured goal, favorites,
+saved meals, remembered quantities, renamed food names, and all available diary
+history.
 
-`make sim-launch` resets the fixture before each launch. Use
+Every manual Debug simulator launch resets and rebases the fixture by default,
+including launches directly from Xcode. `make sim-launch` does the same. Use
 `make sim-launch SIMULATOR_FIXTURE=none` for a normal simulator diary. In
 Xcode, set `CALORIE_TRACKER_DISABLE_SIMULATOR_FIXTURE=1` for the same result.
 UI tests can opt into the same data with `CALORIE_TRACKER_FIXTURE=device` and

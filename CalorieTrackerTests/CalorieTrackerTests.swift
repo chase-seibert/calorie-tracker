@@ -11,6 +11,281 @@ final class CalorieTrackerTests: XCTestCase {
     }
 
     @MainActor
+    func testMagicSuggestionsPromoteReliableMorningSetAndLunchSingleton() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try XCTUnwrap(TimeZone(identifier: "America/Los_Angeles"))
+        func date(_ day: Int, _ hour: Int) -> Date {
+            calendar.date(from: DateComponents(
+                year: 2026,
+                month: 8,
+                day: day,
+                hour: hour,
+                minute: 30
+            ))!
+        }
+        func food(_ id: String, _ name: String) -> Food {
+            Food(
+                sourceID: id,
+                source: .custom,
+                name: name,
+                brand: nil,
+                barcode: nil,
+                nutrients: MacroNutrients(calories: 100, carbs: 10, fat: 2, protein: 5),
+                baseAmountGrams: 100,
+                servingGrams: 100,
+                servingDescription: "1 serving"
+            )
+        }
+        func entry(_ food: Food, day: Int, hour: Int) -> DiaryEntry {
+            DiaryEntry(
+                id: UUID(),
+                date: calendar.startOfDay(for: date(day, hour)),
+                food: food,
+                amount: 1,
+                unit: .serving,
+                nutrients: food.nutrients,
+                loggedAt: date(day, hour)
+            )
+        }
+
+        let cappuccino = food("cappuccino", "Cappuccino")
+        let proteinShake = food("protein-shake", "Protein shake")
+        let turkeySandwich = food("turkey-sandwich", "Turkey sandwich")
+        let tea = food("tea", "Tea with honey")
+        let oldBreakfast = food("old-breakfast", "Old breakfast")
+        var oldBreakfastEntry = entry(oldBreakfast, day: 7, hour: 7)
+        oldBreakfastEntry.date = calendar.date(byAdding: .day, value: -20, to: oldBreakfastEntry.date)!
+        oldBreakfastEntry.loggedAt = calendar.date(byAdding: .day, value: -20, to: oldBreakfastEntry.loggedAt)!
+        var document = DiaryDocument()
+        document.entries = [
+            entry(cappuccino, day: 5, hour: 6),
+            entry(proteinShake, day: 5, hour: 6),
+            entry(cappuccino, day: 6, hour: 7),
+            entry(proteinShake, day: 6, hour: 7),
+            entry(cappuccino, day: 7, hour: 8),
+            entry(turkeySandwich, day: 4, hour: 12),
+            entry(turkeySandwich, day: 5, hour: 12),
+            entry(tea, day: 5, hour: 12),
+            entry(turkeySandwich, day: 6, hour: 13),
+            entry(tea, day: 6, hour: 13),
+            entry(turkeySandwich, day: 7, hour: 12),
+            oldBreakfastEntry
+        ]
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let store = DiaryStore(
+            document: document,
+            fileURL: folder.appendingPathComponent("diary.json"),
+            calendar: calendar,
+            referenceDate: date(8, 10)
+        )
+
+        let breakfast = store.magicSuggestions(at: date(8, 10))
+        XCTAssertEqual(breakfast.first?.items.map(\.id).sorted(), [
+            "food:\(cappuccino.id)",
+            "food:\(proteinShake.id)"
+        ])
+        XCTAssertTrue(breakfast.contains { $0.items.map(\.id) == ["food:\(cappuccino.id)"] })
+        XCTAssertFalse(breakfast.contains { $0.items.contains { $0.id == "food:\(oldBreakfast.id)" } })
+
+        let lunch = store.magicSuggestions(at: date(8, 12))
+        XCTAssertEqual(lunch.first?.items.map(\.id), ["food:\(turkeySandwich.id)"])
+    }
+
+    @MainActor
+    func testLoggingMagicSetCreatesSeparateDiaryEntries() {
+        func food(_ id: String, _ name: String) -> Food {
+            Food(
+                sourceID: id,
+                source: .custom,
+                name: name,
+                brand: nil,
+                barcode: nil,
+                nutrients: MacroNutrients(calories: 100, carbs: 10, fat: 2, protein: 5),
+                baseAmountGrams: 100,
+                servingGrams: 100,
+                servingDescription: "1 serving"
+            )
+        }
+        let cappuccino = food("magic-cappuccino", "Cappuccino")
+        let proteinShake = food("magic-protein-shake", "Protein shake")
+        let suggestion = MagicFoodSuggestion(items: [.food(cappuccino), .food(proteinShake)])
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let store = DiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
+
+        store.logMagicSuggestion(suggestion, on: Date())
+
+        XCTAssertEqual(Set(store.entries(on: Date()).map(\.food.name)), ["Cappuccino", "Protein shake"])
+        XCTAssertTrue(store.entries(on: Date()).allSatisfy { !$0.isMeal })
+        XCTAssertTrue(store.document.meals.isEmpty)
+    }
+
+    @MainActor
+    func testMagicSuggestionsSuppressLoggedItemsAndOverlappingSetsInCurrentMeal() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try XCTUnwrap(TimeZone(identifier: "America/Los_Angeles"))
+        func date(_ day: Int, _ hour: Int) -> Date {
+            calendar.date(from: DateComponents(
+                year: 2026,
+                month: 8,
+                day: day,
+                hour: hour,
+                minute: 30
+            ))!
+        }
+        func food(_ id: String, _ name: String) -> Food {
+            Food(
+                sourceID: id,
+                source: .custom,
+                name: name,
+                brand: nil,
+                barcode: nil,
+                nutrients: MacroNutrients(calories: 100, carbs: 10, fat: 2, protein: 5),
+                baseAmountGrams: 100,
+                servingGrams: 100,
+                servingDescription: "1 serving"
+            )
+        }
+        func entry(_ food: Food, day: Int, hour: Int) -> DiaryEntry {
+            DiaryEntry(
+                id: UUID(),
+                date: calendar.startOfDay(for: date(day, hour)),
+                food: food,
+                amount: 1,
+                unit: .serving,
+                nutrients: food.nutrients,
+                loggedAt: date(day, hour)
+            )
+        }
+
+        let cappuccino = food("cappuccino", "Cappuccino")
+        let proteinShake = food("protein-shake", "Protein shake")
+        let history = [
+            entry(cappuccino, day: 5, hour: 7),
+            entry(proteinShake, day: 5, hour: 7),
+            entry(cappuccino, day: 6, hour: 7),
+            entry(proteinShake, day: 6, hour: 7)
+        ]
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        var unloggedDocument = DiaryDocument()
+        unloggedDocument.entries = history
+        let unloggedStore = DiaryStore(
+            document: unloggedDocument,
+            fileURL: folder.appendingPathComponent("unlogged-diary.json"),
+            calendar: calendar,
+            referenceDate: date(8, 9)
+        )
+
+        XCTAssertTrue(unloggedStore.magicSuggestions(at: date(8, 9)).contains {
+            Set($0.items.map(\.id)) == ["food:\(cappuccino.id)", "food:\(proteinShake.id)"]
+        })
+
+        var loggedDocument = DiaryDocument()
+        loggedDocument.entries = history + [entry(cappuccino, day: 8, hour: 8)]
+        let loggedStore = DiaryStore(
+            document: loggedDocument,
+            fileURL: folder.appendingPathComponent("logged-diary.json"),
+            calendar: calendar,
+            referenceDate: date(8, 9)
+        )
+        let suggestions = loggedStore.magicSuggestions(at: date(8, 9))
+
+        XCTAssertFalse(suggestions.contains { suggestion in
+            suggestion.items.contains { $0.id == "food:\(cappuccino.id)" }
+        })
+        XCTAssertTrue(suggestions.contains {
+            $0.items.map(\.id) == ["food:\(proteinShake.id)"]
+        })
+    }
+
+    @MainActor
+    func testSimulatorFixtureRebasesAndSeedsEveryMagicTimeRange() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try XCTUnwrap(TimeZone(identifier: "America/Los_Angeles"))
+        func date(_ day: Int, _ hour: Int) -> Date {
+            calendar.date(from: DateComponents(
+                year: 2026,
+                month: 8,
+                day: day,
+                hour: hour
+            ))!
+        }
+        func food(_ index: Int, _ name: String) -> Food {
+            Food(
+                sourceID: "fixture-\(index)",
+                source: .custom,
+                name: name,
+                brand: "Fixture",
+                barcode: nil,
+                nutrients: MacroNutrients(calories: 100, carbs: 10, fat: 2, protein: 5),
+                baseAmountGrams: 1,
+                servingGrams: 1,
+                servingDescription: "1 item"
+            )
+        }
+
+        let names = [
+            "Cappuccino",
+            "Protein shake",
+            "Turkey sandwich",
+            "Tea with honey",
+            "Chili, no rice",
+            "Rice, white, cooked, glutinous",
+            "Fixture snack"
+        ]
+        let capturedReferenceDate = date(5, 0)
+        var source = DiaryDocument()
+        source.entries = names.enumerated().map { index, name in
+            let food = food(index, name)
+            return DiaryEntry(
+                id: UUID(),
+                date: capturedReferenceDate,
+                food: food,
+                amount: 1,
+                unit: .serving,
+                nutrients: food.nutrients,
+                loggedAt: date(5, 6 + index)
+            )
+        }
+        let destinationDate = date(20, 5)
+        let document = DiaryFixtureLoader.rebasedDocument(
+            source,
+            from: capturedReferenceDate,
+            to: destinationDate,
+            calendar: calendar
+        )
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let store = DiaryStore(
+            document: document,
+            fileURL: folder.appendingPathComponent("diary.json"),
+            calendar: calendar,
+            referenceDate: destinationDate
+        )
+
+        for offset in -1...1 {
+            let day = calendar.date(byAdding: .day, value: offset, to: destinationDate)!
+            XCTAssertFalse(store.entries(on: day).isEmpty)
+        }
+
+        let expectations: [(hour: Int, names: Set<String>)] = [
+            (5, ["Cappuccino", "Protein shake"]),
+            (11, ["Turkey sandwich", "Tea with honey"]),
+            (15, ["Chili, no rice", "Rice, white, cooked, glutinous"])
+        ]
+        for expectation in expectations {
+            let suggestion = try XCTUnwrap(
+                store.magicSuggestions(at: date(20, expectation.hour)).first
+            )
+            let suggestedNames = Set(suggestion.items.map {
+                switch $0 {
+                case let .food(food): food.name
+                case let .meal(meal): meal.name
+                }
+            })
+            XCTAssertEqual(suggestedNames, expectation.names)
+        }
+    }
+
+    @MainActor
     func testDailyCalorieGoalPersistsAndCanBeRemoved() {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let fileURL = folder.appendingPathComponent("diary.json")

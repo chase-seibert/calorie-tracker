@@ -21,14 +21,25 @@ final class DeviceFixtureUITests: XCTestCase {
             .matching(identifier: "logged-foods-reorder-list")
             .firstMatch
         XCTAssertTrue(loggedFoods.waitForExistence(timeout: 5))
-        XCTAssertTrue((loggedFoods.value as? String ?? "").contains("Cappuccino"))
-        assertDiaryLayout(firstEntrySourceID: "saved-meal-B4176616-B011-437F-B1B6-1C8CF89B6162")
+        XCTAssertTrue((loggedFoods.value as? String ?? "").contains("Plum, raw"))
+        assertDiaryLayout(firstEntrySourceID: "2709265")
 
         app.buttons["Log food"].tap()
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3))
+        let magicFoodNames = [
+            "Cappuccino",
+            "Protein shake",
+            "Turkey sandwich",
+            "Tea with honey",
+            "Chili, no rice",
+            "Rice, white, cooked, glutinous"
+        ]
+        XCTAssertTrue(app.staticTexts.matching(
+            NSPredicate(format: "label IN %@", magicFoodNames)
+        ).firstMatch.waitForExistence(timeout: 3))
         app.buttons["Done"].tap()
         XCTAssertTrue(loggedFoods.waitForExistence(timeout: 3))
-        assertDiaryLayout(firstEntrySourceID: "saved-meal-B4176616-B011-437F-B1B6-1C8CF89B6162")
+        assertDiaryLayout(firstEntrySourceID: "2709265")
 
         let yesterday = app.buttons.matching(
             NSPredicate(format: "label BEGINSWITH 'Yesterday'")
@@ -42,7 +53,8 @@ final class DeviceFixtureUITests: XCTestCase {
             NSPredicate(format: "label BEGINSWITH 'Tomorrow'")
         ).firstMatch
         tomorrow.tap()
-        XCTAssertTrue(app.staticTexts["Nothing logged"].waitForExistence(timeout: 3))
+        XCTAssertTrue((loggedFoods.value as? String ?? "").contains("Plum, raw"))
+        XCTAssertFalse(app.staticTexts["Nothing logged"].exists)
     }
 
     private func assertDiaryLayout(firstEntrySourceID: String) {

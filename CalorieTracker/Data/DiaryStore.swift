@@ -347,6 +347,18 @@ final class DiaryStore: ObservableObject {
         )
     }
 
+    func logMagicSuggestion(_ suggestion: MagicFoodSuggestion, on date: Date) {
+        guard canLogFood(on: date) else { return }
+        for item in suggestion.items {
+            switch item {
+            case let .food(food):
+                quickLog(food, on: date)
+            case let .meal(meal):
+                logMeal(meal, on: date)
+            }
+        }
+    }
+
     func isFavorite(_ food: Food) -> Bool {
         document.favorites.contains { $0.id == food.id }
     }
@@ -472,6 +484,131 @@ final class DiaryStore: ObservableObject {
             }
             .prefix(30)
             .map(\.item)
+    }
+
+    func magicSuggestions(
+        at referenceDate: Date = Date(),
+        lookbackDays: Int = 10,
+        limit: Int = 4
+    ) -> [MagicFoodSuggestion] {
+        guard lookbackDays > 0, limit > 0 else { return [] }
+        let timeRange = MagicFoodTimeRange(date: referenceDate, calendar: calendar)
+        let cutoff = calendar.date(byAdding: .day, value: -lookbackDays, to: referenceDate) ?? .distantPast
+        let alreadyLoggedKeys = Set(document.entries
+            .filter {
+                !$0.isCheatDayAdjustment
+                    && calendar.isDate($0.date, inSameDayAs: referenceDate)
+                    && $0.loggedAt <= referenceDate
+                    && timeRange.contains($0.loggedAt, calendar: calendar)
+            }
+            .flatMap(magicOverlapKeys(for:)))
+        let entries = document.entries.filter {
+            !$0.isCheatDayAdjustment
+                && $0.loggedAt >= cutoff
+                && $0.loggedAt <= referenceDate
+                && timeRange.contains($0.loggedAt, calendar: calendar)
+        }
+
+        struct Observation {
+            let item: FoodPickerItem
+            let latest: Date
+        }
+        struct RankedSuggestion {
+            let suggestion: MagicFoodSuggestion
+            let score: Double
+            let latest: Date
+        }
+
+        var observationsByDay: [Date: [String: Observation]] = [:]
+        for entry in entries {
+            guard let item = pickerItem(for: entry) else { continue }
+            let day = calendar.startOfDay(for: entry.date)
+            if let current = observationsByDay[day]?[item.id], current.latest >= entry.loggedAt {
+                continue
+            }
+            observationsByDay[day, default: [:]][item.id] = Observation(
+                item: item,
+                latest: entry.loggedAt
+            )
+        }
+
+        var itemDays: [String: Set<Date>] = [:]
+        var latestObservation: [String: Observation] = [:]
+        for (day, observations) in observationsByDay {
+            for (itemID, observation) in observations {
+                itemDays[itemID, default: []].insert(day)
+                if let current = latestObservation[itemID], current.latest >= observation.latest {
+                    continue
+                }
+                latestObservation[itemID] = observation
+            }
+        }
+
+        var ranked: [RankedSuggestion] = latestObservation.compactMap { itemID, observation in
+            guard let count = itemDays[itemID]?.count else { return nil }
+            return RankedSuggestion(
+                suggestion: MagicFoodSuggestion(items: [observation.item]),
+                score: Double(count),
+                latest: observation.latest
+            )
+        }
+
+        var combinationDays: [String: Set<Date>] = [:]
+        var combinationItems: [String: [FoodPickerItem]] = [:]
+        var combinationLatest: [String: Date] = [:]
+        for (day, observations) in observationsByDay {
+            let dayItems = observations.values
+                .map(\.item)
+                .sorted { $0.id < $1.id }
+            guard dayItems.count >= 2 else { continue }
+            for size in 2...min(3, dayItems.count) {
+                for items in combinations(of: dayItems, choosing: size) {
+                    let key = items.map(\.id).joined(separator: "|")
+                    combinationDays[key, default: []].insert(day)
+                    let latest = items
+                        .compactMap { observations[$0.id]?.latest }
+                        .max() ?? .distantPast
+                    if let current = combinationLatest[key], current >= latest {
+                        continue
+                    }
+                    combinationItems[key] = items.sorted {
+                        (observations[$0.id]?.latest ?? .distantPast)
+                            < (observations[$1.id]?.latest ?? .distantPast)
+                    }
+                    combinationLatest[key] = latest
+                }
+            }
+        }
+
+        for (key, days) in combinationDays where days.count >= 2 {
+            guard let observedItems = combinationItems[key] else { continue }
+            let items = observedItems.map { latestObservation[$0.id]?.item ?? $0 }
+            let largestItemCount = items.compactMap { itemDays[$0.id]?.count }.max() ?? 0
+            guard largestItemCount > 0 else { continue }
+            let cohesion = Double(days.count) / Double(largestItemCount)
+            guard cohesion >= 0.6 else { continue }
+            ranked.append(RankedSuggestion(
+                suggestion: MagicFoodSuggestion(items: items),
+                score: Double(days.count) + 1.25 + (Double(items.count - 2) * 0.25),
+                latest: combinationLatest[key] ?? .distantPast
+            ))
+        }
+
+        return ranked
+            .filter { rankedSuggestion in
+                let suggestionKeys = Set(rankedSuggestion.suggestion.items.flatMap(magicOverlapKeys(for:)))
+                return suggestionKeys.isDisjoint(with: alreadyLoggedKeys)
+            }
+            .sorted {
+                if $0.score != $1.score { return $0.score > $1.score }
+                if $0.latest != $1.latest { return $0.latest > $1.latest }
+                if $0.suggestion.items.count != $1.suggestion.items.count {
+                    return $0.suggestion.items.count > $1.suggestion.items.count
+                }
+                return $0.suggestion.id < $1.suggestion.id
+            }
+            .prefix(limit)
+            .map(\.suggestion)
     }
 
     func addCustomFood(
@@ -905,6 +1042,20 @@ final class DiaryStore: ObservableObject {
         return foods
     }
 
+    private func combinations<T>(of items: [T], choosing count: Int) -> [[T]] {
+        guard count > 0, count <= items.count else { return [] }
+        if count == 1 { return items.map { [$0] } }
+        if count == items.count { return [items] }
+
+        var result: [[T]] = []
+        for index in 0...(items.count - count) {
+            let head = items[index]
+            let tail = Array(items[(index + 1)...])
+            result.append(contentsOf: combinations(of: tail, choosing: count - 1).map { [head] + $0 })
+        }
+        return result
+    }
+
     private func pickerItem(for entry: DiaryEntry) -> FoodPickerItem? {
         if entry.isMeal {
             guard
@@ -921,6 +1072,31 @@ final class DiaryStore: ObservableObject {
             return "meal:\(savedMealID.uuidString)"
         }
         return "food:\(entry.food.id)"
+    }
+
+    private func magicOverlapKeys(for entry: DiaryEntry) -> Set<String> {
+        guard entry.isMeal else { return ["food:\(entry.food.id)"] }
+
+        var keys = Set<String>()
+        if let savedMealID = entry.savedMealID {
+            keys.insert("meal:\(savedMealID.uuidString)")
+        }
+        let mealItems = entry.mealItems
+            ?? entry.savedMealID.flatMap { savedMealID in
+                document.meals.first(where: { $0.id == savedMealID })?.items
+            }
+            ?? []
+        keys.formUnion(mealItems.map { "food:\($0.food.id)" })
+        return keys
+    }
+
+    private func magicOverlapKeys(for item: FoodPickerItem) -> Set<String> {
+        switch item {
+        case let .food(food):
+            return ["food:\(food.id)"]
+        case let .meal(meal):
+            return Set(["meal:\(meal.id.uuidString)"] + meal.items.map { "food:\($0.food.id)" })
+        }
     }
 
     private func interspersedItems(foods: [Food], meals: [SavedMeal]) -> [FoodPickerItem] {

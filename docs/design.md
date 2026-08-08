@@ -33,11 +33,31 @@ Tapping the calorie total or macro chart navigates directly to Trends.
 The Custom source row in Settings shows separate food and meal counts and opens
 a personal catalog with Custom Foods and Saved Meals sections.
 
-The add-food sheet opens with an already-focused search field and keyboard.
-Before typing, it shows Recent by default plus filters for Frequent, Favorites,
-Meals, and Scan on one line in portrait mode. Typing immediately replaces the
-recent foods with combined MyFitnessPal, USDA, and Open Food Facts results;
-Search is not a separate mode or source picker.
+The add-food sheet opens with an already-focused search field and keyboard, with
+the current Magic suggestions filling the pane until the user starts typing.
+On the diary, the compact strip shows icon-only Magic plus Recent, Frequent,
+Favorites, and Meals on one line in portrait mode; the specialty Scan pill is
+hidden there to avoid wrapping. The full Log Food sheet includes Scan alongside
+all of those modes. Typing immediately replaces the selected mode with combined
+MyFitnessPal, USDA, and Open Food Facts results; Search is not a separate mode
+or source picker.
+
+Magic opens with a short explanation and three or four suggestions learned from
+the previous 10 days in the current local-time band: breakfast from 5–11 AM,
+lunch from 11 AM–3 PM, and dinner otherwise. A suggestion can be one food or a
+visually grouped set. Repeated, cohesive sets receive a modest ranking boost so
+a strong routine such as cappuccino plus protein shake can lead, while a more
+frequent singleton such as turkey sandwich stays ahead of an inconsistent lunch
+pair. Multi-food sets use a thin coral outline and extra space below to distinguish
+the set from adjacent single-food suggestions. One trailing + adds all items in a
+set as separate diary entries. The
+explanation sits below the suggestions and states all three time ranges.
+Items inside Magic suggestions use the same source and saved-meal badges as the
+other food lists.
+Magic omits any single or set that overlaps with food already logged today in
+the active time range when the mode opens. The list stays stable after an add so
+the green confirmation checkmark remains visible; reopening Magic applies the
+filter again.
 
 Every food row displays the quantity and calories that will be logged. Its
 trailing + button logs that displayed remembered or default quantity and closes

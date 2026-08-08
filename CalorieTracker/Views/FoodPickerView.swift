@@ -3,6 +3,7 @@ import UIKit
 
 struct FoodPickerView: View {
     enum Mode: String, CaseIterable, Identifiable {
+        case magic = "Magic"
         case recent = "Recent"
         case frequent = "Frequent"
         case favorites = "Favorites"
@@ -20,6 +21,8 @@ struct FoodPickerView: View {
     @State private var mode: Mode?
     @State private var recentItemsSnapshot: [FoodPickerItem] = []
     @State private var frequentItemsSnapshot: [FoodPickerItem] = []
+    @State private var magicSuggestionsSnapshot: [MagicFoodSuggestion] = []
+    @State private var magicTimeRange = MagicFoodTimeRange(date: Date(), calendar: .current)
     @State private var didLoadInitialSnapshot = false
     @State private var selectedFood: Food?
     @State private var selectedMeal: SavedMeal?
@@ -57,6 +60,8 @@ struct FoodPickerView: View {
                     } else {
                         if let mode {
                             switch mode {
+                            case .magic:
+                                magicSuggestionsContent
                             case .recent:
                                 FoodPickerList(
                                     title: "Logged recently",
@@ -104,11 +109,7 @@ struct FoodPickerView: View {
                                 BarcodeLookup(catalog: catalog, onSelect: { selectedFood = diary.displayedFood($0) })
                             }
                         } else {
-                            ContentUnavailableView(
-                                "Search for food",
-                                systemImage: "magnifyingglass",
-                                description: Text("Search by name, brand, or barcode.")
-                            )
+                            magicSuggestionsContent
                         }
                     }
                 }
@@ -139,9 +140,9 @@ struct FoodPickerView: View {
                 searchIsFocused = true
             }
             .onAppear {
-                guard !didLoadInitialSnapshot, let mode else { return }
+                guard !didLoadInitialSnapshot else { return }
                 didLoadInitialSnapshot = true
-                refreshItems(for: mode)
+                refreshItems(for: mode ?? .magic)
             }
             .task(id: query) {
                 let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -186,6 +187,14 @@ struct FoodPickerView: View {
         .padding(.top, 10)
     }
 
+    private var magicSuggestionsContent: some View {
+        MagicFoodSuggestionsList(
+            timeRange: magicTimeRange,
+            suggestions: magicSuggestionsSnapshot,
+            onQuickLog: { diary.logMagicSuggestion($0, on: date) }
+        )
+    }
+
     private func quickLog(_ food: Food) {
         diary.quickLog(food, on: date)
     }
@@ -196,6 +205,10 @@ struct FoodPickerView: View {
 
     private func refreshItems(for mode: Mode) {
         switch mode {
+        case .magic:
+            let now = Date()
+            magicTimeRange = MagicFoodTimeRange(date: now, calendar: .current)
+            magicSuggestionsSnapshot = diary.magicSuggestions(at: now)
         case .recent:
             recentItemsSnapshot = diary.recentItems
         case .frequent:
@@ -238,12 +251,13 @@ private struct FoodPickerCalorieSummary: View {
 struct FoodPickerModeStrip: View {
     @Binding var selection: FoodPickerView.Mode?
     var isEnabled = true
+    var showsScan = true
     var onDisabledTap: (() -> Void)? = nil
     let onSelect: (FoodPickerView.Mode) -> Void
 
     var body: some View {
         FlowLayout(spacing: 6) {
-            ForEach(FoodPickerView.Mode.allCases) { item in
+            ForEach(FoodPickerView.Mode.allCases.filter { showsScan || $0 != .scan }) { item in
                 Button {
                     guard isEnabled else {
                         onDisabledTap?()
@@ -255,7 +269,9 @@ struct FoodPickerModeStrip: View {
                     }
                 } label: {
                     Group {
-                        if item == .scan {
+                        if item == .magic {
+                            Image(systemName: "wand.and.sparkles")
+                        } else if item == .scan {
                             Image(systemName: "barcode.viewfinder")
                         } else {
                             Text(item.rawValue)
@@ -276,6 +292,150 @@ struct FoodPickerModeStrip: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
+    }
+}
+
+private struct MagicFoodSuggestionsList: View {
+    let timeRange: MagicFoodTimeRange
+    let suggestions: [MagicFoodSuggestion]
+    let onQuickLog: (MagicFoodSuggestion) -> Void
+
+    var body: some View {
+        List {
+            if suggestions.isEmpty {
+                Section {
+                    ContentUnavailableView(
+                        "No \(timeRange.title.lowercased()) pattern yet",
+                        systemImage: "wand.and.sparkles",
+                        description: Text("Keep logging and Magic will learn the foods you repeat during \(timeRange.hoursDescription).")
+                    )
+                }
+            } else {
+                Section("\(timeRange.title) · \(timeRange.hoursDescription)") {
+                    ForEach(suggestions) { suggestion in
+                        MagicFoodSuggestionRow(
+                            suggestion: suggestion,
+                            onQuickLog: { onQuickLog(suggestion) }
+                        )
+                    }
+                }
+            }
+
+            Section {
+                HStack(alignment: .top, spacing: 12) {
+                    Image(systemName: "wand.and.sparkles")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(AppTheme.coral)
+                        .frame(width: 28)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Your recent routine, ready in one tap")
+                            .font(.subheadline.weight(.semibold))
+                        Text("Magic looks at your last 10 days during breakfast (5–11 AM), lunch (11 AM–3 PM), or dinner (after 3 PM). A set adds each item separately to your log.")
+                            .font(.caption)
+                            .foregroundStyle(AppTheme.muted)
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+        }
+        .scrollContentBackground(.hidden)
+    }
+}
+
+private struct MagicFoodSuggestionRow: View {
+    @EnvironmentObject private var diary: DiaryStore
+    let suggestion: MagicFoodSuggestion
+    let onQuickLog: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(Array(suggestion.items.enumerated()), id: \.element.id) { index, item in
+                    if index > 0 {
+                        Divider()
+                    }
+                    itemLabel(item)
+                }
+            }
+            Spacer(minLength: 8)
+            AddConfirmationButton(
+                actionTitle: "Add",
+                itemName: accessibilityName,
+                action: onQuickLog
+            )
+        }
+        .padding(.vertical, isSet ? 10 : 4)
+        .overlay {
+            if isSet {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(AppTheme.coral.opacity(0.55), lineWidth: 1)
+                    .padding(.horizontal, -12)
+            }
+        }
+        .padding(.bottom, isSet ? 10 : 0)
+        .listRowSeparator(isSet ? .hidden : .visible)
+        .accessibilityElement(children: .contain)
+    }
+
+    private var isSet: Bool {
+        suggestion.items.count > 1
+    }
+
+    @ViewBuilder
+    private func itemLabel(_ item: FoodPickerItem) -> some View {
+        switch item {
+        case let .food(food):
+            HStack(spacing: 9) {
+                SourceBadge(source: food.source)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(food.name)
+                        .font(.body.weight(.semibold))
+                        .lineLimit(2)
+                    Text(foodDescription(food))
+                        .font(.caption)
+                        .foregroundStyle(AppTheme.muted)
+                }
+            }
+        case let .meal(meal):
+            HStack(spacing: 9) {
+                MealBadge()
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(meal.name)
+                        .font(.body.weight(.semibold))
+                        .lineLimit(2)
+                    Text("\(Int(meal.nutrients.calories.rounded())) cal · saved meal")
+                        .font(.caption)
+                        .foregroundStyle(AppTheme.muted)
+                }
+            }
+        }
+    }
+
+    private func foodDescription(_ food: Food) -> String {
+        let preference = diary.preference(for: food)
+        let nutrients = food.nutrients(
+            for: preference.amount,
+            unit: preference.unit,
+            portionID: preference.portionID
+        )
+        let quantity: String
+        switch preference.unit {
+        case .grams, .ounces:
+            quantity = "\(preference.amount.cleanAmount) \(preference.unit.rawValue)"
+        case .serving:
+            let label = food.portion(id: preference.portionID)?.label ?? "serving"
+            quantity = "\(preference.amount.cleanAmount) \(label)"
+        }
+        return "\(Int(nutrients.calories.rounded())) cal · \(quantity)"
+    }
+
+    private var accessibilityName: String {
+        suggestion.items.map {
+            switch $0 {
+            case let .food(food): food.name
+            case let .meal(meal): meal.name
+            }
+        }.joined(separator: " and ")
     }
 }
 
@@ -1013,12 +1173,7 @@ private struct MealListRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Text("Meal")
-                .font(.system(size: 9, weight: .bold, design: .rounded))
-                .foregroundStyle(AppTheme.coral)
-                .frame(width: 38, height: 38)
-                .background(AppTheme.coral.opacity(0.12), in: Circle())
-                .accessibilityLabel("Saved meal")
+            MealBadge()
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(meal.name)

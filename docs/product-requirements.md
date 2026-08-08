@@ -6,8 +6,12 @@
   available so that navigating the dates I actually use is effortless.
 - As someone who repeats foods, I want to log recent, frequent, and favorite
   foods with one tap so that routine tracking is faster than MyFitnessPal.
+- As someone whose breakfast and lunch repeat, I want Magic to suggest up to
+  four foods or food sets from my last 10 days at that time of day, so I can
+  log a routine with one tap without first turning it into a saved meal.
 - As someone searching the catalog, I want the keyboard ready immediately and
-  a one-tap add action on each result using its visible quantity.
+  the current Magic suggestions visible before I type, followed by a one-tap add
+  action on each search result using its visible quantity.
 - As someone who weighs food, I want ounces by default plus grams and natural
   portions such as one large egg or one tablespoon, with remembered quantities,
   so that entering a measured amount takes minimal editing.
@@ -85,9 +89,19 @@
 - Light and dark appearances use adaptive backgrounds, elevated cards, primary
   and secondary text, control fills, source badges, macro colors, and action
   colors across Diary, Log Food, quantity editing, Settings, and Trends.
+- The icon-only Magic pill uses breakfast from 5–11 AM, lunch from 11 AM–3 PM,
+  and dinner for the remaining hours in the device's local time. Repeated sets
+  are promoted only when their members reliably co-occur; otherwise the most
+  frequent individual foods remain ahead of weak combinations.
+- A Magic set has one add button. Tapping it creates a normal diary entry for
+  each suggested item and never creates a new saved meal from the set.
+- The diary's compact mode strip omits Scan to remain on one line. Scan remains
+  available in the full Log Food sheet.
+- Magic's explanation appears below its suggestions and lists the breakfast,
+  lunch, and dinner time ranges.
 
 ## Explicit non-goals
 
-No server database, accounts, meal-of-day categories, weight, water, exercise,
-steps, daily completion, recommendations, day notes, or full micronutrient
-tracking in the initial app.
+No server database, accounts, manually assigned meal-of-day categories, weight,
+water, exercise, steps, daily completion, server-generated recommendations, day
+notes, or full micronutrient tracking in the initial app.
