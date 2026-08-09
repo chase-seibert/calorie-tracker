@@ -324,6 +324,11 @@ struct MagicFoodSuggestion: Identifiable, Hashable, Sendable {
     }
 }
 
+struct MagicFoodSuggestionResult: Sendable {
+    let suggestions: [MagicFoodSuggestion]
+    let hasExcludedMatches: Bool
+}
+
 struct DiaryDocument: Codable, Sendable {
     var schemaVersion = 4
     var dailyCalorieGoal: Int? = nil

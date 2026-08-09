@@ -491,7 +491,21 @@ final class DiaryStore: ObservableObject {
         lookbackDays: Int = 10,
         limit: Int = 4
     ) -> [MagicFoodSuggestion] {
-        guard lookbackDays > 0, limit > 0 else { return [] }
+        magicSuggestionResult(
+            at: referenceDate,
+            lookbackDays: lookbackDays,
+            limit: limit
+        ).suggestions
+    }
+
+    func magicSuggestionResult(
+        at referenceDate: Date = Date(),
+        lookbackDays: Int = 10,
+        limit: Int = 4
+    ) -> MagicFoodSuggestionResult {
+        guard lookbackDays > 0, limit > 0 else {
+            return MagicFoodSuggestionResult(suggestions: [], hasExcludedMatches: false)
+        }
         let timeRange = MagicFoodTimeRange(date: referenceDate, calendar: calendar)
         let referenceDay = calendar.startOfDay(for: referenceDate)
         let cutoffDay = calendar.date(
@@ -554,17 +568,24 @@ final class DiaryStore: ObservableObject {
             counts.compactMap { itemID, count in count >= 2 ? itemID : nil }
         })
 
-        var ranked: [RankedSuggestion] = latestObservation.compactMap { itemID, observation in
-            guard let count = itemDays[itemID]?.count else { return nil }
+        var hasExcludedMatches = false
+        var ranked: [RankedSuggestion] = []
+        for (itemID, observation) in latestObservation {
+            guard let count = itemDays[itemID]?.count else { continue }
             let isEligible = todayItemIDs.contains(itemID)
                 ? repeatedWithinDayItemIDs.contains(itemID)
                 : count >= 2
-            guard isEligible else { return nil }
-            return RankedSuggestion(
+            guard isEligible else {
+                if todayItemIDs.contains(itemID) {
+                    hasExcludedMatches = true
+                }
+                continue
+            }
+            ranked.append(RankedSuggestion(
                 suggestion: MagicFoodSuggestion(items: [observation.item]),
                 score: Double(count),
                 latest: observation.latest
-            )
+            ))
         }
 
         var combinationDays: [String: Set<Date>] = [:]
@@ -601,6 +622,11 @@ final class DiaryStore: ObservableObject {
             guard largestItemCount > 0 else { continue }
             let cohesion = Double(days.count) / Double(largestItemCount)
             guard cohesion >= 0.6 else { continue }
+            if items.contains(where: {
+                todayItemIDs.contains($0.id) && !repeatedWithinDayItemIDs.contains($0.id)
+            }) {
+                hasExcludedMatches = true
+            }
             ranked.append(RankedSuggestion(
                 suggestion: MagicFoodSuggestion(items: items),
                 score: Double(days.count) + 1.25 + (Double(items.count - 2) * 0.25),
@@ -608,7 +634,7 @@ final class DiaryStore: ObservableObject {
             ))
         }
 
-        return ranked
+        let eligibleSuggestions = ranked
             .filter { rankedSuggestion in
                 rankedSuggestion.suggestion.items.allSatisfy { item in
                     !todayItemIDs.contains(item.id)
@@ -623,8 +649,13 @@ final class DiaryStore: ObservableObject {
                 }
                 return $0.suggestion.id < $1.suggestion.id
             }
-            .prefix(limit)
             .map(\.suggestion)
+
+        let suggestions = Array(eligibleSuggestions.prefix(limit))
+        return MagicFoodSuggestionResult(
+            suggestions: suggestions,
+            hasExcludedMatches: suggestions.isEmpty && hasExcludedMatches
+        )
     }
 
     func addCustomFood(

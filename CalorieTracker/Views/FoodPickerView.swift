@@ -22,6 +22,7 @@ struct FoodPickerView: View {
     @State private var recentItemsSnapshot: [FoodPickerItem] = []
     @State private var frequentItemsSnapshot: [FoodPickerItem] = []
     @State private var magicSuggestionsSnapshot: [MagicFoodSuggestion] = []
+    @State private var magicHasExcludedMatchesSnapshot = false
     @State private var magicTimeRange = MagicFoodTimeRange(date: Date(), calendar: .current)
     @State private var didLoadInitialSnapshot = false
     @State private var selectedFood: Food?
@@ -191,6 +192,7 @@ struct FoodPickerView: View {
         MagicFoodSuggestionsList(
             timeRange: magicTimeRange,
             suggestions: magicSuggestionsSnapshot,
+            hasExcludedMatches: magicHasExcludedMatchesSnapshot,
             onQuickLog: { diary.logMagicSuggestion($0, on: date) }
         )
     }
@@ -208,7 +210,9 @@ struct FoodPickerView: View {
         case .magic:
             let now = Date()
             magicTimeRange = MagicFoodTimeRange(date: now, calendar: .current)
-            magicSuggestionsSnapshot = diary.magicSuggestions(at: now)
+            let result = diary.magicSuggestionResult(at: now)
+            magicSuggestionsSnapshot = result.suggestions
+            magicHasExcludedMatchesSnapshot = result.hasExcludedMatches
         case .recent:
             recentItemsSnapshot = diary.recentItems
         case .frequent:
@@ -298,6 +302,7 @@ struct FoodPickerModeStrip: View {
 private struct MagicFoodSuggestionsList: View {
     let timeRange: MagicFoodTimeRange
     let suggestions: [MagicFoodSuggestion]
+    let hasExcludedMatches: Bool
     let onQuickLog: (MagicFoodSuggestion) -> Void
 
     var body: some View {
@@ -305,9 +310,15 @@ private struct MagicFoodSuggestionsList: View {
             if suggestions.isEmpty {
                 Section {
                     ContentUnavailableView(
-                        "No \(timeRange.title.lowercased()) pattern yet",
+                        hasExcludedMatches
+                            ? "You’ve already logged the matching foods"
+                            : "No \(timeRange.title.lowercased()) pattern yet",
                         systemImage: "wand.and.sparkles",
-                        description: Text("Keep logging and Magic will learn the foods you repeat during \(timeRange.hoursDescription).")
+                        description: Text(
+                            hasExcludedMatches
+                                ? "Magic found foods that match your usual \(timeRange.title.lowercased()), but they’re hidden because you’ve already logged them today."
+                                : "Keep logging and Magic will learn the foods you repeat during \(timeRange.hoursDescription)."
+                        )
                     )
                 }
             } else {

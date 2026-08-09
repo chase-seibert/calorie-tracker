@@ -218,6 +218,67 @@ final class CalorieTrackerTests: XCTestCase {
     }
 
     @MainActor
+    func testMagicSuggestionResultDistinguishesExcludedMatchesFromNoPattern() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try XCTUnwrap(TimeZone(identifier: "America/Los_Angeles"))
+        func date(_ day: Int, _ hour: Int) -> Date {
+            calendar.date(from: DateComponents(
+                year: 2026,
+                month: 8,
+                day: day,
+                hour: hour,
+                minute: 30
+            ))!
+        }
+        let food = Food(
+            sourceID: "excluded-magic-food",
+            source: .custom,
+            name: "Usual breakfast",
+            brand: nil,
+            barcode: nil,
+            nutrients: MacroNutrients(calories: 100, carbs: 10, fat: 2, protein: 5),
+            baseAmountGrams: 100,
+            servingGrams: 100,
+            servingDescription: "1 serving"
+        )
+        func entry(on day: Int) -> DiaryEntry {
+            DiaryEntry(
+                id: UUID(),
+                date: calendar.startOfDay(for: date(day, 8)),
+                food: food,
+                amount: 1,
+                unit: .serving,
+                nutrients: food.nutrients,
+                loggedAt: date(day, 8)
+            )
+        }
+
+        var document = DiaryDocument()
+        document.entries = [entry(on: 5), entry(on: 6), entry(on: 8)]
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let store = DiaryStore(
+            document: document,
+            fileURL: folder.appendingPathComponent("diary.json"),
+            calendar: calendar,
+            referenceDate: date(8, 8)
+        )
+
+        let excludedResult = store.magicSuggestionResult(at: date(8, 8))
+        XCTAssertTrue(excludedResult.suggestions.isEmpty)
+        XCTAssertTrue(excludedResult.hasExcludedMatches)
+
+        let emptyStore = DiaryStore(
+            document: DiaryDocument(),
+            fileURL: folder.appendingPathComponent("empty-diary.json"),
+            calendar: calendar,
+            referenceDate: date(8, 8)
+        )
+        let noPatternResult = emptyStore.magicSuggestionResult(at: date(8, 8))
+        XCTAssertTrue(noPatternResult.suggestions.isEmpty)
+        XCTAssertFalse(noPatternResult.hasExcludedMatches)
+    }
+
+    @MainActor
     func testSimulatorFixtureRebasesAndSeedsEveryMagicTimeRange() throws {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = try XCTUnwrap(TimeZone(identifier: "America/Los_Angeles"))
