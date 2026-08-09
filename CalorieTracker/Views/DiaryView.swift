@@ -3,9 +3,11 @@ import UIKit
 
 struct DiaryView: View {
     @EnvironmentObject private var diary: DiaryStore
+    @Environment(\.scenePhase) private var scenePhase
     let catalog: CatalogStore
 
     @State private var dayOffset = 0
+    @State private var currentDay = Calendar.current.startOfDay(for: Date())
     @State private var foodPickerLaunch: FoodPickerLaunch? = {
         let arguments = ProcessInfo.processInfo.arguments
         if arguments.contains("--show-magic-food-picker") {
@@ -35,7 +37,7 @@ struct DiaryView: View {
     @State private var didSeedDebugScreenshot = false
 
     private var date: Date {
-        Calendar.current.date(byAdding: .day, value: dayOffset, to: Calendar.current.startOfDay(for: Date())) ?? Date()
+        Calendar.current.date(byAdding: .day, value: dayOffset, to: currentDay) ?? currentDay
     }
 
     private var selectedDayStatus: DayStatus? { diary.status(on: date) }
@@ -47,7 +49,7 @@ struct DiaryView: View {
             ScrollViewReader { scrollProxy in
                 ScrollView {
                     VStack(spacing: 0) {
-                        DateStrip(dayOffset: $dayOffset)
+                        DateStrip(dayOffset: $dayOffset, referenceDay: currentDay)
                             .id("date-strip")
                             .padding(.horizontal, 16)
                             .padding(.top, 8)
@@ -293,6 +295,13 @@ struct DiaryView: View {
                 diaryEntriesHeight = CGFloat(diary.entries(on: date).count) * 78
                 cancelMealSelection()
             }
+            .onChange(of: scenePhase) { _, phase in
+                guard phase == .active else { return }
+                refreshCurrentDay()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
+                refreshCurrentDay()
+            }
             .task {
 #if DEBUG
                 guard !didSeedDebugScreenshot else { return }
@@ -330,6 +339,12 @@ struct DiaryView: View {
             }
         }
         .animation(.easeInOut(duration: 0.16), value: showingToolbarCheatPopover)
+    }
+
+    private func refreshCurrentDay() {
+        let newCurrentDay = Calendar.current.startOfDay(for: Date())
+        guard !Calendar.current.isDate(newCurrentDay, inSameDayAs: currentDay) else { return }
+        currentDay = newCurrentDay
     }
 
     @ViewBuilder
@@ -690,6 +705,7 @@ enum FoodPickerLaunch: Identifiable {
 
 private struct DateStrip: View {
     @Binding var dayOffset: Int
+    let referenceDay: Date
 
     var body: some View {
         HStack(spacing: 8) {
@@ -722,7 +738,7 @@ private struct DateStrip: View {
     }
 
     private func date(_ offset: Int) -> Date {
-        Calendar.current.date(byAdding: .day, value: offset, to: Date()) ?? Date()
+        Calendar.current.date(byAdding: .day, value: offset, to: referenceDay) ?? referenceDay
     }
 }
 
