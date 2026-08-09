@@ -766,13 +766,25 @@ struct QuantityEditor: View {
                         }
                     }
 
-                    HStack(spacing: 12) {
+                    HStack(spacing: 10) {
+                        quantityAdjusterButton(
+                            title: "−1",
+                            accessibilityLabel: "Decrease quantity by one",
+                            amountDelta: -1,
+                            isDisabled: amount <= 1
+                        )
                         amountField
+                        quantityAdjusterButton(
+                            title: "+1",
+                            accessibilityLabel: "Increase quantity by one",
+                            amountDelta: 1,
+                            isDisabled: false
+                        )
                         if isMealEditor {
                             Text("meal")
                                 .font(.headline)
                                 .foregroundStyle(AppTheme.muted)
-                                .frame(minWidth: 72, alignment: .leading)
+                                .frame(minWidth: 52, alignment: .leading)
                         } else {
                             Picker("Unit", selection: $unitChoice) {
                                 ForEach(availableChoices, id: \.self) { choice in
@@ -917,12 +929,49 @@ struct QuantityEditor: View {
             .submitLabel(.done)
             .focused($amountIsFocused)
             .font(.title2.weight(.bold).monospacedDigit())
-            .padding(12)
+            .multilineTextAlignment(.center)
+            .frame(width: 78)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 8)
             .background(AppTheme.controlFill, in: RoundedRectangle(cornerRadius: 12))
             .onSubmit(save)
             .onChange(of: amountIsFocused) { _, isFocused in
                 if isFocused { selectAllAmount() }
             }
+    }
+
+    private func quantityAdjusterButton(
+        title: String,
+        accessibilityLabel: String,
+        amountDelta: Double,
+        isDisabled: Bool
+    ) -> some View {
+        Button {
+            adjustAmount(by: amountDelta)
+        } label: {
+            Text(title)
+                .font(.caption.weight(.bold).monospacedDigit())
+                .frame(width: 36, height: 36)
+                .background(AppTheme.controlFill, in: Circle())
+                .overlay {
+                    Circle()
+                        .stroke(Color.orange, lineWidth: 1.5)
+                }
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(Color.orange)
+        .disabled(isDisabled)
+        .opacity(isDisabled ? 0.4 : 1)
+        .accessibilityLabel(accessibilityLabel)
+        .accessibilityIdentifier(amountDelta < 0 ? "quantity-minus-one" : "quantity-plus-one")
+    }
+
+    private func adjustAmount(by delta: Double) {
+        let adjustedAmount = amount + delta
+        guard adjustedAmount > 0 else { return }
+        let roundingRule: FloatingPointRoundingRule = delta > 0 ? .up : .down
+        amount = max(1, adjustedAmount.rounded(roundingRule))
+        amountIsFocused = false
     }
 
     private var navigationTitle: String {
