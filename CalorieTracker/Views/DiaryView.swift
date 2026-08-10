@@ -783,8 +783,8 @@ private struct DayStatusBanner: View {
 
 private struct CalorieProgressIcon: View {
     let progress: Double?
-    let remaining: Int?
-    let over: Int?
+    let consumed: Int
+    let goal: Int?
 
     var body: some View {
         VStack(spacing: 3) {
@@ -812,13 +812,8 @@ private struct CalorieProgressIcon: View {
             }
             .frame(width: 60, height: 60)
 
-            if let over, over > 0 {
-                Text("\(over.formatted()) over")
-                    .font(.caption2.weight(.semibold).monospacedDigit())
-                    .foregroundStyle(AppTheme.muted)
-                    .fixedSize()
-            } else if let remaining {
-                Text("\(remaining.formatted()) left")
+            if let goal {
+                Text("\(consumed.formatted()) / \(goal.formatted())")
                     .font(.caption2.weight(.semibold).monospacedDigit())
                     .foregroundStyle(AppTheme.muted)
                     .fixedSize()
@@ -846,27 +841,36 @@ private struct MacroSummary: View {
         VStack(alignment: .leading, spacing: 18) {
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: 2) {
-                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    if let over = calorieProgress.over, over > 0 {
+                        Text(over.formatted())
+                            .font(.system(size: 44, weight: .bold, design: .rounded))
+                            .foregroundStyle(AppTheme.coral)
+                        Text("calories over")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(AppTheme.muted)
+                    } else if let remaining = calorieProgress.remaining {
+                        Text(remaining.formatted())
+                            .font(.system(size: 44, weight: .bold, design: .rounded))
+                            .foregroundStyle(AppTheme.ink)
+                        Text("calories left")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(AppTheme.muted)
+                    } else {
                         Text(calorieProgress.consumed.formatted())
                             .font(.system(size: 44, weight: .bold, design: .rounded))
                             .foregroundStyle(AppTheme.ink)
-                        if let goal = calorieProgress.goal {
-                            Text("/ \(goal.formatted())")
-                                .font(.title3.weight(.semibold).monospacedDigit())
-                                .foregroundStyle(AppTheme.muted)
-                        }
+                        Text("calories")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(AppTheme.muted)
                     }
-                    Text("calories")
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(AppTheme.muted)
                 }
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(calorieProgress.accessibilityLabel)
                 Spacer()
                 CalorieProgressIcon(
                     progress: calorieProgress.fraction,
-                    remaining: calorieProgress.remaining,
-                    over: calorieProgress.over
+                    consumed: calorieProgress.consumed,
+                    goal: calorieProgress.goal
                 )
             }
             VStack(spacing: 10) {

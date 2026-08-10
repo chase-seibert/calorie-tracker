@@ -19,12 +19,13 @@
 
 When the macro summary card scrolls fully out of view, its calorie total remains
 visible as a compact navigation-title item and continues updating with the diary.
-An optional daily calorie goal is configured in Settings. When present, both the
-summary card and compact title show consumed calories over the daily goal. The
-fire icon has an outer ring that fills clockwise to the daily goal, with the
-remaining calories shown beneath it as “N left”. Once the goal is exceeded,
-that label changes to “N over”; without a goal, it retains a neutral track and
-the single calorie total is shown.
+An optional daily calorie goal is configured in Settings. When present, the
+summary card emphasizes remaining calories on the left as “N calories left” (or
+“N calories over” once the goal is exceeded), while the fire icon retains the
+consumed/goal value beneath it. The compact title continues to show consumed
+calories over the daily goal. The fire icon has an outer ring that fills
+clockwise to the daily goal; without a goal, it retains a neutral track and the
+single calorie total is shown.
 The summary card presents carbohydrates, fat, and protein as a single stacked
 horizontal bar in that order. Segment widths represent each macro's share of
 total macro grams, and a color-keyed legend retains the exact gram values.
