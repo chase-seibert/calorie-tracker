@@ -30,6 +30,7 @@ struct FoodPickerView: View {
     @State private var query = ProcessInfo.processInfo.arguments.contains("--show-food-search") ? "banana" : ""
     @State private var results: [FoodPickerItem] = []
     @State private var isSearching = false
+    @State private var showingCustomFoodEditor = false
     @FocusState private var searchIsFocused: Bool
 
     init(date: Date, catalog: CatalogStore, initialMode: Mode? = nil) {
@@ -58,7 +59,8 @@ struct FoodPickerView: View {
                             onQuickLogFood: quickLog,
                             onEditFood: { selectedFood = $0 },
                             onQuickLogMeal: logMeal,
-                            onEditMeal: { selectedMeal = $0 }
+                            onEditMeal: { selectedMeal = $0 },
+                            onAddCustomFood: { showingCustomFoodEditor = true }
                         )
                     } else {
                         if let mode {
@@ -137,6 +139,22 @@ struct FoodPickerView: View {
                 QuantityEditor(meal: meal, date: date)
                     .presentationDetents([.medium, .large])
             }
+            .sheet(isPresented: $showingCustomFoodEditor, onDismiss: refreshSearchResults) {
+                CustomFoodEditorView(
+                    food: nil,
+                    initialName: query.trimmingCharacters(in: .whitespacesAndNewlines),
+                    onSaved: { food in
+                        diary.log(
+                            food,
+                            amount: 1,
+                            unit: .serving,
+                            portionID: "custom-serving",
+                            on: date
+                        )
+                        dismiss()
+                    }
+                )
+            }
             .task {
                 guard mode == nil else { return }
                 try? await Task.sleep(for: .milliseconds(180))
@@ -200,6 +218,20 @@ struct FoodPickerView: View {
 
     private func logMeal(_ meal: SavedMeal) {
         diary.logMeal(meal, on: date)
+    }
+
+    private func refreshSearchResults() {
+        let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedQuery.isEmpty else {
+            results = []
+            isSearching = false
+            return
+        }
+        results = diary.searchItems(
+            normalizedQuery,
+            catalogFoods: catalog.searchAll(normalizedQuery)
+        )
+        isSearching = false
     }
 
     private func refreshItems(for mode: Mode) {
@@ -603,13 +635,20 @@ private struct SearchResultsList: View {
     let onEditFood: (Food) -> Void
     let onQuickLogMeal: (SavedMeal) -> Void
     let onEditMeal: (SavedMeal) -> Void
+    let onAddCustomFood: () -> Void
 
     var body: some View {
         if isSearching {
             ProgressView("Searching…")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if results.isEmpty {
-            ContentUnavailableView.search(text: query)
+            VStack(spacing: 16) {
+                ContentUnavailableView.search(text: query)
+                Button("Add custom food", systemImage: "plus", action: onAddCustomFood)
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             List {
                 Section {

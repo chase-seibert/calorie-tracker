@@ -48,7 +48,8 @@
 - As someone who uses iOS in dark mode, I want every app surface and interaction
   to retain readable contrast and the same visual hierarchy as light mode.
 - As someone who creates personal foods and meals, I want a browsable Custom
-  catalog in Settings so I can confirm and manage what I have saved.
+  catalog in Settings so I can add and edit custom foods and saved meals as well
+  as confirm and manage what I have saved.
 - As a user leaving MyFitnessPal, I want to import its export so that my history
   and personal recents can become the third data source.
 - As a user looking for patterns, I want calorie and macro trends by day.

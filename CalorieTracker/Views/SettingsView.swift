@@ -1,5 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import UIKit
 
 struct SettingsView: View {
     @EnvironmentObject private var diary: DiaryStore
@@ -217,16 +218,34 @@ struct SettingsView: View {
 private struct PersonalCatalogView: View {
     @EnvironmentObject private var diary: DiaryStore
 
+    @State private var editingFood: Food?
+    @State private var showingFoodEditor = false
+    @State private var editingMeal: SavedMeal?
+    @State private var showingMealEditor = false
+
     var body: some View {
         List {
             Section("Custom foods") {
+                Button("Add", systemImage: "plus") {
+                    editingFood = nil
+                    showingFoodEditor = true
+                }
                 if diary.document.customFoods.isEmpty {
                     Label("No custom foods yet", systemImage: "fork.knife")
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(diary.document.customFoods) { food in
                         FoodResultRow(food: food, preference: diary.preference(for: food))
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                editingFood = food
+                                showingFoodEditor = true
+                            }
                             .swipeActions {
+                                Button("Edit", systemImage: "pencil") {
+                                    editingFood = food
+                                    showingFoodEditor = true
+                                }
                                 Button("Delete", systemImage: "trash", role: .destructive) {
                                     diary.deleteCustomFood(food)
                                 }
@@ -236,37 +255,405 @@ private struct PersonalCatalogView: View {
             }
 
             Section("Saved meals") {
+                Button("Add", systemImage: "plus") {
+                    editingMeal = nil
+                    showingMealEditor = true
+                }
                 if diary.document.meals.isEmpty {
                     Label("No saved meals yet", systemImage: "square.stack.3d.up")
                         .foregroundStyle(.secondary)
                 } else {
-                    ForEach(diary.document.meals) { meal in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(meal.name)
-                                .font(.body.weight(.semibold))
-                            Text("\(meal.items.count) item\(meal.items.count == 1 ? "" : "s") · \(mealCalories(meal)) cal")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        .swipeActions {
-                            Button("Delete", systemImage: "trash", role: .destructive) {
-                                diary.deleteMeal(meal)
+                    ForEach(diary.alphabetizedMeals) { meal in
+                        PersonalMealRow(meal: meal)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                editingMeal = meal
+                                showingMealEditor = true
                             }
+                            .swipeActions {
+                                Button("Edit", systemImage: "pencil") {
+                                    editingMeal = meal
+                                    showingMealEditor = true
+                                }
+                                Button("Delete", systemImage: "trash", role: .destructive) {
+                                    diary.deleteMeal(meal)
+                                }
                         }
                     }
                 }
             }
         }
         .navigationTitle("Custom")
+        .sheet(isPresented: $showingFoodEditor) {
+            CustomFoodEditorView(food: editingFood)
+        }
+        .sheet(isPresented: $showingMealEditor) {
+            SavedMealEditorView(meal: editingMeal)
+        }
+    }
+}
+
+private struct PersonalMealRow: View {
+    let meal: SavedMeal
+
+    var body: some View {
+        HStack(spacing: 12) {
+            MealBadge()
+            VStack(alignment: .leading, spacing: 4) {
+                Text(meal.name)
+                    .font(.body.weight(.semibold))
+                Text("\(meal.items.count) item\(meal.items.count == 1 ? "" : "s") · \(Int(meal.nutrients.calories.rounded())) cal")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            Image(systemName: "chevron.right")
+                .font(.caption.weight(.bold))
+                .foregroundStyle(.tertiary)
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+struct CustomFoodEditorView: View {
+    @EnvironmentObject private var diary: DiaryStore
+    @Environment(\.dismiss) private var dismiss
+
+    private let food: Food?
+    private let onSaved: ((Food) -> Void)?
+    @State private var name: String
+    @State private var brand: String
+    @State private var calories: Double
+    @State private var carbs: Double
+    @State private var fat: Double
+    @State private var protein: Double
+    @State private var servingGrams: Double
+    @FocusState private var focusedField: Field?
+
+    private enum Field: Hashable {
+        case name
+        case brand
+        case calories
+        case carbs
+        case fat
+        case protein
+        case servingGrams
+
+        var selectsAllOnFocus: Bool {
+            switch self {
+            case .calories, .carbs, .fat, .protein, .servingGrams:
+                return true
+            case .name, .brand:
+                return false
+            }
+        }
     }
 
-    private func mealCalories(_ meal: SavedMeal) -> Int {
-        Int(meal.items.reduce(0) { total, item in
-            total + item.food.nutrients(
-                for: item.amount,
-                unit: item.unit,
-                portionID: item.portionID
-            ).calories
-        }.rounded())
+    init(
+        food: Food?,
+        initialName: String? = nil,
+        onSaved: ((Food) -> Void)? = nil
+    ) {
+        self.food = food
+        self.onSaved = onSaved
+        _name = State(initialValue: food?.name ?? initialName ?? "")
+        _brand = State(initialValue: food?.brand ?? "")
+        _calories = State(initialValue: food?.nutrients.calories ?? 0)
+        _carbs = State(initialValue: food?.nutrients.carbs ?? 0)
+        _fat = State(initialValue: food?.nutrients.fat ?? 0)
+        _protein = State(initialValue: food?.nutrients.protein ?? 0)
+        _servingGrams = State(initialValue: food?.servingGrams ?? food?.baseAmountGrams ?? 100)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Food") {
+                    textFieldRow("Name", text: $name, field: .name)
+                    textFieldRow("Brand (optional)", text: $brand, field: .brand)
+                }
+
+                Section("Nutrition per serving") {
+                    decimalFieldRow("Calories", value: $calories, field: .calories)
+                    decimalFieldRow("Carbohydrates (g)", value: $carbs, field: .carbs)
+                    decimalFieldRow("Fat (g)", value: $fat, field: .fat)
+                    decimalFieldRow("Protein (g)", value: $protein, field: .protein)
+                    decimalFieldRow("Serving size (g)", value: $servingGrams, field: .servingGrams)
+                }
+            }
+            .navigationTitle(food == nil ? "Add Custom Food" : "Edit Custom Food")
+            .navigationBarTitleDisplayMode(.inline)
+            .onChange(of: focusedField) { _, field in
+                guard field?.selectsAllOnFocus == true else { return }
+                selectAllFocusedText()
+            }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save", action: save)
+                        .disabled(!canSave)
+                }
+            }
+        }
+    }
+
+    private var canSave: Bool {
+        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+            servingGrams > 0
+    }
+
+    private func textFieldRow(_ label: String, text: Binding<String>, field: Field) -> some View {
+        LabeledContent {
+            TextField("", text: text)
+                .focused($focusedField, equals: field)
+                .multilineTextAlignment(.trailing)
+                .foregroundStyle(.primary)
+        } label: {
+            Text(label)
+                .foregroundStyle(.secondary)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture { focus(field) }
+    }
+
+    private func decimalFieldRow(_ label: String, value: Binding<Double>, field: Field) -> some View {
+        LabeledContent {
+            TextField("", value: value, format: .number)
+                .focused($focusedField, equals: field)
+                .keyboardType(.decimalPad)
+                .multilineTextAlignment(.trailing)
+                .frame(width: 96)
+                .foregroundStyle(.primary)
+        } label: {
+            Text(label)
+                .foregroundStyle(.secondary)
+        }
+        .contentShape(Rectangle())
+        .simultaneousGesture(TapGesture().onEnded { focus(field) })
+    }
+
+    private func save() {
+        guard canSave else { return }
+        let savedFood: Food?
+        if let food {
+            guard diary.updateCustomFood(
+                foodID: food.id,
+                name: name,
+                brand: brand,
+                calories: calories,
+                carbs: carbs,
+                fat: fat,
+                protein: protein,
+                servingGrams: servingGrams
+            ) else { return }
+            savedFood = diary.document.customFoods.first { $0.id == food.id }
+        } else {
+            savedFood = diary.addCustomFood(
+                name: name,
+                brand: brand,
+                calories: calories,
+                carbs: carbs,
+                fat: fat,
+                protein: protein,
+                servingGrams: servingGrams
+            )
+        }
+        if let savedFood {
+            onSaved?(savedFood)
+        }
+        dismiss()
+    }
+
+    private func focus(_ field: Field) {
+        focusedField = field
+        if field.selectsAllOnFocus {
+            selectAllFocusedText()
+        }
+    }
+
+    private func selectAllFocusedText() {
+        DispatchQueue.main.async {
+            UIApplication.shared.sendAction(
+                #selector(UIResponder.selectAll(_:)),
+                to: nil,
+                from: nil,
+                for: nil
+            )
+        }
+    }
+}
+
+private struct SavedMealEditorView: View {
+    @EnvironmentObject private var diary: DiaryStore
+    @Environment(\.dismiss) private var dismiss
+
+    private let meal: SavedMeal?
+    @State private var name: String
+    @State private var items: [MealItem]
+    @State private var showingFoodPicker = false
+
+    init(meal: SavedMeal?) {
+        self.meal = meal
+        _name = State(initialValue: meal?.name ?? "")
+        _items = State(initialValue: meal?.items ?? [])
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Meal") {
+                    TextField("Name", text: $name)
+                }
+
+                Section("Foods") {
+                    if items.isEmpty {
+                        Text("Add at least one food to save this meal.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    ForEach($items) { item in
+                        SavedMealItemEditorRow(item: item) {
+                            let itemID = item.wrappedValue.id
+                            items.removeAll { $0.id == itemID }
+                        }
+                    }
+                    Button("Add food", systemImage: "plus") {
+                        showingFoodPicker = true
+                    }
+                }
+            }
+            .navigationTitle(meal == nil ? "Add Saved Meal" : "Edit Saved Meal")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save", action: save)
+                        .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || items.isEmpty)
+                }
+            }
+            .sheet(isPresented: $showingFoodPicker) {
+                MealFoodPickerView(foods: availableFoods) { food in
+                    let preference = diary.preference(for: food)
+                    items.append(MealItem(
+                        id: UUID(),
+                        food: food,
+                        amount: preference.amount,
+                        unit: preference.unit,
+                        portionID: preference.portionID
+                    ))
+                }
+            }
+        }
+    }
+
+    private var availableFoods: [Food] {
+        var seen = Set<String>()
+        let candidates = diary.document.customFoods
+            + diary.document.favorites
+            + diary.document.importedFoods
+            + diary.document.entries
+                .filter { !$0.isMeal && !$0.isCheatDayAdjustment }
+                .map(\.food)
+            + diary.document.meals.flatMap { $0.items.map(\.food) }
+        return candidates.compactMap { food in
+            guard seen.insert(food.id).inserted else { return nil }
+            return diary.displayedFood(food)
+        }
+        .sorted {
+            let comparison = $0.name.localizedCaseInsensitiveCompare($1.name)
+            return comparison == .orderedSame ? $0.id < $1.id : comparison == .orderedAscending
+        }
+    }
+
+    private func save() {
+        guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, !items.isEmpty else { return }
+        if let meal {
+            _ = diary.updateSavedMeal(mealID: meal.id, name: name, items: items)
+        } else {
+            _ = diary.saveMeal(name: name, items: items)
+        }
+        dismiss()
+    }
+}
+
+private struct SavedMealItemEditorRow: View {
+    @Binding var item: MealItem
+    let onDelete: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(item.food.name)
+                    .font(.body.weight(.semibold))
+                    .lineLimit(2)
+                Text(quantityDescription)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            Stepper(
+                value: $item.amount,
+                in: 0.01...100,
+                step: item.unit == .serving ? 1 : 10
+            ) {
+                Text(item.amount.cleanAmount)
+                    .monospacedDigit()
+            }
+            .labelsHidden()
+            .accessibilityLabel("Quantity for \(item.food.name)")
+        }
+        .swipeActions {
+            Button("Remove", systemImage: "trash", role: .destructive, action: onDelete)
+        }
+    }
+
+    private var quantityDescription: String {
+        switch item.unit {
+        case .grams, .ounces:
+            return "\(item.amount.cleanAmount) \(item.unit.rawValue)"
+        case .serving:
+            return "\(item.amount.cleanAmount) \(item.food.portion(id: item.portionID)?.label ?? "serving")"
+        }
+    }
+}
+
+private struct MealFoodPickerView: View {
+    @Environment(\.dismiss) private var dismiss
+    let foods: [Food]
+    let onSelect: (Food) -> Void
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if foods.isEmpty {
+                    ContentUnavailableView(
+                        "No foods available",
+                        systemImage: "fork.knife.circle",
+                        description: Text("Add a custom food or log a food before creating a saved meal.")
+                    )
+                } else {
+                    List(foods) { food in
+                        Button {
+                            onSelect(food)
+                            dismiss()
+                        } label: {
+                            FoodResultRow(food: food)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+            .navigationTitle("Add Food")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
     }
 }

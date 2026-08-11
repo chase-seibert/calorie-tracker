@@ -684,11 +684,121 @@ final class DiaryStore: ObservableObject {
         return food
     }
 
-    func saveMeal(name: String, items: [MealItem]) {
-        guard !items.isEmpty else { return }
-        let meal = SavedMeal(id: UUID(), name: name, items: items)
+    @discardableResult
+    func updateCustomFood(
+        foodID: String,
+        name: String,
+        brand: String,
+        calories: Double,
+        carbs: Double,
+        fat: Double,
+        protein: Double,
+        servingGrams: Double
+    ) -> Bool {
+        let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedBrand = brand.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedServingGrams = max(servingGrams, 0.01)
+        guard !normalizedName.isEmpty,
+              let customFoodIndex = document.customFoods.firstIndex(where: { $0.id == foodID })
+        else { return false }
+
+        var updatedFood = document.customFoods[customFoodIndex]
+        updatedFood.name = normalizedName
+        updatedFood.brand = normalizedBrand
+        updatedFood.nutrients = MacroNutrients(
+            calories: calories,
+            carbs: carbs,
+            fat: fat,
+            protein: protein
+        )
+        updatedFood.baseAmountGrams = normalizedServingGrams
+        updatedFood.servingGrams = normalizedServingGrams
+        updatedFood.servingDescription = "1 serving"
+        updatedFood.portions = [FoodPortion(
+            id: "custom-serving",
+            label: "serving",
+            grams: normalizedServingGrams
+        )]
+
+        let previousEntries = document.entries
+        objectWillChange.send()
+        document.customFoods[customFoodIndex] = updatedFood
+        document.customFoodNames.removeValue(forKey: foodID)
+        document.favorites = document.favorites.map {
+            $0.id == foodID ? updatedFood : $0
+        }
+        for index in document.meals.indices {
+            document.meals[index].items = document.meals[index].items.map { item in
+                guard item.food.id == foodID else { return item }
+                var updatedItem = item
+                updatedItem.food = updatedFood
+                return updatedItem
+            }
+        }
+        for index in document.entries.indices {
+            var entry = document.entries[index]
+            if entry.food.id == foodID, !entry.isMeal {
+                entry.food = updatedFood
+                entry.nutrients = updatedFood.nutrients(
+                    for: entry.amount,
+                    unit: entry.unit,
+                    portionID: entry.portionID
+                )
+            }
+            entry.mealItems = entry.mealItems?.map { item in
+                guard item.food.id == foodID else { return item }
+                var updatedItem = item
+                updatedItem.food = updatedFood
+                return updatedItem
+            }
+            refreshMealEntry(&entry)
+            document.entries[index] = entry
+        }
+        let changedEntries = zip(previousEntries, document.entries).compactMap { oldEntry, newEntry in
+            oldEntry == newEntry ? nil : newEntry
+        }
+        persist()
+        if !changedEntries.isEmpty {
+            healthKit?.sync(entries: changedEntries)
+        }
+        return true
+    }
+
+    @discardableResult
+    func saveMeal(name: String, items: [MealItem]) -> SavedMeal? {
+        let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedName.isEmpty, !items.isEmpty else { return nil }
+        let meal = SavedMeal(id: UUID(), name: normalizedName, items: items)
         document.meals.insert(meal, at: 0)
         persist()
+        return meal
+    }
+
+    @discardableResult
+    func updateSavedMeal(mealID: UUID, name: String, items: [MealItem]) -> Bool {
+        let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedName.isEmpty,
+              !items.isEmpty,
+              let mealIndex = document.meals.firstIndex(where: { $0.id == mealID })
+        else { return false }
+
+        let previousEntries = document.entries
+        objectWillChange.send()
+        document.meals[mealIndex] = SavedMeal(id: mealID, name: normalizedName, items: items)
+        for index in document.entries.indices where document.entries[index].savedMealID == mealID {
+            var entry = document.entries[index]
+            entry.food.name = normalizedName
+            refreshMealEntry(&entry)
+            document.entries[index] = entry
+        }
+        let changedEntries = zip(previousEntries, document.entries).compactMap { oldEntry, newEntry in
+            oldEntry == newEntry ? nil : newEntry
+        }
+        persist()
+        if !changedEntries.isEmpty {
+            healthKit?.sync(entries: changedEntries)
+        }
+        return true
     }
 
     func saveMeal(name: String, replacing entryIDs: Set<UUID>, on date: Date) {
@@ -1228,6 +1338,39 @@ final class DiaryStore: ObservableObject {
             .compactMap(\.displayOrder)
             .min() ?? 0
         return firstOrder - 1
+    }
+
+    private func refreshMealEntry(_ entry: inout DiaryEntry) {
+        guard entry.isMeal else { return }
+        let baseItems: [MealItem]
+        if let savedMealID = entry.savedMealID,
+           let savedMeal = document.meals.first(where: { $0.id == savedMealID }) {
+            baseItems = savedMeal.items
+            entry.food.name = savedMeal.name
+        } else if let currentItems = entry.mealItems, entry.amount > 0 {
+            baseItems = currentItems.map { item in
+                var baseItem = item
+                baseItem.amount /= entry.amount
+                return baseItem
+            }
+        } else {
+            return
+        }
+
+        let baseNutrients = baseItems.reduce(.zero) { total, item in
+            total + item.food.nutrients(
+                for: item.amount,
+                unit: item.unit,
+                portionID: item.portionID
+            )
+        }
+        entry.food.nutrients = baseNutrients
+        entry.nutrients = baseNutrients.scaled(by: max(entry.amount, 0.01))
+        entry.mealItems = baseItems.map { item in
+            var scaledItem = item
+            scaledItem.amount *= max(entry.amount, 0.01)
+            return scaledItem
+        }
     }
 
     private func updateDisplayOrder(using orderedEntries: [DiaryEntry]) {

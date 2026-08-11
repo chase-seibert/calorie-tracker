@@ -708,6 +708,101 @@ final class CalorieTrackerTests: XCTestCase {
     }
 
     @MainActor
+    func testCustomFoodCanBeEditedAndUpdatesSavedReferences() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let fileURL = folder.appendingPathComponent("diary.json")
+        let day = Date()
+        let store = DiaryStore(fileURL: fileURL)
+
+        let food = store.addCustomFood(
+            name: "Original oats",
+            brand: "Kitchen",
+            calories: 100,
+            carbs: 20,
+            fat: 2,
+            protein: 4,
+            servingGrams: 40
+        )
+        store.log(food, amount: 1, unit: .serving, on: day)
+        store.saveMeal(
+            name: "Oats breakfast",
+            items: [MealItem(id: UUID(), food: food, amount: 1, unit: .serving, portionID: "custom-serving")]
+        )
+
+        XCTAssertTrue(store.updateCustomFood(
+            foodID: food.id,
+            name: "Updated oats",
+            brand: "New kitchen",
+            calories: 150,
+            carbs: 25,
+            fat: 3,
+            protein: 6,
+            servingGrams: 50
+        ))
+
+        XCTAssertEqual(store.document.customFoods.first?.name, "Updated oats")
+        XCTAssertEqual(store.document.customFoods.first?.nutrients.calories, 150)
+        XCTAssertEqual(store.document.meals.first?.items.first?.food.name, "Updated oats")
+        let loggedFood = try XCTUnwrap(store.entries(on: day).first)
+        XCTAssertEqual(loggedFood.food.name, "Updated oats")
+        XCTAssertEqual(loggedFood.nutrients.calories, 150, accuracy: 0.001)
+
+        let reloaded = DiaryStore(fileURL: fileURL)
+        XCTAssertEqual(reloaded.document.customFoods.first?.name, "Updated oats")
+        XCTAssertEqual(reloaded.document.meals.first?.items.first?.food.name, "Updated oats")
+    }
+
+    @MainActor
+    func testSavedMealCanBeEditedAndUpdatesLoggedMealEntries() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let fileURL = folder.appendingPathComponent("diary.json")
+        let day = Date()
+        let store = DiaryStore(fileURL: fileURL)
+
+        let toast = store.addCustomFood(
+            name: "Toast",
+            brand: "Bakery",
+            calories: 100,
+            carbs: 20,
+            fat: 1,
+            protein: 3,
+            servingGrams: 40
+        )
+        let eggs = store.addCustomFood(
+            name: "Eggs",
+            brand: "Farm",
+            calories: 140,
+            carbs: 1,
+            fat: 10,
+            protein: 12,
+            servingGrams: 100
+        )
+        let meal = try XCTUnwrap(store.saveMeal(
+            name: "Old breakfast",
+            items: [MealItem(id: UUID(), food: toast, amount: 1, unit: .serving, portionID: "custom-serving")]
+        ))
+        store.logMeal(meal, amount: 2, on: day)
+
+        XCTAssertTrue(store.updateSavedMeal(
+            mealID: meal.id,
+            name: "New breakfast",
+            items: [MealItem(id: UUID(), food: eggs, amount: 2, unit: .serving, portionID: "custom-serving")]
+        ))
+
+        XCTAssertEqual(store.document.meals.first?.name, "New breakfast")
+        XCTAssertEqual(store.document.meals.first?.items.first?.food.name, "Eggs")
+        let loggedMeal = try XCTUnwrap(store.entries(on: day).first)
+        XCTAssertEqual(loggedMeal.food.name, "New breakfast")
+        XCTAssertEqual(loggedMeal.nutrients.calories, 560, accuracy: 0.001)
+        XCTAssertEqual(loggedMeal.mealItems?.first?.food.name, "Eggs")
+
+        let reloaded = DiaryStore(fileURL: fileURL)
+        XCTAssertEqual(reloaded.document.meals.first?.name, "New breakfast")
+        let reloadedMeal = try XCTUnwrap(reloaded.entries(on: day).first)
+        XCTAssertEqual(reloadedMeal.nutrients.calories, 560, accuracy: 0.001)
+    }
+
+    @MainActor
     func testReorderedDiaryEntriesPersistAndNewEntriesStayAtTop() throws {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let fileURL = folder.appendingPathComponent("diary.json")

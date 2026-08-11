@@ -32,7 +32,9 @@ total macro grams, and a color-keyed legend retains the exact gram values.
 Tapping the calorie total or macro chart navigates directly to Trends.
 
 The Custom source row in Settings shows separate food and meal counts and opens
-a personal catalog with Custom Foods and Saved Meals sections.
+a personal catalog with Custom Foods and Saved Meals sections. Each section has
+an Add action; tapping or swiping a row opens an editor, while swipe-to-delete
+remains available for both kinds of personal item.
 
 The add-food sheet opens with an already-focused search field and keyboard, with
 the current Magic suggestions filling the pane until the user starts typing.
@@ -43,6 +45,9 @@ all of those modes. Typing immediately replaces the selected mode with combined
 MyFitnessPal, USDA, and Open Food Facts results; Search is not a separate mode
 or source picker. Matching favorite foods and saved meals lead the results in
 one alphabetized group, and saved meals can be found by their names.
+When no search result matches, the empty state offers a compact Add custom food
+action with the search text prefilled as the food name. Saving from that flow
+logs one serving and closes the food picker.
 
 Magic opens with a short explanation and three or four suggestions learned from
 the previous 10 days in the current local-time band: breakfast from 5–11 AM,
