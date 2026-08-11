@@ -220,8 +220,30 @@ private struct PersonalCatalogView: View {
 
     @State private var editingFood: Food?
     @State private var showingFoodEditor = false
-    @State private var editingMeal: SavedMeal?
-    @State private var showingMealEditor = false
+    @State private var mealEditorPresentation: MealEditorPresentation?
+
+    private enum MealEditorPresentation: Identifiable {
+        case add
+        case edit(SavedMeal)
+
+        var id: String {
+            switch self {
+            case .add:
+                return "add"
+            case let .edit(meal):
+                return meal.id.uuidString
+            }
+        }
+
+        var meal: SavedMeal? {
+            switch self {
+            case .add:
+                return nil
+            case let .edit(meal):
+                return meal
+            }
+        }
+    }
 
     var body: some View {
         List {
@@ -256,8 +278,7 @@ private struct PersonalCatalogView: View {
 
             Section("Saved meals") {
                 Button("Add", systemImage: "plus") {
-                    editingMeal = nil
-                    showingMealEditor = true
+                    mealEditorPresentation = .add
                 }
                 if diary.document.meals.isEmpty {
                     Label("No saved meals yet", systemImage: "square.stack.3d.up")
@@ -267,13 +288,11 @@ private struct PersonalCatalogView: View {
                         PersonalMealRow(meal: meal)
                             .contentShape(Rectangle())
                             .onTapGesture {
-                                editingMeal = meal
-                                showingMealEditor = true
+                                mealEditorPresentation = .edit(meal)
                             }
                             .swipeActions {
                                 Button("Edit", systemImage: "pencil") {
-                                    editingMeal = meal
-                                    showingMealEditor = true
+                                    mealEditorPresentation = .edit(meal)
                                 }
                                 Button("Delete", systemImage: "trash", role: .destructive) {
                                     diary.deleteMeal(meal)
@@ -287,8 +306,8 @@ private struct PersonalCatalogView: View {
         .sheet(isPresented: $showingFoodEditor) {
             CustomFoodEditorView(food: editingFood)
         }
-        .sheet(isPresented: $showingMealEditor) {
-            SavedMealEditorView(meal: editingMeal)
+        .sheet(item: $mealEditorPresentation) { presentation in
+            SavedMealEditorView(meal: presentation.meal)
         }
     }
 }
