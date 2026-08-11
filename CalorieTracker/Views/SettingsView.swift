@@ -583,6 +583,7 @@ private struct SavedMealEditorView: View {
 private struct SavedMealItemEditorRow: View {
     @Binding var item: MealItem
     let onDelete: () -> Void
+    @FocusState private var amountIsFocused: Bool
 
     var body: some View {
         HStack(spacing: 12) {
@@ -595,19 +596,39 @@ private struct SavedMealItemEditorRow: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            Stepper(
-                value: $item.amount,
-                in: 0.01...100,
-                step: item.unit == .serving ? 1 : 10
-            ) {
-                Text(item.amount.cleanAmount)
-                    .monospacedDigit()
-            }
-            .labelsHidden()
+            TextField("Amount", value: amountBinding, format: .number.precision(.fractionLength(0...2)))
+                .keyboardType(.decimalPad)
+                .multilineTextAlignment(.trailing)
+                .monospacedDigit()
+                .frame(width: 80)
+                .focused($amountIsFocused)
+                .onChange(of: amountIsFocused) { _, isFocused in
+                    if isFocused {
+                        selectAllAmount()
+                    }
+                }
             .accessibilityLabel("Quantity for \(item.food.name)")
         }
         .swipeActions {
             Button("Remove", systemImage: "trash", role: .destructive, action: onDelete)
+        }
+    }
+
+    private var amountBinding: Binding<Double> {
+        Binding(
+            get: { item.amount },
+            set: { item.amount = min(max($0, 0.01), 100) }
+        )
+    }
+
+    private func selectAllAmount() {
+        DispatchQueue.main.async {
+            UIApplication.shared.sendAction(
+                #selector(UIResponder.selectAll(_:)),
+                to: nil,
+                from: nil,
+                for: nil
+            )
         }
     }
 

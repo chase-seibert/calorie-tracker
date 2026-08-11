@@ -642,12 +642,15 @@ private struct SearchResultsList: View {
             ProgressView("Searching…")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if results.isEmpty {
-            VStack(spacing: 16) {
+            VStack(spacing: 0) {
                 ContentUnavailableView.search(text: query)
                 Button("Add custom food", systemImage: "plus", action: onAddCustomFood)
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 28)
             }
+            .padding(.horizontal, 24)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             List {
