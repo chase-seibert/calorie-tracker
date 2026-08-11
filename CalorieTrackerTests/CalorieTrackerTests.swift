@@ -630,6 +630,53 @@ final class CalorieTrackerTests: XCTestCase {
     }
 
     @MainActor
+    func testSearchPromotesAlphabetizedFavoriteFoodsAndSavedMeals() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let store = DiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
+
+        func food(_ id: String, _ name: String) -> Food {
+            Food(
+                sourceID: id,
+                source: .custom,
+                name: name,
+                brand: nil,
+                barcode: nil,
+                nutrients: MacroNutrients(calories: 100, carbs: 10, fat: 2, protein: 5),
+                baseAmountGrams: 100,
+                servingGrams: 100,
+                servingDescription: "1 serving"
+            )
+        }
+
+        let favorite = food("favorite-zebra", "Zebra favorite")
+        let logged = food("logged-aardvark", "Aardvark logged")
+        let mealFood = food("meal-food", "Meal food")
+        let catalogFood = food("catalog-banana", "Banana catalog")
+        store.toggleFavorite(favorite)
+        store.log(logged, amount: 1, unit: .serving, on: Date())
+        store.saveMeal(
+            name: "Apple meal",
+            items: [MealItem(id: UUID(), food: mealFood, amount: 1, unit: .serving)]
+        )
+
+        let results = store.searchItems("a", catalogFoods: [catalogFood])
+
+        XCTAssertEqual(results.prefix(2).map(searchResultName), ["Apple meal", "Zebra favorite"])
+        XCTAssertEqual(results.dropFirst(2).map(searchResultName), ["Aardvark logged", "Banana catalog"])
+        XCTAssertTrue(results.contains { item in
+            if case let .meal(meal) = item { return meal.name == "Apple meal" }
+            return false
+        })
+    }
+
+    private func searchResultName(_ item: FoodPickerItem) -> String {
+        switch item {
+        case let .food(food): food.name
+        case let .meal(meal): meal.name
+        }
+    }
+
+    @MainActor
     func testCustomFoodsAndMealsRemainSeparatePersonalCatalogItems() {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let store = DiaryStore(fileURL: folder.appendingPathComponent("diary.json"))

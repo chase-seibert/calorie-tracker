@@ -879,6 +879,33 @@ final class DiaryStore: ObservableObject {
         }.prefix(50).map { $0 }
     }
 
+    func searchItems(_ query: String, catalogFoods: [Food], limit: Int = 50) -> [FoodPickerItem] {
+        let normalized = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalized.isEmpty, limit > 0 else { return [] }
+
+        let matchingFavoriteFoods = document.favorites
+            .filter { matchesSearch($0, query: normalized) }
+            .map(displayedFood)
+        let matchingMeals = document.meals.filter {
+            $0.name.localizedStandardContains(normalized)
+        }
+        let prioritizedItems = interspersedItems(
+            foods: matchingFavoriteFoods,
+            meals: matchingMeals
+        ).sorted(by: searchItemAlphabeticalOrder)
+
+        let personalResults = searchPersonalFoods(normalized)
+        let fallbackItems = Array(personalResults.prefix(10))
+            + catalogFoods
+            + Array(personalResults.dropFirst(10))
+
+        var seen = Set<String>()
+        return (prioritizedItems + fallbackItems.map { .food(displayedFood($0)) })
+            .filter { seen.insert($0.id).inserted }
+            .prefix(limit)
+            .map { $0 }
+    }
+
     func displayedFood(_ food: Food) -> Food {
         guard let customName = document.customFoodNames[food.id], !customName.isEmpty else {
             return food
@@ -1144,6 +1171,20 @@ final class DiaryStore: ObservableObject {
         case let .food(food): food.name
         case let .meal(meal): meal.name
         }
+    }
+
+    private func searchItemAlphabeticalOrder(_ left: FoodPickerItem, _ right: FoodPickerItem) -> Bool {
+        let comparison = favoriteItemName(left).localizedCaseInsensitiveCompare(favoriteItemName(right))
+        if comparison == .orderedSame {
+            return left.id < right.id
+        }
+        return comparison == .orderedAscending
+    }
+
+    private func matchesSearch(_ food: Food, query: String) -> Bool {
+        food.name.localizedStandardContains(query) ||
+            (document.customFoodNames[food.id]?.localizedStandardContains(query) ?? false) ||
+            (food.brand?.localizedStandardContains(query) ?? false)
     }
 
     private func insertFavoriteOrder(for itemID: String) {

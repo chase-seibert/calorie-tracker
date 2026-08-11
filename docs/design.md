@@ -41,7 +41,8 @@ Favorites, and Meals on one line in portrait mode; the specialty Scan pill is
 hidden there to avoid wrapping. The full Log Food sheet includes Scan alongside
 all of those modes. Typing immediately replaces the selected mode with combined
 MyFitnessPal, USDA, and Open Food Facts results; Search is not a separate mode
-or source picker.
+or source picker. Matching favorite foods and saved meals lead the results in
+one alphabetized group, and saved meals can be found by their names.
 
 Magic opens with a short explanation and three or four suggestions learned from
 the previous 10 days in the current local-time band: breakfast from 5–11 AM,

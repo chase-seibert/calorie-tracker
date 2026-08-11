@@ -11,7 +11,9 @@
   log a routine with one tap without first turning it into a saved meal.
 - As someone searching the catalog, I want the keyboard ready immediately and
   the current Magic suggestions visible before I type, followed by a one-tap add
-  action on each search result using its visible quantity.
+  action on each search result using its visible quantity. Matching favorites and
+  saved meals should appear first in alphabetical order, and saved meals should
+  be searchable by name.
 - As someone who weighs food, I want ounces by default plus grams and natural
   portions such as one large egg or one tablespoon, with remembered quantities,
   so that entering a measured amount takes minimal editing.

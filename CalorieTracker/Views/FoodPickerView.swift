@@ -28,7 +28,7 @@ struct FoodPickerView: View {
     @State private var selectedFood: Food?
     @State private var selectedMeal: SavedMeal?
     @State private var query = ProcessInfo.processInfo.arguments.contains("--show-food-search") ? "banana" : ""
-    @State private var results: [Food] = []
+    @State private var results: [FoodPickerItem] = []
     @State private var isSearching = false
     @FocusState private var searchIsFocused: Bool
 
@@ -55,8 +55,10 @@ struct FoodPickerView: View {
                             query: query,
                             results: results,
                             isSearching: isSearching,
-                            onQuickLog: quickLog,
-                            onEdit: { selectedFood = $0 }
+                            onQuickLogFood: quickLog,
+                            onEditFood: { selectedFood = $0 },
+                            onQuickLogMeal: logMeal,
+                            onEditMeal: { selectedMeal = $0 }
                         )
                     } else {
                         if let mode {
@@ -155,13 +157,8 @@ struct FoodPickerView: View {
                 isSearching = true
                 try? await Task.sleep(for: .milliseconds(140))
                 guard !Task.isCancelled else { return }
-                let personalResults = diary.searchPersonalFoods(normalizedQuery)
                 let bundledResults = catalog.searchAll(normalizedQuery)
-                var seen = Set<String>()
-                results = (Array(personalResults.prefix(10)) + bundledResults + Array(personalResults.dropFirst(10)))
-                    .filter { seen.insert($0.id).inserted }
-                    .prefix(50)
-                    .map(diary.displayedFood)
+                results = diary.searchItems(normalizedQuery, catalogFoods: bundledResults)
                 isSearching = false
             }
         }
@@ -600,10 +597,12 @@ private struct AddConfirmationButton: View {
 private struct SearchResultsList: View {
     @EnvironmentObject private var diary: DiaryStore
     let query: String
-    let results: [Food]
+    let results: [FoodPickerItem]
     let isSearching: Bool
-    let onQuickLog: (Food) -> Void
-    let onEdit: (Food) -> Void
+    let onQuickLogFood: (Food) -> Void
+    let onEditFood: (Food) -> Void
+    let onQuickLogMeal: (SavedMeal) -> Void
+    let onEditMeal: (SavedMeal) -> Void
 
     var body: some View {
         if isSearching {
@@ -614,15 +613,24 @@ private struct SearchResultsList: View {
         } else {
             List {
                 Section {
-                    ForEach(results) { food in
-                        FoodResultRow(
-                            food: food,
-                            preference: diary.preference(for: food),
-                            actionTitle: "Quick add",
-                            action: { onQuickLog(food) }
-                        )
-                        .contentShape(Rectangle())
-                        .onTapGesture { onEdit(food) }
+                    ForEach(results) { item in
+                        switch item {
+                        case let .food(food):
+                            FoodResultRow(
+                                food: food,
+                                preference: diary.preference(for: food),
+                                actionTitle: "Quick add",
+                                action: { onQuickLogFood(food) }
+                            )
+                            .contentShape(Rectangle())
+                            .onTapGesture { onEditFood(food) }
+                        case let .meal(meal):
+                            MealListActionRow(
+                                meal: meal,
+                                onQuickLog: { onQuickLogMeal(meal) },
+                                onEdit: { onEditMeal(meal) }
+                            )
+                        }
                     }
                 } footer: {
                     Text("Tap + to log the displayed quantity. Tap the row to change it.")
