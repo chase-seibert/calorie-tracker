@@ -57,6 +57,10 @@ final class DiaryStore: ObservableObject {
         entries(on: date).reduce(.zero) { $0 + $1.nutrients }
     }
 
+    func foodWeightReport(referenceDate: Date = Date()) -> FoodWeightReport {
+        FoodWeightReport(document: document, calendar: calendar, referenceDate: referenceDate)
+    }
+
     func status(on date: Date) -> DayStatus? {
         document.dayStatuses.first { calendar.isDate($0.date, inSameDayAs: date) }
     }
@@ -1050,7 +1054,6 @@ final class DiaryStore: ObservableObject {
 
         document.favorites = document.favorites.map { renamedFood($0, foodID: foodID, name: normalizedName) }
         document.customFoods = document.customFoods.map { renamedFood($0, foodID: foodID, name: normalizedName) }
-        document.importedFoods = document.importedFoods.map { renamedFood($0, foodID: foodID, name: normalizedName) }
         document.meals = document.meals.map { meal in
             var updatedMeal = meal
             updatedMeal.items = meal.items.map { item in
@@ -1062,20 +1065,6 @@ final class DiaryStore: ObservableObject {
         }
         persist()
         return true
-    }
-
-    @discardableResult
-    func importMyFitnessPal(data: Data) throws -> ImportSummary {
-        let result = try MyFitnessPalImporter.parse(data: data, calendar: calendar)
-        document.entries.append(contentsOf: result.entries)
-        for entry in result.entries {
-            clearAutomaticStatus(on: entry.date)
-        }
-        let existingIDs = Set(document.importedFoods.map(\.id))
-        document.importedFoods.append(contentsOf: result.foods.filter { !existingIDs.contains($0.id) })
-        persist()
-        healthKit?.sync(entries: result.entries)
-        return ImportSummary(entries: result.entries.count, foods: result.foods.count, skipped: result.skipped)
     }
 
     func clearPersonalData() {
@@ -1102,7 +1091,7 @@ final class DiaryStore: ObservableObject {
 
     private func prepareDayTracking(referenceDate: Date) {
         let today = calendar.startOfDay(for: referenceDate)
-        document.schemaVersion = 4
+        document.schemaVersion = 5
         document.dayStatuses = document.dayStatuses.map { status in
             var normalized = status
             normalized.date = calendar.startOfDay(for: status.date)
@@ -1318,7 +1307,7 @@ final class DiaryStore: ObservableObject {
         let candidates = document.entries
             .filter { !$0.isMeal && !$0.isCheatDayAdjustment }
             .sorted { $0.loggedAt > $1.loggedAt }
-            .map(\.food) + document.favorites + document.customFoods + document.importedFoods
+            .map(\.food) + document.favorites + document.customFoods
         return candidates.compactMap { food in
             guard seen.insert(food.id).inserted else { return nil }
             return displayedFood(food)

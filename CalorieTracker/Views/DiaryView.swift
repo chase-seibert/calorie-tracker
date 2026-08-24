@@ -1201,7 +1201,6 @@ struct SourceBadge: View {
         switch source {
         case .usda: AppTheme.protein
         case .openFoodFacts: AppTheme.carbs
-        case .myFitnessPal: AppTheme.fat
         case .custom: AppTheme.coral
         }
     }

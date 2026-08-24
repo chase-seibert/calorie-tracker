@@ -9,8 +9,8 @@ The SwiftUI app has two local data layers:
    lookup without loading the catalog into memory.
 2. A small writable JSON document in Application Support managed by `DiaryStore`.
    It holds diary entries, day statuses, the streak tracking start date,
-   favorites, meals, remembered quantities, custom foods, imported MyFitnessPal
-   records, and stable-ID custom food names. Writes are atomic.
+   favorites, meals, remembered quantities, custom foods, and stable-ID custom
+   food names. Writes are atomic.
 
 This split keeps a large catalog immutable and fast while making the personal
 data schema easy to evolve and back up.
@@ -59,6 +59,15 @@ so the same portion is available from favorites and later catalog searches.
 Custom names use the same stable IDs, allowing a rename to flow through existing
 diary entries and future personal search results.
 
+The food-weight report is derived on demand from the local `DiaryDocument` and
+does not create persistent report state. It filters to the current day and the
+previous 89 calendar days, excludes calorie-only cheat-day adjustments, expands
+meals from each diary entry's stored component snapshot, and aggregates gram
+weights by stable food ID before sorting. The UI displays rounded whole ounces;
+its share action writes the same rows to a temporary Markdown file and passes
+that file URL directly to `UIActivityViewController`, avoiding an additional
+SwiftUI transfer-provider layer before the native iOS share sheet.
+
 Magic suggestions are derived on-device from `DiaryDocument`; no learned state
 or personal history leaves the phone. `DiaryStore` filters the most recent 10
 days by the entry's actual local logging time, groups unique items by diary day,
@@ -80,14 +89,6 @@ barcode, source, serving description, and rank.
 
 The build script imports USDA JSON and Open Food Facts API/export records into a
 single format, deduplicates them, and builds an external-content FTS5 index.
-
-## MyFitnessPal import
-
-The importer accepts CSV files through the system file picker. Header aliases are
-mapped to date, food name, amount, calories, carbohydrates, fat, and protein.
-Imported rows become diary entries and unique foods become the MyFitnessPal
-source. The mapping is deliberately isolated because the exact export supplied
-by the user may require a small adapter update.
 
 ## Simulator fixture mode
 

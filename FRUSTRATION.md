@@ -1,5 +1,15 @@
 # Frustration Log
 
+## 2026-08-24: UniformTypeIdentifiers has no Markdown constant
+
+The current Xcode SDK does not expose `UTType.markdown`. For Markdown files
+shared from the app, a custom `FileRepresentation` declared as `.plainText`
+compiled but failed while preparing content on a physical iPhone. Writing the
+`.md` file before sharing makes attachment creation independently testable, but
+`ShareLink` still failed with that verified file URL and emitted nothing to the
+attached app console. Bypass its transfer-provider layer by presenting
+`UIActivityViewController` directly with the prepared URL.
+
 ## 2026-08-05: Restricted simulator compile has no runtime
 
 `make sim-compile` can fail during asset catalog compilation when the

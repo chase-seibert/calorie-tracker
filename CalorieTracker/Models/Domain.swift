@@ -3,7 +3,6 @@ import Foundation
 enum FoodSource: String, Codable, CaseIterable, Identifiable, Sendable {
     case usda
     case openFoodFacts = "off"
-    case myFitnessPal = "mfp"
     case custom
 
     var id: String { rawValue }
@@ -12,7 +11,6 @@ enum FoodSource: String, Codable, CaseIterable, Identifiable, Sendable {
         switch self {
         case .usda: "USDA"
         case .openFoodFacts: "Open Food Facts"
-        case .myFitnessPal: "MyFitnessPal"
         case .custom: "Custom"
         }
     }
@@ -21,9 +19,19 @@ enum FoodSource: String, Codable, CaseIterable, Identifiable, Sendable {
         switch self {
         case .usda: "USDA"
         case .openFoodFacts: "OFF"
-        case .myFitnessPal: "MFP"
         case .custom: "Mine"
         }
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let rawValue = try container.decode(String.self)
+        self = FoodSource(rawValue: rawValue) ?? .custom
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
     }
 }
 
@@ -330,7 +338,7 @@ struct MagicFoodSuggestionResult: Sendable {
 }
 
 struct DiaryDocument: Codable, Sendable {
-    var schemaVersion = 4
+    var schemaVersion = 5
     var dailyCalorieGoal: Int? = nil
     var trackingStartDate: Date? = nil
     var dayStatuses: [DayStatus] = []
@@ -341,7 +349,6 @@ struct DiaryDocument: Codable, Sendable {
     var meals: [SavedMeal] = []
     var rememberedQuantities: [String: QuantityPreference] = [:]
     var customFoods: [Food] = []
-    var importedFoods: [Food] = []
     var customFoodNames: [String: String] = [:]
 
     init() {}
@@ -358,7 +365,6 @@ struct DiaryDocument: Codable, Sendable {
         case meals
         case rememberedQuantities
         case customFoods
-        case importedFoods
         case customFoodNames
     }
 
@@ -378,7 +384,6 @@ struct DiaryDocument: Codable, Sendable {
             forKey: .rememberedQuantities
         ) ?? [:]
         customFoods = try container.decodeIfPresent([Food].self, forKey: .customFoods) ?? []
-        importedFoods = try container.decodeIfPresent([Food].self, forKey: .importedFoods) ?? []
         customFoodNames = try container.decodeIfPresent(
             [String: String].self,
             forKey: .customFoodNames
@@ -391,6 +396,193 @@ struct DiaryFixture: Codable, Sendable {
     let capturedReferenceDate: Date
     let defaultWeightUnit: LogUnit?
     var document: DiaryDocument
+}
+
+struct FoodWeightReport: Equatable, Sendable {
+    struct Item: Identifiable, Equatable, Sendable {
+        let id: String
+        let name: String
+        let totalGrams: Double
+
+        var wholeOunces: Int {
+            Int((totalGrams / FoodWeightReport.gramsPerOunce).rounded(.toNearestOrAwayFromZero))
+        }
+    }
+
+    static let title = "Foods by Total Weight — Last 90 Days"
+    static let fileName = "foods-by-total-weight-last-90-days.md"
+    private static let gramsPerOunce = 28.349_523_125
+
+    let coverageDescription: String
+    let items: [Item]
+
+    var markdown: String {
+        var lines = [
+            "# \(Self.title)",
+            "",
+            "Diary coverage: \(coverageDescription)",
+            "",
+            "| Food | Weight |",
+            "|---|---:|"
+        ]
+        lines.append(contentsOf: items.map {
+            "| \(Self.escapeMarkdownTableCell($0.name)) | \(Self.formattedInteger($0.wholeOunces)) oz |"
+        })
+        return lines.joined(separator: "\n") + "\n"
+    }
+
+    func writeShareFile(in directory: URL) throws -> URL {
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let fileURL = directory.appendingPathComponent(Self.fileName)
+        try Data(markdown.utf8).write(to: fileURL, options: .atomic)
+        return fileURL
+    }
+
+    init(document: DiaryDocument, calendar: Calendar, referenceDate: Date) {
+        let today = calendar.startOfDay(for: referenceDate)
+        let firstDay = calendar.date(byAdding: .day, value: -89, to: today) ?? today
+        let savedMealsByID = Dictionary(uniqueKeysWithValues: document.meals.map { ($0.id, $0) })
+        var totals: [String: Accumulator] = [:]
+        var coverageStart: Date?
+        var coverageEnd: Date?
+
+        for entry in document.entries where !entry.isCheatDayAdjustment {
+            let entryDay = calendar.startOfDay(for: entry.date)
+            guard entryDay >= firstDay, entryDay <= today else { continue }
+
+            var entryContributedWeight = false
+            for component in Self.components(for: entry, savedMealsByID: savedMealsByID) {
+                let grams = component.unit.grams(
+                    for: component.amount,
+                    food: component.food,
+                    portionID: component.portionID
+                )
+                guard grams.isFinite, grams > 0 else { continue }
+
+                let id = component.food.id
+                let displayName = document.customFoodNames[id] ?? component.food.name
+                let name: String
+                if let brand = component.food.displayBrand {
+                    name = "\(displayName) — \(brand)"
+                } else {
+                    name = displayName
+                }
+
+                var total = totals[id] ?? Accumulator(
+                    name: name,
+                    totalGrams: 0,
+                    latestLogDate: entry.loggedAt
+                )
+                total.totalGrams += grams
+                if entry.loggedAt >= total.latestLogDate {
+                    total.name = name
+                    total.latestLogDate = entry.loggedAt
+                }
+                totals[id] = total
+                entryContributedWeight = true
+            }
+
+            if entryContributedWeight {
+                coverageStart = min(coverageStart ?? entryDay, entryDay)
+                coverageEnd = max(coverageEnd ?? entryDay, entryDay)
+            }
+        }
+
+        coverageDescription = Self.coverageDescription(
+            from: coverageStart,
+            through: coverageEnd,
+            calendar: calendar
+        )
+        items = totals.map { id, total in
+            Item(id: id, name: total.name, totalGrams: total.totalGrams)
+        }
+        .sorted {
+            if $0.totalGrams != $1.totalGrams { return $0.totalGrams > $1.totalGrams }
+            let nameOrder = $0.name.localizedCaseInsensitiveCompare($1.name)
+            if nameOrder != .orderedSame { return nameOrder == .orderedAscending }
+            return $0.id < $1.id
+        }
+    }
+
+    private struct Component {
+        let food: Food
+        let amount: Double
+        let unit: LogUnit
+        let portionID: String?
+    }
+
+    private struct Accumulator {
+        var name: String
+        var totalGrams: Double
+        var latestLogDate: Date
+    }
+
+    private static func components(
+        for entry: DiaryEntry,
+        savedMealsByID: [UUID: SavedMeal]
+    ) -> [Component] {
+        if entry.isMeal {
+            if let snapshot = entry.mealItems, !snapshot.isEmpty {
+                return snapshot.map {
+                    Component(food: $0.food, amount: $0.amount, unit: $0.unit, portionID: $0.portionID)
+                }
+            }
+            guard let savedMealID = entry.savedMealID, let meal = savedMealsByID[savedMealID] else {
+                return []
+            }
+            return meal.items.map {
+                Component(
+                    food: $0.food,
+                    amount: $0.amount * entry.amount,
+                    unit: $0.unit,
+                    portionID: $0.portionID
+                )
+            }
+        }
+
+        return [Component(
+            food: entry.food,
+            amount: entry.amount,
+            unit: entry.unit,
+            portionID: entry.portionID
+        )]
+    }
+
+    private static func coverageDescription(
+        from start: Date?,
+        through end: Date?,
+        calendar: Calendar
+    ) -> String {
+        guard let start, let end else { return "No logged foods in the last 90 days" }
+
+        let formatter = DateFormatter()
+        formatter.calendar = calendar
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = calendar.timeZone
+        if calendar.isDate(start, inSameDayAs: end) {
+            formatter.dateFormat = "MMMM d, yyyy"
+            return formatter.string(from: start)
+        }
+
+        let startYear = calendar.component(.year, from: start)
+        let endYear = calendar.component(.year, from: end)
+        formatter.dateFormat = startYear == endYear ? "MMMM d" : "MMMM d, yyyy"
+        let startText = formatter.string(from: start)
+        formatter.dateFormat = "MMMM d, yyyy"
+        return "\(startText)–\(formatter.string(from: end))"
+    }
+
+    private static func formattedInteger(_ value: Int) -> String {
+        value.formatted(.number.grouping(.automatic).locale(Locale(identifier: "en_US_POSIX")))
+    }
+
+    private static func escapeMarkdownTableCell(_ value: String) -> String {
+        value
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "|", with: "\\|")
+            .replacingOccurrences(of: "\n", with: " ")
+            .replacingOccurrences(of: "\r", with: " ")
+    }
 }
 
 extension Double {

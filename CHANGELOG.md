@@ -1,5 +1,7 @@
 # Changelog
 
+- Added a shareable last-90-days Markdown report that ranks foods by total
+  whole-ounce weight and expands logged meals into their component foods.
 - Added time-of-day Magic logging with up to four personalized food or food-set
   suggestions learned on-device from the previous 10 days.
 - Expanded the default date-relative simulator fixture with Magic-ready sets in
@@ -22,9 +24,9 @@
 ## 2026-08-03
 
 - Created the local-first SwiftUI calorie tracker.
-- Added switchable USDA, Open Food Facts, and MyFitnessPal food sources.
+- Added USDA and Open Food Facts food sources.
 - Added fast diary logging, favorites, frequent foods, saved meals, custom foods,
-  barcode scanning, CSV import, and trends.
+  barcode scanning, and trends.
 - Added a compact SQLite FTS catalog pipeline and source documentation.
 - Wrapped every log-food mode onto the screen instead of hiding modes in a
   horizontal scroller.

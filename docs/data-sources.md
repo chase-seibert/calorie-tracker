@@ -83,9 +83,3 @@ families, nutrition-bearing preparation variants, and original source records.
 It includes both a family-level search index and a variant-level search index so
 generic queries can return fewer rows while explicit preparation queries retain
 the correct nutrition.
-
-## MyFitnessPal
-
-MyFitnessPal history is user-owned personal data and is never bundled. It is
-imported on-device and remains in the writable personal store. The importer will
-be finalized against the user's actual export.

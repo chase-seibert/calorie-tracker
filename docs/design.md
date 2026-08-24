@@ -13,8 +13,8 @@
 
 - **Diary** is the sole root screen: date strip, macro summary, entries, a
   prominent add button, and an upper-right Settings button.
-- **Settings** contains source counts, data attribution, import, data
-  management, and a link to Trends.
+- **Settings** contains source counts, data attribution, data management, and
+  links to Trends and the food-weight report.
 - **Trends**, nested under Settings, shows calorie and macro daily charts.
 
 When the macro summary card scrolls fully out of view, its calorie total remains
@@ -36,15 +36,21 @@ a personal catalog with Custom Foods and Saved Meals sections. Each section has
 an Add action; tapping or swiping a row opens an editor, while swipe-to-delete
 remains available for both kinds of personal item.
 
+The food-weight report previews the last 90 calendar days as foods sorted by
+exact total weight, displayed as whole ounces. Logged saved meals are expanded
+from the component snapshots on their diary entries. A Share toolbar action
+opens the native iOS share sheet with the report as a named Markdown file so it
+can be sent directly to document-aware apps such as ChatGPT.
+
 The add-food sheet opens with an already-focused search field and keyboard, with
 the current Magic suggestions filling the pane until the user starts typing.
 On the diary, the compact strip shows icon-only Magic plus Recent, Frequent,
 Favorites, and Meals on one line in portrait mode; the specialty Scan pill is
 hidden there to avoid wrapping. The full Log Food sheet includes Scan alongside
 all of those modes. Typing immediately replaces the selected mode with combined
-MyFitnessPal, USDA, and Open Food Facts results; Search is not a separate mode
-or source picker. Matching favorite foods and saved meals lead the results in
-one alphabetized group, and saved meals can be found by their names.
+personal, USDA, and Open Food Facts results; Search is not a separate mode or
+source picker. Matching favorite foods and saved meals lead the results in one
+alphabetized group, and saved meals can be found by their names.
 When no search result matches, the empty state offers a compact Add custom food
 action with the search text prefilled as the food name. Saving from that flow
 logs one serving and closes the food picker.

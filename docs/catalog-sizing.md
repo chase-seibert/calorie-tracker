@@ -34,9 +34,8 @@ currently averages about 335 bytes per retained row, including indexes.
 - Open Food Facts is capped before normalization. The API request asks for
   U.S.-tagged products ordered by scan popularity, so the catalog favors common
   packaged products rather than attempting full coverage.
-- MyFitnessPal history, custom foods, and saved meals are personal data. They
-  remain in the writable on-device store and are never compiled into the shared
-  SQLite asset.
+- Custom foods and saved meals are personal data. They remain in the writable
+  on-device store and are never compiled into the shared SQLite asset.
 
 ### Fields
 

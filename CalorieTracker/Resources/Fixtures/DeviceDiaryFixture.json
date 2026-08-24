@@ -2127,7 +2127,6 @@
         "sourceID": "2707152"
       }
     ],
-    "importedFoods": [],
     "meals": [
       {
         "id": "3C4BA44C-33D9-4055-8F85-9B91654AB55C",
@@ -2923,7 +2922,6 @@
         "unit": "serving"
       }
     },
-    "schemaVersion": 1
+    "schemaVersion": 5
   }
 }
-

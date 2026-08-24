@@ -18,11 +18,11 @@ Checked August 4, 2026 against the checked-in
 
 | Food or search | USDA matches | Open Food Facts matches | Likely source for a fuller match | Notes |
 | --- | ---: | ---: | --- | --- |
-| Psyllium | 0 | 0 | USDA Branded Food; broader Open Food Facts; MyFitnessPal history | The spelling is **psyllium**. A prior probe found 780 USDA Branded matches and 271 full-text Open Food Facts matches globally, including 77 U.S.-tagged matches. |
-| Americano | 0 | 0 | MyFitnessPal history or a custom food for a café preparation; USDA Branded/Open Food Facts for packaged products | No canonical generic café Americano is present in either bundled subset. |
-| Buttermilk bread | 0 | 0 | USDA Branded Food; Open Food Facts; MyFitnessPal history | The catalog has related buttermilk entries, but none also contain bread. |
-| Oroweat buttermilk bread | 0 | 0 | USDA Branded Food; Open Food Facts barcode/product records; MyFitnessPal history | Brand spelling: **Oroweat** (often said as “Oro Wheat”). Confirm the exact variety from the package or prior history when available. |
-| Mint tea | 0 | 0 | USDA generic foods or USDA Branded Food; Open Food Facts for packaged tea; MyFitnessPal history | The catalog has mint and tea entries separately, but no entry matching both terms. |
+| Psyllium | 0 | 0 | USDA Branded Food; broader Open Food Facts; custom food | The spelling is **psyllium**. A prior probe found 780 USDA Branded matches and 271 full-text Open Food Facts matches globally, including 77 U.S.-tagged matches. |
+| Americano | 0 | 0 | Custom food for a café preparation; USDA Branded/Open Food Facts for packaged products | No canonical generic café Americano is present in either bundled subset. |
+| Buttermilk bread | 0 | 0 | USDA Branded Food; Open Food Facts; custom food | The catalog has related buttermilk entries, but none also contain bread. |
+| Oroweat buttermilk bread | 0 | 0 | USDA Branded Food; Open Food Facts barcode/product records; custom food | Brand spelling: **Oroweat** (often said as “Oro Wheat”). Confirm the exact variety from the package when available. |
+| Mint tea | 0 | 0 | USDA generic foods or USDA Branded Food; Open Food Facts for packaged tea; custom food | The catalog has mint and tea entries separately, but no entry matching both terms. |
 
 ### Related results that are not substitutes
 
@@ -49,9 +49,6 @@ should not be treated as coverage for the requested item.
   U.S.-tagged products. A broader export or a larger popularity slice may find
   packaged bread, tea, and psyllium products, but low-scan products are not
   guaranteed to appear.
-- **MyFitnessPal:** Imported history is personal on-device data, not part of
-  the shared catalog. It is the best place to look for an item logged before,
-  especially a specific café drink or branded bread.
 - **Custom food:** A custom entry is the fallback for a preparation that is
   absent from upstream datasets, such as a café Americano with a known serving
   size.

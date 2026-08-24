@@ -980,13 +980,10 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(reloaded.totals(on: day).calories, 305)
     }
 
-    func testMyFitnessPalCSVImport() throws {
-        let csv = "Date,Food Name,Calories,Carbs,Fat,Protein\n2026-08-01,Banana,105,27,0.4,1.3\n"
-        let result = try MyFitnessPalImporter.parse(data: Data(csv.utf8), calendar: .current)
-        XCTAssertEqual(result.entries.count, 1)
-        XCTAssertEqual(result.foods.count, 1)
-        XCTAssertEqual(result.entries[0].food.source, .myFitnessPal)
-        XCTAssertEqual(result.entries[0].nutrients.calories, 105)
+    func testUnknownFoodSourceDecodesAsCustom() throws {
+        let data = Data(#""retired-source""#.utf8)
+        let source = try JSONDecoder().decode(FoodSource.self, from: data)
+        XCTAssertEqual(source, .custom)
     }
 
     func testCatalogHasBothBundledSources() throws {
@@ -1344,6 +1341,164 @@ extension CalorieTrackerTests {
 
         store.markCheatDay(on: days[1])
         XCTAssertEqual(store.streak(referenceDate: days[2]).dayCount, 0)
+    }
+
+    func testFoodWeightReportExpandsMealSnapshotsAndFormatsShareableMarkdown() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "America/Los_Angeles")!
+        func date(month: Int, day: Int) -> Date {
+            calendar.date(from: DateComponents(year: 2026, month: month, day: day, hour: 12))!
+        }
+        func food(_ id: String, _ name: String, brand: String? = nil, servingGrams: Double) -> Food {
+            Food(
+                sourceID: id,
+                source: .custom,
+                name: name,
+                brand: brand,
+                barcode: nil,
+                nutrients: .zero,
+                baseAmountGrams: servingGrams,
+                servingGrams: servingGrams,
+                servingDescription: "1 serving",
+                portions: [FoodPortion(id: "serving", label: "serving", grams: servingGrams)]
+            )
+        }
+        func entry(
+            food: Food,
+            amount: Double,
+            unit: LogUnit,
+            date: Date,
+            kind: DiaryEntryKind? = nil
+        ) -> DiaryEntry {
+            DiaryEntry(
+                id: UUID(),
+                date: calendar.startOfDay(for: date),
+                food: food,
+                amount: amount,
+                unit: unit,
+                nutrients: .zero,
+                loggedAt: date,
+                portionID: unit == .serving ? "serving" : nil,
+                kind: kind
+            )
+        }
+
+        let ounce = 28.349_523_125
+        let almondMilk = food("almond-milk", "Almond milk", servingGrams: ounce)
+        let banana = food("banana", "Banana", servingGrams: ounce * 2)
+        let wholeMilk = food("whole-milk", "Whole Milk", brand: "Great Value", servingGrams: ounce)
+        let mealID = UUID()
+        let mealSnapshot = [
+            MealItem(id: UUID(), food: almondMilk, amount: 1, unit: .ounces),
+            MealItem(id: UUID(), food: banana, amount: 1, unit: .serving, portionID: "serving"),
+            MealItem(id: UUID(), food: wholeMilk, amount: 0.51, unit: .serving, portionID: "serving")
+        ]
+        let mealFood = food("meal", "Breakfast", servingGrams: 1)
+        let mealEntry = DiaryEntry(
+            id: UUID(),
+            date: calendar.startOfDay(for: date(month: 8, day: 24)),
+            food: mealFood,
+            amount: 1,
+            unit: .serving,
+            nutrients: .zero,
+            loggedAt: date(month: 8, day: 24),
+            savedMealID: mealID,
+            mealItems: mealSnapshot
+        )
+        let replacementFood = food("replacement", "Current recipe only", servingGrams: ounce * 100)
+        var document = DiaryDocument()
+        document.meals = [SavedMeal(
+            id: mealID,
+            name: "Breakfast",
+            items: [MealItem(id: UUID(), food: replacementFood, amount: 1, unit: .serving, portionID: "serving")]
+        )]
+        document.entries = [
+            entry(food: almondMilk, amount: 2, unit: .ounces, date: date(month: 8, day: 3)),
+            mealEntry,
+            entry(food: almondMilk, amount: 100, unit: .ounces, date: date(month: 5, day: 26)),
+            entry(
+                food: almondMilk,
+                amount: 100,
+                unit: .ounces,
+                date: date(month: 8, day: 24),
+                kind: .cheatDayAdjustment
+            )
+        ]
+
+        let report = FoodWeightReport(
+            document: document,
+            calendar: calendar,
+            referenceDate: date(month: 8, day: 24)
+        )
+
+        XCTAssertEqual(report.coverageDescription, "August 3–August 24, 2026")
+        XCTAssertEqual(report.items.map(\.name), ["Almond milk", "Banana", "Whole Milk — Great Value"])
+        XCTAssertEqual(report.items.map(\.wholeOunces), [3, 2, 1])
+        XCTAssertFalse(report.markdown.contains("| Rank |"))
+        XCTAssertFalse(report.markdown.contains("Total logged food weight"))
+        XCTAssertFalse(report.markdown.contains("Report window"))
+        XCTAssertFalse(report.markdown.contains("## Method"))
+        XCTAssertTrue(report.markdown.hasSuffix("| Whole Milk — Great Value | 1 oz |\n"))
+
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let fileURL = try report.writeShareFile(in: directory)
+        XCTAssertEqual(fileURL.lastPathComponent, "foods-by-total-weight-last-90-days.md")
+        XCTAssertTrue(FileManager.default.fileExists(atPath: fileURL.path))
+        XCTAssertEqual(try String(contentsOf: fileURL, encoding: .utf8), report.markdown)
+    }
+
+    func testFoodWeightReportUsesSavedMealAsFallbackWithoutHistoricalSnapshot() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        let day = calendar.date(from: DateComponents(year: 2026, month: 8, day: 24))!
+        let ounce = 28.349_523_125
+        let food = Food(
+            sourceID: "fallback-food",
+            source: .custom,
+            name: "Fallback food",
+            brand: nil,
+            barcode: nil,
+            nutrients: .zero,
+            baseAmountGrams: ounce,
+            servingGrams: ounce,
+            servingDescription: "1 serving",
+            portions: [FoodPortion(id: "serving", label: "serving", grams: ounce)]
+        )
+        let mealID = UUID()
+        let meal = SavedMeal(
+            id: mealID,
+            name: "Legacy meal",
+            items: [MealItem(id: UUID(), food: food, amount: 1, unit: .serving, portionID: "serving")]
+        )
+        let mealFood = Food(
+            sourceID: "meal",
+            source: .custom,
+            name: meal.name,
+            brand: nil,
+            barcode: nil,
+            nutrients: .zero,
+            baseAmountGrams: 1,
+            servingGrams: 1,
+            servingDescription: "1 meal"
+        )
+        var document = DiaryDocument()
+        document.meals = [meal]
+        document.entries = [DiaryEntry(
+            id: UUID(),
+            date: day,
+            food: mealFood,
+            amount: 2,
+            unit: .serving,
+            nutrients: .zero,
+            loggedAt: day,
+            savedMealID: mealID
+        )]
+
+        let report = FoodWeightReport(document: document, calendar: calendar, referenceDate: day)
+
+        XCTAssertEqual(report.items.map(\.name), ["Fallback food"])
+        XCTAssertEqual(report.items.map(\.wholeOunces), [2])
     }
 
     private var testCalendar: Calendar {

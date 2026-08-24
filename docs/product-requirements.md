@@ -5,7 +5,7 @@
 - As a calorie tracker, I want yesterday, today, and tomorrow immediately
   available so that navigating the dates I actually use is effortless.
 - As someone who repeats foods, I want to log recent, frequent, and favorite
-  foods with one tap so that routine tracking is faster than MyFitnessPal.
+  foods with one tap so that routine tracking is as fast as possible.
 - As someone whose breakfast and lunch repeat, I want Magic to suggest up to
   four foods or food sets from my last 10 days at that time of day, so I can
   log a routine with one tap without first turning it into a saved meal.
@@ -20,8 +20,8 @@
 - As a privacy- and speed-conscious user, I want diary storage and food search
   on-device so that routine use has no network latency or server dependency.
 - As a data-source evaluator, I want one search to return USDA, Open Food Facts,
-  and MyFitnessPal history together, with source badges for comparing coverage
-  and quality without an extra filtering step.
+  and personal foods together, with source badges for comparing coverage and
+  quality without an extra filtering step.
 - As a packaged-food user, I want barcode lookup so that occasional scans are
   quick.
 - As someone who repeats combinations, I want to select one or more diary foods,
@@ -50,9 +50,10 @@
 - As someone who creates personal foods and meals, I want a browsable Custom
   catalog in Settings so I can add and edit custom foods and saved meals as well
   as confirm and manage what I have saved.
-- As a user leaving MyFitnessPal, I want to import its export so that my history
-  and personal recents can become the third data source.
 - As a user looking for patterns, I want calorie and macro trends by day.
+- As someone analyzing what I eat, I want to share a last-90-days Markdown
+  report of foods by total whole-ounce weight, with meals expanded into their
+  historical component foods, so I can send it to ChatGPT and ask questions.
 - As someone who sometimes takes a day off from tracking, I want an empty past
   day recorded as a gap day and removed automatically if I later log food.
 - As someone whose log may be intentionally incomplete, I want past days below

@@ -1,5 +1,4 @@
 import SwiftUI
-import UniformTypeIdentifiers
 import UIKit
 
 struct SettingsView: View {
@@ -7,9 +6,6 @@ struct SettingsView: View {
     @EnvironmentObject private var healthKit: HealthKitStore
     let catalog: CatalogStore
 
-    @State private var importing = false
-    @State private var importMessage: String?
-    @State private var importError: String?
     @State private var syncingNutrition = false
     @AppStorage("defaultWeightUnit") private var defaultWeightUnit = LogUnit.ounces.rawValue
 
@@ -22,6 +18,14 @@ struct SettingsView: View {
                     TrendsView()
                 } label: {
                     Label("Trends", systemImage: "chart.xyaxis.line")
+                }
+            }
+
+            Section("Reports") {
+                NavigationLink {
+                    FoodWeightReportView()
+                } label: {
+                    Label("Foods by total weight", systemImage: "doc.text")
                 }
             }
 
@@ -109,7 +113,6 @@ struct SettingsView: View {
             Section("Local catalogs") {
                 sourceRow(.usda, count: catalog.count(source: .usda))
                 sourceRow(.openFoodFacts, count: catalog.count(source: .openFoodFacts))
-                sourceRow(.myFitnessPal, count: diary.document.importedFoods.count)
                 NavigationLink {
                     PersonalCatalogView()
                 } label: {
@@ -125,19 +128,6 @@ struct SettingsView: View {
                 }
             }
 
-            Section("MyFitnessPal") {
-                Button("Import CSV export", systemImage: "square.and.arrow.down") {
-                    importing = true
-                }
-                if let importMessage {
-                    Label(importMessage, systemImage: "checkmark.circle.fill")
-                        .font(.subheadline)
-                        .foregroundStyle(AppTheme.protein)
-                }
-                Text("The importer is ready for history data. Its header mapping may be adjusted once your actual export arrives.")
-                    .font(.caption)
-            }
-
             Section("Data & attribution") {
                 Link("USDA FoodData Central", destination: URL(string: "https://fdc.nal.usda.gov/")!)
                 Link("Open Food Facts", destination: URL(string: "https://world.openfoodfacts.org/")!)
@@ -150,20 +140,6 @@ struct SettingsView: View {
         .scrollContentBackground(.hidden)
         .background(AppTheme.background)
         .navigationTitle("Settings")
-        .fileImporter(
-            isPresented: $importing,
-            allowedContentTypes: [.commaSeparatedText, .plainText],
-            allowsMultipleSelection: false,
-            onCompletion: importFile
-        )
-        .alert("Import failed", isPresented: Binding(
-            get: { importError != nil },
-            set: { if !$0 { importError = nil } }
-        )) {
-            Button("OK") { importError = nil }
-        } message: {
-            Text(importError ?? "Unknown error")
-        }
     }
 
     private func syncLoggedNutrition() async {
@@ -201,18 +177,105 @@ struct SettingsView: View {
         )
     }
 
-    private func importFile(_ result: Result<[URL], Error>) {
-        do {
-            guard let url = try result.get().first else { return }
-            let accessed = url.startAccessingSecurityScopedResource()
-            defer { if accessed { url.stopAccessingSecurityScopedResource() } }
-            let summary = try diary.importMyFitnessPal(data: Data(contentsOf: url))
-            importMessage = "Imported \(summary.entries) entries and \(summary.foods) foods"
-            importError = nil
-        } catch {
-            importError = error.localizedDescription
+}
+
+private struct FoodWeightReportView: View {
+    @EnvironmentObject private var diary: DiaryStore
+    @State private var shareURL: URL?
+    @State private var shareRequest: FoodWeightReportShareRequest?
+    @State private var sharePreparationError: String?
+
+    private var report: FoodWeightReport {
+        diary.foodWeightReport()
+    }
+
+    var body: some View {
+        List {
+            Section {
+                Text("Diary coverage: \(report.coverageDescription)")
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Foods") {
+                if report.items.isEmpty {
+                    ContentUnavailableView(
+                        "No logged foods",
+                        systemImage: "fork.knife",
+                        description: Text("Log food to include it in the last-90-days report.")
+                    )
+                } else {
+                    ForEach(report.items) { item in
+                        HStack(alignment: .firstTextBaseline) {
+                            Text(item.name)
+                            Spacer(minLength: 16)
+                            Text("\(item.wholeOunces.formatted()) oz")
+                                .foregroundStyle(.secondary)
+                                .monospacedDigit()
+                        }
+                    }
+                }
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .background(AppTheme.background)
+        .navigationTitle("Food Weight Report")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    if let shareURL {
+                        shareRequest = FoodWeightReportShareRequest(fileURL: shareURL)
+                    }
+                } label: {
+                    Label("Share", systemImage: "square.and.arrow.up")
+                }
+                .disabled(shareURL == nil)
+            }
+        }
+        .task(id: report.markdown) {
+            prepareShareFile()
+        }
+        .alert("Couldn’t prepare report", isPresented: Binding(
+            get: { sharePreparationError != nil },
+            set: { if !$0 { sharePreparationError = nil } }
+        )) {
+            Button("Try again") {
+                prepareShareFile()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text(sharePreparationError ?? "Unknown error")
+        }
+        .sheet(item: $shareRequest) { request in
+            FoodWeightReportShareSheet(fileURL: request.fileURL)
         }
     }
+
+    private func prepareShareFile() {
+        do {
+            let directory = FileManager.default.temporaryDirectory
+                .appendingPathComponent("CalorieTrackerReports", isDirectory: true)
+            shareURL = try report.writeShareFile(in: directory)
+            sharePreparationError = nil
+        } catch {
+            shareURL = nil
+            sharePreparationError = error.localizedDescription
+        }
+    }
+}
+
+private struct FoodWeightReportShareRequest: Identifiable {
+    let id = UUID()
+    let fileURL: URL
+}
+
+private struct FoodWeightReportShareSheet: UIViewControllerRepresentable {
+    let fileURL: URL
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: [fileURL], applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
 private struct PersonalCatalogView: View {
@@ -573,7 +636,6 @@ private struct SavedMealEditorView: View {
         var seen = Set<String>()
         let candidates = diary.document.customFoods
             + diary.document.favorites
-            + diary.document.importedFoods
             + diary.document.entries
                 .filter { !$0.isMeal && !$0.isCheatDayAdjustment }
                 .map(\.food)

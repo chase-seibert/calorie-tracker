@@ -14,8 +14,10 @@ keeps the diary and food search on-device.
   and remembered quantity for each food.
 - Select any subset of diary entries and save it as a reusable meal.
 - Barcode scanning and manual barcode entry.
-- Custom foods and MyFitnessPal CSV import entry point.
+- Custom foods and saved meals.
 - Daily calorie and macro trend charts.
+- A shareable last-90-days food-weight report with saved meals expanded into
+  their individual foods.
 - Automatic gap and calorie-goal-based cheat days, plus manual cheat-day
   adjustments and undo.
 - A toolbar streak counter with calorie, macro, range, and most-logged-item
