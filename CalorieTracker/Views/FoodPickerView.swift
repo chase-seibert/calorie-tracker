@@ -11,6 +11,8 @@ struct FoodPickerView: View {
         case scan = "Scan"
 
         var id: String { rawValue }
+
+        var analyticsValue: String { rawValue.lowercased() }
     }
 
     @EnvironmentObject private var diary: DiaryStore
@@ -31,7 +33,10 @@ struct FoodPickerView: View {
     @State private var results: [FoodPickerItem] = []
     @State private var isSearching = false
     @State private var showingCustomFoodEditor = false
+    @State private var searchAttempt = FoodSearchAttemptTracker()
     @FocusState private var searchIsFocused: Bool
+
+    private let analytics = AnalyticsService.shared
 
     init(date: Date, catalog: CatalogStore, initialMode: Mode? = nil) {
         self.date = date
@@ -47,6 +52,10 @@ struct FoodPickerView: View {
                     FoodPickerModeStrip(selection: $mode) { selectedMode in
                         searchIsFocused = false
                         refreshItems(for: selectedMode)
+                        AppAnalytics.capture(
+                            "food_picker.mode_selected",
+                            properties: ["mode": selectedMode.analyticsValue]
+                        )
                     }
                 }
                 Divider()
@@ -60,7 +69,10 @@ struct FoodPickerView: View {
                             onEditFood: { selectedFood = $0 },
                             onQuickLogMeal: logMeal,
                             onEditMeal: { selectedMeal = $0 },
-                            onAddCustomFood: { showingCustomFoodEditor = true }
+                            onAddCustomFood: {
+                                finishSearchAttempt(recordNothingSelected: false)
+                                showingCustomFoodEditor = true
+                            }
                         )
                     } else {
                         if let mode {
@@ -77,7 +89,7 @@ struct FoodPickerView: View {
                                     onEditFood: { selectedFood = $0 },
                                     onQuickLogMeal: logMeal,
                                     onEditMeal: { selectedMeal = $0 },
-                                    onDeleteMeal: diary.deleteMeal
+                                    onDeleteMeal: deleteMeal
                                 )
                             case .frequent:
                                 FoodPickerList(
@@ -89,7 +101,7 @@ struct FoodPickerView: View {
                                     onEditFood: { selectedFood = $0 },
                                     onQuickLogMeal: logMeal,
                                     onEditMeal: { selectedMeal = $0 },
-                                    onDeleteMeal: diary.deleteMeal
+                                    onDeleteMeal: deleteMeal
                                 )
                             case .favorites:
                                 FoodPickerList(
@@ -101,13 +113,11 @@ struct FoodPickerView: View {
                                     onEditFood: { selectedFood = $0 },
                                     onQuickLogMeal: logMeal,
                                     onEditMeal: { selectedMeal = $0 },
-                                    onDeleteMeal: diary.deleteMeal
+                                    onDeleteMeal: deleteMeal
                                 )
                             case .meals:
                                 MealsList(
-                                    onQuickLog: { meal in
-                                        diary.logMeal(meal, on: date)
-                                    },
+                                    onQuickLog: logMeal,
                                     onEdit: { selectedMeal = $0 }
                                 )
                             case .scan:
@@ -128,22 +138,38 @@ struct FoodPickerView: View {
                     FoodPickerCalorieSummary(date: date)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    Button("Done") {
+                        finishSearchAttempt()
+                        dismiss()
+                    }
                 }
             }
             .sheet(item: $selectedFood) { food in
-                QuantityEditor(food: food, date: date)
+                QuantityEditor(food: food, date: date) { unit in
+                    markCurrentSearchLogged()
+                    captureFoodLog(
+                        food: food,
+                        method: "quantity_editor",
+                        unit: unit
+                    )
+                }
                     .presentationDetents([.medium, .large])
             }
             .sheet(item: $selectedMeal) { meal in
-                QuantityEditor(meal: meal, date: date)
+                QuantityEditor(meal: meal, date: date) { unit in
+                    markCurrentSearchLogged()
+                    captureMealLog(meal: meal, method: "quantity_editor", unit: unit)
+                }
                     .presentationDetents([.medium, .large])
             }
             .sheet(isPresented: $showingCustomFoodEditor, onDismiss: refreshSearchResults) {
                 CustomFoodEditorView(
                     food: nil,
                     initialName: query.trimmingCharacters(in: .whitespacesAndNewlines),
+                    analyticsOrigin: "search_miss",
                     onSaved: { food in
+                        markCurrentSearchLogged()
+                        let previousEntryCount = diary.entries(on: date).count
                         diary.log(
                             food,
                             amount: 1,
@@ -151,6 +177,14 @@ struct FoodPickerView: View {
                             portionID: "custom-serving",
                             on: date
                         )
+                        if diary.entries(on: date).count > previousEntryCount {
+                            captureFoodLog(
+                                food: food,
+                                method: "custom_food_creation",
+                                unit: .serving,
+                                foodKind: "custom"
+                            )
+                        }
                         dismiss()
                     }
                 )
@@ -164,6 +198,9 @@ struct FoodPickerView: View {
                 guard !didLoadInitialSnapshot else { return }
                 didLoadInitialSnapshot = true
                 refreshItems(for: mode ?? .magic)
+                AppAnalytics.capture("food_picker.opened", properties: [
+                    "initial_mode": mode?.analyticsValue ?? "search"
+                ])
             }
             .task(id: query) {
                 let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -178,8 +215,13 @@ struct FoodPickerView: View {
                 let bundledResults = catalog.searchAll(normalizedQuery)
                 results = diary.searchItems(normalizedQuery, catalogFoods: bundledResults)
                 isSearching = false
+                searchAttempt.completed(query: normalizedQuery, resultCount: results.count)
             }
+            .onDisappear { finishSearchAttempt() }
         }
+        .analyticsScreen("food_picker", properties: [
+            "initial_mode": mode?.analyticsValue ?? "search"
+        ])
     }
 
     private var searchControls: some View {
@@ -192,7 +234,10 @@ struct FoodPickerView: View {
                 .autocorrectionDisabled()
                 .submitLabel(.search)
             if !query.isEmpty {
-                Button("Clear", systemImage: "xmark.circle.fill") { query = "" }
+                Button("Clear", systemImage: "xmark.circle.fill") {
+                    finishSearchAttempt()
+                    query = ""
+                }
                     .labelStyle(.iconOnly)
                     .foregroundStyle(.secondary)
             }
@@ -208,16 +253,144 @@ struct FoodPickerView: View {
             timeRange: magicTimeRange,
             suggestions: magicSuggestionsSnapshot,
             hasExcludedMatches: magicHasExcludedMatchesSnapshot,
-            onQuickLog: { diary.logMagicSuggestion($0, on: date) }
+            onQuickLog: logMagicSuggestion
         )
     }
 
     private func quickLog(_ food: Food) {
+        markCurrentSearchLogged()
+        let preference = diary.preference(for: food)
+        let previousEntryCount = diary.entries(on: date).count
         diary.quickLog(food, on: date)
+        guard diary.entries(on: date).count > previousEntryCount else { return }
+        captureFoodLog(
+            food: food,
+            method: "quick_add",
+            unit: preference.unit
+        )
     }
 
     private func logMeal(_ meal: SavedMeal) {
+        markCurrentSearchLogged()
+        let previousEntryCount = diary.entries(on: date).count
         diary.logMeal(meal, on: date)
+        guard diary.entries(on: date).count > previousEntryCount else { return }
+        captureMealLog(meal: meal, method: "quick_add", unit: .serving)
+    }
+
+    private func deleteMeal(_ meal: SavedMeal) {
+        diary.deleteMeal(meal)
+        AppAnalytics.capture("meal.deleted", properties: ["origin": "food_picker"])
+    }
+
+    private func logMagicSuggestion(_ suggestion: MagicFoodSuggestion) {
+        let loggedItems = diary.logMagicSuggestion(suggestion, on: date)
+        guard !loggedItems.isEmpty else { return }
+        let groupID = UUID().uuidString
+        for item in loggedItems {
+            switch item {
+            case let .food(food):
+                captureFoodLog(
+                    food: food,
+                    method: "magic_suggestion",
+                    unit: diary.preference(for: food).unit,
+                    mode: "magic",
+                    groupID: groupID
+                )
+            case let .meal(meal):
+                captureMealLog(
+                    meal: meal,
+                    method: "magic_suggestion",
+                    unit: .serving,
+                    mode: "magic",
+                    groupID: groupID
+                )
+            }
+        }
+    }
+
+    private func captureFoodLog(
+        food: Food,
+        method: String,
+        unit: LogUnit,
+        foodKind: String? = nil,
+        mode: String? = nil,
+        groupID: String? = nil
+    ) {
+        let resolvedMode = mode ?? activeAnalyticsMode
+        AppAnalytics.capture(
+            "food_log.completed",
+            properties: FoodLogAnalytics.foodProperties(
+                food: food,
+                method: method,
+                mode: resolvedMode,
+                unit: unit,
+                isFavorite: diary.isFavorite(food),
+                catalogVersion: catalog.catalogVersion,
+                foodKind: foodKind,
+                selectionRank: resolvedMode == "search" ? selectionRank(for: .food(food)) : nil,
+                query: resolvedMode == "search" ? successfulSearchQuery : nil,
+                groupID: groupID
+            )
+        )
+    }
+
+    private func captureMealLog(
+        meal: SavedMeal,
+        method: String,
+        unit: LogUnit,
+        mode: String? = nil,
+        groupID: String? = nil
+    ) {
+        let resolvedMode = mode ?? activeAnalyticsMode
+        AppAnalytics.capture(
+            "food_log.completed",
+            properties: FoodLogAnalytics.mealProperties(
+                meal: meal,
+                method: method,
+                mode: resolvedMode,
+                unit: unit,
+                isFavorite: diary.isFavorite(meal),
+                selectionRank: resolvedMode == "search" ? selectionRank(for: .meal(meal)) : nil,
+                query: resolvedMode == "search" ? successfulSearchQuery : nil,
+                groupID: groupID
+            )
+        )
+    }
+
+    private var activeAnalyticsMode: String {
+        query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            ? (mode?.analyticsValue ?? "magic")
+            : "search"
+    }
+
+    private var successfulSearchQuery: String? {
+        let normalized = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        return normalized.isEmpty ? nil : String(normalized.prefix(200))
+    }
+
+    private func selectionRank(for item: FoodPickerItem) -> Int? {
+        results.firstIndex(where: { $0.id == item.id }).map { $0 + 1 }
+    }
+
+    private func markCurrentSearchLogged() {
+        let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedQuery.isEmpty else { return }
+        searchAttempt.logged(query: normalizedQuery)
+    }
+
+    private func finishSearchAttempt(recordNothingSelected: Bool = true) {
+        guard let outcome = searchAttempt.finish(
+            query: query,
+            isSearching: isSearching,
+            recordNothingSelected: recordNothingSelected
+        ) else { return }
+        Task {
+            await analytics.capture(type: outcome.eventType, properties: [
+                "query": String(outcome.query.prefix(200)),
+                "result_count": String(outcome.resultCount)
+            ])
+        }
     }
 
     private func refreshSearchResults() {
@@ -250,6 +423,56 @@ struct FoodPickerView: View {
             break
         }
     }
+}
+
+struct FoodSearchAttemptTracker {
+    private(set) var completedQuery = ""
+    private(set) var completedResultCount = 0
+    private var loggedQueries: Set<String> = []
+    private var finishedQueries: Set<String> = []
+
+    mutating func completed(query: String, resultCount: Int) {
+        completedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        completedResultCount = max(0, resultCount)
+    }
+
+    mutating func logged(query: String) {
+        let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedQuery.isEmpty else { return }
+        loggedQueries.insert(normalizedQuery)
+    }
+
+    mutating func finish(
+        query: String,
+        isSearching: Bool,
+        recordNothingSelected: Bool = true
+    ) -> FoodSearchOutcome? {
+        let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedQuery.isEmpty,
+              normalizedQuery == completedQuery,
+              !isSearching,
+              !finishedQueries.contains(normalizedQuery) else { return nil }
+
+        let eventType: String
+        if completedResultCount == 0 {
+            eventType = "food_search.no_match"
+        } else {
+            guard recordNothingSelected, !loggedQueries.contains(normalizedQuery) else { return nil }
+            eventType = "food_search.nothing_selected"
+        }
+        finishedQueries.insert(normalizedQuery)
+        return FoodSearchOutcome(
+            eventType: eventType,
+            query: normalizedQuery,
+            resultCount: completedResultCount
+        )
+    }
+}
+
+struct FoodSearchOutcome: Equatable {
+    let eventType: String
+    let query: String
+    let resultCount: Int
 }
 
 private struct FoodPickerCalorieSummary: View {
@@ -699,6 +922,7 @@ struct QuantityEditor: View {
     private let mealID: UUID?
     private let savedMeal: SavedMeal?
     private let isMealEditor: Bool
+    private let onLogged: (LogUnit) -> Void
 
     @State private var amount: Double
     @State private var unitChoice: QuantityUnitChoice
@@ -706,25 +930,27 @@ struct QuantityEditor: View {
     @State private var showingNameEditor = false
     @FocusState private var amountIsFocused: Bool
 
-    init(food: Food, date: Date) {
+    init(food: Food, date: Date, onLogged: @escaping (LogUnit) -> Void = { _ in }) {
         _food = State(initialValue: food)
         self.date = date
         entryID = nil
         mealID = nil
         savedMeal = nil
         isMealEditor = false
+        self.onLogged = onLogged
         _amount = State(initialValue: 1)
         _unitChoice = State(initialValue: .ounces)
         _mealItems = State(initialValue: [])
     }
 
-    init(meal: SavedMeal, date: Date) {
+    init(meal: SavedMeal, date: Date, onLogged: @escaping (LogUnit) -> Void = { _ in }) {
         _food = State(initialValue: Self.mealFood(for: meal))
         self.date = date
         entryID = nil
         mealID = meal.id
         savedMeal = meal
         isMealEditor = true
+        self.onLogged = onLogged
         _amount = State(initialValue: 1)
         _unitChoice = State(initialValue: .portion("saved-meal"))
         _mealItems = State(initialValue: meal.items)
@@ -737,6 +963,7 @@ struct QuantityEditor: View {
         mealID = entry.savedMealID
         savedMeal = nil
         isMealEditor = entry.isMeal
+        onLogged = { _ in }
         _amount = State(initialValue: entry.amount)
         _mealItems = State(initialValue: entry.mealItems ?? [])
         if entry.isMeal {
@@ -836,7 +1063,7 @@ struct QuantityEditor: View {
                                 .foregroundStyle(AppTheme.muted)
                                 .frame(minWidth: 52, alignment: .leading)
                         } else {
-                            Picker("Unit", selection: $unitChoice) {
+                            Picker("Unit", selection: unitSelection) {
                                 ForEach(availableChoices, id: \.self) { choice in
                                     Text(label(for: choice)).tag(choice)
                                 }
@@ -895,14 +1122,27 @@ struct QuantityEditor: View {
                             diary.isFavorite(meal) ? "Unfavorite" : "Favorite",
                             systemImage: diary.isFavorite(meal) ? "star.fill" : "star"
                         ) {
+                            let wasFavorite = diary.isFavorite(meal)
                             diary.toggleFavorite(meal)
+                            AppAnalytics.capture(
+                                wasFavorite ? "favorite.removed" : "favorite.added",
+                                properties: ["item_type": "meal"]
+                            )
                         }
                         .labelStyle(.iconOnly)
                     }
                 } else if !isMealEditor {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button(diary.isFavorite(food) ? "Unfavorite" : "Favorite", systemImage: diary.isFavorite(food) ? "star.fill" : "star") {
+                            let wasFavorite = diary.isFavorite(food)
                             diary.toggleFavorite(food, preference: currentPreference)
+                            AppAnalytics.capture(
+                                wasFavorite ? "favorite.removed" : "favorite.added",
+                                properties: [
+                                    "item_type": "food",
+                                    "source": food.source.rawValue
+                                ]
+                            )
                         }
                         .labelStyle(.iconOnly)
                     }
@@ -961,7 +1201,29 @@ struct QuantityEditor: View {
                     diary.rememberPreference(currentPreference, for: food)
                 }
             }
+            .analyticsScreen("quantity_editor", properties: [
+                "item_type": isMealEditor ? "meal" : "food",
+                "operation": entryID == nil ? "create" : "edit"
+            ])
         }
+    }
+
+    private var unitSelection: Binding<QuantityUnitChoice> {
+        Binding(
+            get: { unitChoice },
+            set: { choice in
+                unitChoice = choice
+                let unit: LogUnit = switch choice {
+                case .ounces: .ounces
+                case .grams: .grams
+                case .portion: .serving
+                }
+                AppAnalytics.capture("food_log.unit_selected", properties: [
+                    "unit": unit.analyticsValue,
+                    "operation": entryID == nil ? "create" : "edit"
+                ])
+            }
+        )
     }
 
     private func label(for choice: QuantityUnitChoice) -> String {
@@ -1039,6 +1301,7 @@ struct QuantityEditor: View {
     private func save() {
         guard amount > 0 else { return }
         if let entryID {
+            let previousEntry = diary.document.entries.first { $0.id == entryID }
             if isMealEditor {
                 diary.updateMealEntry(entryID: entryID, amount: amount)
             } else {
@@ -1049,10 +1312,21 @@ struct QuantityEditor: View {
                     portionID: selectedPortionID
                 )
             }
+            if diary.document.entries.first(where: { $0.id == entryID }) != previousEntry {
+                AppAnalytics.capture("diary_entry.updated", properties: [
+                    "item_type": isMealEditor ? "meal" : "food",
+                    "unit": selectedUnit.analyticsValue
+                ])
+            }
         } else if let savedMeal {
+            let previousEntryCount = diary.entries(on: date).count
             let currentMeal = diary.document.meals.first { $0.id == savedMeal.id } ?? savedMeal
             diary.logMeal(currentMeal, amount: amount, on: date)
+            if diary.entries(on: date).count > previousEntryCount {
+                onLogged(.serving)
+            }
         } else {
+            let previousEntryCount = diary.entries(on: date).count
             diary.log(
                 food,
                 amount: amount,
@@ -1060,13 +1334,20 @@ struct QuantityEditor: View {
                 portionID: selectedPortionID,
                 on: date
             )
+            if diary.entries(on: date).count > previousEntryCount {
+                onLogged(selectedUnit)
+            }
         }
         dismiss()
     }
 
     private func breakApartMeal() {
         guard let entryID else { return }
+        let previousEntryCount = diary.entries(on: date).count
         diary.breakApartMeal(entryID: entryID)
+        if diary.entries(on: date).count > previousEntryCount {
+            AppAnalytics.capture("meal.broken_apart")
+        }
         dismiss()
     }
 
@@ -1269,7 +1550,10 @@ private struct MealsList: View {
                         onEdit: { onEdit(meal) }
                     )
                     .swipeActions {
-                        Button("Delete", role: .destructive) { diary.deleteMeal(meal) }
+                        Button("Delete", role: .destructive) {
+                            diary.deleteMeal(meal)
+                            AppAnalytics.capture("meal.deleted", properties: ["origin": "food_picker"])
+                        }
                     }
                 }
             }
@@ -1366,13 +1650,14 @@ private struct BarcodeLookup: View {
 
     @State private var barcode = ""
     @State private var notFound = false
+    private let analytics = AnalyticsService.shared
 
     var body: some View {
         ScrollView {
             VStack(spacing: 18) {
                 BarcodeScanner { code in
                     barcode = code
-                    lookup()
+                    lookup(inputSource: "camera")
                 }
                 .frame(height: 260)
                 .clipShape(RoundedRectangle(cornerRadius: 22))
@@ -1384,7 +1669,7 @@ private struct BarcodeLookup: View {
                     TextField("Enter barcode", text: $barcode)
                         .keyboardType(.numberPad)
                         .textFieldStyle(.roundedBorder)
-                    Button("Look up") { lookup() }
+                    Button("Look up") { lookup(inputSource: "manual") }
                         .buttonStyle(.borderedProminent)
                 }
                 if notFound {
@@ -1397,12 +1682,23 @@ private struct BarcodeLookup: View {
         }
     }
 
-    private func lookup() {
-        if let food = catalog.food(barcode: barcode) {
+    private func lookup(inputSource: String) {
+        let normalizedBarcode = barcode.filter(\.isNumber)
+        guard !normalizedBarcode.isEmpty else {
+            notFound = true
+            return
+        }
+        if let food = catalog.food(barcode: normalizedBarcode) {
             notFound = false
             onSelect(food)
         } else {
             notFound = true
+            Task {
+                await analytics.capture(type: "barcode_search.no_match", properties: [
+                    "barcode": String(normalizedBarcode.prefix(32)),
+                    "input_source": inputSource
+                ])
+            }
         }
     }
 }

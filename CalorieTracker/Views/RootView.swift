@@ -28,11 +28,18 @@ struct RootView: View {
 
     private func openImportFile(_ url: URL) {
         do {
-            importRequest = ImportRequest(file: try CustomImportFile.load(from: url))
+            let importedFile = try CustomImportFile.load(from: url)
+            importRequest = ImportRequest(file: importedFile)
             importError = nil
+            let itemType: String = switch importedFile {
+            case .food: "food"
+            case .meal: "meal"
+            }
+            AppAnalytics.capture("import.opened", properties: ["item_type": itemType])
         } catch {
             importRequest = nil
             importError = error.localizedDescription
+            AppAnalytics.capture("import.failed")
         }
     }
 }

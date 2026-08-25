@@ -102,6 +102,44 @@ displacing a strong singleton. Logging a suggested set reuses normal quick-log
 and saved-meal paths once per item, so the suggestion itself never becomes a
 combined meal entry.
 
+Analytics uses a process-wide actor with a durable, backup-excluded queue under
+Application Support. It batches at most 500 same-audience events, creates and
+persists deterministic gzip bytes, signs the compressed payload with
+HMAC-SHA256, coalesces nearby captures with a brief upload debounce, and retries
+transient failures with persisted exponential backoff and jitter for up to 90
+days. Configuration is loaded from a debug app-container
+override or bundled `AnalyticsConfig.plist`; a missing or invalid configuration
+disables analytics without affecting app behavior. A git-ignored local plist is
+copied into builds when present, while the repository contains only a placeholder
+example.
+
+Food search records a terminal `food_search.no_match` event for a completed
+query with no results. A completed search that returned results records
+`food_search.nothing_selected` only when the picker is cleared or dismissed
+without a diary log. Opening a quantity editor does not count as selection; its
+Add action does. Failed camera and manual barcode lookups record
+`barcode_search.no_match`. Exact failed queries and normalized barcodes are
+bounded. Successful search-originated food logs include the bounded query,
+one-based result rank, and stable item identity. Public catalog identity uses
+the source ID and a short catalog content fingerprint; custom or imported items
+use their pseudonymous local UUID without sending their user-authored names.
+Debug builds also retain payloads in the 100-event diagnostics history so
+developers can inspect exact events; Release builds do not retain this
+additional diagnostics copy. The copied diagnostics summary omits payloads.
+
+Debug builds expose a Developer Diagnostics hierarchy in Settings. Its
+Analytics Events screen shows the most recent local events and their queued,
+prepared, uploading, retry-scheduled, uploaded, rejected, expired, or stopped
+state. Selecting an event opens its canonical event payload, including event
+properties. Request headers, signatures, and configuration secrets are never
+shown.
+
+The broader product event catalog is documented in
+[`analytics-events.md`](analytics-events.md). Feature-usage events carry only
+coarse categorical context and counts; food names, meal contents, diary
+quantities and nutrition values, alcohol details, and Health samples are
+excluded.
+
 ## Catalog schema
 
 Every food is normalized to a base quantity and unit plus calories, carbs, fat,

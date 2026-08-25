@@ -8,3 +8,4 @@ data/work/
 __pycache__/
 *.pyc
 outputs/
+Config/AnalyticsConfig.local.plist

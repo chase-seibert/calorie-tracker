@@ -23,6 +23,23 @@ and `make test` do not build or run it. Use this slower test for changes to the
 logged-food list, drag/drop, swipe deletion, or diary ordering; do not add it to
 the routine build or unit-test workflow.
 
+## Analytics configuration
+
+Copy `Config/AnalyticsConfig.example.plist` to the git-ignored
+`Config/AnalyticsConfig.local.plist` and replace the placeholder endpoint and
+secret with the namespace-scoped values. The Xcode target copies that local file
+into the app bundle as `AnalyticsConfig.plist` when it exists. If it is absent or
+invalid, analytics remains disabled and the rest of the app is unchanged.
+
+Debug builds default to the `debug` audience and Release builds default to
+`production`; set an explicit `audience` in the plist only for a beta or test
+deployment. CI should generate the local plist from its secret store without
+printing the secret. Never commit the local plist. Debug builds expose queue and
+per-event delivery state under Settings → Developer Diagnostics → Analytics
+Events. Selecting an event displays its payload, including search strings or
+barcodes when present. Request headers, signatures, and the signing secret are
+never displayed.
+
 ## Physical iPhone
 
 Connect Chase's iPhone 17 Pro, trust the Mac if prompted, and run

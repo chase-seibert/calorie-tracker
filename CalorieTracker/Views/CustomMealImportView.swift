@@ -42,6 +42,7 @@ struct CustomFoodImportView: View {
                         .disabled(!canLog)
                 }
             }
+            .analyticsScreen("food_import_review")
         }
     }
 
@@ -74,10 +75,12 @@ struct CustomFoodImportView: View {
                 servingGrams: definition.servingGrams,
                 servingDescription: "1 \(definition.servingDescription)"
             )
+            AppAnalytics.capture("custom_food.created", properties: ["origin": "file_import"])
         } else {
             loggedFood = definition.makeFood()
         }
 
+        let previousEntryCount = diary.entries(on: Date()).count
         diary.log(
             loggedFood,
             amount: 1,
@@ -85,6 +88,20 @@ struct CustomFoodImportView: View {
             portionID: loggedFood.availablePortions.first?.id,
             on: Date()
         )
+        if diary.entries(on: Date()).count > previousEntryCount {
+            AppAnalytics.capture(
+                "food_log.completed",
+                properties: FoodLogAnalytics.foodProperties(
+                    food: loggedFood,
+                    method: "file_import",
+                    mode: "import",
+                    unit: .serving,
+                    isFavorite: diary.isFavorite(loggedFood),
+                    foodKind: saveForReuse ? "imported" : "one_off",
+                    savedForReuse: saveForReuse
+                )
+            )
+        }
         dismiss()
     }
 }
@@ -156,6 +173,7 @@ struct CustomMealImportView: View {
                         .disabled(!canLog)
                 }
             }
+            .analyticsScreen("meal_import_review")
         }
     }
 
@@ -187,13 +205,35 @@ struct CustomMealImportView: View {
     private func logMeal() {
         guard canLog else { return }
         let importedMeal = reviewedFile.makeMeal()
+        let previousEntryCount = diary.entries(on: Date()).count
+        let loggedMeal: SavedMeal
         if saveForReuse {
             guard let savedMeal = diary.saveMeal(name: importedMeal.name, items: importedMeal.items) else {
                 return
             }
+            loggedMeal = savedMeal
+            AppAnalytics.capture("meal.created", properties: [
+                "origin": "file_import",
+                "item_count": String(importedMeal.items.count)
+            ])
             diary.logMeal(savedMeal, on: Date())
         } else {
+            loggedMeal = importedMeal
             diary.logOneOffMeal(importedMeal, on: Date())
+        }
+        if diary.entries(on: Date()).count > previousEntryCount {
+            AppAnalytics.capture(
+                "food_log.completed",
+                properties: FoodLogAnalytics.mealProperties(
+                    meal: loggedMeal,
+                    method: "file_import",
+                    mode: "import",
+                    isFavorite: saveForReuse && diary.isFavorite(loggedMeal),
+                    foodKind: saveForReuse ? "imported" : "one_off",
+                    includeLocalID: saveForReuse,
+                    savedForReuse: saveForReuse
+                )
+            )
         }
         dismiss()
     }
@@ -228,6 +268,7 @@ struct CustomImportGuideView: View {
             }
         }
         .navigationTitle("AI Import")
+        .analyticsScreen("import_guide")
         .scrollContentBackground(.hidden)
         .background(AppTheme.background)
     }

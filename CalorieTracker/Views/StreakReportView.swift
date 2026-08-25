@@ -23,6 +23,7 @@ struct StreakReportView: View {
         }
         .navigationTitle("Streak")
         .navigationBarTitleDisplayMode(.inline)
+        .analyticsScreen("streak")
     }
 
     private var streakHeader: some View {

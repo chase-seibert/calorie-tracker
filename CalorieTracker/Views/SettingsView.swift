@@ -63,7 +63,7 @@ struct SettingsView: View {
             }
 
             Section("Entry defaults") {
-                Picker("Weight unit", selection: $defaultWeightUnit) {
+                Picker("Weight unit", selection: defaultWeightUnitSelection) {
                     Text("Ounces").tag(LogUnit.ounces.rawValue)
                     Text("Grams").tag(LogUnit.grams.rawValue)
                 }
@@ -96,8 +96,7 @@ struct SettingsView: View {
                 case .notDetermined:
                     Button("Connect Apple Health", systemImage: "heart.fill") {
                         Task {
-                            await healthKit.requestAuthorizationAndSync(entries: [])
-                            diary.syncAllHealthData()
+                            await connectAppleHealth()
                         }
                     }
                     Text("Writes calories, carbohydrates, fat, and protein for logged foods, meals, and alcohol estimates.")
@@ -142,19 +141,40 @@ struct SettingsView: View {
                 Text("USDA records are U.S. government public-domain data. Open Food Facts database records are reused under ODbL with source attribution and remain identifiable in this derived local database.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                Text("When analytics is enabled, the app sends feature-usage events, catalog or local item identifiers, successful and failed food search terms, searches dismissed without logging, and unmatched barcodes to its private analytics service. Food names, meal contents, quantities, calorie totals, and Health data are not sent.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
+
+#if DEBUG
+            Section("Developer") {
+                NavigationLink {
+                    DeveloperDiagnosticsView()
+                } label: {
+                    Label("Developer Diagnostics", systemImage: "wrench.and.screwdriver.fill")
+                }
+            }
+#endif
 
         }
         .scrollContentBackground(.hidden)
         .background(AppTheme.background)
         .navigationTitle("Settings")
+        .analyticsScreen("settings")
     }
 
     private func syncLoggedNutrition() async {
         syncingNutrition = true
         let startedAt = Date()
 
+        AppAnalytics.capture("health.sync_requested", properties: ["source": "manual"])
+        healthKit.clearLastError()
         diary.syncAllHealthData()
+        await healthKit.waitForPendingOperations()
+        AppAnalytics.capture("health.sync_completed", properties: [
+            "source": "manual",
+            "result": healthKit.lastError == nil ? "success" : "failure"
+        ])
 
         let remainingDuration = minimumSyncSpinnerDuration - Date().timeIntervalSince(startedAt)
         if remainingDuration > 0 {
@@ -162,6 +182,40 @@ struct SettingsView: View {
         }
 
         syncingNutrition = false
+    }
+
+    private func connectAppleHealth() async {
+        AppAnalytics.capture("health.authorization_requested")
+        healthKit.clearLastError()
+        await healthKit.requestAuthorizationAndSync(entries: [])
+        AppAnalytics.capture("health.authorization_completed", properties: [
+            "result": healthKit.authorizationState.analyticsValue
+        ])
+        guard healthKit.authorizationState == .authorized else { return }
+
+        AppAnalytics.capture("health.sync_requested", properties: ["source": "authorization"])
+        healthKit.clearLastError()
+        diary.syncAllHealthData()
+        await healthKit.waitForPendingOperations()
+        AppAnalytics.capture("health.sync_completed", properties: [
+            "source": "authorization",
+            "result": healthKit.lastError == nil ? "success" : "failure"
+        ])
+    }
+
+    private var defaultWeightUnitSelection: Binding<String> {
+        Binding(
+            get: { defaultWeightUnit },
+            set: { unit in
+                guard unit != defaultWeightUnit else { return }
+                defaultWeightUnit = unit
+                let analyticsUnit = LogUnit(rawValue: unit)?.analyticsValue ?? "unknown"
+                AppAnalytics.capture(
+                    "settings.default_unit_changed",
+                    properties: ["unit": analyticsUnit]
+                )
+            }
+        )
     }
 
     private func sourceRow(_ source: FoodSource, count: Int) -> some View {
@@ -186,6 +240,233 @@ struct SettingsView: View {
     }
 
 }
+
+#if DEBUG
+private struct DeveloperDiagnosticsView: View {
+    var body: some View {
+        List {
+            Section {
+                NavigationLink {
+                    AnalyticsDiagnosticsView()
+                } label: {
+                    Label("Analytics Events", systemImage: "chart.line.uptrend.xyaxis")
+                }
+            } footer: {
+                Text("Inspect the local event queue, upload state, retries, and recent delivery outcomes.")
+            }
+        }
+        .navigationTitle("Developer Diagnostics")
+        .navigationBarTitleDisplayMode(.inline)
+        .analyticsScreen("developer_diagnostics")
+    }
+}
+
+private struct AnalyticsDiagnosticsView: View {
+    @State private var snapshot: AnalyticsDiagnosticsSnapshot?
+    @State private var isUploading = false
+    @State private var showingClearConfirmation = false
+
+    private let analytics = AnalyticsService.shared
+
+    var body: some View {
+        List {
+            if let currentSnapshot = snapshot {
+                Section {
+                    if currentSnapshot.recentEvents.isEmpty {
+                        Text("No recent events")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(currentSnapshot.recentEvents) { event in
+                            NavigationLink {
+                                AnalyticsEventPayloadView(event: event)
+                            } label: {
+                                HStack(spacing: 12) {
+                                    Image(systemName: eventStateIcon(event.state))
+                                        .foregroundStyle(eventStateColor(event.state))
+                                        .frame(width: 24)
+                                        .accessibilityLabel(event.stateTitle)
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text(event.type)
+                                            .font(.body.monospaced())
+                                            .lineLimit(1)
+                                            .minimumScaleFactor(0.75)
+                                        Text(event.occurredAt.formatted(date: .abbreviated, time: .standard))
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } header: {
+                    Text("Events")
+                } footer: {
+                    Text("Select an event to inspect its payload. Request headers, signatures, and configuration secrets are never shown here.")
+                }
+
+                Section("Queue") {
+                    diagnosticRow("Status", currentSnapshot.status)
+                    diagnosticRow("Queued events", currentSnapshot.queuedEventCount.formatted())
+                    diagnosticRow("Prepared batches", currentSnapshot.preparedBatchCount.formatted())
+                    diagnosticRow("Oldest unsent", oldestAgeDescription(currentSnapshot.oldestUnsentAge))
+                    diagnosticRow("Batch ID", currentSnapshot.latestBatchID ?? "—")
+                    diagnosticRow("Retry attempt", currentSnapshot.retryAttempt.formatted())
+                    diagnosticRow("Next retry", currentSnapshot.nextRetryAt?.formatted(date: .abbreviated, time: .standard) ?? "—")
+                    diagnosticRow("Redirect host", currentSnapshot.redirectHost ?? "—")
+                    diagnosticRow("Stop logging", currentSnapshot.stopLogging ? "Yes" : "No")
+                }
+
+                Section("Actions") {
+                    Button {
+                        refresh()
+                    } label: {
+                        Label("Refresh", systemImage: "arrow.clockwise")
+                    }
+                    Button {
+                        Task {
+                            isUploading = true
+                            await analytics.uploadNow()
+                            snapshot = await analytics.diagnosticsSnapshot()
+                            isUploading = false
+                        }
+                    } label: {
+                        if isUploading {
+                            HStack {
+                                ProgressView()
+                                Text("Uploading…")
+                            }
+                        } else {
+                            Label("Upload now", systemImage: "arrow.up.circle")
+                        }
+                    }
+                    .disabled(isUploading || currentSnapshot.queuedEventCount == 0)
+                    Button("Copy diagnostics summary", systemImage: "doc.on.doc") {
+                        UIPasteboard.general.string = currentSnapshot.redactedSummary
+                    }
+                    Button("Clear analytics queue", systemImage: "trash", role: .destructive) {
+                        showingClearConfirmation = true
+                    }
+                }
+
+                Section("Configuration") {
+                    diagnosticRow("Enabled", currentSnapshot.enabled ? "Yes" : "No")
+                    diagnosticRow("App", currentSnapshot.appName ?? "—")
+                    diagnosticRow("Version", currentSnapshot.appVersion ?? "—")
+                    diagnosticRow("Platform", currentSnapshot.platform ?? "—")
+                    diagnosticRow("Audience", currentSnapshot.audience ?? "—")
+                    diagnosticRow("Namespace", currentSnapshot.namespace ?? "—")
+                    diagnosticRow("Key ID", currentSnapshot.keyID ?? "—")
+                }
+            } else {
+                ProgressView()
+            }
+        }
+        .navigationTitle("Analytics")
+        .analyticsScreen("analytics_diagnostics")
+        .task { refresh() }
+        .refreshable { snapshot = await analytics.diagnosticsSnapshot() }
+        .confirmationDialog(
+            "Clear all queued analytics events?",
+            isPresented: $showingClearConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Clear queue", role: .destructive) {
+                Task {
+                    await analytics.clearQueue()
+                    snapshot = await analytics.diagnosticsSnapshot()
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+    }
+
+    @ViewBuilder
+    private func diagnosticRow(_ title: String, _ value: String) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(title)
+            Spacer(minLength: 12)
+            Text(value)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.trailing)
+        }
+    }
+
+    private func refresh() {
+        Task { snapshot = await analytics.diagnosticsSnapshot() }
+    }
+
+    private func oldestAgeDescription(_ age: TimeInterval?) -> String {
+        guard let age else { return "—" }
+        return Duration.seconds(age).formatted(.units(allowed: [.days, .hours, .minutes], width: .abbreviated))
+    }
+
+    private func eventStateIcon(_ state: String) -> String {
+        switch state {
+        case "uploaded": "checkmark.circle.fill"
+        case "rejected", "expired", "stopped": "xmark.octagon.fill"
+        case "retry_scheduled": "exclamationmark.triangle.fill"
+        case "uploading", "prepared": "arrow.up.circle.fill"
+        default: "circle.dashed"
+        }
+    }
+
+    private func eventStateColor(_ state: String) -> Color {
+        switch state {
+        case "uploaded": AppTheme.protein
+        case "rejected", "expired", "stopped": .red
+        case "retry_scheduled": .orange
+        case "uploading", "prepared": .blue
+        default: AppTheme.muted
+        }
+    }
+}
+
+private struct AnalyticsEventPayloadView: View {
+    let event: AnalyticsDiagnosticEvent
+
+    var body: some View {
+        List {
+            Section("Delivery") {
+                HStack {
+                    Text("State")
+                    Spacer()
+                    Label(event.stateTitle, systemImage: eventStateIcon)
+                        .foregroundStyle(eventStateColor)
+                }
+            }
+
+            Section("Payload") {
+                Text(event.payload?.formattedJSON ?? "Payload unavailable for events recorded before payload diagnostics were enabled.")
+                    .font(.caption.monospaced())
+                    .textSelection(.enabled)
+            }
+        }
+        .navigationTitle(event.type)
+        .navigationBarTitleDisplayMode(.inline)
+        .analyticsScreen("analytics_event_payload")
+    }
+
+    private var eventStateIcon: String {
+        switch event.state {
+        case "uploaded": "checkmark.circle.fill"
+        case "rejected", "expired", "stopped": "xmark.octagon.fill"
+        case "retry_scheduled": "exclamationmark.triangle.fill"
+        case "uploading", "prepared": "arrow.up.circle.fill"
+        default: "circle.dashed"
+        }
+    }
+
+    private var eventStateColor: Color {
+        switch event.state {
+        case "uploaded": AppTheme.protein
+        case "rejected", "expired", "stopped": .red
+        case "retry_scheduled": .orange
+        case "uploading", "prepared": .blue
+        default: AppTheme.muted
+        }
+    }
+}
+#endif
 
 private struct FoodWeightReportView: View {
     @EnvironmentObject private var diary: DiaryStore
@@ -227,6 +508,7 @@ private struct FoodWeightReportView: View {
         .scrollContentBackground(.hidden)
         .background(AppTheme.background)
         .navigationTitle("Food Weight Report")
+        .analyticsScreen("food_weight_report")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
@@ -341,6 +623,10 @@ private struct PersonalCatalogView: View {
                                 }
                                 Button("Delete", systemImage: "trash", role: .destructive) {
                                     diary.deleteCustomFood(food)
+                                    AppAnalytics.capture(
+                                        "custom_food.deleted",
+                                        properties: ["origin": "custom_catalog"]
+                                    )
                                 }
                             }
                     }
@@ -367,6 +653,10 @@ private struct PersonalCatalogView: View {
                                 }
                                 Button("Delete", systemImage: "trash", role: .destructive) {
                                     diary.deleteMeal(meal)
+                                    AppAnalytics.capture(
+                                        "meal.deleted",
+                                        properties: ["origin": "custom_catalog"]
+                                    )
                                 }
                         }
                     }
@@ -374,6 +664,7 @@ private struct PersonalCatalogView: View {
             }
         }
         .navigationTitle("Custom")
+        .analyticsScreen("custom_catalog")
         .sheet(isPresented: $showingFoodEditor) {
             CustomFoodEditorView(food: editingFood)
         }
@@ -411,6 +702,7 @@ struct CustomFoodEditorView: View {
 
     private let food: Food?
     private let onSaved: ((Food) -> Void)?
+    private let analyticsOrigin: String
     @State private var name: String
     @State private var brand: String
     @State private var calories: Double
@@ -442,10 +734,12 @@ struct CustomFoodEditorView: View {
     init(
         food: Food?,
         initialName: String? = nil,
+        analyticsOrigin: String = "custom_catalog",
         onSaved: ((Food) -> Void)? = nil
     ) {
         self.food = food
         self.onSaved = onSaved
+        self.analyticsOrigin = analyticsOrigin
         _name = State(initialValue: food?.name ?? initialName ?? "")
         _brand = State(initialValue: food?.brand ?? "")
         _calories = State(initialValue: food?.nutrients.calories ?? 0)
@@ -486,6 +780,10 @@ struct CustomFoodEditorView: View {
                         .disabled(!canSave)
                 }
             }
+            .analyticsScreen("custom_food_editor", properties: [
+                "operation": food == nil ? "create" : "edit",
+                "origin": analyticsOrigin
+            ])
         }
     }
 
@@ -551,6 +849,9 @@ struct CustomFoodEditorView: View {
             )
         }
         if let savedFood {
+            AppAnalytics.capture(food == nil ? "custom_food.created" : "custom_food.updated", properties: [
+                "origin": analyticsOrigin
+            ])
             onSaved?(savedFood)
         }
         dismiss()
@@ -637,6 +938,10 @@ private struct SavedMealEditorView: View {
                     ))
                 }
             }
+            .analyticsScreen("saved_meal_editor", properties: [
+                "operation": meal == nil ? "create" : "edit",
+                "origin": "custom_catalog"
+            ])
         }
     }
 
@@ -661,9 +966,17 @@ private struct SavedMealEditorView: View {
     private func save() {
         guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, !items.isEmpty else { return }
         if let meal {
-            _ = diary.updateSavedMeal(mealID: meal.id, name: name, items: items)
+            guard diary.updateSavedMeal(mealID: meal.id, name: name, items: items) else { return }
+            AppAnalytics.capture("meal.updated", properties: [
+                "origin": "custom_catalog",
+                "item_count": String(items.count)
+            ])
         } else {
-            _ = diary.saveMeal(name: name, items: items)
+            guard diary.saveMeal(name: name, items: items) != nil else { return }
+            AppAnalytics.capture("meal.created", properties: [
+                "origin": "custom_catalog",
+                "item_count": String(items.count)
+            ])
         }
         dismiss()
     }

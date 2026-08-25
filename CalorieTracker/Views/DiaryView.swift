@@ -337,6 +337,7 @@ struct DiaryView: View {
 #endif
             }
         }
+        .analyticsScreen("diary")
     }
 
     private func refreshCurrentDay() {
@@ -383,6 +384,7 @@ struct DiaryView: View {
                         withAnimation(.snappy) {
                             diary.markCheatDay(on: date, adjustmentCalories: calories)
                         }
+                        AppAnalytics.capture("cheat_day.adjustment_set")
                     }
                 )
                 .padding(.horizontal, 16)
@@ -448,9 +450,16 @@ struct DiaryView: View {
                                 }
                             },
                             onDelete: { entryID in
+                                let itemType = diary.document.entries.first { $0.id == entryID }?.isMeal == true
+                                    ? "meal"
+                                    : "food"
                                 withAnimation(.snappy) {
                                     diary.delete(entryID: entryID)
                                 }
+                                AppAnalytics.capture(
+                                    "diary_entry.deleted",
+                                    properties: ["item_type": itemType]
+                                )
                             }
                         )
                         .accessibilityElement(children: .contain)
@@ -473,11 +482,29 @@ struct DiaryView: View {
     }
 
     private func saveSelectedAsMeal() {
+        let itemCount = selectedEntryIDs.count
+        let previousMealCount = diary.document.meals.count
         diary.saveMeal(
             name: mealName,
             replacing: selectedEntryIDs,
             on: date
         )
+        if diary.document.meals.count > previousMealCount {
+            guard let savedMeal = diary.document.meals.first else { return }
+            AppAnalytics.capture("meal.created", properties: [
+                "origin": "diary_selection",
+                "item_count": String(itemCount)
+            ])
+            AppAnalytics.capture(
+                "food_log.completed",
+                properties: FoodLogAnalytics.mealProperties(
+                    meal: savedMeal,
+                    method: "create_meal",
+                    mode: "diary",
+                    isFavorite: diary.isFavorite(savedMeal)
+                )
+            )
+        }
         cancelMealSelection()
     }
 
@@ -487,8 +514,15 @@ struct DiaryView: View {
     }
 
     private func deleteSelectedEntries() {
+        let deletedCount = selectedEntryIDs.count
         withAnimation(.snappy) {
             diary.deleteEntries(entryIDs: selectedEntryIDs)
+        }
+        if deletedCount > 0 {
+            AppAnalytics.capture("diary_entry.deleted", properties: [
+                "item_type": "mixed",
+                "item_count": String(deletedCount)
+            ])
         }
         cancelMealSelection()
     }
@@ -517,9 +551,17 @@ struct DiaryView: View {
     private func confirmCheatDayAction() {
         if isCheatDay {
             diary.undoCheatDay(on: date)
+            AppAnalytics.capture("cheat_day.cleared", properties: ["day": analyticsDayRelation])
         } else {
             diary.markCheatDay(on: date)
+            AppAnalytics.capture("cheat_day.marked", properties: ["day": analyticsDayRelation])
         }
+    }
+
+    private var analyticsDayRelation: String {
+        if Calendar.current.isDateInToday(date) { return "today" }
+        if Calendar.current.isDateInYesterday(date) { return "yesterday" }
+        return date < Calendar.current.startOfDay(for: Date()) ? "past" : "future"
     }
 }
 
@@ -541,12 +583,14 @@ private struct AlcoholQuickEntryView: View {
     @EnvironmentObject private var diary: DiaryStore
     @Environment(\.dismiss) private var dismiss
     let date: Date
+    private let hadExistingEntry: Bool
 
     @State private var drinks: Int
     @State private var selectedType: AlcoholType?
 
     init(date: Date, entry: AlcoholEntry?) {
         self.date = date
+        hadExistingEntry = entry != nil
         _drinks = State(initialValue: entry?.drinks ?? 1)
         _selectedType = State(initialValue: entry?.type)
     }
@@ -624,10 +668,19 @@ private struct AlcoholQuickEntryView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         diary.setAlcohol(drinks: drinks, type: selectedType, on: date)
+                        AppAnalytics.capture(
+                            drinks == 0 ? "alcohol.removed" : "alcohol.saved",
+                            properties: drinks == 0
+                                ? [:]
+                                : ["operation": hadExistingEntry ? "update" : "create"]
+                        )
                         dismiss()
                     }
                 }
             }
+            .analyticsScreen("alcohol_editor", properties: [
+                "operation": hadExistingEntry ? "edit" : "create"
+            ])
         }
     }
 }

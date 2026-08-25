@@ -39,6 +39,13 @@ struct TrendsView: View {
             }
         }
         .navigationTitle("Trends")
+        .analyticsScreen("trends")
+        .onChange(of: range) { _, newRange in
+            AppAnalytics.capture(
+                "trends.range_changed",
+                properties: ["days": String(newRange)]
+            )
+        }
     }
 
     private var calorieAndAlcoholChart: some View {

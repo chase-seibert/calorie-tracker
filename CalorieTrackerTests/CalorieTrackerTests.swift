@@ -3,6 +3,147 @@ import XCTest
 @testable import CalorieTracker
 
 final class CalorieTrackerTests: XCTestCase {
+    func testAnalyticsDiagnosticEventDecodesHistoryWithoutPayload() throws {
+        let data = Data(#"{"id":"event-001","type":"app.launched","occurredAt":"2026-08-25T12:00:00Z","state":"uploaded"}"#.utf8)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+
+        let event = try decoder.decode(AnalyticsDiagnosticEvent.self, from: data)
+
+        XCTAssertEqual(event.id, "event-001")
+        XCTAssertNil(event.payload)
+    }
+
+    func testAnalyticsDiagnosticPayloadFormatsCanonicalEventJSON() {
+        let payload = AnalyticsDiagnosticPayload(
+            eventId: "event-001",
+            type: "food_search.no_match",
+            occurredAt: Date(timeIntervalSince1970: 0),
+            audience: .debug,
+            sessionId: "session-001",
+            properties: ["query": "dragon fruit"]
+        )
+
+        XCTAssertTrue(payload.formattedJSON.contains(#""eventId" : "event-001""#))
+        XCTAssertTrue(payload.formattedJSON.contains(#""audience" : "debug""#))
+        XCTAssertTrue(payload.formattedJSON.contains(#""query" : "dragon fruit""#))
+    }
+
+    func testFoodLogAnalyticsIdentifiesCatalogFoodWithoutSendingDisplayText() {
+        let food = Food(
+            sourceID: "171705",
+            source: .usda,
+            name: "Banana, raw",
+            brand: "Example brand",
+            barcode: nil,
+            nutrients: MacroNutrients(calories: 89, carbs: 23, fat: 0.3, protein: 1.1),
+            baseAmountGrams: 100,
+            servingGrams: 118,
+            servingDescription: "1 medium"
+        )
+
+        let properties = FoodLogAnalytics.foodProperties(
+            food: food,
+            method: "quick_add",
+            mode: "search",
+            unit: .ounces,
+            isFavorite: true,
+            catalogVersion: "abc123def456",
+            selectionRank: 2,
+            query: "  banana  "
+        )
+
+        XCTAssertEqual(properties["source"], "usda")
+        XCTAssertEqual(properties["source_id"], "171705")
+        XCTAssertEqual(properties["catalog_version"], "abc123def456")
+        XCTAssertEqual(properties["food_kind"], "catalog")
+        XCTAssertEqual(properties["is_favorite"], "true")
+        XCTAssertEqual(properties["selection_rank"], "2")
+        XCTAssertEqual(properties["query"], "banana")
+        XCTAssertEqual(properties["has_brand"], "true")
+        XCTAssertEqual(properties["has_barcode"], "false")
+        XCTAssertEqual(properties["has_portions"], "true")
+        XCTAssertNil(properties["local_item_id"])
+        XCTAssertNil(properties["name"])
+        XCTAssertNil(properties["brand"])
+        XCTAssertNil(properties["barcode"])
+    }
+
+    func testFoodLogAnalyticsUsesLocalIdentityForCustomFood() {
+        let food = Food(
+            sourceID: "local-food-001",
+            source: .custom,
+            name: "Private custom name",
+            brand: nil,
+            barcode: nil,
+            nutrients: MacroNutrients(calories: 100, carbs: 10, fat: 2, protein: 5),
+            baseAmountGrams: 100,
+            servingGrams: nil,
+            servingDescription: nil
+        )
+
+        let properties = FoodLogAnalytics.foodProperties(
+            food: food,
+            method: "quantity_editor",
+            mode: "favorites",
+            unit: .grams,
+            isFavorite: false,
+            catalogVersion: "ignored-for-custom"
+        )
+
+        XCTAssertEqual(properties["local_item_id"], "local-food-001")
+        XCTAssertEqual(properties["food_kind"], "custom")
+        XCTAssertNil(properties["source_id"])
+        XCTAssertNil(properties["catalog_version"])
+        XCTAssertNil(properties["query"])
+    }
+
+    func testAnalyticsGzipIsDeterministicAndValidForStoredBlock() {
+        let encoded = GzipEncoder.encode(Data("hello".utf8))
+
+        XCTAssertEqual(Array(encoded.prefix(10)), [0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff])
+        XCTAssertEqual(Array(encoded[10..<15]), [0x01, 0x05, 0x00, 0xfa, 0xff])
+        XCTAssertEqual(String(data: encoded[15..<20], encoding: .utf8), "hello")
+        XCTAssertEqual(Array(encoded.suffix(8)), [0x86, 0xa6, 0x10, 0x36, 0x05, 0x00, 0x00, 0x00])
+        XCTAssertEqual(encoded, GzipEncoder.encode(Data("hello".utf8)))
+    }
+
+    func testAnalyticsRequestSigningUsesSpecifiedCanonicalText() {
+        let payloadSHA = AnalyticsRequestSigner.payloadSHA256(Data("abc".utf8))
+        let signature = AnalyticsRequestSigner.signature(
+            namespace: "calorie-tracker",
+            apiVersion: "v1",
+            batchID: "batch-001",
+            payloadSHA256: payloadSHA,
+            secret: "test-secret"
+        )
+
+        XCTAssertEqual(payloadSHA, "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad")
+        XCTAssertEqual(signature, "4b83cfa537f94dc2f283f784a53528c04ca44d72a6b4cb13f54b13f2ee882376")
+    }
+
+    func testFoodSearchAttemptRecordsTerminalOutcomesOnce() {
+        var noMatch = FoodSearchAttemptTracker()
+        noMatch.completed(query: " dragon fruit ", resultCount: 0)
+        XCTAssertEqual(
+            noMatch.finish(query: "dragon fruit", isSearching: false),
+            FoodSearchOutcome(eventType: "food_search.no_match", query: "dragon fruit", resultCount: 0)
+        )
+        XCTAssertNil(noMatch.finish(query: "dragon fruit", isSearching: false))
+
+        var abandoned = FoodSearchAttemptTracker()
+        abandoned.completed(query: "banana", resultCount: 4)
+        XCTAssertEqual(
+            abandoned.finish(query: "banana", isSearching: false),
+            FoodSearchOutcome(eventType: "food_search.nothing_selected", query: "banana", resultCount: 4)
+        )
+
+        var logged = FoodSearchAttemptTracker()
+        logged.completed(query: "banana", resultCount: 4)
+        logged.logged(query: "banana")
+        XCTAssertNil(logged.finish(query: "banana", isSearching: false))
+    }
+
     func testFoodPickerLaunchPreservesRequestedMode() {
         let launch = FoodPickerLaunch.mode(.meals)
 
@@ -115,8 +256,9 @@ final class CalorieTrackerTests: XCTestCase {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let store = DiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
 
-        store.logMagicSuggestion(suggestion, on: Date())
+        let loggedItems = store.logMagicSuggestion(suggestion, on: Date())
 
+        XCTAssertEqual(loggedItems, suggestion.items)
         XCTAssertEqual(Set(store.entries(on: Date()).map(\.food.name)), ["Cappuccino", "Protein shake"])
         XCTAssertTrue(store.entries(on: Date()).allSatisfy { !$0.isMeal })
         XCTAssertTrue(store.document.meals.isEmpty)

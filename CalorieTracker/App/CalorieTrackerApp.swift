@@ -2,9 +2,11 @@ import SwiftUI
 
 @main
 struct CalorieTrackerApp: App {
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var diary: DiaryStore
     @StateObject private var healthKit: HealthKitStore
     private let catalog = CatalogStore()
+    private let analytics = AnalyticsService.shared
 
     init() {
         let healthKit = HealthKitStore()
@@ -19,7 +21,21 @@ struct CalorieTrackerApp: App {
                 .environmentObject(healthKit)
                 .tint(AppTheme.coral)
                 .task {
+                    await analytics.start()
+                    await analytics.recordAppLaunch()
+                    guard healthKit.authorizationState == .authorized else { return }
+                    await analytics.capture(type: "health.sync_requested", properties: ["source": "app_launch"])
+                    healthKit.clearLastError()
                     diary.syncAllHealthData()
+                    await healthKit.waitForPendingOperations()
+                    await analytics.capture(type: "health.sync_completed", properties: [
+                        "source": "app_launch",
+                        "result": healthKit.lastError == nil ? "success" : "failure"
+                    ])
+                }
+                .onChange(of: scenePhase) { _, phase in
+                    guard phase == .active else { return }
+                    Task { await analytics.appBecameActive() }
                 }
         }
     }

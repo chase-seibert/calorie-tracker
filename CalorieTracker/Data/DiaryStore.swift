@@ -388,16 +388,23 @@ final class DiaryStore: ObservableObject {
         )
     }
 
-    func logMagicSuggestion(_ suggestion: MagicFoodSuggestion, on date: Date) {
-        guard canLogFood(on: date) else { return }
+    @discardableResult
+    func logMagicSuggestion(_ suggestion: MagicFoodSuggestion, on date: Date) -> [FoodPickerItem] {
+        guard canLogFood(on: date) else { return [] }
+        var loggedItems: [FoodPickerItem] = []
         for item in suggestion.items {
+            let previousEntryCount = entries(on: date).count
             switch item {
             case let .food(food):
                 quickLog(food, on: date)
             case let .meal(meal):
                 logMeal(meal, on: date)
             }
+            if entries(on: date).count > previousEntryCount {
+                loggedItems.append(item)
+            }
         }
+        return loggedItems
     }
 
     func isFavorite(_ food: Food) -> Bool {

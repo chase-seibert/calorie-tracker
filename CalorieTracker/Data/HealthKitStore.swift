@@ -58,6 +58,14 @@ final class HealthKitStore: ObservableObject {
         sync(entries: entries)
     }
 
+    func clearLastError() {
+        lastError = nil
+    }
+
+    func waitForPendingOperations() async {
+        await pendingOperation?.value
+    }
+
     @discardableResult
     func sync(entries: [DiaryEntry]) -> Task<Void, Never> {
         guard isAvailable else { return Task {} }

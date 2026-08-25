@@ -1,11 +1,14 @@
+import CryptoKit
 import Foundation
 import SQLite3
 
 final class CatalogStore: @unchecked Sendable {
     private var database: OpaquePointer?
     private let lock = NSLock()
+    let catalogVersion: String?
 
     init(url: URL? = Bundle.main.url(forResource: "FoodCatalog", withExtension: "sqlite3")) {
+        catalogVersion = url.flatMap { Self.contentFingerprint(at: $0) }
         guard let url else { return }
         if sqlite3_open_v2(url.path, &database, SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX, nil) != SQLITE_OK {
             sqlite3_close(database)
@@ -18,6 +21,14 @@ final class CatalogStore: @unchecked Sendable {
     }
 
     var isAvailable: Bool { database != nil }
+
+    private static func contentFingerprint(at url: URL) -> String? {
+        guard let data = try? Data(contentsOf: url, options: .mappedIfSafe) else { return nil }
+        return SHA256.hash(data: data)
+            .prefix(6)
+            .map { String(format: "%02x", $0) }
+            .joined()
+    }
 
     func search(_ query: String, source: FoodSource, limit: Int = 50) -> [Food] {
         let terms = query
