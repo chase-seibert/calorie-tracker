@@ -28,11 +28,9 @@ struct DiaryView: View {
     @State private var showingTrends = ProcessInfo.processInfo.arguments.contains("--show-trends")
     @State private var showingStreak = ProcessInfo.processInfo.arguments.contains("--show-streak-report")
     @State private var diaryEntriesHeight: CGFloat = 0
-    @State private var foodPickerMode: FoodPickerView.Mode?
     @State private var showingToolbarCheatPopover = false
     @State private var showingBannerCheatPopover = false
     @State private var showingLogFoodCheatPopover = false
-    @State private var showingModeStripCheatPopover = false
     @State private var showingLoggedEntriesCheatPopover = false
     @State private var didSeedDebugScreenshot = false
 
@@ -243,22 +241,6 @@ struct DiaryView: View {
                         .opacity(isCheatDay ? 0.5 : 1)
                         .cheatDayPopover(
                             isPresented: $showingLogFoodCheatPopover,
-                            date: date,
-                            isCheatDay: isCheatDay,
-                            arrowEdge: .bottom,
-                            onConfirm: confirmCheatDayAction
-                        )
-
-                        FoodPickerModeStrip(
-                            selection: $foodPickerMode,
-                            isEnabled: !isCheatDay,
-                            showsScan: false,
-                            onDisabledTap: { showingModeStripCheatPopover = true }
-                        ) { selectedMode in
-                            foodPickerLaunch = .mode(selectedMode)
-                        }
-                        .cheatDayPopover(
-                            isPresented: $showingModeStripCheatPopover,
                             date: date,
                             isCheatDay: isCheatDay,
                             arrowEdge: .bottom,
@@ -483,7 +465,6 @@ struct DiaryView: View {
             showingLogFoodCheatPopover = true
             return
         }
-        foodPickerMode = nil
         foodPickerLaunch = .search
     }
 

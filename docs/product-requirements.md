@@ -103,8 +103,8 @@
   normally requires logs on at least two previous days. If the food is already
   logged today, at least one previous day must contain two matching logs in the
   active time band. Today's entries never count toward historical frequency.
-- The diary's compact mode strip omits Scan to remain on one line. Scan remains
-  available in the full Log Food sheet.
+- The Log Food sheet exposes Magic, Recent, Frequent, Favorites, Meals, and Scan
+  modes; the diary's persistent home action is a single Log food button.
 - Magic's explanation appears below its suggestions and lists the breakfast,
   lunch, and dinner time ranges.
 

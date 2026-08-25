@@ -44,10 +44,8 @@ can be sent directly to document-aware apps such as ChatGPT.
 
 The add-food sheet opens with an already-focused search field and keyboard, with
 the current Magic suggestions filling the pane until the user starts typing.
-On the diary, the compact strip shows icon-only Magic plus Recent, Frequent,
-Favorites, and Meals on one line in portrait mode; the specialty Scan pill is
-hidden there to avoid wrapping. The full Log Food sheet includes Scan alongside
-all of those modes. Typing immediately replaces the selected mode with combined
+The full Log Food sheet includes Magic, Recent, Frequent, Favorites, Meals, and
+Scan modes. Typing immediately replaces the selected mode with combined
 personal, USDA, and Open Food Facts results; Search is not a separate mode or
 source picker. Matching favorite foods and saved meals lead the results in one
 alphabetized group, and saved meals can be found by their names.
