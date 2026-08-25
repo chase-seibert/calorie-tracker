@@ -92,7 +92,7 @@ struct SettingsView: View {
                             diary.syncAllHealthData()
                         }
                     }
-                    Text("Writes calories, carbohydrates, fat, and protein for your logged foods and meals.")
+                    Text("Writes calories, carbohydrates, fat, and protein for logged foods, meals, and alcohol estimates.")
                         .font(.caption)
                 case .denied:
                     Label("Access is turned off", systemImage: "exclamationmark.triangle")

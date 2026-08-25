@@ -143,6 +143,55 @@ struct DailyCalorieProgress: Equatable, Sendable {
     }
 }
 
+enum AlcoholType: String, Codable, CaseIterable, Identifiable, Sendable {
+    case beer
+    case wine
+    case spirits
+    case cocktail
+
+    static let defaultCaloriesPerDrink = 150
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .beer: "Beer"
+        case .wine: "Wine"
+        case .spirits: "Spirits"
+        case .cocktail: "Cocktail"
+        }
+    }
+
+    var caloriesPerDrink: Int {
+        switch self {
+        case .beer: 150
+        case .wine: 125
+        case .spirits: 100
+        case .cocktail: 200
+        }
+    }
+}
+
+struct AlcoholEntry: Codable, Hashable, Identifiable, Sendable {
+    let id: UUID
+    var date: Date
+    var drinks: Int
+    var type: AlcoholType?
+    var loggedAt: Date
+
+    var caloriesPerDrink: Int {
+        type?.caloriesPerDrink ?? AlcoholType.defaultCaloriesPerDrink
+    }
+
+    var calories: Int {
+        drinks * caloriesPerDrink
+    }
+
+    var nutrients: MacroNutrients {
+        MacroNutrients(calories: Double(calories), carbs: 0, fat: 0, protein: 0)
+    }
+}
+
 struct FoodPortion: Codable, Hashable, Identifiable, Sendable {
     let id: String
     var label: String
@@ -338,7 +387,7 @@ struct MagicFoodSuggestionResult: Sendable {
 }
 
 struct DiaryDocument: Codable, Sendable {
-    var schemaVersion = 5
+    var schemaVersion = 6
     var dailyCalorieGoal: Int? = nil
     var trackingStartDate: Date? = nil
     var dayStatuses: [DayStatus] = []
@@ -350,6 +399,7 @@ struct DiaryDocument: Codable, Sendable {
     var rememberedQuantities: [String: QuantityPreference] = [:]
     var customFoods: [Food] = []
     var customFoodNames: [String: String] = [:]
+    var alcoholEntries: [AlcoholEntry] = []
 
     init() {}
 
@@ -366,6 +416,7 @@ struct DiaryDocument: Codable, Sendable {
         case rememberedQuantities
         case customFoods
         case customFoodNames
+        case alcoholEntries
     }
 
     init(from decoder: Decoder) throws {
@@ -388,6 +439,7 @@ struct DiaryDocument: Codable, Sendable {
             [String: String].self,
             forKey: .customFoodNames
         ) ?? [:]
+        alcoholEntries = try container.decodeIfPresent([AlcoholEntry].self, forKey: .alcoholEntries) ?? []
     }
 }
 

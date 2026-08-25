@@ -1287,6 +1287,88 @@ extension CalorieTrackerTests {
     }
 
     @MainActor
+    func testAlcoholQuickEntryUsesDefaultCaloriesAndPersists() throws {
+        let day = testDate(day: 1)
+        let fileURL = temporaryDiaryURL()
+        let store = DiaryStore(fileURL: fileURL, calendar: testCalendar, referenceDate: day)
+        store.log(testFood(calories: 200, name: "Dinner"), amount: 1, unit: .serving, on: day)
+
+        store.setAlcohol(drinks: 2, type: nil, on: day)
+
+        let entry = try XCTUnwrap(store.alcoholEntry(on: day))
+        XCTAssertEqual(entry.drinks, 2)
+        XCTAssertNil(entry.type)
+        XCTAssertEqual(entry.caloriesPerDrink, 150)
+        XCTAssertEqual(store.totals(on: day).calories, 500, accuracy: 0.001)
+
+        let reloaded = DiaryStore(fileURL: fileURL, calendar: testCalendar, referenceDate: day)
+        let reloadedEntry = try XCTUnwrap(reloaded.alcoholEntry(on: day))
+        XCTAssertEqual(reloaded.document.schemaVersion, 6)
+        XCTAssertEqual(reloadedEntry.id, entry.id)
+        XCTAssertEqual(reloadedEntry.date, entry.date)
+        XCTAssertEqual(reloadedEntry.drinks, entry.drinks)
+        XCTAssertEqual(reloadedEntry.type, entry.type)
+        XCTAssertEqual(reloadedEntry.loggedAt.timeIntervalSince(entry.loggedAt), 0, accuracy: 1)
+        XCTAssertEqual(reloaded.totals(on: day).calories, 500, accuracy: 0.001)
+    }
+
+    @MainActor
+    func testAlcoholQuickEntryKeepsOneTypeAndCanBeCleared() {
+        let day = testDate(day: 1)
+        let store = DiaryStore(
+            document: DiaryDocument(),
+            fileURL: temporaryDiaryURL(),
+            calendar: testCalendar,
+            referenceDate: day
+        )
+
+        store.setAlcohol(drinks: 1, type: .beer, on: day)
+        let originalID = store.alcoholEntry(on: day)?.id
+        store.setAlcohol(drinks: 3, type: .wine, on: day)
+
+        XCTAssertEqual(store.document.alcoholEntries.count, 1)
+        XCTAssertEqual(store.alcoholEntry(on: day)?.id, originalID)
+        XCTAssertEqual(store.alcoholEntry(on: day)?.type, .wine)
+        XCTAssertEqual(store.alcoholDrinkCount(on: day), 3)
+        XCTAssertEqual(store.totals(on: day).calories, 375, accuracy: 0.001)
+
+        store.setAlcohol(drinks: 0, type: .wine, on: day)
+
+        XCTAssertNil(store.alcoholEntry(on: day))
+        XCTAssertEqual(store.totals(on: day), .zero)
+    }
+
+    @MainActor
+    func testLoggingAlcoholOnGapDayClearsGapStatus() {
+        let yesterday = testDate(day: 1)
+        let today = testDate(day: 2)
+        var document = DiaryDocument()
+        document.trackingStartDate = yesterday
+        let store = DiaryStore(
+            document: document,
+            fileURL: temporaryDiaryURL(),
+            calendar: testCalendar,
+            referenceDate: today
+        )
+        XCTAssertEqual(store.status(on: yesterday)?.kind, .gap)
+
+        store.setAlcohol(drinks: 1, type: .cocktail, on: yesterday)
+
+        XCTAssertNil(store.status(on: yesterday))
+        XCTAssertEqual(store.alcoholDrinkCount(on: yesterday), 1)
+        XCTAssertEqual(store.totals(on: yesterday).calories, 200, accuracy: 0.001)
+    }
+
+    func testOlderDiaryDocumentsDecodeWithoutAlcoholEntries() throws {
+        let data = try XCTUnwrap(#"{"schemaVersion":5}"#.data(using: .utf8))
+
+        let document = try JSONDecoder().decode(DiaryDocument.self, from: data)
+
+        XCTAssertEqual(document.schemaVersion, 5)
+        XCTAssertTrue(document.alcoholEntries.isEmpty)
+    }
+
+    @MainActor
     func testManualCheatDayAdjustmentPersistsAndUndoPreservesFood() throws {
         let day = testDate(day: 1)
         let fileURL = temporaryDiaryURL()

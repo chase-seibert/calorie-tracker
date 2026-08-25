@@ -15,7 +15,8 @@
   prominent add button, and an upper-right Settings button.
 - **Settings** contains source counts, data attribution, data management, and
   links to Trends and the food-weight report.
-- **Trends**, nested under Settings, shows calorie and macro daily charts.
+- **Trends**, nested under Settings, shows a combined calorie-and-drink chart
+  and a daily macro chart.
 
 When the macro summary card scrolls fully out of view, its calorie total remains
 visible as a compact navigation-title item and continues updating with the diary.
@@ -30,6 +31,21 @@ The summary card presents carbohydrates, fat, and protein as a single stacked
 horizontal bar in that order. Segment widths represent each macro's share of
 total macro grams, and a color-keyed legend retains the exact gram values.
 Tapping the calorie total or macro chart navigates directly to Trends.
+
+The bottom action bar orders compact orange cheat-day and alcohol actions before
+the primary Log food button, which receives most of the width. This leaves the top
+bar clear for the scrolled calorie summary, streak count, and Settings. The
+wine-glass action opens a compact alcohol entry sheet for the selected day. The
+sheet keeps one aggregate count and one optional type per day; plus and minus
+buttons change only the drink count. An unspecified drink uses 150 calories.
+Beer uses 150, wine 125, spirits 100, and cocktails 200 calories per drink. The
+selected estimate contributes to the diary calorie total without adding
+carbohydrates, fat, or protein. Reopening the sheet edits the same daily
+aggregate, and saving zero removes it. The alcohol action displays the saved
+count. The aggregate also appears as an orange wine-glass row in Logged; tapping
+the row reopens its editor. Trends stacks one large, vertically spaced orange
+wine-glass icon per drink on that day at the base of the calorie chart. The icon
+stack uses screen-space sizing independent of the calorie axis.
 
 The Custom source row in Settings shows separate food and meal counts and opens
 a personal catalog with Custom Foods and Saved Meals sections. Each section has

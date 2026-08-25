@@ -27,8 +27,9 @@ struct DiaryView: View {
     @State private var isMacroSummaryVisible = true
     @State private var showingTrends = ProcessInfo.processInfo.arguments.contains("--show-trends")
     @State private var showingStreak = ProcessInfo.processInfo.arguments.contains("--show-streak-report")
+    @State private var showingAlcoholEntry = false
     @State private var diaryEntriesHeight: CGFloat = 0
-    @State private var showingToolbarCheatPopover = false
+    @State private var showingBottomCheatPopover = false
     @State private var showingBannerCheatPopover = false
     @State private var showingLogFoodCheatPopover = false
     @State private var showingLoggedEntriesCheatPopover = false
@@ -144,15 +145,6 @@ struct DiaryView: View {
                 if !isSelectingMealItems {
                     ToolbarItemGroup(placement: .topBarTrailing) {
                         Button {
-                            showingToolbarCheatPopover = true
-                        } label: {
-                            CheatDayToolbarIcon(isCheatDay: isCheatDay)
-                        }
-                        .tint(AppTheme.coral)
-                        .disabled(isFutureDay)
-                        .accessibilityLabel(isCheatDay ? "Undo cheat day" : "Mark cheat day")
-
-                        Button {
                             showingStreak = true
                         } label: {
                             HStack(spacing: 2) {
@@ -226,7 +218,41 @@ struct DiaryView: View {
                     .padding(.vertical, 8)
                     .background(.ultraThinMaterial)
                 } else {
-                    VStack(spacing: 0) {
+                    HStack(spacing: 10) {
+                        Button {
+                            showingBottomCheatPopover = true
+                        } label: {
+                            CheatDayToolbarIcon(isCheatDay: isCheatDay)
+                                .frame(width: 34, height: 34)
+                        }
+                        .buttonStyle(.bordered)
+                        .buttonBorderShape(.circle)
+                        .controlSize(.large)
+                        .tint(AppTheme.coral)
+                        .disabled(isFutureDay)
+                        .accessibilityLabel(isCheatDay ? "Undo cheat day" : "Mark cheat day")
+                        .cheatDayPopover(
+                            isPresented: $showingBottomCheatPopover,
+                            date: date,
+                            isCheatDay: isCheatDay,
+                            arrowEdge: .bottom,
+                            onConfirm: confirmCheatDayAction
+                        )
+
+                        Button {
+                            beginLoggingAlcohol()
+                        } label: {
+                            AlcoholActionIcon(drinks: diary.alcoholDrinkCount(on: date))
+                                .frame(width: 34, height: 34)
+                        }
+                        .buttonStyle(.bordered)
+                        .buttonBorderShape(.circle)
+                        .controlSize(.large)
+                        .tint(AppTheme.coral)
+                        .opacity(isCheatDay ? 0.5 : 1)
+                        .accessibilityLabel("Log alcohol")
+                        .accessibilityValue(alcoholAccessibilityValue)
+
                         Button {
                             beginLoggingFood()
                         } label: {
@@ -234,7 +260,7 @@ struct DiaryView: View {
                                 .font(.headline)
                                 .padding(.horizontal, 8)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
+                                .padding(.vertical, 16)
                         }
                         .buttonStyle(.borderedProminent)
                         .clipShape(Capsule())
@@ -259,6 +285,11 @@ struct DiaryView: View {
             .sheet(item: $foodPickerLaunch) { launch in
                 FoodPickerView(date: date, catalog: catalog, initialMode: launch.initialMode)
                     .environmentObject(diary)
+            }
+            .sheet(isPresented: $showingAlcoholEntry) {
+                AlcoholQuickEntryView(date: date, entry: diary.alcoholEntry(on: date))
+                    .environmentObject(diary)
+                    .presentationDetents([.medium])
             }
             .sheet(item: $editingEntry) { entry in
                 QuantityEditor(entry: entry)
@@ -299,28 +330,13 @@ struct DiaryView: View {
                     || arguments.contains("--show-banner-cheat-popover")
                     || arguments.contains("--show-log-food-cheat-popover") {
                     try? await Task.sleep(for: .milliseconds(500))
-                    showingToolbarCheatPopover = arguments.contains("--show-cheat-day-dialog")
+                    showingBottomCheatPopover = arguments.contains("--show-cheat-day-dialog")
                     showingBannerCheatPopover = arguments.contains("--show-banner-cheat-popover")
                     showingLogFoodCheatPopover = arguments.contains("--show-log-food-cheat-popover")
                 }
 #endif
             }
         }
-        .overlay {
-            if showingToolbarCheatPopover {
-                ToolbarCheatDayOverlay(
-                    date: date,
-                    isCheatDay: isCheatDay,
-                    onConfirm: {
-                        confirmCheatDayAction()
-                        showingToolbarCheatPopover = false
-                    },
-                    onDismiss: { showingToolbarCheatPopover = false }
-                )
-                .transition(.opacity.combined(with: .scale(scale: 0.98, anchor: .topTrailing)))
-            }
-        }
-        .animation(.easeInOut(duration: 0.16), value: showingToolbarCheatPopover)
     }
 
     private func refreshCurrentDay() {
@@ -332,6 +348,7 @@ struct DiaryView: View {
     @ViewBuilder
     private var entrySection: some View {
         let entries = diary.entries(on: date)
+        let alcoholEntry = diary.alcoholEntry(on: date)
         VStack(spacing: 0) {
             HStack {
                 Text("Logged")
@@ -371,7 +388,7 @@ struct DiaryView: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 6)
             }
-            if entries.isEmpty {
+            if entries.isEmpty, alcoholEntry == nil {
                 ContentUnavailableView {
                     Label("Nothing logged", systemImage: "leaf")
                 } description: {
@@ -403,38 +420,54 @@ struct DiaryView: View {
                     .padding(.vertical, 6)
                 }
             } else {
-                ReorderableDiaryEntries(
-                    entries: entries,
-                    contentHeight: $diaryEntriesHeight,
-                    onMove: { entryID, destinationIndex in
-                        diary.moveEntry(entryID, toIndex: destinationIndex, on: date)
-                    },
-                    onEdit: { entry in
-                        if isCheatDay {
-                            showingLoggedEntriesCheatPopover = true
-                        } else if !entry.isCheatDayAdjustment {
-                            editingEntry = entry
+                VStack(spacing: 0) {
+                    if let alcoholEntry {
+                        Button {
+                            beginLoggingAlcohol()
+                        } label: {
+                            AlcoholDiaryRow(entry: alcoholEntry)
                         }
-                    },
-                    onDelete: { entryID in
-                        withAnimation(.snappy) {
-                            diary.delete(entryID: entryID)
-                        }
+                        .buttonStyle(.plain)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 6)
+                        .accessibilityIdentifier("logged-alcohol-entry")
                     }
-                )
-                .accessibilityElement(children: .contain)
-                .accessibilityLabel("Logged foods")
-                .accessibilityValue(entries.map(\.food.name).joined(separator: ", "))
-                .accessibilityIdentifier("logged-foods-reorder-list")
-                .frame(height: max(diaryEntriesHeight, CGFloat(entries.count) * 78))
-                .padding(.horizontal, 16)
-                .cheatDayPopover(
-                    isPresented: $showingLoggedEntriesCheatPopover,
-                    date: date,
-                    isCheatDay: isCheatDay,
-                    arrowEdge: .top,
-                    onConfirm: confirmCheatDayAction
-                )
+
+                    if !entries.isEmpty {
+                        ReorderableDiaryEntries(
+                            entries: entries,
+                            contentHeight: $diaryEntriesHeight,
+                            onMove: { entryID, destinationIndex in
+                                diary.moveEntry(entryID, toIndex: destinationIndex, on: date)
+                            },
+                            onEdit: { entry in
+                                if isCheatDay {
+                                    showingLoggedEntriesCheatPopover = true
+                                } else if !entry.isCheatDayAdjustment {
+                                    editingEntry = entry
+                                }
+                            },
+                            onDelete: { entryID in
+                                withAnimation(.snappy) {
+                                    diary.delete(entryID: entryID)
+                                }
+                            }
+                        )
+                        .accessibilityElement(children: .contain)
+                        .accessibilityLabel("Logged foods")
+                        .accessibilityValue(entries.map(\.food.name).joined(separator: ", "))
+                        .accessibilityIdentifier("logged-foods-reorder-list")
+                        .frame(height: max(diaryEntriesHeight, CGFloat(entries.count) * 78))
+                        .padding(.horizontal, 16)
+                        .cheatDayPopover(
+                            isPresented: $showingLoggedEntriesCheatPopover,
+                            date: date,
+                            isCheatDay: isCheatDay,
+                            arrowEdge: .top,
+                            onConfirm: confirmCheatDayAction
+                        )
+                    }
+                }
             }
         }
     }
@@ -468,11 +501,133 @@ struct DiaryView: View {
         foodPickerLaunch = .search
     }
 
+    private func beginLoggingAlcohol() {
+        guard !isCheatDay else {
+            showingBottomCheatPopover = true
+            return
+        }
+        showingAlcoholEntry = true
+    }
+
+    private var alcoholAccessibilityValue: String {
+        let drinks = diary.alcoholDrinkCount(on: date)
+        return drinks == 1 ? "1 drink" : "\(drinks) drinks"
+    }
+
     private func confirmCheatDayAction() {
         if isCheatDay {
             diary.undoCheatDay(on: date)
         } else {
             diary.markCheatDay(on: date)
+        }
+    }
+}
+
+private struct AlcoholActionIcon: View {
+    let drinks: Int
+
+    var body: some View {
+        HStack(spacing: 2) {
+            Image(systemName: drinks > 0 ? "wineglass.fill" : "wineglass")
+            if drinks > 0 {
+                Text(drinks.formatted())
+                    .font(.subheadline.weight(.bold).monospacedDigit())
+            }
+        }
+    }
+}
+
+private struct AlcoholQuickEntryView: View {
+    @EnvironmentObject private var diary: DiaryStore
+    @Environment(\.dismiss) private var dismiss
+    let date: Date
+
+    @State private var drinks: Int
+    @State private var selectedType: AlcoholType?
+
+    init(date: Date, entry: AlcoholEntry?) {
+        self.date = date
+        _drinks = State(initialValue: entry?.drinks ?? 1)
+        _selectedType = State(initialValue: entry?.type)
+    }
+
+    private var caloriesPerDrink: Int {
+        selectedType?.caloriesPerDrink ?? AlcoholType.defaultCaloriesPerDrink
+    }
+
+    private var estimatedCalories: Int {
+        drinks * caloriesPerDrink
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Number of drinks") {
+                    HStack(spacing: 24) {
+                        Button("Decrease", systemImage: "minus") {
+                            drinks = max(drinks - 1, 0)
+                        }
+                        .labelStyle(.iconOnly)
+                        .buttonStyle(.bordered)
+                        .disabled(drinks == 0)
+
+                        VStack(spacing: 2) {
+                            Text(drinks.formatted())
+                                .font(.system(.largeTitle, design: .rounded, weight: .bold))
+                                .monospacedDigit()
+                            Text(drinks == 1 ? "drink" : "drinks")
+                                .font(.caption)
+                                .foregroundStyle(AppTheme.muted)
+                        }
+                        .frame(maxWidth: .infinity)
+
+                        Button("Increase", systemImage: "plus") {
+                            drinks += 1
+                        }
+                        .labelStyle(.iconOnly)
+                        .buttonStyle(.borderedProminent)
+                    }
+                    .padding(.vertical, 6)
+                }
+
+                Section {
+                    Picker("Type", selection: $selectedType) {
+                        Text("Not specified · \(AlcoholType.defaultCaloriesPerDrink) cal")
+                            .tag(nil as AlcoholType?)
+                        ForEach(AlcoholType.allCases) { type in
+                            Text("\(type.title) · \(type.caloriesPerDrink) cal")
+                                .tag(type as AlcoholType?)
+                        }
+                    }
+
+                    HStack {
+                        Text("Estimated calories")
+                        Spacer()
+                        Text("\(estimatedCalories.formatted()) cal")
+                            .foregroundStyle(AppTheme.muted)
+                            .monospacedDigit()
+                    }
+                } header: {
+                    Text("Type (optional)")
+                } footer: {
+                    Text("One calorie estimate applies to all drinks in this quick entry.")
+                }
+            }
+            .scrollContentBackground(.hidden)
+            .background(AppTheme.background)
+            .navigationTitle("Alcohol")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        diary.setAlcohol(drinks: drinks, type: selectedType, on: date)
+                        dismiss()
+                    }
+                }
+            }
         }
     }
 }
@@ -485,51 +640,6 @@ private struct CheatDayToolbarIcon: View {
               ? "takeoutbag.and.cup.and.straw.fill"
               : "takeoutbag.and.cup.and.straw")
             .font(.body)
-    }
-}
-
-private struct ToolbarCheatDayOverlay: View {
-    let date: Date
-    let isCheatDay: Bool
-    let onConfirm: () -> Void
-    let onDismiss: () -> Void
-
-    var body: some View {
-        GeometryReader { proxy in
-            ZStack(alignment: .topTrailing) {
-                Color.black.opacity(0.06)
-                    .ignoresSafeArea()
-                    .contentShape(Rectangle())
-                    .onTapGesture(perform: onDismiss)
-
-                VStack(spacing: -1) {
-                    UpwardCaret()
-                        .fill(.regularMaterial)
-                        .frame(width: 24, height: 13)
-                        .offset(x: 7)
-                    CheatDayActionPopover(
-                        date: date,
-                        isCheatDay: isCheatDay,
-                        onConfirm: onConfirm
-                    )
-                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 30, style: .continuous))
-                    .shadow(color: .black.opacity(0.13), radius: 22, y: 8)
-                }
-                .padding(.top, max(proxy.safeAreaInsets.top - 12, 0))
-                .padding(.trailing, 8)
-            }
-        }
-    }
-}
-
-private struct UpwardCaret: Shape {
-    func path(in rect: CGRect) -> Path {
-        Path { path in
-            path.move(to: CGPoint(x: rect.midX, y: rect.minY))
-            path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
-            path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
-            path.closeSubpath()
-        }
     }
 }
 
@@ -967,6 +1077,46 @@ private struct DiaryEntryRow: View {
         case .serving:
             "\(entry.amount.cleanAmount) \(entry.food.portion(id: entry.portionID)?.label ?? "serving")"
         }
+    }
+}
+
+private struct AlcoholDiaryRow: View {
+    let entry: AlcoholEntry
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "wineglass.fill")
+                .font(.title2)
+                .foregroundStyle(AppTheme.coral)
+                .frame(width: 38, height: 38)
+                .background(AppTheme.coral.opacity(0.12), in: Circle())
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(entry.type?.title ?? "Alcohol")
+                    .font(.body.weight(.semibold))
+                Text(drinkDescription)
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.muted)
+            }
+            Spacer()
+            Text(entry.calories.formatted())
+                .font(.headline.monospacedDigit())
+            Text("cal")
+                .font(.caption2)
+                .foregroundStyle(AppTheme.muted)
+        }
+        .padding(14)
+        .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 18))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(
+            "\(entry.type?.title ?? "Alcohol"), \(drinkDescription), \(entry.calories) calories"
+        )
+        .accessibilityHint("Edits this alcohol entry")
+    }
+
+    private var drinkDescription: String {
+        let count = entry.drinks == 1 ? "1 drink" : "\(entry.drinks) drinks"
+        return entry.type == nil ? "\(count) · default estimate" : count
     }
 }
 

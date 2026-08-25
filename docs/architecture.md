@@ -10,7 +10,8 @@ The SwiftUI app has two local data layers:
 2. A small writable JSON document in Application Support managed by `DiaryStore`.
    It holds diary entries, day statuses, the streak tracking start date,
    favorites, meals, remembered quantities, custom foods, and stable-ID custom
-   food names. Writes are atomic.
+   food names. It also stores at most one aggregate alcohol entry per day, with
+   a count and optional type. Writes are atomic.
 
 This split keeps a large catalog immutable and fast while making the personal
 data schema easy to evolve and back up.
@@ -21,6 +22,15 @@ protein. Each sample uses the diary entry UUID as a sync identifier, so edits
 replace the previous samples and deletions remove only samples created by this
 app. Authorization is requested only from Settings; HealthKit synchronization
 is skipped until write access is granted.
+
+Alcohol entries remain separate from food entries in storage but render as a
+dedicated row in the diary's Logged section. They are excluded from food meal
+selection and reordering while contributing their estimated calories to daily
+totals, calorie goals, streak statistics, and automatic day classification.
+`DiaryStore` converts each alcohol aggregate to a stable-ID, calorie-only
+nutrition entry when synchronizing Apple Health. Trends reads the persisted
+counts directly and overlays one wine-glass icon per drink in a vertical stack
+at the base of that day's calorie series.
 
 On launch, `DiaryStore` finalizes every elapsed day since tracking began. Empty
 days become gap days. When a calorie goal exists, nonempty days below 75% or
@@ -50,7 +60,9 @@ it disables UIKit's automatic safe-area content-inset adjustment. The diary's
 few top-level sections use eager vertical layout, avoiding stale lazy-stack
 positions while the collection reports a new intrinsic height. The persistent
 logging controls reserve the bottom safe area but ignore keyboard-only safe-area
-changes from the food-picker sheet so they remain anchored after dismissal.
+changes from the food-picker sheet so they remain anchored after dismissal. The
+fixed cheat-day and alcohol actions lead the row, while the primary Log food
+action follows and expands to use the available width.
 
 Custom foods and saved meals are separate collections in the personal document.
 Settings presents them together as the Custom catalog while retaining their

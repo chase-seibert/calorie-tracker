@@ -81,6 +81,12 @@ enum DiaryFixtureLoader {
             rebased.loggedAt = calendar.date(byAdding: .day, value: dayOffset, to: entry.loggedAt) ?? entry.loggedAt
             return rebased
         }
+        document.alcoholEntries = source.alcoholEntries.map { entry in
+            var rebased = entry
+            rebased.date = calendar.date(byAdding: .day, value: dayOffset, to: entry.date) ?? entry.date
+            rebased.loggedAt = calendar.date(byAdding: .day, value: dayOffset, to: entry.loggedAt) ?? entry.loggedAt
+            return rebased
+        }
         addMagicDemoHistory(to: &document, referenceDate: destinationDate, calendar: calendar)
         return document
     }

@@ -51,6 +51,9 @@
   catalog in Settings so I can add and edit custom foods and saved meals as well
   as confirm and manage what I have saved.
 - As a user looking for patterns, I want calorie and macro trends by day.
+- As someone tracking alcohol without itemizing every drink, I want a fast daily
+  drink count with an optional single type, estimated calories, and drink-count
+  trends.
 - As someone analyzing what I eat, I want to share a last-90-days Markdown
   report of foods by total whole-ounce weight, with meals expanded into their
   historical component foods, so I can send it to ChatGPT and ask questions.
@@ -80,10 +83,21 @@
   bar, in that order, with exact gram values in its legend.
 - Tapping calories, carbs, fat, or protein in the diary summary navigates to
   Trends.
-- The diary toolbar orders the cheat-day action, lightning-bolt streak count,
-  and Settings from left to right. An active cheat day adds a green check to
-  the orange action icon and disables food logging until the user confirms that
-  they want to undo it from the icon, status banner, or Log Food action.
+- The top diary bar keeps the lightning-bolt streak count and Settings so the
+  compact calorie summary has room in portrait. The bottom safe-area bar gives
+  compact orange cheat-day and alcohol actions first, followed by a larger Log
+  food button that receives most of the width. An active cheat day adds a green
+  check to the orange action icon and disables food and alcohol logging until
+  the user confirms that they want to undo it from the icon, status banner, or
+  logging action.
+- Alcohol quick entry stores one aggregate count and one optional type per day.
+  Plus and minus change the count; reopening edits that same aggregate, and zero
+  removes it. An unspecified drink uses 150 calories; beer uses 150, wine 125,
+  spirits 100, and cocktails 200 calories per drink. A saved aggregate appears
+  as an orange wine-glass row in Logged and can be tapped to edit it. Alcohol
+  calories contribute to diary totals. Trends shows each day's count as a
+  vertical stack of orange wine-glass icons within the calorie chart rather
+  than as a separate alcohol chart.
 - Marking a cheat day uses one Yes action. Once marked, compact estimate pills
   offer 500, 1,000, 1,500, and 2,000 calories above the Logged list. The chosen
   value appears as one calorie-only “Cheat day adjustment,” and choosing another
@@ -104,7 +118,7 @@
   logged today, at least one previous day must contain two matching logs in the
   active time band. Today's entries never count toward historical frequency.
 - The Log Food sheet exposes Magic, Recent, Frequent, Favorites, Meals, and Scan
-  modes; the diary's persistent home action is a single Log food button.
+  modes; the diary's primary persistent action is the larger Log food button.
 - Magic's explanation appears below its suggestions and lists the breakfast,
   lunch, and dinner time ranges.
 

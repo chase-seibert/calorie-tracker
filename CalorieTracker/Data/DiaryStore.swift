@@ -54,7 +54,43 @@ final class DiaryStore: ObservableObject {
     }
 
     func totals(on date: Date) -> MacroNutrients {
-        entries(on: date).reduce(.zero) { $0 + $1.nutrients }
+        entries(on: date).reduce(alcoholEntry(on: date)?.nutrients ?? .zero) { $0 + $1.nutrients }
+    }
+
+    func alcoholEntry(on date: Date) -> AlcoholEntry? {
+        document.alcoholEntries.first { calendar.isDate($0.date, inSameDayAs: date) }
+    }
+
+    func alcoholDrinkCount(on date: Date) -> Int {
+        alcoholEntry(on: date)?.drinks ?? 0
+    }
+
+    func setAlcohol(drinks: Int, type: AlcoholType?, on date: Date) {
+        guard canLogFood(on: date) else { return }
+        let day = calendar.startOfDay(for: date)
+        let previousEntry = alcoholEntry(on: day)
+        let previousHealthEntry = previousEntry.map(makeAlcoholHealthEntry)
+        let normalizedDrinks = max(drinks, 0)
+
+        document.alcoholEntries.removeAll { calendar.isDate($0.date, inSameDayAs: day) }
+        if normalizedDrinks > 0 {
+            document.alcoholEntries.append(AlcoholEntry(
+                id: previousEntry?.id ?? UUID(),
+                date: day,
+                drinks: normalizedDrinks,
+                type: type,
+                loggedAt: previousEntry?.loggedAt ?? Date()
+            ))
+            clearAutomaticStatus(on: day)
+        } else if day < calendar.startOfDay(for: Date()) {
+            reconcileAutomaticStatus(on: day)
+        }
+
+        persist()
+        if let previousHealthEntry {
+            healthKit?.delete(entries: [previousHealthEntry])
+        }
+        syncHealthData(on: day)
     }
 
     func foodWeightReport(referenceDate: Date = Date()) -> FoodWeightReport {
@@ -144,7 +180,7 @@ final class DiaryStore: ObservableObject {
         let today = calendar.startOfDay(for: referenceDate)
         var cursor = today
 
-        if status(on: today) == nil && ordinaryEntries(on: today).isEmpty {
+        if status(on: today) == nil && !hasTrackedData(on: today) {
             guard let yesterday = calendar.date(byAdding: .day, value: -1, to: today) else {
                 return .empty
             }
@@ -154,7 +190,7 @@ final class DiaryStore: ObservableObject {
         let lowerBound = document.trackingStartDate.map(calendar.startOfDay(for:)) ?? today
         var dates: [Date] = []
         while cursor >= lowerBound {
-            guard status(on: cursor) == nil, !ordinaryEntries(on: cursor).isEmpty else { break }
+            guard status(on: cursor) == nil, hasTrackedData(on: cursor) else { break }
             dates.append(cursor)
             guard let previous = calendar.date(byAdding: .day, value: -1, to: cursor) else { break }
             cursor = previous
@@ -188,8 +224,9 @@ final class DiaryStore: ObservableObject {
 
     func syncAllHealthData() {
         let groupedEntries = Dictionary(grouping: document.entries, by: { calendar.startOfDay(for: $0.date) })
+        let alcoholDays = document.alcoholEntries.map { calendar.startOfDay(for: $0.date) }
         let statusDays = document.dayStatuses.map { calendar.startOfDay(for: $0.date) }
-        for day in Set(groupedEntries.keys).union(statusDays) {
+        for day in Set(groupedEntries.keys).union(alcoholDays).union(statusDays) {
             syncHealthData(on: day)
         }
     }
@@ -1068,7 +1105,7 @@ final class DiaryStore: ObservableObject {
     }
 
     func clearPersonalData() {
-        let deletedEntries = document.entries
+        let deletedEntries = document.entries + document.alcoholEntries.map(makeAlcoholHealthEntry)
         let zeroOverrideDays = document.dayStatuses
             .filter { $0.kind == .cheat && $0.adjustmentCalories == nil }
             .map(\.date)
@@ -1091,17 +1128,23 @@ final class DiaryStore: ObservableObject {
 
     private func prepareDayTracking(referenceDate: Date) {
         let today = calendar.startOfDay(for: referenceDate)
-        document.schemaVersion = 5
+        document.schemaVersion = 6
         document.dayStatuses = document.dayStatuses.map { status in
             var normalized = status
             normalized.date = calendar.startOfDay(for: status.date)
             return normalized
         }
+        document.alcoholEntries = document.alcoholEntries.map { entry in
+            var normalized = entry
+            normalized.date = calendar.startOfDay(for: entry.date)
+            return normalized
+        }
 
         if document.trackingStartDate == nil {
             let firstEntryDay = document.entries.map { calendar.startOfDay(for: $0.date) }.min()
+            let firstAlcoholDay = document.alcoholEntries.map { calendar.startOfDay(for: $0.date) }.min()
             let firstStatusDay = document.dayStatuses.map { calendar.startOfDay(for: $0.date) }.min()
-            document.trackingStartDate = [firstEntryDay, firstStatusDay]
+            document.trackingStartDate = [firstEntryDay, firstAlcoholDay, firstStatusDay]
                 .compactMap { $0 }
                 .min() ?? today
         } else {
@@ -1121,14 +1164,13 @@ final class DiaryStore: ObservableObject {
         document.dayStatuses.removeAll {
             calendar.isDate($0.date, inSameDayAs: day) && $0.source == .automatic
         }
-        let entries = ordinaryEntries(on: day)
-        if entries.isEmpty {
+        guard hasTrackedData(on: day) else {
             upsertStatus(DayStatus(date: day, kind: .gap, source: .automatic))
             return
         }
 
         guard let goal = dailyCalorieGoal, goal > 0 else { return }
-        let ratio = entries.reduce(.zero) { $0 + $1.nutrients }.calories / Double(goal)
+        let ratio = totals(on: day).calories / Double(goal)
         if ratio < 0.75 || ratio > 1.30 {
             upsertStatus(DayStatus(date: day, kind: .cheat, source: .automatic))
         }
@@ -1150,6 +1192,10 @@ final class DiaryStore: ObservableObject {
 
     private func ordinaryEntries(on date: Date) -> [DiaryEntry] {
         entries(on: date).filter { !$0.isCheatDayAdjustment }
+    }
+
+    private func hasTrackedData(on date: Date) -> Bool {
+        !ordinaryEntries(on: date).isEmpty || alcoholDrinkCount(on: date) > 0
     }
 
     private func makeCheatDayAdjustment(calories: Int, on date: Date) -> DiaryEntry {
@@ -1179,6 +1225,37 @@ final class DiaryStore: ObservableObject {
         )
     }
 
+    private func makeAlcoholHealthEntry(_ alcohol: AlcoholEntry) -> DiaryEntry {
+        let perDrinkNutrients = MacroNutrients(
+            calories: Double(alcohol.caloriesPerDrink),
+            carbs: 0,
+            fat: 0,
+            protein: 0
+        )
+        let food = Food(
+            sourceID: "alcohol-\(alcohol.type?.rawValue ?? "default")",
+            source: .custom,
+            name: alcohol.type?.title ?? "Alcohol",
+            brand: nil,
+            barcode: nil,
+            nutrients: perDrinkNutrients,
+            baseAmountGrams: 1,
+            servingGrams: 1,
+            servingDescription: "1 drink",
+            portions: [FoodPortion(id: "alcohol-drink", label: "drink", grams: 1)]
+        )
+        return DiaryEntry(
+            id: alcohol.id,
+            date: calendar.startOfDay(for: alcohol.date),
+            food: food,
+            amount: Double(alcohol.drinks),
+            unit: .serving,
+            nutrients: alcohol.nutrients,
+            loggedAt: alcohol.loggedAt,
+            portionID: "alcohol-drink"
+        )
+    }
+
     private func mostPopularItem(on dates: Set<Date>) -> String? {
         let entries = document.entries.filter {
             !$0.isCheatDayAdjustment && dates.contains(calendar.startOfDay(for: $0.date))
@@ -1194,7 +1271,8 @@ final class DiaryStore: ObservableObject {
 
     private func syncHealthData(on date: Date) {
         guard let healthKit else { return }
-        let dayEntries = entries(on: date)
+        let alcoholEntries = alcoholEntry(on: date).map { [makeAlcoholHealthEntry($0)] } ?? []
+        let dayEntries = entries(on: date) + alcoholEntries
         let dayStatus = status(on: date)
         if dayStatus?.kind == .cheat, dayStatus?.adjustmentCalories == nil {
             healthKit.delete(entries: dayEntries)

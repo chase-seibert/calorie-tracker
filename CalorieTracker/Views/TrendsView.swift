@@ -7,7 +7,12 @@ struct TrendsView: View {
 
     private var points: [TrendPoint] {
         diary.totalsByDay(numberOfDays: range).map {
-            TrendPoint(date: $0.date, nutrients: $0.nutrients, status: diary.status(on: $0.date)?.kind)
+            TrendPoint(
+                date: $0.date,
+                nutrients: $0.nutrients,
+                alcoholDrinks: diary.alcoholDrinkCount(on: $0.date),
+                status: diary.status(on: $0.date)?.kind
+            )
         }
     }
 
@@ -27,7 +32,7 @@ struct TrendsView: View {
                     }
                     .pickerStyle(.segmented)
 
-                    chartCard(title: "Calories", color: AppTheme.coral, value: { $0.nutrients.calories })
+                    calorieAndAlcoholChart
                     macroChart
                 }
                 .padding(16)
@@ -36,27 +41,48 @@ struct TrendsView: View {
         .navigationTitle("Trends")
     }
 
-    private func chartCard(title: String, color: Color, value: @escaping (TrendPoint) -> Double) -> some View {
+    private var calorieAndAlcoholChart: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(title).font(.title3.weight(.bold))
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Calories & drinks").font(.title3.weight(.bold))
+                Text("Each wine glass is one drink")
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.muted)
+            }
             Chart {
                 ForEach(points) { point in
                     LineMark(
                         x: .value("Date", point.date),
-                        y: .value(title, value(point))
+                        y: .value("Calories", point.nutrients.calories)
                     )
-                    .foregroundStyle(color)
+                    .foregroundStyle(AppTheme.coral)
                     .interpolationMethod(.catmullRom)
                     AreaMark(
                         x: .value("Date", point.date),
-                        y: .value(title, value(point))
+                        y: .value("Calories", point.nutrients.calories)
                     )
-                    .foregroundStyle(LinearGradient(colors: [color.opacity(0.22), .clear], startPoint: .top, endPoint: .bottom))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [AppTheme.coral.opacity(0.22), .clear],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
                     .interpolationMethod(.catmullRom)
                     if let status = point.status {
                         RuleMark(x: .value("Special day", point.date))
                             .foregroundStyle(statusColor(status).opacity(0.5))
                             .lineStyle(StrokeStyle(lineWidth: 6))
+                    }
+                    if point.alcoholDrinks > 0 {
+                        PointMark(
+                            x: .value("Date", point.date),
+                            y: .value("Drink stack baseline", 0)
+                        )
+                        .foregroundStyle(.clear)
+                        .annotation(position: .top, spacing: 3) {
+                            AlcoholTrendStack(drinks: point.alcoholDrinks, range: range)
+                        }
                     }
                 }
             }
@@ -136,9 +162,43 @@ struct TrendsView: View {
     }
 }
 
+private struct AlcoholTrendStack: View {
+    let drinks: Int
+    let range: Int
+
+    private var iconSize: CGFloat {
+        switch range {
+        case 0...14: 16
+        case 15...30: 14
+        default: 10
+        }
+    }
+
+    private var iconSpacing: CGFloat {
+        switch range {
+        case 0...14: 3
+        case 15...30: 2
+        default: 1
+        }
+    }
+
+    var body: some View {
+        VStack(spacing: iconSpacing) {
+            ForEach(0..<drinks, id: \.self) { _ in
+                Image(systemName: "wineglass.fill")
+                    .font(.system(size: iconSize, weight: .semibold))
+            }
+        }
+        .foregroundStyle(AppTheme.coral)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(drinks) drink\(drinks == 1 ? "" : "s")")
+    }
+}
+
 private struct TrendPoint: Identifiable {
     let date: Date
     let nutrients: MacroNutrients
+    let alcoholDrinks: Int
     let status: DayStatusKind?
     var id: Date { date }
 }
