@@ -1162,6 +1162,182 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertNotNil(butter.availablePortions.first { $0.label.localizedCaseInsensitiveContains("table") || $0.label == "tbsp" })
     }
 
+    func testCatalogClassifiesProcessedAndRedMeatPresence() throws {
+        let projectRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalog = CatalogStore(url: projectRoot.appendingPathComponent("CalorieTracker/Resources/FoodCatalog.sqlite3"))
+
+        XCTAssertEqual(
+            catalog.meatClassification(sourceID: "2705889", source: .usda),
+            MeatClassification(containsProcessedMeat: true, containsRedMeat: false)
+        )
+        XCTAssertEqual(
+            catalog.meatClassification(sourceID: "168652", source: .usda),
+            MeatClassification(containsProcessedMeat: false, containsRedMeat: true)
+        )
+        XCTAssertEqual(
+            catalog.meatClassification(sourceID: "2707465", source: .usda),
+            MeatClassification.none
+        )
+        XCTAssertEqual(
+            catalog.meatClassification(sourceID: "2706980", source: .usda),
+            MeatClassification(containsProcessedMeat: true, containsRedMeat: false)
+        )
+    }
+
+    @MainActor
+    func testExistingDiaryFoodsBackfillMeatFlagsFromCatalogAndNames() {
+        let projectRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalog = CatalogStore(url: projectRoot.appendingPathComponent("CalorieTracker/Resources/FoodCatalog.sqlite3"))
+        let day = testDate(day: 1)
+        var bacon = testFood(calories: 100, name: "Legacy bacon")
+        bacon = Food(
+            sourceID: "2705889",
+            source: .usda,
+            name: bacon.name,
+            brand: bacon.brand,
+            barcode: bacon.barcode,
+            nutrients: bacon.nutrients,
+            baseAmountGrams: bacon.baseAmountGrams,
+            servingGrams: bacon.servingGrams,
+            servingDescription: bacon.servingDescription,
+            portions: bacon.portions
+        )
+        let customPepperoni = testFood(calories: 80, name: "House pepperoni")
+        var document = DiaryDocument()
+        document.entries = [
+            DiaryEntry(
+                id: UUID(),
+                date: day,
+                food: bacon,
+                amount: 1,
+                unit: .serving,
+                nutrients: bacon.nutrients,
+                loggedAt: day
+            )
+        ]
+        document.customFoods = [customPepperoni]
+
+        let store = DiaryStore(
+            document: document,
+            fileURL: temporaryDiaryURL(),
+            calendar: testCalendar,
+            catalog: catalog,
+            referenceDate: day
+        )
+
+        XCTAssertEqual(store.entries(on: day).first?.food.containsProcessedMeat, true)
+        XCTAssertEqual(store.entries(on: day).first?.food.containsRedMeat, false)
+        XCTAssertEqual(store.document.customFoods.first?.containsProcessedMeat, true)
+        XCTAssertEqual(store.document.customFoods.first?.containsRedMeat, false)
+    }
+
+    @MainActor
+    func testWeeklyMeatTrendsCountEachCategoryAtMostOncePerDay() {
+        let firstDay = testDate(day: 1)
+        let secondDay = testDate(day: 2)
+        let fifthDay = testDate(day: 5)
+        let referenceDay = testDate(day: 8)
+        let store = DiaryStore(
+            document: DiaryDocument(),
+            fileURL: temporaryDiaryURL(),
+            calendar: testCalendar,
+            referenceDate: referenceDay
+        )
+        var processed = testFood(calories: 100, name: "Processed test food")
+        processed.containsProcessedMeat = true
+        processed.containsRedMeat = false
+        var red = testFood(calories: 100, name: "Red test food")
+        red.containsProcessedMeat = false
+        red.containsRedMeat = true
+        var mixed = testFood(calories: 100, name: "Mixed test food")
+        mixed.containsProcessedMeat = true
+        mixed.containsRedMeat = true
+
+        store.log(processed, amount: 1, unit: .serving, on: firstDay)
+        store.log(processed, amount: 1, unit: .serving, on: firstDay)
+        store.log(red, amount: 1, unit: .serving, on: secondDay)
+        store.log(mixed, amount: 1, unit: .serving, on: fifthDay)
+
+        let weeks = store.weeklyMeatDays(numberOfDays: 8, referenceDate: referenceDay)
+        XCTAssertEqual(weeks.map(\.processedMeatDays).reduce(0, +), 2)
+        XCTAssertEqual(weeks.map(\.redMeatDays).reduce(0, +), 2)
+        XCTAssertEqual(store.meatPresence(on: firstDay).containsProcessedMeat, true)
+        XCTAssertEqual(store.meatPresence(on: firstDay).containsRedMeat, false)
+    }
+
+    @MainActor
+    func testMeatDayDetailsListQualifyingFoodsAndExpandMeals() throws {
+        let day = testDate(day: 1)
+        let store = DiaryStore(
+            document: DiaryDocument(),
+            fileURL: temporaryDiaryURL(),
+            calendar: testCalendar,
+            referenceDate: day
+        )
+        var bacon = testFood(calories: 100, name: "Bacon")
+        bacon.containsProcessedMeat = true
+        bacon.containsRedMeat = false
+        var steak = testFood(calories: 200, name: "Steak")
+        steak.containsProcessedMeat = false
+        steak.containsRedMeat = true
+
+        store.log(bacon, amount: 1, unit: .serving, on: day)
+        store.log(bacon, amount: 1, unit: .serving, on: day)
+        let meal = try XCTUnwrap(store.saveMeal(
+            name: "Steak dinner",
+            items: [MealItem(id: UUID(), food: steak, amount: 1, unit: .serving)]
+        ))
+        store.logMeal(meal, on: day)
+
+        let details = try XCTUnwrap(
+            store.meatDayFoods(numberOfDays: 1, referenceDate: day).first
+        )
+        XCTAssertEqual(details.processedMeatFoods, ["Bacon"])
+        XCTAssertEqual(details.redMeatFoods, ["Steak dinner — Steak"])
+    }
+
+    @MainActor
+    func testCustomFoodAndMealMeatFlagsAreEditableOverrides() throws {
+        let store = DiaryStore(fileURL: temporaryDiaryURL())
+        let food = store.addCustomFood(
+            name: "House plate",
+            brand: "",
+            calories: 200,
+            carbs: 5,
+            fat: 10,
+            protein: 20,
+            servingGrams: 100,
+            containsProcessedMeat: true,
+            containsRedMeat: false
+        )
+        XCTAssertEqual(food.containsProcessedMeat, true)
+        XCTAssertTrue(store.updateCustomFood(
+            foodID: food.id,
+            name: food.name,
+            brand: "",
+            calories: 200,
+            carbs: 5,
+            fat: 10,
+            protein: 20,
+            servingGrams: 100,
+            containsProcessedMeat: false,
+            containsRedMeat: true
+        ))
+        let updatedFood = try XCTUnwrap(store.document.customFoods.first)
+        let meal = try XCTUnwrap(store.saveMeal(
+            name: "Override meal",
+            items: [MealItem(id: UUID(), food: updatedFood, amount: 1, unit: .serving)],
+            containsProcessedMeat: true,
+            containsRedMeat: false
+        ))
+        XCTAssertTrue(meal.resolvedContainsProcessedMeat)
+        XCTAssertFalse(meal.resolvedContainsRedMeat)
+    }
+
     @MainActor
     func testNewFoodsDefaultToOunces() {
         let previous = UserDefaults.standard.object(forKey: "defaultWeightUnit")
@@ -1445,7 +1621,7 @@ extension CalorieTrackerTests {
 
         let reloaded = DiaryStore(fileURL: fileURL, calendar: testCalendar, referenceDate: day)
         let reloadedEntry = try XCTUnwrap(reloaded.alcoholEntry(on: day))
-        XCTAssertEqual(reloaded.document.schemaVersion, 6)
+        XCTAssertEqual(reloaded.document.schemaVersion, 7)
         XCTAssertEqual(reloadedEntry.id, entry.id)
         XCTAssertEqual(reloadedEntry.date, entry.date)
         XCTAssertEqual(reloadedEntry.drinks, entry.drinks)

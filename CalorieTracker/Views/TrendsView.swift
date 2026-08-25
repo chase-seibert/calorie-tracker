@@ -4,6 +4,7 @@ import SwiftUI
 struct TrendsView: View {
     @EnvironmentObject private var diary: DiaryStore
     @State private var range = 30
+    @State private var selectedMeatWeek: WeeklyMeatDays?
 
     private var points: [TrendPoint] {
         diary.totalsByDay(numberOfDays: range).map {
@@ -20,6 +21,10 @@ struct TrendsView: View {
         DayStatusKind.allCases.filter { status in points.contains { $0.status == status } }
     }
 
+    private var weeklyMeatPoints: [WeeklyMeatDays] {
+        diary.weeklyMeatDays(numberOfDays: range)
+    }
+
     var body: some View {
         ZStack {
             AppTheme.background.ignoresSafeArea()
@@ -33,18 +38,136 @@ struct TrendsView: View {
                     .pickerStyle(.segmented)
 
                     calorieAndAlcoholChart
+                    meatDaysChart
                     macroChart
                 }
                 .padding(16)
             }
         }
         .navigationTitle("Trends")
+        .sheet(item: $selectedMeatWeek) { week in
+            MeatWeekFoodsView(
+                week: week,
+                days: meatDays(in: week)
+            )
+            .presentationDetents([.medium, .large])
+        }
         .analyticsScreen("trends")
         .onChange(of: range) { _, newRange in
             AppAnalytics.capture(
                 "trends.range_changed",
                 properties: ["days": String(newRange)]
             )
+        }
+    }
+
+    private var meatDaysChart: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Meat days per week").font(.title3.weight(.bold))
+                Text("A day counts once per category, regardless of quantity")
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.muted)
+            }
+            Chart {
+                ForEach(weeklyMeatPoints) { point in
+                    BarMark(
+                        x: .value("Week", point.weekStart, unit: .weekOfYear),
+                        y: .value("Days", point.processedMeatDays)
+                    )
+                    .position(by: .value("Meat type", "Processed meat"))
+                    .foregroundStyle(AppTheme.processedMeat)
+                    .accessibilityLabel("Processed meat, week of \(point.weekStart.formatted(date: .abbreviated, time: .omitted))")
+                    .accessibilityValue("\(point.processedMeatDays) days")
+
+                    BarMark(
+                        x: .value("Week", point.weekStart, unit: .weekOfYear),
+                        y: .value("Days", point.redMeatDays)
+                    )
+                    .position(by: .value("Meat type", "Red meat"))
+                    .foregroundStyle(AppTheme.redMeat)
+                    .accessibilityLabel("Red meat, week of \(point.weekStart.formatted(date: .abbreviated, time: .omitted))")
+                    .accessibilityValue("\(point.redMeatDays) days")
+                }
+            }
+            .chartYScale(domain: 0...7)
+            .chartYAxis {
+                AxisMarks(values: [0, 1, 2, 3, 4, 5, 6, 7])
+            }
+            .chartXAxis {
+                AxisMarks(values: .automatic(desiredCount: range == 90 ? 5 : 4)) { value in
+                    AxisGridLine().foregroundStyle(.clear)
+                    AxisValueLabel(format: .dateTime.month(.abbreviated).day())
+                }
+            }
+            .chartOverlay { proxy in
+                GeometryReader { geometry in
+                    Rectangle()
+                        .fill(.clear)
+                        .contentShape(Rectangle())
+                        .gesture(
+                            SpatialTapGesture().onEnded { value in
+                                selectMeatWeek(
+                                    at: value.location,
+                                    proxy: proxy,
+                                    geometry: geometry
+                                )
+                            }
+                        )
+                }
+            }
+            .frame(height: 190)
+
+            HStack(spacing: 18) {
+                meatLegend(icon: "🥓", title: "Processed meat", color: AppTheme.processedMeat)
+                meatLegend(icon: "🥩", title: "Red meat", color: AppTheme.redMeat)
+            }
+            .accessibilityElement(children: .combine)
+
+            Text("Tap a week to see the foods included")
+                .font(.caption2)
+                .foregroundStyle(AppTheme.muted)
+        }
+        .padding(18)
+        .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 22))
+    }
+
+    private func meatLegend(icon: String, title: String, color: Color) -> some View {
+        HStack(spacing: 6) {
+            Text(icon)
+                .font(.body)
+                .grayscale(0.15)
+            Circle()
+                .fill(color)
+                .frame(width: 8, height: 8)
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(AppTheme.muted)
+        }
+    }
+
+    private func selectMeatWeek(
+        at location: CGPoint,
+        proxy: ChartProxy,
+        geometry: GeometryProxy
+    ) {
+        guard let plotFrame = proxy.plotFrame else { return }
+        let plotRect = geometry[plotFrame]
+        let xPosition = location.x - plotRect.origin.x
+        guard xPosition >= 0,
+              xPosition <= plotRect.width,
+              let selectedDate: Date = proxy.value(atX: xPosition),
+              let week = weeklyMeatPoints.min(by: {
+                  abs($0.weekStart.timeIntervalSince(selectedDate))
+                      < abs($1.weekStart.timeIntervalSince(selectedDate))
+              })
+        else { return }
+        selectedMeatWeek = week
+    }
+
+    private func meatDays(in week: WeeklyMeatDays) -> [MeatDayFoods] {
+        diary.meatDayFoods(numberOfDays: range).filter {
+            $0.date >= week.weekStart && $0.date <= week.weekEnd
         }
     }
 
@@ -166,6 +289,92 @@ struct TrendsView: View {
         case .gap: AppTheme.gapDay
         case .cheat: AppTheme.cheatDay
         }
+    }
+}
+
+private struct MeatWeekFoodsView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    let week: WeeklyMeatDays
+    let days: [MeatDayFoods]
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if days.isEmpty {
+                    ContentUnavailableView(
+                        "No meat foods",
+                        systemImage: "fork.knife",
+                        description: Text("No qualifying foods were logged during this week.")
+                    )
+                } else {
+                    List(days) { day in
+                        Section(day.date.formatted(date: .complete, time: .omitted)) {
+                            if !day.processedMeatFoods.isEmpty {
+                                meatFoodGroup(
+                                    icon: "🥓",
+                                    title: "Processed meat",
+                                    foods: day.processedMeatFoods,
+                                    color: AppTheme.processedMeat
+                                )
+                            }
+                            if !day.redMeatFoods.isEmpty {
+                                meatFoodGroup(
+                                    icon: "🥩",
+                                    title: "Red meat",
+                                    foods: day.redMeatFoods,
+                                    color: AppTheme.redMeat
+                                )
+                            }
+                        }
+                    }
+                    .listStyle(.insetGrouped)
+                }
+            }
+            .navigationTitle("Meat foods")
+            .safeAreaInset(edge: .top, spacing: 0) {
+                Text(weekRangeTitle)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(AppTheme.muted)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                    .background(.bar)
+            }
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private func meatFoodGroup(
+        icon: String,
+        title: String,
+        foods: [String],
+        color: Color
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 7) {
+                Text(icon)
+                Circle()
+                    .fill(color)
+                    .frame(width: 8, height: 8)
+                Text(title)
+                    .font(.headline)
+            }
+            ForEach(foods, id: \.self) { food in
+                Text(food)
+                    .font(.subheadline)
+                    .foregroundStyle(AppTheme.muted)
+            }
+        }
+        .padding(.vertical, 3)
+        .accessibilityElement(children: .combine)
+    }
+
+    private var weekRangeTitle: String {
+        "\(week.weekStart.formatted(date: .abbreviated, time: .omitted))–\(week.weekEnd.formatted(date: .abbreviated, time: .omitted))"
     }
 }
 

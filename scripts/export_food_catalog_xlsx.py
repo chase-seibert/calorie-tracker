@@ -19,7 +19,8 @@ HEADERS = [
     "Source ID", "Source", "Food name", "Brand", "Barcode",
     "Calories / 100 g", "Carbs (g) / 100 g", "Fat (g) / 100 g",
     "Protein (g) / 100 g", "Base grams", "Serving grams",
-    "Serving description", "Portions", "Rank",
+    "Serving description", "Portions", "Contains processed meat",
+    "Contains red meat", "Rank",
 ]
 
 
@@ -62,7 +63,7 @@ def rows() -> list[list[object]]:
     query = """
         SELECT source_id, source, name, brand, barcode, calories, carbs, fat,
                protein, base_grams, serving_grams, serving_description,
-               portions_json, rank
+               portions_json, contains_processed_meat, contains_red_meat, rank
         FROM foods
         ORDER BY source, rank DESC, name
     """
@@ -74,7 +75,10 @@ def rows() -> list[list[object]]:
             row["name"], row["brand"], row["barcode"],
             row["calories"], row["carbs"], row["fat"], row["protein"],
             row["base_grams"], row["serving_grams"], row["serving_description"],
-            portion_text(row["portions_json"]), row["rank"],
+            portion_text(row["portions_json"]),
+            "Yes" if row["contains_processed_meat"] else "No",
+            "Yes" if row["contains_red_meat"] else "No",
+            row["rank"],
         ])
     connection.close()
     return result

@@ -13,6 +13,8 @@ struct CustomFoodDefinition: Codable, Equatable, Sendable {
     var servingGrams: Double
     var nutrition: Nutrition
     var notes: String?
+    var containsProcessedMeat: Bool? = nil
+    var containsRedMeat: Bool? = nil
 
     func validate() throws {
         guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
@@ -64,7 +66,9 @@ struct CustomFoodDefinition: Codable, Equatable, Sendable {
                 id: "imported-serving",
                 label: normalized.servingDescription,
                 grams: grams
-            )]
+            )],
+            containsProcessedMeat: normalized.containsProcessedMeat ?? false,
+            containsRedMeat: normalized.containsRedMeat ?? false
         )
     }
 
@@ -91,6 +95,8 @@ struct CustomFoodFile: Codable, Equatable, Sendable {
     var servingGrams: Double
     var nutrition: CustomFoodDefinition.Nutrition
     var notes: String?
+    var containsProcessedMeat: Bool? = nil
+    var containsRedMeat: Bool? = nil
 
     var food: CustomFoodDefinition {
         CustomFoodDefinition(
@@ -98,7 +104,9 @@ struct CustomFoodFile: Codable, Equatable, Sendable {
             servingDescription: servingDescription,
             servingGrams: servingGrams,
             nutrition: nutrition,
-            notes: notes
+            notes: notes,
+            containsProcessedMeat: containsProcessedMeat,
+            containsRedMeat: containsRedMeat
         )
     }
 
@@ -121,7 +129,9 @@ struct CustomFoodFile: Codable, Equatable, Sendable {
             servingDescription: normalizedFood.servingDescription,
             servingGrams: normalizedFood.servingGrams,
             nutrition: normalizedFood.nutrition,
-            notes: normalizedFood.notes
+            notes: normalizedFood.notes,
+            containsProcessedMeat: normalizedFood.containsProcessedMeat,
+            containsRedMeat: normalizedFood.containsRedMeat
         )
     }
 }
@@ -212,6 +222,8 @@ enum CustomImportFile: Equatable, Sendable {
         "fatGrams": 40,
         "proteinGrams": 60
       },
+      "containsProcessedMeat": false,
+      "containsRedMeat": false,
       "notes": "Short explanation of the estimate and biggest uncertainty"
     }
 
@@ -231,6 +243,8 @@ enum CustomImportFile: Equatable, Sendable {
             "fatGrams": 12,
             "proteinGrams": 45
           },
+          "containsProcessedMeat": false,
+          "containsRedMeat": false,
           "notes": "Optional food-specific estimate note"
         },
         {

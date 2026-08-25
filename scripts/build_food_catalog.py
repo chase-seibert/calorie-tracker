@@ -45,6 +45,8 @@ OFF_FIELDS = ",".join(
         "serving_size",
         "serving_quantity",
         "nutriments",
+        "categories_tags",
+        "ingredients_tags",
         "unique_scans_n",
     ]
 )
@@ -66,7 +68,143 @@ class CatalogFood:
     serving_grams: float | None = None
     serving_description: str | None = None
     portions: tuple[dict[str, object], ...] = ()
+    contains_processed_meat: bool = False
+    contains_red_meat: bool = False
     rank: int = 0
+
+
+PROCESSED_MEAT_PATTERN = re.compile(
+    r"\b(?:bacon|ham|hot[ -]?dogs?|frankfurters?|wieners?|luncheon meat|cold cuts?|"
+    r"deli meats?|sausages?|pepperoni|salami|prosciutto|pastrami|pancetta|mortadella|"
+    r"capicola|coppa|soppressata|chorizo|kielbasa|bratwurst|andouille|liverwurst|"
+    r"braunschweiger|corned beef|jerky|biltong|canned meat|spam)\b",
+    re.IGNORECASE,
+)
+PROCESS_METHOD_PATTERN = re.compile(
+    r"\b(?:cured|salted|smoked|fermented|dried|preserved)\b",
+    re.IGNORECASE,
+)
+RED_MEAT_PATTERN = re.compile(
+    r"\b(?:beef|veal|pork|lamb|mutton|goat|venison|deer|elk|moose|bison|buffalo|"
+    r"rabbit|hare|horse|boar)\b",
+    re.IGNORECASE,
+)
+OTHER_MEAT_PATTERN = re.compile(
+    r"\b(?:chicken|turkey|duck|goose|poultry|meat|offal)\b",
+    re.IGNORECASE,
+)
+POULTRY_PATTERN = re.compile(r"\b(?:chicken|turkey|duck|goose|poultry)\b", re.IGNORECASE)
+MEAT_ANALOG_PATTERN = re.compile(
+    r"\b(?:meatless|vegetarian|vegan|plant[ -]based|soy)\b",
+    re.IGNORECASE,
+)
+NON_MEAT_RED_PRODUCT_PATTERN = re.compile(
+    r"\b(?:beef|pork|lamb)\s+(?:broth|stock|bouillon|flavou?r|extract|gelatin|"
+    r"tallow|fat|suet)\b",
+    re.IGNORECASE,
+)
+NON_MUSCLE_MEAT_PATTERN = re.compile(
+    r"\b(?:variety meats?|by-products?|brain|heart|kidney|liver|lung|pancreas|"
+    r"spleen|sweetbread|thymus|tongue|tripe|seam fat|fat only)\b",
+    re.IGNORECASE,
+)
+NON_MEAT_NAME_PATTERN = re.compile(
+    r"\b(?:bun|buns|roll|rolls|bread|cracker|crackers|seasoning|flavou?r)\b",
+    re.IGNORECASE,
+)
+
+
+def classify_meat_text(text: str, category: str = "") -> tuple[bool, bool]:
+    """Return processed-meat and unprocessed-red-meat presence flags."""
+    combined = f"{text} {category}".strip()
+    processed_text = re.sub(r"\bleg\s*\(ham\)", "leg", combined, flags=re.IGNORECASE)
+    processed_text = re.sub(r"\bham hocks?\b", "hock", processed_text, flags=re.IGNORECASE)
+    processed_text = re.sub(
+        r"\b(?:includes? )?cuts? to be cured\b",
+        "cuts",
+        processed_text,
+        flags=re.IGNORECASE,
+    )
+    has_red_species = bool(RED_MEAT_PATTERN.search(combined))
+    has_other_meat = bool(OTHER_MEAT_PATTERN.search(combined))
+    has_poultry = bool(POULTRY_PATTERN.search(combined))
+    is_analog = bool(MEAT_ANALOG_PATTERN.search(combined))
+    if is_analog and not has_red_species and not has_poultry:
+        return False, False
+
+    category_lower = category.lower()
+    processed_category = any(
+        value in category_lower
+        for value in (
+            "sausages and luncheon meats",
+            "cold cuts and cured meats",
+            "deli and cured meat sandwiches",
+            "bacon",
+            "frankfurters",
+            "sausages",
+        )
+    )
+    explicit_processed = bool(PROCESSED_MEAT_PATTERN.search(processed_text))
+    if explicit_processed and NON_MEAT_NAME_PATTERN.search(text) and not has_red_species and not has_poultry:
+        explicit_processed = False
+    method_processed = bool(PROCESS_METHOD_PATTERN.search(processed_text)) and (
+        has_red_species or has_other_meat
+    )
+    contains_processed = processed_category or explicit_processed or method_processed
+
+    red_category = any(
+        value in category_lower
+        for value in (
+            "beef products",
+            "pork products",
+            "lamb, veal, and game products",
+            "beef, excludes ground",
+            "ground beef",
+            "lamb, goat, game",
+        )
+    ) or category_lower == "pork"
+    non_meat_product = bool(NON_MEAT_RED_PRODUCT_PATTERN.search(text))
+    non_muscle_meat = bool(NON_MUSCLE_MEAT_PATTERN.search(text))
+    contains_red = (
+        (has_red_species or red_category)
+        and not contains_processed
+        and not non_meat_product
+        and not non_muscle_meat
+    )
+    return contains_processed, contains_red
+
+
+def classify_usda_meat(raw: dict) -> tuple[bool, bool]:
+    category = clean_text((raw.get("foodCategory") or {}).get("description")) or clean_text(
+        (raw.get("wweiaFoodCategory") or {}).get("wweiaFoodCategoryDescription")
+    ) or ""
+    direct = classify_meat_text(clean_text(raw.get("description")) or "", category)
+    classifications = [direct]
+    for ingredient in raw.get("inputFoods") or []:
+        description = (
+            clean_text(ingredient.get("ingredientDescription"))
+            or clean_text(ingredient.get("foodDescription"))
+            or ""
+        )
+        classifications.append(classify_meat_text(description))
+    contains_processed = any(processed for processed, _ in classifications)
+    contains_red = any(red for _, red in classifications)
+    direct_processed_categories = (
+        "sausages and luncheon meats",
+        "cold cuts and cured meats",
+        "bacon",
+        "frankfurters",
+        "sausages",
+    )
+    if direct[0] and any(value in category.lower() for value in direct_processed_categories):
+        contains_red = False
+    return contains_processed, contains_red
+
+
+def classify_off_meat(raw: dict, name: str) -> tuple[bool, bool]:
+    categories = " ".join(str(value) for value in raw.get("categories_tags") or [])
+    ingredients = " ".join(str(value) for value in raw.get("ingredients_tags") or [])
+    return classify_meat_text(f"{name} {ingredients}", categories)
 
 
 def parse_args() -> argparse.Namespace:
@@ -319,6 +457,7 @@ def parse_usda_food(raw: dict, kind: str) -> CatalogFood | None:
     serving_grams = finite_number(portions[0]["grams"]) if portions else None
     serving_description = f"1 {portions[0]['label']}" if portions else None
     data_type_rank = {"foundation": 300, "survey": 200, "sr_legacy": 100}.get(kind, 0)
+    contains_processed_meat, contains_red_meat = classify_usda_meat(raw)
     return CatalogFood(
         source_id=source_id,
         source="usda",
@@ -332,6 +471,8 @@ def parse_usda_food(raw: dict, kind: str) -> CatalogFood | None:
         serving_grams=serving_grams,
         serving_description=serving_description,
         portions=tuple(portions),
+        contains_processed_meat=contains_processed_meat,
+        contains_red_meat=contains_red_meat,
         rank=data_type_rank,
     )
 
@@ -387,6 +528,7 @@ def off_foods(products: int | None = None, search: bool = False) -> Iterator[Cat
                 if serving_grams > 0
                 else ()
             )
+            contains_processed_meat, contains_red_meat = classify_off_meat(raw, name)
             yield CatalogFood(
                 source_id=barcode,
                 source="off",
@@ -400,6 +542,8 @@ def off_foods(products: int | None = None, search: bool = False) -> Iterator[Cat
                 serving_grams=serving_grams or None,
                 serving_description=serving_description,
                 portions=portions,
+                contains_processed_meat=contains_processed_meat,
+                contains_red_meat=contains_red_meat,
                 rank=int(finite_number(raw.get("_catalog_rank", raw.get("unique_scans_n")))),
             )
 
@@ -446,6 +590,8 @@ def create_database(output: Path, foods: Iterable[CatalogFood]) -> tuple[int, di
             serving_grams REAL,
             serving_description TEXT,
             portions_json TEXT,
+            contains_processed_meat INTEGER NOT NULL DEFAULT 0,
+            contains_red_meat INTEGER NOT NULL DEFAULT 0,
             rank INTEGER NOT NULL DEFAULT 0,
             UNIQUE(source, source_id)
         );
@@ -458,8 +604,8 @@ def create_database(output: Path, foods: Iterable[CatalogFood]) -> tuple[int, di
         INSERT OR REPLACE INTO foods (
             source_id, source, name, brand, barcode, calories, carbs, fat,
             protein, base_grams, serving_grams, serving_description, portions_json,
-            rank
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            contains_processed_meat, contains_red_meat, rank
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
     count = 0
     counts: dict[str, int] = {}
@@ -480,6 +626,8 @@ def create_database(output: Path, foods: Iterable[CatalogFood]) -> tuple[int, di
                 food.serving_grams,
                 food.serving_description,
                 json.dumps(food.portions, separators=(",", ":")) if food.portions else None,
+                int(food.contains_processed_meat),
+                int(food.contains_red_meat),
                 food.rank,
             )
         )
@@ -503,7 +651,7 @@ def create_database(output: Path, foods: Iterable[CatalogFood]) -> tuple[int, di
         );
         INSERT INTO foods_fts(rowid, name, brand)
             SELECT rowid, name, coalesce(brand, '') FROM foods;
-        INSERT INTO metadata VALUES ('schema_version', '2');
+        INSERT INTO metadata VALUES ('schema_version', '3');
         INSERT INTO metadata VALUES ('usda_release', '2026-04-30 foundation; 2018-04 SR Legacy; 2024-10-31 FNDDS');
         INSERT INTO metadata VALUES ('off_scope', 'popular products tagged United States with calorie data');
         ANALYZE;

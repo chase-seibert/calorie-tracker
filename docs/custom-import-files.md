@@ -42,6 +42,8 @@ food:
     "fatGrams": 40,
     "proteinGrams": 60
   },
+  "containsProcessedMeat": false,
+  "containsRedMeat": false,
   "notes": "Dressing and buried cheese are the biggest uncertainties."
 }
 ```
@@ -66,7 +68,9 @@ totals from `foods`; top-level nutrition is intentionally absent.
         "carbohydratesGrams": 4,
         "fatGrams": 12,
         "proteinGrams": 45
-      }
+      },
+      "containsProcessedMeat": false,
+      "containsRedMeat": false
     },
     {
       "name": "Quinoa and black beans",
@@ -101,7 +105,10 @@ should be separate foods when they are calorically material.
 
 ## Validation and behavior
 
-All fields except `notes` are required. Numeric fields contain numbers rather
+All fields except `notes`, `containsProcessedMeat`, and `containsRedMeat` are
+required. The optional meat fields are booleans, default to false when absent,
+and remain editable in the review screen. Red meat means unprocessed mammalian
+meat; a mixed food can set both flags. Numeric fields contain numbers rather
 than strings or ranges. `servingGrams` is the estimated weight of the portion
 described by `servingDescription`, preserving meaningful food-weight reports.
 Fiber is intentionally absent because the app does not currently track it.

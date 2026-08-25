@@ -198,6 +198,13 @@ struct FoodPortion: Codable, Hashable, Identifiable, Sendable {
     var grams: Double
 }
 
+struct MeatClassification: Codable, Hashable, Sendable {
+    var containsProcessedMeat: Bool
+    var containsRedMeat: Bool
+
+    static let none = MeatClassification(containsProcessedMeat: false, containsRedMeat: false)
+}
+
 struct Food: Codable, Hashable, Identifiable, Sendable {
     let sourceID: String
     let source: FoodSource
@@ -209,8 +216,18 @@ struct Food: Codable, Hashable, Identifiable, Sendable {
     var servingGrams: Double?
     var servingDescription: String?
     var portions: [FoodPortion]? = nil
+    var containsProcessedMeat: Bool? = nil
+    var containsRedMeat: Bool? = nil
 
     var id: String { "\(source.rawValue):\(sourceID)" }
+
+    var meatClassification: MeatClassification? {
+        guard let containsProcessedMeat, let containsRedMeat else { return nil }
+        return MeatClassification(
+            containsProcessedMeat: containsProcessedMeat,
+            containsRedMeat: containsRedMeat
+        )
+    }
 
     var displayBrand: String? {
         guard let brand, !brand.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
@@ -309,6 +326,16 @@ struct SavedMeal: Codable, Hashable, Identifiable, Sendable {
     let id: UUID
     var name: String
     var items: [MealItem]
+    var containsProcessedMeat: Bool? = nil
+    var containsRedMeat: Bool? = nil
+
+    var resolvedContainsProcessedMeat: Bool {
+        containsProcessedMeat ?? items.contains { $0.food.containsProcessedMeat == true }
+    }
+
+    var resolvedContainsRedMeat: Bool {
+        containsRedMeat ?? items.contains { $0.food.containsRedMeat == true }
+    }
 
     var nutrients: MacroNutrients {
         items.reduce(.zero) { total, item in
@@ -319,6 +346,23 @@ struct SavedMeal: Codable, Hashable, Identifiable, Sendable {
             )
         }
     }
+}
+
+struct WeeklyMeatDays: Identifiable, Equatable, Sendable {
+    let weekStart: Date
+    let weekEnd: Date
+    let processedMeatDays: Int
+    let redMeatDays: Int
+
+    var id: Date { weekStart }
+}
+
+struct MeatDayFoods: Identifiable, Equatable, Sendable {
+    let date: Date
+    let processedMeatFoods: [String]
+    let redMeatFoods: [String]
+
+    var id: Date { date }
 }
 
 enum FoodPickerItem: Identifiable, Hashable, Sendable {
@@ -387,7 +431,7 @@ struct MagicFoodSuggestionResult: Sendable {
 }
 
 struct DiaryDocument: Codable, Sendable {
-    var schemaVersion = 6
+    var schemaVersion = 7
     var dailyCalorieGoal: Int? = nil
     var trackingStartDate: Date? = nil
     var dayStatuses: [DayStatus] = []

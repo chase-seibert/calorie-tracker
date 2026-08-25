@@ -73,7 +73,9 @@ struct CustomFoodImportView: View {
                 fat: definition.nutrition.fatGrams,
                 protein: definition.nutrition.proteinGrams,
                 servingGrams: definition.servingGrams,
-                servingDescription: "1 \(definition.servingDescription)"
+                servingDescription: "1 \(definition.servingDescription)",
+                containsProcessedMeat: definition.containsProcessedMeat ?? false,
+                containsRedMeat: definition.containsRedMeat ?? false
             )
             AppAnalytics.capture("custom_food.created", properties: ["origin": "file_import"])
         } else {
@@ -297,6 +299,8 @@ private struct ImportedFoodFields: View {
         decimalField("Carbohydrates (g)", value: $food.nutrition.carbohydratesGrams)
         decimalField("Fat (g)", value: $food.nutrition.fatGrams)
         decimalField("Protein (g)", value: $food.nutrition.proteinGrams)
+        Toggle("Contains processed meat", isOn: optionalBool($food.containsProcessedMeat))
+        Toggle("Contains red meat", isOn: optionalBool($food.containsRedMeat))
         TextField("Notes (optional)", text: notesBinding, axis: .vertical)
             .lineLimit(2...5)
     }
@@ -315,5 +319,12 @@ private struct ImportedFoodFields: View {
                 .multilineTextAlignment(.trailing)
                 .frame(width: 90)
         }
+    }
+
+    private func optionalBool(_ value: Binding<Bool?>) -> Binding<Bool> {
+        Binding(
+            get: { value.wrappedValue ?? false },
+            set: { value.wrappedValue = $0 }
+        )
     }
 }

@@ -1362,7 +1362,9 @@ struct QuantityEditor: View {
             baseAmountGrams: 1,
             servingGrams: 1,
             servingDescription: "1 meal",
-            portions: [FoodPortion(id: "saved-meal", label: "meal", grams: 1)]
+            portions: [FoodPortion(id: "saved-meal", label: "meal", grams: 1)],
+            containsProcessedMeat: meal.resolvedContainsProcessedMeat,
+            containsRedMeat: meal.resolvedContainsRedMeat
         )
     }
 

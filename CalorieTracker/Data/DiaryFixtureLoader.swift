@@ -7,6 +7,7 @@ enum DiaryFixtureLoader {
     @MainActor
     static func makeDeviceStore(
         healthKit: HealthKitStore,
+        catalog: CatalogStore? = nil,
         calendar: Calendar = .current,
         reset: Bool
     ) -> DiaryStore {
@@ -18,7 +19,7 @@ enum DiaryFixtureLoader {
             let data = try? Data(contentsOf: fixtureURL),
             let fixture = decode(data: data)
         else {
-            return DiaryStore(healthKit: healthKit)
+            return DiaryStore(catalog: catalog, healthKit: healthKit)
         }
 
         let fileURL = FileManager.default.temporaryDirectory
@@ -29,6 +30,7 @@ enum DiaryFixtureLoader {
             return DiaryStore(
                 fileURL: fileURL,
                 calendar: calendar,
+                catalog: catalog,
                 healthKit: healthKit,
                 defaultWeightUnit: fixture.defaultWeightUnit
             )
@@ -45,6 +47,7 @@ enum DiaryFixtureLoader {
             document: document,
             fileURL: fileURL,
             calendar: calendar,
+            catalog: catalog,
             healthKit: healthKit,
             defaultWeightUnit: fixture.defaultWeightUnit
         )

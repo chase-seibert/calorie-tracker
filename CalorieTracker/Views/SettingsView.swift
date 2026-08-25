@@ -710,6 +710,8 @@ struct CustomFoodEditorView: View {
     @State private var fat: Double
     @State private var protein: Double
     @State private var servingGrams: Double
+    @State private var containsProcessedMeat: Bool
+    @State private var containsRedMeat: Bool
     @FocusState private var focusedField: Field?
 
     private enum Field: Hashable {
@@ -747,6 +749,8 @@ struct CustomFoodEditorView: View {
         _fat = State(initialValue: food?.nutrients.fat ?? 0)
         _protein = State(initialValue: food?.nutrients.protein ?? 0)
         _servingGrams = State(initialValue: food?.servingGrams ?? food?.baseAmountGrams ?? 100)
+        _containsProcessedMeat = State(initialValue: food?.containsProcessedMeat ?? false)
+        _containsRedMeat = State(initialValue: food?.containsRedMeat ?? false)
     }
 
     var body: some View {
@@ -763,6 +767,15 @@ struct CustomFoodEditorView: View {
                     decimalFieldRow("Fat (g)", value: $fat, field: .fat)
                     decimalFieldRow("Protein (g)", value: $protein, field: .protein)
                     decimalFieldRow("Serving size (g)", value: $servingGrams, field: .servingGrams)
+                }
+
+                Section {
+                    Toggle("Contains processed meat", isOn: $containsProcessedMeat)
+                    Toggle("Contains red meat", isOn: $containsRedMeat)
+                } header: {
+                    Text("Meat tracking")
+                } footer: {
+                    Text("Red meat tracks unprocessed mammalian meat. Set both when a mixed food contains both kinds.")
                 }
             }
             .navigationTitle(food == nil ? "Add Custom Food" : "Edit Custom Food")
@@ -834,7 +847,9 @@ struct CustomFoodEditorView: View {
                 carbs: carbs,
                 fat: fat,
                 protein: protein,
-                servingGrams: servingGrams
+                servingGrams: servingGrams,
+                containsProcessedMeat: containsProcessedMeat,
+                containsRedMeat: containsRedMeat
             ) else { return }
             savedFood = diary.document.customFoods.first { $0.id == food.id }
         } else {
@@ -845,7 +860,9 @@ struct CustomFoodEditorView: View {
                 carbs: carbs,
                 fat: fat,
                 protein: protein,
-                servingGrams: servingGrams
+                servingGrams: servingGrams,
+                containsProcessedMeat: containsProcessedMeat,
+                containsRedMeat: containsRedMeat
             )
         }
         if let savedFood {
@@ -883,12 +900,16 @@ private struct SavedMealEditorView: View {
     private let meal: SavedMeal?
     @State private var name: String
     @State private var items: [MealItem]
+    @State private var containsProcessedMeat: Bool
+    @State private var containsRedMeat: Bool
     @State private var showingFoodPicker = false
 
     init(meal: SavedMeal?) {
         self.meal = meal
         _name = State(initialValue: meal?.name ?? "")
         _items = State(initialValue: meal?.items ?? [])
+        _containsProcessedMeat = State(initialValue: meal?.resolvedContainsProcessedMeat ?? false)
+        _containsRedMeat = State(initialValue: meal?.resolvedContainsRedMeat ?? false)
     }
 
     var body: some View {
@@ -914,6 +935,15 @@ private struct SavedMealEditorView: View {
                         showingFoodPicker = true
                     }
                 }
+
+                Section {
+                    Toggle("Contains processed meat", isOn: $containsProcessedMeat)
+                    Toggle("Contains red meat", isOn: $containsRedMeat)
+                } header: {
+                    Text("Meat tracking")
+                } footer: {
+                    Text("These meal-level flags control how every logged serving of this meal appears in Trends.")
+                }
             }
             .navigationTitle(meal == nil ? "Add Saved Meal" : "Edit Saved Meal")
             .navigationBarTitleDisplayMode(.inline)
@@ -936,6 +966,8 @@ private struct SavedMealEditorView: View {
                         unit: preference.unit,
                         portionID: preference.portionID
                     ))
+                    containsProcessedMeat = containsProcessedMeat || food.containsProcessedMeat == true
+                    containsRedMeat = containsRedMeat || food.containsRedMeat == true
                 }
             }
             .analyticsScreen("saved_meal_editor", properties: [
@@ -966,13 +998,24 @@ private struct SavedMealEditorView: View {
     private func save() {
         guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, !items.isEmpty else { return }
         if let meal {
-            guard diary.updateSavedMeal(mealID: meal.id, name: name, items: items) else { return }
+            guard diary.updateSavedMeal(
+                mealID: meal.id,
+                name: name,
+                items: items,
+                containsProcessedMeat: containsProcessedMeat,
+                containsRedMeat: containsRedMeat
+            ) else { return }
             AppAnalytics.capture("meal.updated", properties: [
                 "origin": "custom_catalog",
                 "item_count": String(items.count)
             ])
         } else {
-            guard diary.saveMeal(name: name, items: items) != nil else { return }
+            guard diary.saveMeal(
+                name: name,
+                items: items,
+                containsProcessedMeat: containsProcessedMeat,
+                containsRedMeat: containsRedMeat
+            ) != nil else { return }
             AppAnalytics.capture("meal.created", properties: [
                 "origin": "custom_catalog",
                 "item_count": String(items.count)

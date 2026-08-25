@@ -20,10 +20,9 @@ The checked-in SQLite file is generated from cached upstream snapshots by
 | Open Food Facts, top 1,000 U.S.-tagged products | 1,000 | 935 | Missing a product name, barcode, or calorie value |
 | **Total** | **14,620** | **14,480** | **140 rejected** |
 
-The resulting file is approximately 4.6 MiB: 13,545 USDA foods and 935 Open
-Food Facts products. A measured USDA-only build used 4,599,808 bytes for 13,545
-rows; the OFF-only build used 319,488 bytes for 935 rows. The combined catalog
-currently averages about 335 bytes per retained row, including indexes.
+The resulting file is approximately 4.7 MiB: 13,545 USDA foods and 935 Open
+Food Facts products. The combined catalog currently averages about 337 bytes
+per retained row, including indexes and the two meat-presence flags.
 
 ## What is pruned
 
@@ -45,10 +44,13 @@ Each retained catalog row keeps only:
 - name, brand, and barcode;
 - calories, carbohydrates, fat, and protein per 100 g;
 - usable portion labels and their gram weights;
+- compiled processed-meat and unprocessed-red-meat presence flags;
 - a source popularity/ranking value.
 
-Micronutrients, ingredients, allergens, images, packaging, category trees,
-marketing text, and source audit history are discarded. SQLite adds a compact
+Source categories, recipe ingredients, and ingredient tags contribute to the
+meat flags during compilation and are then discarded. Micronutrients, allergens,
+images, packaging, category trees, marketing text, and source audit history are
+also discarded. SQLite adds a compact
 FTS5 index over name and brand plus indexes for source ranking and barcodes.
 
 ### Normalization rules
@@ -73,7 +75,7 @@ are not perfectly linear.
 
 | Preset | Approximate retained items | Estimated app asset | Coverage and tradeoff |
 | --- | ---: | ---: | --- |
-| Current compact | 14,480 | 4.6 MiB measured | Strong generic foods; only the most popular packaged products |
+| Current compact | 14,480 | 4.7 MiB measured | Strong generic foods; only the most popular packaged products |
 | OFF top 5,000 | 18,000–18,500 total | 6–8 MiB | Modest packaged-food improvement with almost no install concern |
 | OFF top 25,000 | 36,000–38,000 total | 12–20 MiB | Good personal-app balance; refresh through the rate-limited search API is slow |
 | USDA Branded | 350,000–450,000 total after validation | 120–220 MiB | Much broader U.S. packaged coverage and UPC lookup; more duplicates and stale products |

@@ -83,6 +83,22 @@ so the same portion is available from favorites and later catalog searches.
 Custom names use the same stable IDs, allowing a rename to flow through existing
 diary entries and future personal search results.
 
+Catalog foods also carry two compiled presence flags: processed meat and
+unprocessed red meat. The catalog builder derives them from USDA food categories,
+FNDDS ingredient recipes, Open Food Facts category and ingredient tags, and
+token-aware name rules. Source categories and ingredient lists remain build-time
+inputs rather than shipped catalog payloads. Existing diary food snapshots are
+backfilled at launch by stable source ID; legacy custom foods use the same
+conservative name classifier and can then be corrected in the Custom editor.
+Saved meals have optional explicit overrides and otherwise derive both flags from
+their component foods.
+
+Meat trends are presence-based rather than quantity-based. `DiaryStore` reduces
+each day to two booleans, then groups the selected Trends range by the device's
+calendar week. Multiple matching foods on one day still contribute one day to
+that category. A meal-level explicit flag controls the saved meal; otherwise its
+historical component snapshot supplies the classification.
+
 The food-weight report is derived on demand from the local `DiaryDocument` and
 does not create persistent report state. It filters to the current day and the
 previous 89 calendar days, excludes calorie-only cheat-day adjustments, expands
@@ -147,7 +163,8 @@ and protein for that quantity. All usable source portions are stored as compact
 JSON so one food can expose choices such as ounces, grams, large egg,
 tablespoon, cup, or branded serving without duplicating nutrition rows.
 Searchable metadata is intentionally limited to source ID, name, brand,
-barcode, source, serving description, and rank.
+barcode, source, serving description, and rank. Two non-searchable boolean
+columns record processed-meat and unprocessed-red-meat presence.
 
 The build script imports USDA JSON and Open Food Facts API/export records into a
 single format, deduplicates them, and builds an external-content FTS5 index.

@@ -58,6 +58,9 @@
 - As someone tracking alcohol without itemizing every drink, I want a fast daily
   drink count with an optional single type, estimated calories, and drink-count
   trends.
+- As someone limiting meat-related health risks, I want Trends to show how many
+  days in each week contained processed meat and how many contained unprocessed
+  red meat, regardless of quantity.
 - As someone analyzing what I eat, I want to share a last-90-days Markdown
   report of foods by total whole-ounce weight, with meals expanded into their
   historical component foods, so I can send it to ChatGPT and ask questions.
@@ -102,6 +105,13 @@
   calories contribute to diary totals. Trends shows each day's count as a
   vertical stack of orange wine-glass icons within the calorie chart rather
   than as a separate alcohol chart.
+- Foods carry independent processed-meat and unprocessed-red-meat presence flags.
+  Processed meat includes cured, salted, smoked, fermented, dried, or otherwise
+  preserved meat from red meat or poultry. Red meat means unprocessed mammalian
+  meat. A mixed food may carry both flags. Trends groups diary days by the
+  device calendar week and counts each category at most once per day. Tapping a
+  week shows the qualifying foods grouped by day and category. Custom food,
+  saved-meal, and import review editors expose both flags.
 - Marking a cheat day uses one Yes action. Once marked, compact estimate pills
   offer 500, 1,000, 1,500, and 2,000 calories above the Logged list. The chosen
   value appears as one calorie-only “Cheat day adjustment,” and choosing another

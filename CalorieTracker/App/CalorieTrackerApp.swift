@@ -5,13 +5,18 @@ struct CalorieTrackerApp: App {
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var diary: DiaryStore
     @StateObject private var healthKit: HealthKitStore
-    private let catalog = CatalogStore()
+    private let catalog: CatalogStore
     private let analytics = AnalyticsService.shared
 
     init() {
         let healthKit = HealthKitStore()
+        let catalog = CatalogStore()
+        self.catalog = catalog
         _healthKit = StateObject(wrappedValue: healthKit)
-        _diary = StateObject(wrappedValue: LaunchConfiguration.makeDiaryStore(healthKit: healthKit))
+        _diary = StateObject(wrappedValue: LaunchConfiguration.makeDiaryStore(
+            healthKit: healthKit,
+            catalog: catalog
+        ))
     }
 
     var body: some Scene {
@@ -43,7 +48,7 @@ struct CalorieTrackerApp: App {
 
 private enum LaunchConfiguration {
     @MainActor
-    static func makeDiaryStore(healthKit: HealthKitStore) -> DiaryStore {
+    static func makeDiaryStore(healthKit: HealthKitStore, catalog: CatalogStore) -> DiaryStore {
 #if DEBUG
         let environment = ProcessInfo.processInfo.environment
         if environment["CALORIE_TRACKER_UI_TEST_FIXTURE"] == "reorder" {
@@ -54,7 +59,7 @@ private enum LaunchConfiguration {
                 try? FileManager.default.removeItem(at: fixtureURL)
             }
 
-            let store = DiaryStore(fileURL: fixtureURL, healthKit: healthKit)
+            let store = DiaryStore(fileURL: fixtureURL, catalog: catalog, healthKit: healthKit)
             if store.entries(on: Date()).isEmpty {
                 seedReorderFixture(in: store)
             }
@@ -70,11 +75,12 @@ private enum LaunchConfiguration {
         if environment["CALORIE_TRACKER_FIXTURE"] == "device" || usesDefaultSimulatorFixture {
             return DiaryFixtureLoader.makeDeviceStore(
                 healthKit: healthKit,
+                catalog: catalog,
                 reset: environment["CALORIE_TRACKER_FIXTURE_RESET"] == "1" || usesDefaultSimulatorFixture
             )
         }
 #endif
-        return DiaryStore(healthKit: healthKit)
+        return DiaryStore(catalog: catalog, healthKit: healthKit)
     }
 
 #if DEBUG
@@ -129,4 +135,6 @@ enum AppTheme {
     static let protein = Color(uiColor: .systemGreen)
     static let gapDay = Color(uiColor: .systemGray)
     static let cheatDay = Color(uiColor: .systemOrange)
+    static let processedMeat = Color(uiColor: .systemTeal)
+    static let redMeat = Color(uiColor: .systemRed)
 }

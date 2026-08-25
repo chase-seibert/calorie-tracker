@@ -8,21 +8,27 @@ final class DiaryStore: ObservableObject {
 
     private let fileURL: URL
     private let calendar: Calendar
+    private let catalog: CatalogStore?
     private let healthKit: HealthKitStore?
     private let defaultWeightUnit: LogUnit?
 
     init(
         fileURL: URL? = nil,
         calendar: Calendar = .current,
+        catalog: CatalogStore? = nil,
         healthKit: HealthKitStore? = nil,
         defaultWeightUnit: LogUnit? = nil,
         referenceDate: Date = Date()
     ) {
         self.calendar = calendar
         self.fileURL = fileURL ?? Self.defaultFileURL()
+        self.catalog = catalog
         self.healthKit = healthKit
         self.defaultWeightUnit = defaultWeightUnit
-        self.document = Self.load(from: self.fileURL) ?? DiaryDocument()
+        self.document = Self.backfilledMeatClassifications(
+            in: Self.load(from: self.fileURL) ?? DiaryDocument(),
+            catalog: catalog
+        )
         prepareDayTracking(referenceDate: referenceDate)
     }
 
@@ -30,15 +36,17 @@ final class DiaryStore: ObservableObject {
         document: DiaryDocument,
         fileURL: URL? = nil,
         calendar: Calendar = .current,
+        catalog: CatalogStore? = nil,
         healthKit: HealthKitStore? = nil,
         defaultWeightUnit: LogUnit? = nil,
         referenceDate: Date = Date()
     ) {
         self.calendar = calendar
         self.fileURL = fileURL ?? Self.defaultFileURL()
+        self.catalog = catalog
         self.healthKit = healthKit
         self.defaultWeightUnit = defaultWeightUnit
-        self.document = document
+        self.document = Self.backfilledMeatClassifications(in: document, catalog: catalog)
         prepareDayTracking(referenceDate: referenceDate)
     }
 
@@ -55,6 +63,62 @@ final class DiaryStore: ObservableObject {
 
     func totals(on date: Date) -> MacroNutrients {
         entries(on: date).reduce(alcoholEntry(on: date)?.nutrients ?? .zero) { $0 + $1.nutrients }
+    }
+
+    func meatPresence(on date: Date) -> MeatClassification {
+        entries(on: date).reduce(.none) { result, entry in
+            guard !entry.isCheatDayAdjustment else { return result }
+            let classification = entryMeatClassification(entry)
+            return MeatClassification(
+                containsProcessedMeat: result.containsProcessedMeat || classification.containsProcessedMeat,
+                containsRedMeat: result.containsRedMeat || classification.containsRedMeat
+            )
+        }
+    }
+
+    func weeklyMeatDays(
+        numberOfDays: Int = 30,
+        referenceDate: Date = Date()
+    ) -> [WeeklyMeatDays] {
+        guard numberOfDays > 0 else { return [] }
+        let today = calendar.startOfDay(for: referenceDate)
+        var counts: [Date: (processed: Int, red: Int)] = [:]
+
+        for offset in (0..<numberOfDays).reversed() {
+            guard let day = calendar.date(byAdding: .day, value: -offset, to: today),
+                  let week = calendar.dateInterval(of: .weekOfYear, for: day)
+            else { continue }
+            let presence = meatPresence(on: day)
+            var count = counts[week.start] ?? (0, 0)
+            if presence.containsProcessedMeat { count.processed += 1 }
+            if presence.containsRedMeat { count.red += 1 }
+            counts[week.start] = count
+        }
+
+        return counts.keys.sorted().map { weekStart in
+            let weekEnd = calendar.date(byAdding: .day, value: 6, to: weekStart) ?? weekStart
+            let count = counts[weekStart] ?? (0, 0)
+            return WeeklyMeatDays(
+                weekStart: weekStart,
+                weekEnd: weekEnd,
+                processedMeatDays: count.processed,
+                redMeatDays: count.red
+            )
+        }
+    }
+
+    func meatDayFoods(
+        numberOfDays: Int = 30,
+        referenceDate: Date = Date()
+    ) -> [MeatDayFoods] {
+        guard numberOfDays > 0 else { return [] }
+        let today = calendar.startOfDay(for: referenceDate)
+        return (0..<numberOfDays).reversed().compactMap { offset in
+            guard let day = calendar.date(byAdding: .day, value: -offset, to: today) else {
+                return nil
+            }
+            return meatFoods(on: day)
+        }
     }
 
     func alcoholEntry(on date: Date) -> AlcoholEntry? {
@@ -714,7 +778,9 @@ final class DiaryStore: ObservableObject {
         fat: Double,
         protein: Double,
         servingGrams: Double,
-        servingDescription: String = "1 serving"
+        servingDescription: String = "1 serving",
+        containsProcessedMeat: Bool = false,
+        containsRedMeat: Bool = false
     ) -> Food {
         let normalizedServingDescription = servingDescription
             .trimmingCharacters(in: .whitespacesAndNewlines)
@@ -737,7 +803,9 @@ final class DiaryStore: ObservableObject {
                 id: "custom-serving",
                 label: portionLabel.isEmpty ? "serving" : portionLabel,
                 grams: max(servingGrams, 0.01)
-            )]
+            )],
+            containsProcessedMeat: containsProcessedMeat,
+            containsRedMeat: containsRedMeat
         )
         document.customFoods.insert(food, at: 0)
         persist()
@@ -753,7 +821,9 @@ final class DiaryStore: ObservableObject {
         carbs: Double,
         fat: Double,
         protein: Double,
-        servingGrams: Double
+        servingGrams: Double,
+        containsProcessedMeat: Bool? = nil,
+        containsRedMeat: Bool? = nil
     ) -> Bool {
         let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         let normalizedBrand = brand.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -779,6 +849,8 @@ final class DiaryStore: ObservableObject {
             label: "serving",
             grams: normalizedServingGrams
         )]
+        updatedFood.containsProcessedMeat = containsProcessedMeat ?? updatedFood.containsProcessedMeat ?? false
+        updatedFood.containsRedMeat = containsRedMeat ?? updatedFood.containsRedMeat ?? false
 
         let previousEntries = document.entries
         objectWillChange.send()
@@ -825,17 +897,34 @@ final class DiaryStore: ObservableObject {
     }
 
     @discardableResult
-    func saveMeal(name: String, items: [MealItem]) -> SavedMeal? {
+    func saveMeal(
+        name: String,
+        items: [MealItem],
+        containsProcessedMeat: Bool? = nil,
+        containsRedMeat: Bool? = nil
+    ) -> SavedMeal? {
         let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedName.isEmpty, !items.isEmpty else { return nil }
-        let meal = SavedMeal(id: UUID(), name: normalizedName, items: items)
+        let meal = SavedMeal(
+            id: UUID(),
+            name: normalizedName,
+            items: items,
+            containsProcessedMeat: containsProcessedMeat,
+            containsRedMeat: containsRedMeat
+        )
         document.meals.insert(meal, at: 0)
         persist()
         return meal
     }
 
     @discardableResult
-    func updateSavedMeal(mealID: UUID, name: String, items: [MealItem]) -> Bool {
+    func updateSavedMeal(
+        mealID: UUID,
+        name: String,
+        items: [MealItem],
+        containsProcessedMeat: Bool? = nil,
+        containsRedMeat: Bool? = nil
+    ) -> Bool {
         let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedName.isEmpty,
               !items.isEmpty,
@@ -844,7 +933,14 @@ final class DiaryStore: ObservableObject {
 
         let previousEntries = document.entries
         objectWillChange.send()
-        document.meals[mealIndex] = SavedMeal(id: mealID, name: normalizedName, items: items)
+        let previousMeal = document.meals[mealIndex]
+        document.meals[mealIndex] = SavedMeal(
+            id: mealID,
+            name: normalizedName,
+            items: items,
+            containsProcessedMeat: containsProcessedMeat ?? previousMeal.containsProcessedMeat,
+            containsRedMeat: containsRedMeat ?? previousMeal.containsRedMeat
+        )
         for index in document.entries.indices where document.entries[index].savedMealID == mealID {
             var entry = document.entries[index]
             entry.food.name = normalizedName
@@ -1093,11 +1189,20 @@ final class DiaryStore: ObservableObject {
     }
 
     func displayedFood(_ food: Food) -> Food {
-        guard let customName = document.customFoodNames[food.id], !customName.isEmpty else {
-            return food
-        }
         var displayedFood = food
-        displayedFood.name = customName
+        if displayedFood.meatClassification == nil {
+            let classification = displayedFood.source == .custom
+                ? Self.fallbackMeatClassification(for: displayedFood.name)
+                : catalog?.meatClassification(
+                    sourceID: displayedFood.sourceID,
+                    source: displayedFood.source
+                ) ?? Self.fallbackMeatClassification(for: displayedFood.name)
+            displayedFood.containsProcessedMeat = classification.containsProcessedMeat
+            displayedFood.containsRedMeat = classification.containsRedMeat
+        }
+        if let customName = document.customFoodNames[food.id], !customName.isEmpty {
+            displayedFood.name = customName
+        }
         return displayedFood
     }
 
@@ -1163,7 +1268,7 @@ final class DiaryStore: ObservableObject {
 
     private func prepareDayTracking(referenceDate: Date) {
         let today = calendar.startOfDay(for: referenceDate)
-        document.schemaVersion = 6
+        document.schemaVersion = 7
         document.dayStatuses = document.dayStatuses.map { status in
             var normalized = status
             normalized.date = calendar.startOfDay(for: status.date)
@@ -1445,16 +1550,22 @@ final class DiaryStore: ObservableObject {
     private func refreshMealEntry(_ entry: inout DiaryEntry) {
         guard entry.isMeal else { return }
         let baseItems: [MealItem]
+        let classification: MeatClassification
         if let savedMealID = entry.savedMealID,
            let savedMeal = document.meals.first(where: { $0.id == savedMealID }) {
             baseItems = savedMeal.items
             entry.food.name = savedMeal.name
+            classification = MeatClassification(
+                containsProcessedMeat: savedMeal.resolvedContainsProcessedMeat,
+                containsRedMeat: savedMeal.resolvedContainsRedMeat
+            )
         } else if let currentItems = entry.mealItems, entry.amount > 0 {
             baseItems = currentItems.map { item in
                 var baseItem = item
                 baseItem.amount /= entry.amount
                 return baseItem
             }
+            classification = entry.food.meatClassification ?? Self.meatClassification(for: baseItems)
         } else {
             return
         }
@@ -1467,6 +1578,8 @@ final class DiaryStore: ObservableObject {
             )
         }
         entry.food.nutrients = baseNutrients
+        entry.food.containsProcessedMeat = classification.containsProcessedMeat
+        entry.food.containsRedMeat = classification.containsRedMeat
         entry.nutrients = baseNutrients.scaled(by: max(entry.amount, 0.01))
         entry.mealItems = baseItems.map { item in
             var scaledItem = item
@@ -1510,7 +1623,9 @@ final class DiaryStore: ObservableObject {
             baseAmountGrams: 1,
             servingGrams: 1,
             servingDescription: "1 meal",
-            portions: [FoodPortion(id: "saved-meal", label: "meal", grams: 1)]
+            portions: [FoodPortion(id: "saved-meal", label: "meal", grams: 1)],
+            containsProcessedMeat: meal.resolvedContainsProcessedMeat,
+            containsRedMeat: meal.resolvedContainsRedMeat
         )
         return DiaryEntry(
             id: UUID(),
@@ -1524,6 +1639,193 @@ final class DiaryStore: ObservableObject {
             displayOrder: displayOrder,
             savedMealID: meal.id,
             mealItems: scaledItems
+        )
+    }
+
+    private func entryMeatClassification(_ entry: DiaryEntry) -> MeatClassification {
+        if let classification = entry.food.meatClassification {
+            return classification
+        }
+        if entry.isMeal, let items = entry.mealItems {
+            return Self.meatClassification(for: items)
+        }
+        return Self.fallbackMeatClassification(for: entry.food.name)
+    }
+
+    private func meatFoods(on date: Date) -> MeatDayFoods? {
+        var processedFoods: [String] = []
+        var redFoods: [String] = []
+
+        for entry in entries(on: date) where !entry.isCheatDayAdjustment {
+            let entryClassification = entryMeatClassification(entry)
+            let classifiedItems = (entry.mealItems ?? []).map { item in
+                (item.food.name, Self.classification(for: item.food))
+            }
+
+            if entryClassification.containsProcessedMeat {
+                let matches = classifiedItems
+                    .filter { $0.1.containsProcessedMeat }
+                    .map { "\(entry.food.name) — \($0.0)" }
+                processedFoods.append(contentsOf: matches.isEmpty ? [entry.food.name] : matches)
+            }
+            if entryClassification.containsRedMeat {
+                let matches = classifiedItems
+                    .filter { $0.1.containsRedMeat }
+                    .map { "\(entry.food.name) — \($0.0)" }
+                redFoods.append(contentsOf: matches.isEmpty ? [entry.food.name] : matches)
+            }
+        }
+
+        processedFoods = Self.uniqueNames(processedFoods)
+        redFoods = Self.uniqueNames(redFoods)
+        guard !processedFoods.isEmpty || !redFoods.isEmpty else { return nil }
+        return MeatDayFoods(
+            date: calendar.startOfDay(for: date),
+            processedMeatFoods: processedFoods,
+            redMeatFoods: redFoods
+        )
+    }
+
+    private static func classification(for food: Food) -> MeatClassification {
+        food.meatClassification ?? fallbackMeatClassification(for: food.name)
+    }
+
+    private static func uniqueNames(_ names: [String]) -> [String] {
+        var seen = Set<String>()
+        return names.filter {
+            seen.insert(
+                $0.folding(
+                    options: [.caseInsensitive, .diacriticInsensitive],
+                    locale: .current
+                )
+            ).inserted
+        }
+    }
+
+    private static func meatClassification(for items: [MealItem]) -> MeatClassification {
+        MeatClassification(
+            containsProcessedMeat: items.contains { $0.food.containsProcessedMeat == true },
+            containsRedMeat: items.contains { $0.food.containsRedMeat == true }
+        )
+    }
+
+    private static func backfilledMeatClassifications(
+        in source: DiaryDocument,
+        catalog: CatalogStore?
+    ) -> DiaryDocument {
+        func classified(_ sourceFood: Food) -> Food {
+            guard sourceFood.meatClassification == nil else { return sourceFood }
+            var food = sourceFood
+            let classification: MeatClassification
+            if sourceFood.source != .custom,
+               let catalogClassification = catalog?.meatClassification(
+                   sourceID: sourceFood.sourceID,
+                   source: sourceFood.source
+               ) {
+                classification = catalogClassification
+            } else {
+                classification = fallbackMeatClassification(for: sourceFood.name)
+            }
+            food.containsProcessedMeat = classification.containsProcessedMeat
+            food.containsRedMeat = classification.containsRedMeat
+            return food
+        }
+
+        var document = source
+        document.customFoods = document.customFoods.map(classified)
+        document.favorites = document.favorites.map(classified)
+        document.meals = document.meals.map { sourceMeal in
+            var meal = sourceMeal
+            meal.items = meal.items.map { sourceItem in
+                var item = sourceItem
+                item.food = classified(item.food)
+                return item
+            }
+            return meal
+        }
+        let mealsByID = Dictionary(uniqueKeysWithValues: document.meals.map { ($0.id, $0) })
+        document.entries = document.entries.map { sourceEntry in
+            var entry = sourceEntry
+            let existingClassification = entry.food.meatClassification
+            entry.food = classified(entry.food)
+            entry.mealItems = entry.mealItems?.map { sourceItem in
+                var item = sourceItem
+                item.food = classified(item.food)
+                return item
+            }
+            guard entry.isMeal else { return entry }
+
+            let classification: MeatClassification
+            if let mealID = entry.savedMealID, let meal = mealsByID[mealID] {
+                classification = MeatClassification(
+                    containsProcessedMeat: meal.resolvedContainsProcessedMeat,
+                    containsRedMeat: meal.resolvedContainsRedMeat
+                )
+            } else if let existingClassification {
+                classification = existingClassification
+            } else {
+                classification = meatClassification(for: entry.mealItems ?? [])
+            }
+            entry.food.containsProcessedMeat = classification.containsProcessedMeat
+            entry.food.containsRedMeat = classification.containsRedMeat
+            return entry
+        }
+        return document
+    }
+
+    private static func fallbackMeatClassification(for name: String) -> MeatClassification {
+        func matches(_ pattern: String, in value: String) -> Bool {
+            value.range(of: pattern, options: [.regularExpression, .caseInsensitive]) != nil
+        }
+
+        let redPattern = #"\b(?:beef|veal|pork|lamb|mutton|goat|venison|deer|elk|moose|bison|buffalo|rabbit|hare|horse|boar)\b"#
+        let poultryPattern = #"\b(?:chicken|turkey|duck|goose|poultry)\b"#
+        let analogPattern = #"\b(?:meatless|vegetarian|vegan|plant[ -]based|soy)\b"#
+        if matches(analogPattern, in: name),
+           !matches(redPattern, in: name),
+           !matches(poultryPattern, in: name) {
+            return .none
+        }
+
+        var processedName = name.replacingOccurrences(
+            of: #"\bleg\s*\(ham\)"#,
+            with: "leg",
+            options: [.regularExpression, .caseInsensitive]
+        )
+        processedName = processedName.replacingOccurrences(
+            of: #"\bham hocks?\b"#,
+            with: "hock",
+            options: [.regularExpression, .caseInsensitive]
+        )
+        processedName = processedName.replacingOccurrences(
+            of: #"\b(?:includes? )?cuts? to be cured\b"#,
+            with: "cuts",
+            options: [.regularExpression, .caseInsensitive]
+        )
+        let namedProcessedPattern = #"\b(?:bacon|ham|hot[ -]?dogs?|frankfurters?|wieners?|luncheon meat|cold cuts?|deli meats?|sausages?|pepperoni|salami|prosciutto|pastrami|pancetta|mortadella|capicola|coppa|soppressata|chorizo|kielbasa|bratwurst|andouille|liverwurst|braunschweiger|corned beef|jerky|biltong|canned meat|spam)\b"#
+        let methodPattern = #"\b(?:cured|salted|smoked|fermented|dried|preserved)\b"#
+        let animalPattern = #"\b(?:beef|veal|pork|lamb|mutton|goat|venison|deer|elk|moose|bison|buffalo|rabbit|hare|horse|boar|chicken|turkey|duck|goose|poultry|meat|offal)\b"#
+        let nonMeatNamePattern = #"\b(?:bun|buns|roll|rolls|bread|cracker|crackers|seasoning|flavou?r)\b"#
+        var containsProcessed = matches(namedProcessedPattern, in: processedName)
+        if containsProcessed,
+           matches(nonMeatNamePattern, in: name),
+           !matches(redPattern, in: name),
+           !matches(poultryPattern, in: name) {
+            containsProcessed = false
+        }
+        containsProcessed = containsProcessed || (
+            matches(methodPattern, in: processedName) && matches(animalPattern, in: name)
+        )
+
+        let nonMeatRedPattern = #"\b(?:beef|pork|lamb)\s+(?:broth|stock|bouillon|flavou?r|extract|gelatin|tallow|fat|suet)\b"#
+        let nonMusclePattern = #"\b(?:variety meats?|by-products?|brain|heart|kidney|liver|lung|pancreas|spleen|sweetbread|thymus|tongue|tripe|seam fat|fat only)\b"#
+        let containsRed = matches(redPattern, in: name)
+            && !containsProcessed
+            && !matches(nonMeatRedPattern, in: name)
+            && !matches(nonMusclePattern, in: name)
+        return MeatClassification(
+            containsProcessedMeat: containsProcessed,
+            containsRedMeat: containsRed
         )
     }
 
