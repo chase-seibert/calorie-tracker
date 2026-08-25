@@ -1583,6 +1583,222 @@ extension CalorieTrackerTests {
         XCTAssertEqual(report.items.map(\.wholeOunces), [2])
     }
 
+    func testCustomFoodFileLoadsAndCreatesOneServingFood() throws {
+        let fileURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension("calfood")
+        let json = """
+        {
+          "format": "calorie-tracker-food",
+          "version": 1,
+          "name": "  Buffalo chicken salad  ",
+          "servingDescription": "whole bowl",
+          "servingGrams": 510,
+          "nutrition": {
+            "calories": 750,
+            "carbohydratesGrams": 32,
+            "fatGrams": 40,
+            "proteinGrams": 60
+          },
+          "notes": "  Dressing is the biggest uncertainty.  "
+        }
+        """
+        try Data(json.utf8).write(to: fileURL)
+
+        let importedFile = try CustomImportFile.load(from: fileURL)
+        guard case let .food(file) = importedFile else {
+            return XCTFail("Expected a food file")
+        }
+        let food = file.food.makeFood(sourceID: "import-test")
+
+        XCTAssertEqual(file.name, "Buffalo chicken salad")
+        XCTAssertEqual(file.notes, "Dressing is the biggest uncertainty.")
+        XCTAssertEqual(food.nutrients.calories, 750)
+        XCTAssertEqual(food.nutrients.carbs, 32)
+        XCTAssertEqual(food.nutrients.fat, 40)
+        XCTAssertEqual(food.nutrients.protein, 60)
+        XCTAssertEqual(food.servingGrams, 510)
+        XCTAssertEqual(food.availablePortions.first?.label, "whole bowl")
+        XCTAssertEqual(food.nutrients(for: 1, unit: .serving, portionID: "imported-serving"), food.nutrients)
+    }
+
+    @MainActor
+    func testOneOffImportedFoodLogsWithoutSavingCustomFood() throws {
+        let fileURL = temporaryDiaryURL()
+        let store = DiaryStore(fileURL: fileURL)
+        let importedFood = CustomFoodDefinition(
+            name: "Quinoa chicken bowl",
+            servingDescription: "whole bowl",
+            servingGrams: 620,
+            nutrition: CustomFoodDefinition.Nutrition(
+                calories: 900,
+                carbohydratesGrams: 95,
+                fatGrams: 28,
+                proteinGrams: 70
+            ),
+            notes: nil
+        )
+
+        let food = importedFood.makeFood(sourceID: "one-off-import")
+        store.log(food, amount: 1, unit: .serving, portionID: "imported-serving", on: Date())
+
+        XCTAssertTrue(store.document.customFoods.isEmpty)
+        XCTAssertEqual(store.entries(on: Date()).map(\.food.name), ["Quinoa chicken bowl"])
+        XCTAssertEqual(store.totals(on: Date()).calories, 900)
+    }
+
+    func testCustomMealFileLoadsAListOfFoodsAndCalculatesTotals() throws {
+        let fileURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension("calmeal")
+        let json = """
+        {
+          "format": "calorie-tracker-meal",
+          "version": 1,
+          "name": "Chicken and rice",
+          "foods": [
+            {
+              "name": "Chicken",
+              "servingDescription": "6 oz portion",
+              "servingGrams": 170,
+              "nutrition": {
+                "calories": 300,
+                "carbohydratesGrams": 0,
+                "fatGrams": 12,
+                "proteinGrams": 45
+              }
+            },
+            {
+              "name": "Rice",
+              "servingDescription": "1 cup",
+              "servingGrams": 190,
+              "nutrition": {
+                "calories": 240,
+                "carbohydratesGrams": 52,
+                "fatGrams": 1,
+                "proteinGrams": 5
+              }
+            }
+          ],
+          "notes": "Estimated from the plate."
+        }
+        """
+        try Data(json.utf8).write(to: fileURL)
+
+        let importedFile = try CustomImportFile.load(from: fileURL)
+        guard case let .meal(file) = importedFile else {
+            return XCTFail("Expected a meal file")
+        }
+        let meal = file.makeMeal()
+
+        XCTAssertEqual(meal.name, "Chicken and rice")
+        XCTAssertEqual(meal.items.map(\.food.name), ["Chicken", "Rice"])
+        XCTAssertEqual(meal.items.map(\.food.servingGrams), [170, 190])
+        XCTAssertEqual(meal.nutrients, MacroNutrients(calories: 540, carbs: 52, fat: 13, protein: 50))
+    }
+
+    @MainActor
+    func testOneOffImportedMealIsBreakableWithoutSavingMealOrFoods() throws {
+        let store = DiaryStore(fileURL: temporaryDiaryURL())
+        let importedMeal = CustomMealFile(
+            format: CustomMealFile.formatIdentifier,
+            version: CustomMealFile.currentVersion,
+            name: "Chicken and rice",
+            foods: [
+                CustomFoodDefinition(
+                    name: "Chicken",
+                    servingDescription: "portion",
+                    servingGrams: 170,
+                    nutrition: CustomFoodDefinition.Nutrition(
+                        calories: 300,
+                        carbohydratesGrams: 0,
+                        fatGrams: 12,
+                        proteinGrams: 45
+                    ),
+                    notes: nil
+                ),
+                CustomFoodDefinition(
+                    name: "Rice",
+                    servingDescription: "cup",
+                    servingGrams: 190,
+                    nutrition: CustomFoodDefinition.Nutrition(
+                        calories: 240,
+                        carbohydratesGrams: 52,
+                        fatGrams: 1,
+                        proteinGrams: 5
+                    ),
+                    notes: nil
+                )
+            ],
+            notes: nil
+        )
+
+        store.logOneOffMeal(importedMeal.makeMeal(), on: Date())
+
+        let mealEntry = try XCTUnwrap(store.entries(on: Date()).first)
+        XCTAssertTrue(mealEntry.isMeal)
+        XCTAssertNil(mealEntry.savedMealID)
+        XCTAssertEqual(mealEntry.mealItems?.map(\.food.name), ["Chicken", "Rice"])
+        XCTAssertTrue(store.document.meals.isEmpty)
+        XCTAssertTrue(store.document.customFoods.isEmpty)
+        XCTAssertEqual(store.totals(on: Date()).calories, 540)
+
+        store.breakApartMeal(entryID: mealEntry.id)
+        XCTAssertEqual(store.entries(on: Date()).map(\.food.name), ["Chicken", "Rice"])
+    }
+
+    func testFoodAndMealFormatsRequireTheirMatchingExtensions() throws {
+        let fileURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension("calmeal")
+        let json = """
+        {
+          "format": "calorie-tracker-food",
+          "version": 1,
+          "name": "Food with wrong extension",
+          "servingDescription": "serving",
+          "servingGrams": 100,
+          "nutrition": {
+            "calories": 100,
+            "carbohydratesGrams": 10,
+            "fatGrams": 2,
+            "proteinGrams": 5
+          }
+        }
+        """
+        try Data(json.utf8).write(to: fileURL)
+
+        XCTAssertThrowsError(try CustomImportFile.load(from: fileURL)) { error in
+            XCTAssertEqual(error as? CustomImportError, .extensionMismatch(expected: "calfood"))
+        }
+    }
+
+    func testCustomFoodFileRejectsUnsupportedVersion() throws {
+        let fileURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension("calfood")
+        let json = """
+        {
+          "format": "calorie-tracker-food",
+          "version": 99,
+          "name": "Future food",
+          "servingDescription": "serving",
+          "servingGrams": 100,
+          "nutrition": {
+            "calories": 100,
+            "carbohydratesGrams": 10,
+            "fatGrams": 2,
+            "proteinGrams": 5
+          }
+        }
+        """
+        try Data(json.utf8).write(to: fileURL)
+
+        XCTAssertThrowsError(try CustomImportFile.load(from: fileURL)) { error in
+            XCTAssertEqual(error as? CustomImportError, .unsupportedVersion(99))
+        }
+    }
+
     private var testCalendar: Calendar {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(secondsFromGMT: 0)!

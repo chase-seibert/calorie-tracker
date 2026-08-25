@@ -37,3 +37,4 @@ tests as unverified.
 - `docs/architecture.md`
 - `docs/setup-install.md`
 - `docs/data-sources.md`
+- `docs/custom-import-files.md`

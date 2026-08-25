@@ -29,6 +29,14 @@ struct SettingsView: View {
                 }
             }
 
+            Section("Imports") {
+                NavigationLink {
+                    CustomImportGuideView()
+                } label: {
+                    Label("AI food & meal files", systemImage: "square.and.arrow.down")
+                }
+            }
+
             Section {
                 HStack {
                     Label("Goal", systemImage: "target")

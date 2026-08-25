@@ -16,6 +16,18 @@ The SwiftUI app has two local data layers:
 This split keeps a large catalog immutable and fast while making the personal
 data schema easy to evolve and back up.
 
+The app exports `com.cseibert.calorietracker.food` and
+`com.cseibert.calorietracker.meal`, backed by `.calfood` and `.calmeal`.
+`RootView` handles incoming document URLs, reads security-scoped files, caps
+imports at 256 KiB, validates the extension against the format identifier,
+schema version, counts, lengths, numeric finiteness, and reasonable upper bounds,
+then presents the corresponding review sheet. A one-off food becomes a normal
+custom-source `Food` snapshot without joining `DiaryDocument.customFoods`. A
+one-off meal becomes a `DiaryEntry` with component `MealItem` snapshots and no
+saved-meal link, preserving quantity edits, break-apart, reports, and HealthKit
+sync without joining `DiaryDocument.meals`. Each review offers an explicit opt-in
+to save for reuse. See `docs/custom-import-files.md` for both public schemas.
+
 When Apple Health is connected, `HealthKitStore` mirrors each diary entry as
 four nutrition quantity samples: dietary energy, carbohydrates, total fat, and
 protein. Each sample uses the diary entry UUID as a sync identifier, so edits

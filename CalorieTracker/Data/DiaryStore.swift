@@ -706,8 +706,16 @@ final class DiaryStore: ObservableObject {
         carbs: Double,
         fat: Double,
         protein: Double,
-        servingGrams: Double
+        servingGrams: Double,
+        servingDescription: String = "1 serving"
     ) -> Food {
+        let normalizedServingDescription = servingDescription
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let portionLabel = normalizedServingDescription.replacingOccurrences(
+            of: #"^1\s+"#,
+            with: "",
+            options: .regularExpression
+        )
         let food = Food(
             sourceID: UUID().uuidString,
             source: .custom,
@@ -717,8 +725,12 @@ final class DiaryStore: ObservableObject {
             nutrients: MacroNutrients(calories: calories, carbs: carbs, fat: fat, protein: protein),
             baseAmountGrams: max(servingGrams, 0.01),
             servingGrams: max(servingGrams, 0.01),
-            servingDescription: "1 serving",
-            portions: [FoodPortion(id: "custom-serving", label: "serving", grams: max(servingGrams, 0.01))]
+            servingDescription: normalizedServingDescription.isEmpty ? "1 serving" : normalizedServingDescription,
+            portions: [FoodPortion(
+                id: "custom-serving",
+                label: portionLabel.isEmpty ? "serving" : portionLabel,
+                grams: max(servingGrams, 0.01)
+            )]
         )
         document.customFoods.insert(food, at: 0)
         persist()
@@ -949,6 +961,22 @@ final class DiaryStore: ObservableObject {
             loggedAt: Date(),
             displayOrder: nextDisplayOrder(on: date)
         )
+        document.entries.append(entry)
+        persist()
+        healthKit?.sync(entries: [entry])
+    }
+
+    func logOneOffMeal(_ meal: SavedMeal, amount: Double = 1, on date: Date) {
+        guard !meal.items.isEmpty, amount > 0, canLogFood(on: date) else { return }
+        clearAutomaticStatus(on: date)
+        var entry = makeMealEntry(
+            for: meal,
+            amount: amount,
+            on: date,
+            loggedAt: Date(),
+            displayOrder: nextDisplayOrder(on: date)
+        )
+        entry.savedMealID = nil
         document.entries.append(entry)
         persist()
         healthKit?.sync(entries: [entry])

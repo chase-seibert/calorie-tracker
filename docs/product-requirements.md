@@ -50,6 +50,10 @@
 - As someone who creates personal foods and meals, I want a browsable Custom
   catalog in Settings so I can add and edit custom foods and saved meals as well
   as confirm and manage what I have saved.
+- As someone who estimates photographed food manually with an AI assistant, I
+  want to open a small app-owned food or meal file, review its calories and
+  macros, and log it as a one-off without sharing my conversation or cluttering
+  my personal catalogs.
 - As a user looking for patterns, I want calorie and macro trends by day.
 - As someone tracking alcohol without itemizing every drink, I want a fast daily
   drink count with an optional single type, estimated calories, and drink-count
@@ -107,6 +111,13 @@
 - Light and dark appearances use adaptive backgrounds, elevated cards, primary
   and secondary text, control fills, source badges, macro colors, and action
   colors across Diary, Log Food, quantity editing, Settings, and Trends.
+- Calorie Tracker owns two versioned JSON formats: `.calfood` represents one
+  aggregate food and `.calmeal` represents a named list of food snapshots.
+  Opening either presents an editable review sheet before anything is saved.
+  Log records one serving on the current day; saving to Custom foods or Saved
+  meals is an explicit, off-by-default choice. A one-off meal remains breakable
+  into its foods. Invalid, mismatched-extension, oversized, and
+  unsupported-version files show an error and do not mutate the diary.
 - The icon-only Magic pill uses breakfast from 5–11 AM, lunch from 11 AM–3 PM,
   and dinner for the remaining hours in the device's local time. Repeated sets
   are promoted only when their members reliably co-occur; otherwise the most
