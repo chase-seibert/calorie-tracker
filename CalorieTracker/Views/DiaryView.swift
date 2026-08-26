@@ -5,6 +5,11 @@ struct DiaryView: View {
     @EnvironmentObject private var diary: DiaryStore
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("trends.focus.alcohol") private var tracksAlcohol = true
+#if DEBUG
+    @AppStorage("experimental.alwaysShowQuickCalories") private var alwaysShowQuickCalories = false
+#else
+    private let alwaysShowQuickCalories = false
+#endif
     let catalog: CatalogStore
 
     @State private var dayOffset = 0
@@ -352,6 +357,7 @@ struct DiaryView: View {
     @ViewBuilder
     private var entrySection: some View {
         let entries = diary.entries(on: date)
+        let selectableEntries = entries.filter { !$0.isCheatDayAdjustment }
         let alcoholEntry = diary.alcoholEntry(on: date)
         VStack(spacing: 0) {
             HStack {
@@ -359,7 +365,7 @@ struct DiaryView: View {
                     .font(.title3.weight(.bold))
                     .accessibilityIdentifier("logged-heading-label")
                 Spacer()
-                if !entries.isEmpty, !isSelectingMealItems, !isCheatDay {
+                if !selectableEntries.isEmpty, !isSelectingMealItems, !isCheatDay {
                     Button("Select") {
                         selectedEntryIDs = []
                         isSelectingMealItems = true
@@ -380,14 +386,19 @@ struct DiaryView: View {
                     .padding(.horizontal, 16)
                     .padding(.bottom, 5)
             }
-            if isCheatDay {
-                CheatDayAdjustmentPicker(
-                    selectedCalories: selectedDayStatus?.adjustmentCalories,
+            if !isSelectingMealItems,
+               isCheatDay || alwaysShowQuickCalories || diary.calorieAdjustment(on: date) != nil {
+                CalorieAdjustmentPicker(
+                    selectedCalories: diary.calorieAdjustment(on: date),
                     onSelect: { calories in
                         withAnimation(.snappy) {
-                            diary.markCheatDay(on: date, adjustmentCalories: calories)
+                            diary.setCalorieAdjustment(calories, on: date)
                         }
-                        AppAnalytics.capture("cheat_day.adjustment_set")
+                        AppAnalytics.capture(
+                            calories == nil
+                                ? "calorie_adjustment.removed"
+                                : "calorie_adjustment.set"
+                        )
                     }
                 )
                 .padding(.horizontal, 16)
@@ -405,7 +416,7 @@ struct DiaryView: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 6)
             } else if isSelectingMealItems {
-                ForEach(entries) { entry in
+                ForEach(selectableEntries) { entry in
                     Button {
                         if selectedEntryIDs.contains(entry.id) {
                             selectedEntryIDs.remove(entry.id)
@@ -553,7 +564,10 @@ struct DiaryView: View {
 
     private func confirmCheatDayAction() {
         if isCheatDay {
-            diary.undoCheatDay(on: date)
+            diary.undoCheatDay(
+                on: date,
+                preservingCalorieAdjustment: alwaysShowQuickCalories
+            )
             AppAnalytics.capture("cheat_day.cleared", properties: ["day": analyticsDayRelation])
         } else {
             diary.markCheatDay(on: date)
@@ -781,17 +795,26 @@ private struct CheatDayActionPopover: View {
     }
 }
 
-private struct CheatDayAdjustmentPicker: View {
+private struct CalorieAdjustmentPicker: View {
     let selectedCalories: Int?
-    let onSelect: (Int) -> Void
+    let onSelect: (Int?) -> Void
 
     private let options = [500, 1_000, 1_500, 2_000]
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 4)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 9) {
-            Text("Estimated extra calories")
-                .font(.subheadline.weight(.semibold))
+            HStack {
+                Text("Add estimated calories")
+                    .font(.subheadline.weight(.semibold))
+                Spacer()
+                if selectedCalories != nil {
+                    Button("Remove", role: .destructive) {
+                        onSelect(nil)
+                    }
+                    .font(.caption.weight(.semibold))
+                }
+            }
             LazyVGrid(columns: columns, spacing: 6) {
                 ForEach(options, id: \.self) { calories in
                     let isSelected = selectedCalories == calories
@@ -818,7 +841,7 @@ private struct CheatDayAdjustmentPicker: View {
                     .accessibilityAddTraits(isSelected ? .isSelected : [])
                 }
             }
-            Text("Choosing another amount replaces the current estimate.")
+            Text("Available on any day; choosing another amount replaces the current estimate.")
                 .font(.caption2)
                 .foregroundStyle(AppTheme.muted)
         }
@@ -1097,7 +1120,7 @@ private struct DiaryEntryRow: View {
                     .foregroundStyle(AppTheme.cheatDay)
                     .frame(width: 38, height: 38)
                     .background(AppTheme.cheatDay.opacity(0.12), in: Circle())
-                    .accessibilityLabel("Cheat day adjustment")
+                    .accessibilityLabel("Calorie adjustment")
             } else if !entry.isMeal {
                 SourceBadge(source: entry.food.source)
             } else {

@@ -1761,33 +1761,72 @@ extension CalorieTrackerTests {
     }
 
     @MainActor
-    func testManualCheatDayAdjustmentPersistsAndUndoPreservesFood() throws {
+    func testCalorieAdjustmentWorksOnNormalDayAndPersists() throws {
         let day = testDate(day: 1)
         let fileURL = temporaryDiaryURL()
         let store = DiaryStore(fileURL: fileURL, calendar: testCalendar, referenceDate: day)
         store.log(testFood(calories: 450, name: "Breakfast"), amount: 1, unit: .serving, on: day)
 
-        store.markCheatDay(on: day, adjustmentCalories: 1_000)
+        store.setCalorieAdjustment(1_000, on: day)
 
-        XCTAssertEqual(store.status(on: day)?.kind, .cheat)
-        XCTAssertEqual(store.status(on: day)?.source, .manual)
-        XCTAssertEqual(store.status(on: day)?.adjustmentCalories, 1_000)
+        XCTAssertNil(store.status(on: day))
+        XCTAssertEqual(store.calorieAdjustment(on: day), 1_000)
         XCTAssertEqual(store.totals(on: day).calories, 1_450, accuracy: 0.001)
         XCTAssertEqual(store.entries(on: day).filter(\.isCheatDayAdjustment).count, 1)
 
-        store.markCheatDay(on: day, adjustmentCalories: 1_500)
+        store.setCalorieAdjustment(1_500, on: day)
 
-        XCTAssertEqual(store.status(on: day)?.adjustmentCalories, 1_500)
+        XCTAssertEqual(store.calorieAdjustment(on: day), 1_500)
         XCTAssertEqual(store.totals(on: day).calories, 1_950, accuracy: 0.001)
         XCTAssertEqual(store.entries(on: day).filter(\.isCheatDayAdjustment).count, 1)
         let reloaded = DiaryStore(fileURL: fileURL, calendar: testCalendar, referenceDate: day)
-        XCTAssertEqual(reloaded.status(on: day)?.adjustmentCalories, 1_500)
+        XCTAssertEqual(reloaded.calorieAdjustment(on: day), 1_500)
 
-        reloaded.undoCheatDay(on: day)
+        reloaded.setCalorieAdjustment(nil, on: day)
 
         XCTAssertNil(reloaded.status(on: day))
         XCTAssertEqual(reloaded.entries(on: day).map(\.food.name), ["Breakfast"])
         XCTAssertEqual(reloaded.totals(on: day).calories, 450, accuracy: 0.001)
+    }
+
+    @MainActor
+    func testUndoingCheatDayPreservesIndependentCalorieAdjustment() throws {
+        let day = testDate(day: 1)
+        let store = DiaryStore(
+            fileURL: temporaryDiaryURL(),
+            calendar: testCalendar,
+            referenceDate: day
+        )
+        store.log(testFood(calories: 450, name: "Breakfast"), amount: 1, unit: .serving, on: day)
+        store.setCalorieAdjustment(1_000, on: day)
+        store.markCheatDay(on: day)
+
+        XCTAssertEqual(store.status(on: day)?.kind, .cheat)
+        XCTAssertEqual(store.calorieAdjustment(on: day), 1_000)
+
+        store.undoCheatDay(on: day, preservingCalorieAdjustment: true)
+
+        XCTAssertNil(store.status(on: day))
+        XCTAssertEqual(store.calorieAdjustment(on: day), 1_000)
+        XCTAssertEqual(store.totals(on: day).calories, 1_450, accuracy: 0.001)
+    }
+
+    @MainActor
+    func testUndoingCheatDayRemovesAdjustmentByDefault() {
+        let day = testDate(day: 1)
+        let store = DiaryStore(
+            fileURL: temporaryDiaryURL(),
+            calendar: testCalendar,
+            referenceDate: day
+        )
+        store.setCalorieAdjustment(1_000, on: day)
+        store.markCheatDay(on: day)
+
+        store.undoCheatDay(on: day)
+
+        XCTAssertNil(store.status(on: day))
+        XCTAssertNil(store.calorieAdjustment(on: day))
+        XCTAssertEqual(store.totals(on: day).calories, 0, accuracy: 0.001)
     }
 
     @MainActor

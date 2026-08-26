@@ -39,6 +39,12 @@ horizontal bar in that order. Segment widths represent each macro's share of
 total macro grams, and a color-keyed legend retains the exact gram values.
 Tapping the calorie total or macro chart navigates directly to Trends.
 
+The Logged section exposes compact +500, +1,000, +1,500, and +2,000 estimated
+calorie pills on cheat days. The DEBUG-only Developer Diagnostics → Experimental
+Features screen contains an off-by-default “Always show quick calories” toggle
+that exposes the pills on every day. One calorie-only adjustment may exist per
+day; selecting a different amount replaces it, and Remove clears it.
+
 The bottom action bar orders compact orange cheat-day and alcohol actions before
 the primary Log food button, which receives most of the width. When the Alcohol
 focus is disabled, its quick-entry action disappears and Log food expands into

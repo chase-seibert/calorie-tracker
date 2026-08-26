@@ -132,10 +132,13 @@
   Disabling both meat focuses hides the meat-days card. All focuses remain enabled
   by default for compatibility with existing behavior, and logged data remains
   local regardless of display selection.
-- Marking a cheat day uses one Yes action. Once marked, compact estimate pills
-  offer 500, 1,000, 1,500, and 2,000 calories above the Logged list. The chosen
-  value appears as one calorie-only “Cheat day adjustment,” and choosing another
-  value replaces it.
+- Compact estimate pills above the Logged list offer calorie-only adjustments of
+  500, 1,000, 1,500, and 2,000 calories on cheat days. A DEBUG-only, off-by-default
+  “Always show quick calories” experiment exposes them on every day. Choosing
+  another amount replaces the current adjustment, and Remove clears it.
+- Marking a cheat day uses one Yes action. With the experiment disabled, undoing
+  a cheat day also removes its adjustment; with it enabled, the adjustment is
+  independent and remains on the now-normal day.
 - Trends summarizes gap-day and cheat-day counts beneath its title for the fixed
   30-day window; those statuses do not add vertical markers to individual charts.
 - Light and dark appearances use adaptive backgrounds, elevated cards, primary

@@ -47,14 +47,16 @@ at the base of that day's calorie series.
 On launch, `DiaryStore` finalizes every elapsed day since tracking began. Empty
 days become gap days. When a calorie goal exists, nonempty days below 75% or
 above 130% of the goal become automatic cheat days. Manual cheat-day labels are
-authoritative. Logging into an automatic gap removes the label; undoing a cheat
-day removes its optional calorie-only adjustment and restores normal logging.
+authoritative. Logging into an automatic gap removes the label. A calorie-only
+adjustment remains a separate diary entry. Its standard UI is limited to cheat
+days; a DEBUG-only `UserDefaults` experiment can show the quick-calorie controls
+on every day and preserve the adjustment when cheat status is removed.
 
-Cheat days without an estimated adjustment preserve their local food entries
+Cheat days without a calorie adjustment preserve their local food entries
 but replace this app's HealthKit samples for that date with zero-valued nutrition
 samples. Cheat days with an adjustment sync their logged entries plus the
-adjustment. Stable per-day HealthKit sync identifiers let later undo operations
-remove the zero override safely.
+adjustment. Stable per-day HealthKit sync identifiers let status or adjustment
+changes remove the zero override safely.
 
 The current streak walks backward across consecutive non-special days that have
 food entries. An empty current day is ignored until it ends. The streak report
@@ -121,7 +123,7 @@ are off.
 
 The food-weight report is derived on demand from the local `DiaryDocument` and
 does not create persistent report state. It filters to the current day and the
-previous 89 calendar days, excludes calorie-only cheat-day adjustments, expands
+previous 89 calendar days, excludes calorie-only adjustments, expands
 meals from each diary entry's stored component snapshot, and aggregates gram
 weights by stable food ID before sorting. The UI displays rounded whole ounces;
 its share action writes the same rows to a temporary Markdown file and passes

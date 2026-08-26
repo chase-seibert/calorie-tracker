@@ -363,6 +363,12 @@ private struct DeveloperDiagnosticsView: View {
         List {
             Section {
                 NavigationLink {
+                    ExperimentalFeaturesView()
+                } label: {
+                    Label("Experimental Features", systemImage: "flask.fill")
+                }
+
+                NavigationLink {
                     AnalyticsDiagnosticsView()
                 } label: {
                     Label("Analytics Events", systemImage: "chart.line.uptrend.xyaxis")
@@ -376,6 +382,25 @@ private struct DeveloperDiagnosticsView: View {
         .navigationTitle("Developer Diagnostics")
         .navigationBarTitleDisplayMode(.inline)
         .analyticsScreen("developer_diagnostics")
+    }
+}
+
+private struct ExperimentalFeaturesView: View {
+    @AppStorage("experimental.alwaysShowQuickCalories") private var alwaysShowQuickCalories = false
+
+    var body: some View {
+        Form {
+            Section {
+                Toggle("Always show quick calories", isOn: $alwaysShowQuickCalories)
+            } footer: {
+                Text("Shows the +500, +1,000, +1,500, and +2,000 calorie shortcuts on every day. When disabled, they appear only on cheat days or when that day already has an adjustment.")
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .background(AppTheme.background)
+        .navigationTitle("Experimental Features")
+        .navigationBarTitleDisplayMode(.inline)
+        .analyticsScreen("developer_experimental_features")
     }
 }
 

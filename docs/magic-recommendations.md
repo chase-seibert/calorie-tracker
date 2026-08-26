@@ -14,7 +14,7 @@ Magic assigns the current local time to one band:
 
 The history window is the 10 complete local calendar days immediately before
 today. Today is never part of the historical counts, scores, combination
-cohesion, or recency tie-breakers. Cheat-day adjustment entries are ignored.
+cohesion, or recency tie-breakers. Calorie-adjustment entries are ignored.
 Within each historical day, only entries whose logging time belongs to the
 current band are considered.
 

@@ -21,7 +21,7 @@ platform, version, and audience). Event properties are strings.
 | `meal.created` / `meal.updated` / `meal.deleted` | A saved meal mutation succeeds | `origin`; create/update also include `item_count` |
 | `meal.broken_apart` | A diary meal is successfully expanded into its foods | — |
 | `cheat_day.marked` / `cheat_day.cleared` | A cheat day is set or removed | `day` (`today`, `yesterday`, `past`, or `future`) |
-| `cheat_day.adjustment_set` | A cheat-day adjustment option is chosen | — |
+| `calorie_adjustment.set` / `calorie_adjustment.removed` | A daily calorie adjustment is set or removed | — |
 | `alcohol.saved` | An alcohol entry is successfully created or updated | `operation` |
 | `alcohol.removed` | Saving zero drinks removes an alcohol entry | — |
 | `health.authorization_requested` | The Apple Health connection flow begins | — |

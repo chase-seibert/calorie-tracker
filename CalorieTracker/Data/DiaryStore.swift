@@ -184,6 +184,12 @@ final class DiaryStore: ObservableObject {
         status(on: date)?.kind != .cheat
     }
 
+    func calorieAdjustment(on date: Date) -> Int? {
+        entries(on: date)
+            .first(where: \.isCheatDayAdjustment)
+            .map { Int($0.nutrients.calories.rounded()) }
+    }
+
     var dailyCalorieGoal: Int? {
         document.dailyCalorieGoal
     }
@@ -198,23 +204,54 @@ final class DiaryStore: ObservableObject {
     func markCheatDay(on date: Date, adjustmentCalories: Int? = nil) {
         let day = calendar.startOfDay(for: date)
         let normalizedAdjustment = adjustmentCalories.flatMap { $0 > 0 ? $0 : nil }
-        let oldAdjustments = entries(on: day).filter(\.isCheatDayAdjustment)
-        document.entries.removeAll {
-            calendar.isDate($0.date, inSameDayAs: day) && $0.isCheatDayAdjustment
+        let existingAdjustment = calorieAdjustment(on: day)
+        let oldAdjustments = normalizedAdjustment == nil
+            ? []
+            : entries(on: day).filter(\.isCheatDayAdjustment)
+
+        if let normalizedAdjustment {
+            document.entries.removeAll {
+                calendar.isDate($0.date, inSameDayAs: day) && $0.isCheatDayAdjustment
+            }
+            document.entries.append(makeCalorieAdjustment(
+                calories: normalizedAdjustment,
+                on: day
+            ))
         }
 
         upsertStatus(DayStatus(
             date: day,
             kind: .cheat,
             source: .manual,
-            adjustmentCalories: normalizedAdjustment
+            adjustmentCalories: normalizedAdjustment ?? existingAdjustment
         ))
 
+        persist()
+        healthKit?.delete(entries: oldAdjustments)
+        syncHealthData(on: day)
+    }
+
+    func setCalorieAdjustment(_ calories: Int?, on date: Date) {
+        let day = calendar.startOfDay(for: date)
+        let normalizedAdjustment = calories.flatMap { $0 > 0 ? $0 : nil }
+        let oldAdjustments = entries(on: day).filter(\.isCheatDayAdjustment)
+        document.entries.removeAll {
+            calendar.isDate($0.date, inSameDayAs: day) && $0.isCheatDayAdjustment
+        }
         if let normalizedAdjustment {
-            document.entries.append(makeCheatDayAdjustment(
+            document.entries.append(makeCalorieAdjustment(
                 calories: normalizedAdjustment,
                 on: day
             ))
+            clearAutomaticStatus(on: day)
+        } else if day < calendar.startOfDay(for: Date()) {
+            reconcileAutomaticStatus(on: day)
+        }
+
+        if let statusIndex = document.dayStatuses.firstIndex(where: {
+            calendar.isDate($0.date, inSameDayAs: day) && $0.kind == .cheat
+        }) {
+            document.dayStatuses[statusIndex].adjustmentCalories = normalizedAdjustment
         }
 
         persist()
@@ -222,13 +259,17 @@ final class DiaryStore: ObservableObject {
         syncHealthData(on: day)
     }
 
-    func undoCheatDay(on date: Date) {
+    func undoCheatDay(on date: Date, preservingCalorieAdjustment: Bool = false) {
         guard status(on: date)?.kind == .cheat else { return }
         let day = calendar.startOfDay(for: date)
-        let adjustments = entries(on: day).filter(\.isCheatDayAdjustment)
+        let adjustments = preservingCalorieAdjustment
+            ? []
+            : entries(on: day).filter(\.isCheatDayAdjustment)
         document.dayStatuses.removeAll { calendar.isDate($0.date, inSameDayAs: day) }
-        document.entries.removeAll {
-            calendar.isDate($0.date, inSameDayAs: day) && $0.isCheatDayAdjustment
+        if !preservingCalorieAdjustment {
+            document.entries.removeAll {
+                calendar.isDate($0.date, inSameDayAs: day) && $0.isCheatDayAdjustment
+            }
         }
         persist()
         healthKit?.delete(entries: adjustments)
@@ -1283,7 +1324,7 @@ final class DiaryStore: ObservableObject {
     func clearPersonalData() {
         let deletedEntries = document.entries + document.alcoholEntries.map(makeAlcoholHealthEntry)
         let zeroOverrideDays = document.dayStatuses
-            .filter { $0.kind == .cheat && $0.adjustmentCalories == nil }
+            .filter { $0.kind == .cheat && calorieAdjustment(on: $0.date) == nil }
             .map(\.date)
         document = DiaryDocument()
         document.trackingStartDate = calendar.startOfDay(for: Date())
@@ -1366,19 +1407,15 @@ final class DiaryStore: ObservableObject {
         }
     }
 
-    private func ordinaryEntries(on date: Date) -> [DiaryEntry] {
-        entries(on: date).filter { !$0.isCheatDayAdjustment }
-    }
-
     private func hasTrackedData(on date: Date) -> Bool {
-        !ordinaryEntries(on: date).isEmpty || alcoholDrinkCount(on: date) > 0
+        !entries(on: date).isEmpty || alcoholDrinkCount(on: date) > 0
     }
 
-    private func makeCheatDayAdjustment(calories: Int, on date: Date) -> DiaryEntry {
+    private func makeCalorieAdjustment(calories: Int, on date: Date) -> DiaryEntry {
         let food = Food(
-            sourceID: "cheat-day-adjustment",
+            sourceID: "calorie-adjustment",
             source: .custom,
-            name: "Cheat day adjustment",
+            name: "Calorie adjustment",
             brand: nil,
             barcode: nil,
             nutrients: MacroNutrients(
@@ -1391,7 +1428,7 @@ final class DiaryStore: ObservableObject {
             baseAmountGrams: 1,
             servingGrams: 1,
             servingDescription: "1 adjustment",
-            portions: [FoodPortion(id: "cheat-day-adjustment", label: "adjustment", grams: 1)]
+            portions: [FoodPortion(id: "calorie-adjustment", label: "adjustment", grams: 1)]
         )
         return DiaryEntry(
             id: UUID(),
@@ -1401,7 +1438,7 @@ final class DiaryStore: ObservableObject {
             unit: .serving,
             nutrients: food.nutrients,
             loggedAt: Date(),
-            portionID: "cheat-day-adjustment",
+            portionID: "calorie-adjustment",
             displayOrder: nextDisplayOrder(on: date),
             kind: .cheatDayAdjustment
         )
@@ -1457,7 +1494,7 @@ final class DiaryStore: ObservableObject {
         let alcoholEntries = alcoholEntry(on: date).map { [makeAlcoholHealthEntry($0)] } ?? []
         let dayEntries = entries(on: date) + alcoholEntries
         let dayStatus = status(on: date)
-        if dayStatus?.kind == .cheat, dayStatus?.adjustmentCalories == nil {
+        if dayStatus?.kind == .cheat, calorieAdjustment(on: date) == nil {
             healthKit.delete(entries: dayEntries)
             healthKit.syncZeroNutrition(on: calendar.startOfDay(for: date))
         } else {
@@ -1800,6 +1837,9 @@ final class DiaryStore: ObservableObject {
             var entry = sourceEntry
             let existingClassification = entry.food.meatClassification
             entry.food = enriched(entry.food)
+            if entry.isCheatDayAdjustment {
+                entry.food.name = "Calorie adjustment"
+            }
             entry.mealItems = entry.mealItems?.map { sourceItem in
                 var item = sourceItem
                 item.food = enriched(item.food)
