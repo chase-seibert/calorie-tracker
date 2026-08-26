@@ -1218,6 +1218,7 @@ struct QuantityEditor: View {
                 case .grams: .grams
                 case .portion: .serving
                 }
+                diary.rememberLastWeightUnit(unit)
                 AppAnalytics.capture("food_log.unit_selected", properties: [
                     "unit": unit.analyticsValue,
                     "operation": entryID == nil ? "create" : "edit"
@@ -1481,6 +1482,8 @@ private struct NameEditor: View {
                     Text(footer)
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(AppTheme.background)
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

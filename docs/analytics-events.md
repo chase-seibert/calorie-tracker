@@ -24,7 +24,6 @@ platform, version, and audience). Event properties are strings.
 | `cheat_day.adjustment_set` | A cheat-day adjustment option is chosen | — |
 | `alcohol.saved` | An alcohol entry is successfully created or updated | `operation` |
 | `alcohol.removed` | Saving zero drinks removes an alcohol entry | — |
-| `settings.default_unit_changed` | The default weight unit changes | `unit` |
 | `health.authorization_requested` | The Apple Health connection flow begins | — |
 | `health.authorization_completed` | The authorization flow returns | `result` |
 | `health.sync_requested` / `health.sync_completed` | A launch, authorization, or manual full sync begins/finishes | `source`; completion also includes `result` |

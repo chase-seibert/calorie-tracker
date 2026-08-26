@@ -31,8 +31,7 @@ enum DiaryFixtureLoader {
                 fileURL: fileURL,
                 calendar: calendar,
                 catalog: catalog,
-                healthKit: healthKit,
-                defaultWeightUnit: fixture.defaultWeightUnit
+                healthKit: healthKit
             )
         }
 
@@ -48,8 +47,7 @@ enum DiaryFixtureLoader {
             fileURL: fileURL,
             calendar: calendar,
             catalog: catalog,
-            healthKit: healthKit,
-            defaultWeightUnit: fixture.defaultWeightUnit
+            healthKit: healthKit
         )
     }
 

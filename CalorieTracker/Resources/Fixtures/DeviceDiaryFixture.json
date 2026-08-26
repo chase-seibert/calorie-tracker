@@ -1,7 +1,6 @@
 {
   "fixtureVersion": 1,
   "capturedReferenceDate": "2026-08-05T07:00:00Z",
-  "defaultWeightUnit": "oz",
   "document": {
     "customFoodNames": {
       "usda:2707527": "Pistachios"

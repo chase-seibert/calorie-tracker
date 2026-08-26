@@ -77,11 +77,17 @@ fixed cheat-day and alcohol actions lead the row, while the primary Log food
 action follows and expands to use the available width.
 
 Custom foods and saved meals are separate collections in the personal document.
-Settings presents them together as the Custom catalog while retaining their
+Settings presents them together as the Personal Library while retaining their
 different logging behavior. Remembered quantities are keyed by stable food ID,
 so the same portion is available from favorites and later catalog searches.
 Custom names use the same stable IDs, allowing a rename to flow through existing
 diary entries and future personal search results.
+
+The last explicitly selected weight unit is a lightweight `UserDefaults`
+preference. It starts as ounces and changes only when the user selects ounces or
+grams in a food quantity editor; natural portions do not replace it. A food's
+remembered quantity remains authoritative, while foods without one begin at one
+ounce or 100 grams according to this global fallback.
 
 Catalog foods also carry two compiled presence flags: processed meat and
 unprocessed red meat. The catalog builder derives them from USDA food categories,
@@ -98,6 +104,13 @@ each day to two booleans, then groups the selected Trends range by the device's
 calendar week. Multiple matching foods on one day still contribute one day to
 that category. A meal-level explicit flag controls the saved meal; otherwise its
 historical component snapshot supplies the classification.
+
+The user's visible Trend focus areas are lightweight `UserDefaults` preferences,
+separate from the diary document because they affect presentation rather than
+food or diary data. Processed-meat and red-meat preferences default on to retain
+the existing experience. The Trends toolbar menu changes them in context.
+Trends conditionally builds chart series, legends, and week-detail groups from
+those preferences and omits the complete card when both are off.
 
 The food-weight report is derived on demand from the local `DiaryDocument` and
 does not create persistent report state. It filters to the current day and the

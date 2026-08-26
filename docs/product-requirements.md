@@ -14,9 +14,10 @@
   action on each search result using its visible quantity. Matching favorites and
   saved meals should appear first in alphabetical order, and saved meals should
   be searchable by name.
-- As someone who weighs food, I want ounces by default plus grams and natural
-  portions such as one large egg or one tablespoon, with remembered quantities,
-  so that entering a measured amount takes minimal editing.
+- As someone who weighs food, I want ounces initially plus grams and natural
+  portions such as one large egg or one tablespoon, with remembered quantities
+  per food and my last selected weight unit reused for new foods, so that
+  entering a measured amount takes minimal editing.
 - As a privacy- and speed-conscious user, I want diary storage and food search
   on-device so that routine use has no network latency or server dependency.
 - As a data-source evaluator, I want one search to return USDA, Open Food Facts,
@@ -61,6 +62,8 @@
 - As someone limiting meat-related health risks, I want Trends to show how many
   days in each week contained processed meat and how many contained unprocessed
   red meat, regardless of quantity.
+- As someone with specific nutrition priorities, I want to choose which focused
+  food metrics appear in Trends so the app emphasizes only what I care about.
 - As someone analyzing what I eat, I want to share a last-90-days Markdown
   report of foods by total whole-ounce weight, with meals expanded into their
   historical component foods, so I can send it to ChatGPT and ask questions.
@@ -112,6 +115,11 @@
   device calendar week and counts each category at most once per day. Tapping a
   week shows the qualifying foods grouped by day and category. Custom food,
   saved-meal, and import review editors expose both flags.
+- The Trends toolbar exposes processed meat and red meat as independent focus
+  toggles. A disabled focus is omitted from the weekly chart, its legend, and
+  the tapped-week detail. Disabling both hides the meat-days card. Both focuses
+  remain enabled by default for compatibility with existing behavior, and food
+  classification remains local regardless of display selection.
 - Marking a cheat day uses one Yes action. Once marked, compact estimate pills
   offer 500, 1,000, 1,500, and 2,000 calories above the Logged list. The chosen
   value appears as one calorie-only “Cheat day adjustment,” and choosing another

@@ -1339,16 +1339,16 @@ final class CalorieTrackerTests: XCTestCase {
     }
 
     @MainActor
-    func testNewFoodsDefaultToOunces() {
-        let previous = UserDefaults.standard.object(forKey: "defaultWeightUnit")
+    func testNewFoodsUseLastSelectedWeightUnitAndStartWithOunces() {
+        let previous = UserDefaults.standard.object(forKey: "lastWeightUnit")
         defer {
             if let previous {
-                UserDefaults.standard.set(previous, forKey: "defaultWeightUnit")
+                UserDefaults.standard.set(previous, forKey: "lastWeightUnit")
             } else {
-                UserDefaults.standard.removeObject(forKey: "defaultWeightUnit")
+                UserDefaults.standard.removeObject(forKey: "lastWeightUnit")
             }
         }
-        UserDefaults.standard.removeObject(forKey: "defaultWeightUnit")
+        UserDefaults.standard.removeObject(forKey: "lastWeightUnit")
 
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let store = DiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
@@ -1365,6 +1365,12 @@ final class CalorieTrackerTests: XCTestCase {
         )
 
         XCTAssertEqual(store.preference(for: food), QuantityPreference(amount: 1, unit: .ounces))
+
+        store.rememberLastWeightUnit(.grams)
+        XCTAssertEqual(store.preference(for: food), QuantityPreference(amount: 100, unit: .grams))
+
+        store.rememberLastWeightUnit(.serving)
+        XCTAssertEqual(store.preference(for: food), QuantityPreference(amount: 100, unit: .grams))
     }
 
     @MainActor

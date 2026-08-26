@@ -13,7 +13,7 @@ user explicitly requests a meal file or separate foods.
 ## Workflow
 
 1. Send a food photo and any useful context to an assistant.
-2. In Calorie Tracker, open **Settings → AI food & meal files** and copy the
+2. In Calorie Tracker, open **Settings → AI Food & Meal Import** and copy the
    format prompt.
 3. Paste the prompt after the assistant analyzes the food. Explicitly request a
    meal file or separate foods only when that is desired.

@@ -10,21 +10,20 @@ final class DiaryStore: ObservableObject {
     private let calendar: Calendar
     private let catalog: CatalogStore?
     private let healthKit: HealthKitStore?
-    private let defaultWeightUnit: LogUnit?
+
+    private static let lastWeightUnitKey = "lastWeightUnit"
 
     init(
         fileURL: URL? = nil,
         calendar: Calendar = .current,
         catalog: CatalogStore? = nil,
         healthKit: HealthKitStore? = nil,
-        defaultWeightUnit: LogUnit? = nil,
         referenceDate: Date = Date()
     ) {
         self.calendar = calendar
         self.fileURL = fileURL ?? Self.defaultFileURL()
         self.catalog = catalog
         self.healthKit = healthKit
-        self.defaultWeightUnit = defaultWeightUnit
         self.document = Self.backfilledMeatClassifications(
             in: Self.load(from: self.fileURL) ?? DiaryDocument(),
             catalog: catalog
@@ -38,14 +37,12 @@ final class DiaryStore: ObservableObject {
         calendar: Calendar = .current,
         catalog: CatalogStore? = nil,
         healthKit: HealthKitStore? = nil,
-        defaultWeightUnit: LogUnit? = nil,
         referenceDate: Date = Date()
     ) {
         self.calendar = calendar
         self.fileURL = fileURL ?? Self.defaultFileURL()
         self.catalog = catalog
         self.healthKit = healthKit
-        self.defaultWeightUnit = defaultWeightUnit
         self.document = Self.backfilledMeatClassifications(in: document, catalog: catalog)
         prepareDayTracking(referenceDate: referenceDate)
     }
@@ -426,10 +423,14 @@ final class DiaryStore: ObservableObject {
         if let remembered = document.rememberedQuantities[food.id] {
             return remembered
         }
-        let rawDefault = defaultWeightUnit?.rawValue ??
-            UserDefaults.standard.string(forKey: "defaultWeightUnit") ?? LogUnit.ounces.rawValue
-        let unit = LogUnit(rawValue: rawDefault) ?? .ounces
+        let rawUnit = UserDefaults.standard.string(forKey: Self.lastWeightUnitKey)
+        let unit = LogUnit(rawValue: rawUnit ?? "") ?? .ounces
         return QuantityPreference(amount: unit == .ounces ? 1 : 100, unit: unit)
+    }
+
+    func rememberLastWeightUnit(_ unit: LogUnit) {
+        guard unit == .ounces || unit == .grams else { return }
+        UserDefaults.standard.set(unit.rawValue, forKey: Self.lastWeightUnitKey)
     }
 
     func rememberPreference(_ preference: QuantityPreference, for food: Food) {

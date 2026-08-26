@@ -13,10 +13,12 @@
 
 - **Diary** is the sole root screen: date strip, macro summary, entries, a
   prominent add button, and an upper-right Settings button.
-- **Settings** contains source counts, data attribution, data management, and
-  links to Trends and the food-weight report.
-- **Trends**, nested under Settings, shows a combined calorie-and-drink chart
-  and a daily macro chart.
+- **Settings** is a compact setup and management hub organized into Goals &
+  Logging, Food & Meals, Connections, and Data & Privacy. Its rows show current
+  values or status so the user's setup is understandable at a glance.
+- **Trends**, opened by tapping the diary summary, shows a combined
+  calorie-and-drink chart and a daily macro chart. Its toolbar contains focused
+  food-metric controls and the food-weight report.
 
 When the macro summary card scrolls fully out of view, its calorie total remains
 visible as a compact navigation-title item and continues updating with the diary.
@@ -47,16 +49,21 @@ the row reopens its editor. Trends stacks one large, vertically spaced orange
 wine-glass icon per drink on that day at the base of the calorie chart. The icon
 stack uses screen-space sizing independent of the calorie axis.
 
-The Custom source row in Settings shows separate food and meal counts and opens
-a personal catalog with Custom Foods and Saved Meals sections. Each section has
-an Add action; tapping or swiping a row opens an editor, while swipe-to-delete
+The Personal Library row in Settings shows separate food and meal counts and
+opens a catalog with Custom Foods and Saved Meals sections. Each section has an
+Add action; tapping or swiping a row opens an editor, while swipe-to-delete
 remains available for both kinds of personal item.
 
-Settings also links to AI Import instructions and one copyable, tool-neutral
-prompt. The prompt tells an assistant to create a `.calfood` attachment by
-default, representing the full pictured portion as one aggregate food. Only an
-explicit request for separate foods produces a `.calmeal`, which contains a
-named list of complete per-food serving and nutrition snapshots.
+The Trend focus area toolbar menu contains independent Processed Meat and Red
+Meat switches. Trends omits disabled series from the weekly chart and
+tapped-week detail; when neither is selected, the meat-days card is omitted
+entirely so the screen remains centered on the user's chosen metrics.
+
+Settings also links to AI Food & Meal Import instructions and one copyable,
+tool-neutral prompt. The prompt tells an assistant to create a `.calfood`
+attachment by default, representing the full pictured portion as one aggregate
+food. Only an explicit request for separate foods produces a `.calmeal`, which
+contains a named list of complete per-food serving and nutrition snapshots.
 
 Opening either attachment presents a native review sheet. Food imports expose
 editable name, serving description, serving weight, calories, carbohydrates,
@@ -67,11 +74,12 @@ is stored as a meal entry with its component snapshots, so it can be inspected,
 rescaled, or broken apart without creating reusable catalog items. Files contain
 only structured estimates; no conversation URL or assistant account is shared.
 
-The food-weight report previews the last 90 calendar days as foods sorted by
-exact total weight, displayed as whole ounces. Logged saved meals are expanded
-from the component snapshots on their diary entries. A Share toolbar action
-opens the native iOS share sheet with the report as a named Markdown file so it
-can be sent directly to document-aware apps such as ChatGPT.
+The Trends toolbar links to a food-weight report that previews the last 90
+calendar days as foods sorted by exact total weight, displayed as whole ounces.
+Logged saved meals are expanded from the component snapshots on their diary
+entries. A Share toolbar action opens the native iOS share sheet with the report
+as a named Markdown file so it can be sent directly to document-aware apps such
+as ChatGPT.
 
 The add-food sheet opens with an already-focused search field and keyboard, with
 the current Magic suggestions filling the pane until the user starts typing.
@@ -106,8 +114,11 @@ checkmark remains visible; reopening Magic recalculates from prior days again.
 Every food row displays the quantity and calories that will be logged. Its
 trailing + button logs that displayed remembered or default quantity and closes
 the sheet; tapping the rest of the row opens quantity editing. Quantity entry
-starts in ounces for a new food and offers every natural portion retained from
-the source dataset.
+starts at one ounce before any weight-unit choice has been made. Selecting ounces
+or grams in any food quantity editor makes that the fallback for foods without a
+remembered quantity; the fallback amount is one ounce or 100 grams. Selecting a
+natural portion does not replace the last weight-unit choice. Every natural
+portion retained from the source dataset remains available.
 Saved meal rows use the same interaction: + logs one meal, while tapping the
 row opens the quantity editor in meal servings. The meal editor keeps the name
 editable through the same pencil action as foods, shows the
@@ -151,3 +162,6 @@ the diary into a dashboard of unrelated features.
 These roles use adaptive semantic colors: dark mode switches to grouped dark
 surfaces, elevated cards, and system-aware text while retaining the same accent
 relationships and contrast hierarchy.
+Every full-screen or sheet-hosted list and form hides its system scroll
+background and exposes the shared adaptive app background, including empty
+states and developer-only screens.

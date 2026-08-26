@@ -3,6 +3,8 @@ import SwiftUI
 
 struct TrendsView: View {
     @EnvironmentObject private var diary: DiaryStore
+    @AppStorage("trends.focus.processedMeat") private var tracksProcessedMeat = true
+    @AppStorage("trends.focus.redMeat") private var tracksRedMeat = true
     @State private var range = 30
     @State private var selectedMeatWeek: WeeklyMeatDays?
 
@@ -38,17 +40,37 @@ struct TrendsView: View {
                     .pickerStyle(.segmented)
 
                     calorieAndAlcoholChart
-                    meatDaysChart
+                    if tracksProcessedMeat || tracksRedMeat {
+                        meatDaysChart
+                    }
                     macroChart
                 }
                 .padding(16)
             }
         }
         .navigationTitle("Trends")
+        .toolbar {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Menu {
+                    Toggle("Processed Meat", isOn: $tracksProcessedMeat)
+                    Toggle("Red Meat", isOn: $tracksRedMeat)
+                } label: {
+                    Label("Trend Focus Areas", systemImage: "slider.horizontal.3")
+                }
+
+                NavigationLink {
+                    FoodWeightReportView()
+                } label: {
+                    Label("Food Weight Report", systemImage: "doc.text")
+                }
+            }
+        }
         .sheet(item: $selectedMeatWeek) { week in
             MeatWeekFoodsView(
                 week: week,
-                days: meatDays(in: week)
+                days: meatDays(in: week),
+                showsProcessedMeat: tracksProcessedMeat,
+                showsRedMeat: tracksRedMeat
             )
             .presentationDetents([.medium, .large])
         }
@@ -71,23 +93,27 @@ struct TrendsView: View {
             }
             Chart {
                 ForEach(weeklyMeatPoints) { point in
-                    BarMark(
-                        x: .value("Week", point.weekStart, unit: .weekOfYear),
-                        y: .value("Days", point.processedMeatDays)
-                    )
-                    .position(by: .value("Meat type", "Processed meat"))
-                    .foregroundStyle(AppTheme.processedMeat)
-                    .accessibilityLabel("Processed meat, week of \(point.weekStart.formatted(date: .abbreviated, time: .omitted))")
-                    .accessibilityValue("\(point.processedMeatDays) days")
+                    if tracksProcessedMeat {
+                        BarMark(
+                            x: .value("Week", point.weekStart, unit: .weekOfYear),
+                            y: .value("Days", point.processedMeatDays)
+                        )
+                        .position(by: .value("Meat type", "Processed meat"))
+                        .foregroundStyle(AppTheme.processedMeat)
+                        .accessibilityLabel("Processed meat, week of \(point.weekStart.formatted(date: .abbreviated, time: .omitted))")
+                        .accessibilityValue("\(point.processedMeatDays) days")
+                    }
 
-                    BarMark(
-                        x: .value("Week", point.weekStart, unit: .weekOfYear),
-                        y: .value("Days", point.redMeatDays)
-                    )
-                    .position(by: .value("Meat type", "Red meat"))
-                    .foregroundStyle(AppTheme.redMeat)
-                    .accessibilityLabel("Red meat, week of \(point.weekStart.formatted(date: .abbreviated, time: .omitted))")
-                    .accessibilityValue("\(point.redMeatDays) days")
+                    if tracksRedMeat {
+                        BarMark(
+                            x: .value("Week", point.weekStart, unit: .weekOfYear),
+                            y: .value("Days", point.redMeatDays)
+                        )
+                        .position(by: .value("Meat type", "Red meat"))
+                        .foregroundStyle(AppTheme.redMeat)
+                        .accessibilityLabel("Red meat, week of \(point.weekStart.formatted(date: .abbreviated, time: .omitted))")
+                        .accessibilityValue("\(point.redMeatDays) days")
+                    }
                 }
             }
             .chartYScale(domain: 0...7)
@@ -119,8 +145,12 @@ struct TrendsView: View {
             .frame(height: 190)
 
             HStack(spacing: 18) {
-                meatLegend(icon: "🥓", title: "Processed meat", color: AppTheme.processedMeat)
-                meatLegend(icon: "🥩", title: "Red meat", color: AppTheme.redMeat)
+                if tracksProcessedMeat {
+                    meatLegend(icon: "🥓", title: "Processed meat", color: AppTheme.processedMeat)
+                }
+                if tracksRedMeat {
+                    meatLegend(icon: "🥩", title: "Red meat", color: AppTheme.redMeat)
+                }
             }
             .accessibilityElement(children: .combine)
 
@@ -167,7 +197,10 @@ struct TrendsView: View {
 
     private func meatDays(in week: WeeklyMeatDays) -> [MeatDayFoods] {
         diary.meatDayFoods(numberOfDays: range).filter {
-            $0.date >= week.weekStart && $0.date <= week.weekEnd
+            $0.date >= week.weekStart
+                && $0.date <= week.weekEnd
+                && ((tracksProcessedMeat && !$0.processedMeatFoods.isEmpty)
+                    || (tracksRedMeat && !$0.redMeatFoods.isEmpty))
         }
     }
 
@@ -297,41 +330,47 @@ private struct MeatWeekFoodsView: View {
 
     let week: WeeklyMeatDays
     let days: [MeatDayFoods]
+    let showsProcessedMeat: Bool
+    let showsRedMeat: Bool
 
     var body: some View {
         NavigationStack {
-            Group {
-                if days.isEmpty {
-                    ContentUnavailableView(
-                        "No meat foods",
-                        systemImage: "fork.knife",
-                        description: Text("No qualifying foods were logged during this week.")
-                    )
-                } else {
-                    List(days) { day in
-                        Section(day.date.formatted(date: .complete, time: .omitted)) {
-                            if !day.processedMeatFoods.isEmpty {
-                                meatFoodGroup(
-                                    icon: "🥓",
-                                    title: "Processed meat",
-                                    foods: day.processedMeatFoods,
-                                    color: AppTheme.processedMeat
-                                )
-                            }
-                            if !day.redMeatFoods.isEmpty {
-                                meatFoodGroup(
-                                    icon: "🥩",
-                                    title: "Red meat",
-                                    foods: day.redMeatFoods,
-                                    color: AppTheme.redMeat
-                                )
+            ZStack {
+                AppTheme.background.ignoresSafeArea()
+                Group {
+                    if days.isEmpty {
+                        ContentUnavailableView(
+                            "No focused foods",
+                            systemImage: "fork.knife",
+                            description: Text("No foods matching your selected focus areas were logged during this week.")
+                        )
+                    } else {
+                        List(days) { day in
+                            Section(day.date.formatted(date: .complete, time: .omitted)) {
+                                if showsProcessedMeat, !day.processedMeatFoods.isEmpty {
+                                    meatFoodGroup(
+                                        icon: "🥓",
+                                        title: "Processed meat",
+                                        foods: day.processedMeatFoods,
+                                        color: AppTheme.processedMeat
+                                    )
+                                }
+                                if showsRedMeat, !day.redMeatFoods.isEmpty {
+                                    meatFoodGroup(
+                                        icon: "🥩",
+                                        title: "Red meat",
+                                        foods: day.redMeatFoods,
+                                        color: AppTheme.redMeat
+                                    )
+                                }
                             }
                         }
+                        .listStyle(.insetGrouped)
+                        .scrollContentBackground(.hidden)
                     }
-                    .listStyle(.insetGrouped)
                 }
             }
-            .navigationTitle("Meat foods")
+            .navigationTitle("Focus foods")
             .safeAreaInset(edge: .top, spacing: 0) {
                 Text(weekRangeTitle)
                     .font(.subheadline.weight(.medium))

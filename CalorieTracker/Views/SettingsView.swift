@@ -6,144 +6,66 @@ struct SettingsView: View {
     @EnvironmentObject private var healthKit: HealthKitStore
     let catalog: CatalogStore
 
-    @State private var syncingNutrition = false
-    @AppStorage("defaultWeightUnit") private var defaultWeightUnit = LogUnit.ounces.rawValue
-
-    private let minimumSyncSpinnerDuration: TimeInterval = 0.35
-
     var body: some View {
         Form {
-            Section {
+            Section("Goals & Logging") {
                 NavigationLink {
-                    TrendsView()
+                    CalorieGoalSettingsView()
                 } label: {
-                    Label("Trends", systemImage: "chart.xyaxis.line")
+                    SettingsValueLabel(
+                        title: "Daily Calorie Goal",
+                        systemImage: "target",
+                        value: calorieGoalDescription
+                    )
                 }
             }
 
-            Section("Reports") {
-                NavigationLink {
-                    FoodWeightReportView()
-                } label: {
-                    Label("Foods by total weight", systemImage: "doc.text")
-                }
-            }
-
-            Section("Imports") {
-                NavigationLink {
-                    CustomImportGuideView()
-                } label: {
-                    Label("AI food & meal files", systemImage: "square.and.arrow.down")
-                }
-            }
-
-            Section {
-                HStack {
-                    Label("Goal", systemImage: "target")
-                    Spacer()
-                    TextField("Not set", text: calorieGoalText)
-                        .keyboardType(.numberPad)
-                        .multilineTextAlignment(.trailing)
-                        .monospacedDigit()
-                        .frame(width: 90)
-                    if diary.dailyCalorieGoal != nil {
-                        Text("cal")
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                if diary.dailyCalorieGoal != nil {
-                    Button("Remove goal", role: .destructive) {
-                        diary.setDailyCalorieGoal(nil)
-                    }
-                }
-            } header: {
-                Text("Daily calorie goal")
-            } footer: {
-                Text("Optional. When set, the diary shows calories consumed against this daily goal.")
-            }
-
-            Section("Entry defaults") {
-                Picker("Weight unit", selection: defaultWeightUnitSelection) {
-                    Text("Ounces").tag(LogUnit.ounces.rawValue)
-                    Text("Grams").tag(LogUnit.grams.rawValue)
-                }
-                .pickerStyle(.segmented)
-                Text("Used for foods you have not logged before. Your last amount and unit are remembered per food.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Section("Apple Health") {
-                switch healthKit.authorizationState {
-                case .authorized:
-                    Label("Connected", systemImage: "checkmark.circle.fill")
-                        .foregroundStyle(AppTheme.protein)
-                    Button {
-                        Task {
-                            await syncLoggedNutrition()
-                        }
-                    } label: {
-                        if syncingNutrition {
-                            HStack {
-                                ProgressView()
-                                Text("Syncing logged nutrition…")
-                            }
-                        } else {
-                            Label("Sync logged nutrition", systemImage: "arrow.triangle.2.circlepath")
-                        }
-                    }
-                    .disabled(syncingNutrition)
-                case .notDetermined:
-                    Button("Connect Apple Health", systemImage: "heart.fill") {
-                        Task {
-                            await connectAppleHealth()
-                        }
-                    }
-                    Text("Writes calories, carbohydrates, fat, and protein for logged foods, meals, and alcohol estimates.")
-                        .font(.caption)
-                case .denied:
-                    Label("Access is turned off", systemImage: "exclamationmark.triangle")
-                    Text("Allow nutrition data in the Health app's Apps settings to reconnect.")
-                        .font(.caption)
-                case .unavailable:
-                    Label("Apple Health is unavailable", systemImage: "heart.slash")
-                    Text("Health data can only be written on a device that supports Apple Health.")
-                        .font(.caption)
-                }
-                if let error = healthKit.lastError {
-                    Text(error)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-
-            Section("Local catalogs") {
-                sourceRow(.usda, count: catalog.count(source: .usda))
-                sourceRow(.openFoodFacts, count: catalog.count(source: .openFoodFacts))
+            Section("Food & Meals") {
                 NavigationLink {
                     PersonalCatalogView()
                 } label: {
-                    HStack {
-                        SourceBadge(source: .custom)
-                        Text("Custom")
-                        Spacer()
-                        Text("\(diary.document.customFoods.count) foods · \(diary.document.meals.count) meals")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .monospacedDigit()
-                    }
+                    SettingsValueLabel(
+                        title: "Personal Library",
+                        systemImage: "books.vertical",
+                        value: personalLibraryDescription
+                    )
+                }
+
+                NavigationLink {
+                    CustomImportGuideView()
+                } label: {
+                    Label("AI Food & Meal Import", systemImage: "square.and.arrow.down")
                 }
             }
 
-            Section("Data & attribution") {
-                Link("USDA FoodData Central", destination: URL(string: "https://fdc.nal.usda.gov/")!)
-                Link("Open Food Facts", destination: URL(string: "https://world.openfoodfacts.org/")!)
-                Text("USDA records are U.S. government public-domain data. Open Food Facts database records are reused under ODbL with source attribution and remain identifiable in this derived local database.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text("When analytics is enabled, the app sends feature-usage events, catalog or local item identifiers, successful and failed food search terms, searches dismissed without logging, and unmatched barcodes to its private analytics service. Food names, meal contents, quantities, calorie totals, and Health data are not sent.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+            Section("Connections") {
+                NavigationLink {
+                    AppleHealthSettingsView()
+                } label: {
+                    SettingsValueLabel(
+                        title: "Apple Health",
+                        systemImage: "heart.fill",
+                        value: appleHealthStatus
+                    )
+                }
+            }
+
+            Section("Data & Privacy") {
+                NavigationLink {
+                    FoodDataSourcesView(catalog: catalog)
+                } label: {
+                    SettingsValueLabel(
+                        title: "Food Data Sources",
+                        systemImage: "cylinder.split.1x2",
+                        value: "USDA · Open Food Facts"
+                    )
+                }
+
+                NavigationLink {
+                    PrivacyAnalyticsView()
+                } label: {
+                    Label("Privacy & Analytics", systemImage: "hand.raised.fill")
+                }
             }
 
 #if DEBUG
@@ -161,6 +83,160 @@ struct SettingsView: View {
         .background(AppTheme.background)
         .navigationTitle("Settings")
         .analyticsScreen("settings")
+    }
+
+    private var calorieGoalDescription: String {
+        diary.dailyCalorieGoal.map { "\($0.formatted()) cal" } ?? "Not Set"
+    }
+
+    private var personalLibraryDescription: String {
+        let foodCount = diary.document.customFoods.count
+        let mealCount = diary.document.meals.count
+        return "\(foodCount) \(foodCount == 1 ? "food" : "foods") · \(mealCount) \(mealCount == 1 ? "meal" : "meals")"
+    }
+
+    private var appleHealthStatus: String {
+        switch healthKit.authorizationState {
+        case .authorized: "Connected"
+        case .notDetermined: "Not Connected"
+        case .denied: "Access Off"
+        case .unavailable: "Unavailable"
+        }
+    }
+}
+
+private struct SettingsValueLabel: View {
+    let title: String
+    let systemImage: String
+    let value: String
+
+    var body: some View {
+        HStack {
+            Label(title, systemImage: systemImage)
+            Spacer(minLength: 12)
+            Text(value)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.trailing)
+                .lineLimit(2)
+        }
+    }
+}
+
+private struct CalorieGoalSettingsView: View {
+    @EnvironmentObject private var diary: DiaryStore
+
+    var body: some View {
+        Form {
+            Section {
+                HStack {
+                    Text("Calories per day")
+                    Spacer()
+                    TextField("Not set", text: calorieGoalText)
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.trailing)
+                        .monospacedDigit()
+                        .frame(width: 90)
+                    if diary.dailyCalorieGoal != nil {
+                        Text("cal")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                if diary.dailyCalorieGoal != nil {
+                    Button("Remove Goal", role: .destructive) {
+                        diary.setDailyCalorieGoal(nil)
+                    }
+                }
+            } header: {
+                Text("Daily Goal")
+            } footer: {
+                Text("Optional. When set, the diary shows calories consumed against this daily goal.")
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .background(AppTheme.background)
+        .navigationTitle("Calorie Goal")
+        .navigationBarTitleDisplayMode(.inline)
+        .analyticsScreen("settings_calorie_goal")
+    }
+
+    private var calorieGoalText: Binding<String> {
+        Binding(
+            get: { diary.dailyCalorieGoal.map(String.init) ?? "" },
+            set: { value in
+                let digits = value.filter(\.isNumber)
+                diary.setDailyCalorieGoal(Int(digits))
+            }
+        )
+    }
+}
+
+private struct AppleHealthSettingsView: View {
+    @EnvironmentObject private var diary: DiaryStore
+    @EnvironmentObject private var healthKit: HealthKitStore
+
+    @State private var syncingNutrition = false
+
+    private let minimumSyncSpinnerDuration: TimeInterval = 0.35
+
+    var body: some View {
+        Form {
+            Section("Status") {
+                switch healthKit.authorizationState {
+                case .authorized:
+                    Label("Connected", systemImage: "checkmark.circle.fill")
+                        .foregroundStyle(AppTheme.protein)
+                    Button {
+                        Task {
+                            await syncLoggedNutrition()
+                        }
+                    } label: {
+                        if syncingNutrition {
+                            HStack {
+                                ProgressView()
+                                Text("Syncing logged nutrition…")
+                            }
+                        } else {
+                            Label("Sync Logged Nutrition", systemImage: "arrow.triangle.2.circlepath")
+                        }
+                    }
+                    .disabled(syncingNutrition)
+                case .notDetermined:
+                    Button("Connect Apple Health", systemImage: "heart.fill") {
+                        Task {
+                            await connectAppleHealth()
+                        }
+                    }
+                case .denied:
+                    Label("Access is turned off", systemImage: "exclamationmark.triangle")
+                    Text("Allow nutrition data in the Health app's Apps settings to reconnect.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                case .unavailable:
+                    Label("Apple Health is unavailable", systemImage: "heart.slash")
+                    Text("Health data can only be written on a device that supports Apple Health.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                if let error = healthKit.lastError {
+                    Text(error)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Section("Nutrition Data") {
+                Text("Calorie Tracker writes calories, carbohydrates, fat, and protein for logged foods, meals, and alcohol estimates.")
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .background(AppTheme.background)
+        .navigationTitle("Apple Health")
+        .navigationBarTitleDisplayMode(.inline)
+        .analyticsScreen("settings_apple_health")
     }
 
     private func syncLoggedNutrition() async {
@@ -202,20 +278,33 @@ struct SettingsView: View {
             "result": healthKit.lastError == nil ? "success" : "failure"
         ])
     }
+}
 
-    private var defaultWeightUnitSelection: Binding<String> {
-        Binding(
-            get: { defaultWeightUnit },
-            set: { unit in
-                guard unit != defaultWeightUnit else { return }
-                defaultWeightUnit = unit
-                let analyticsUnit = LogUnit(rawValue: unit)?.analyticsValue ?? "unknown"
-                AppAnalytics.capture(
-                    "settings.default_unit_changed",
-                    properties: ["unit": analyticsUnit]
-                )
+private struct FoodDataSourcesView: View {
+    let catalog: CatalogStore
+
+    var body: some View {
+        List {
+            Section("Local Catalogs") {
+                sourceRow(.usda, count: catalog.count(source: .usda))
+                sourceRow(.openFoodFacts, count: catalog.count(source: .openFoodFacts))
             }
-        )
+
+            Section("Source Links") {
+                Link("USDA FoodData Central", destination: URL(string: "https://fdc.nal.usda.gov/")!)
+                Link("Open Food Facts", destination: URL(string: "https://world.openfoodfacts.org/")!)
+            }
+
+            Section("Attribution") {
+                Text("USDA records are U.S. government public-domain data. Open Food Facts database records are reused under ODbL with source attribution and remain identifiable in this derived local database.")
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .background(AppTheme.background)
+        .navigationTitle("Food Data Sources")
+        .navigationBarTitleDisplayMode(.inline)
+        .analyticsScreen("settings_food_data_sources")
     }
 
     private func sourceRow(_ source: FoodSource, count: Int) -> some View {
@@ -228,17 +317,29 @@ struct SettingsView: View {
                 .monospacedDigit()
         }
     }
+}
 
-    private var calorieGoalText: Binding<String> {
-        Binding(
-            get: { diary.dailyCalorieGoal.map(String.init) ?? "" },
-            set: { value in
-                let digits = value.filter(\.isNumber)
-                diary.setDailyCalorieGoal(Int(digits))
+private struct PrivacyAnalyticsView: View {
+    var body: some View {
+        List {
+            Section("On Your Device") {
+                Text("Your diary, personal foods, saved meals, and remembered quantities are stored on your device. The food catalog and search index are bundled with the app, so routine logging does not depend on a network connection.")
+                    .foregroundStyle(.secondary)
             }
-        )
-    }
 
+            Section("Analytics") {
+                Text("When analytics is enabled, the app sends feature-usage events, catalog or local item identifiers, successful and failed food search terms, searches dismissed without logging, and unmatched barcodes to its private analytics service.")
+                    .foregroundStyle(.secondary)
+                Label("Food names, meal contents, quantities, calorie totals, and Health data are not sent.", systemImage: "checkmark.shield.fill")
+                    .foregroundStyle(AppTheme.protein)
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .background(AppTheme.background)
+        .navigationTitle("Privacy & Analytics")
+        .navigationBarTitleDisplayMode(.inline)
+        .analyticsScreen("settings_privacy_analytics")
+    }
 }
 
 #if DEBUG
@@ -255,6 +356,8 @@ private struct DeveloperDiagnosticsView: View {
                 Text("Inspect the local event queue, upload state, retries, and recent delivery outcomes.")
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(AppTheme.background)
         .navigationTitle("Developer Diagnostics")
         .navigationBarTitleDisplayMode(.inline)
         .analyticsScreen("developer_diagnostics")
@@ -361,6 +464,8 @@ private struct AnalyticsDiagnosticsView: View {
                 ProgressView()
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(AppTheme.background)
         .navigationTitle("Analytics")
         .analyticsScreen("analytics_diagnostics")
         .task { refresh() }
@@ -441,6 +546,8 @@ private struct AnalyticsEventPayloadView: View {
                     .textSelection(.enabled)
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(AppTheme.background)
         .navigationTitle(event.type)
         .navigationBarTitleDisplayMode(.inline)
         .analyticsScreen("analytics_event_payload")
@@ -468,7 +575,7 @@ private struct AnalyticsEventPayloadView: View {
 }
 #endif
 
-private struct FoodWeightReportView: View {
+struct FoodWeightReportView: View {
     @EnvironmentObject private var diary: DiaryStore
     @State private var shareURL: URL?
     @State private var shareRequest: FoodWeightReportShareRequest?
@@ -663,7 +770,9 @@ private struct PersonalCatalogView: View {
                 }
             }
         }
-        .navigationTitle("Custom")
+        .scrollContentBackground(.hidden)
+        .background(AppTheme.background)
+        .navigationTitle("Personal Library")
         .analyticsScreen("custom_catalog")
         .sheet(isPresented: $showingFoodEditor) {
             CustomFoodEditorView(food: editingFood)
@@ -778,6 +887,8 @@ struct CustomFoodEditorView: View {
                     Text("Red meat tracks unprocessed mammalian meat. Set both when a mixed food contains both kinds.")
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(AppTheme.background)
             .navigationTitle(food == nil ? "Add Custom Food" : "Edit Custom Food")
             .navigationBarTitleDisplayMode(.inline)
             .onChange(of: focusedField) { _, field in
@@ -945,6 +1056,8 @@ private struct SavedMealEditorView: View {
                     Text("These meal-level flags control how every logged serving of this meal appears in Trends.")
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(AppTheme.background)
             .navigationTitle(meal == nil ? "Add Saved Meal" : "Edit Saved Meal")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -1094,22 +1207,26 @@ private struct MealFoodPickerView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if foods.isEmpty {
-                    ContentUnavailableView(
-                        "No foods available",
-                        systemImage: "fork.knife.circle",
-                        description: Text("Add a custom food or log a food before creating a saved meal.")
-                    )
-                } else {
-                    List(foods) { food in
-                        Button {
-                            onSelect(food)
-                            dismiss()
-                        } label: {
-                            FoodResultRow(food: food)
+            ZStack {
+                AppTheme.background.ignoresSafeArea()
+                Group {
+                    if foods.isEmpty {
+                        ContentUnavailableView(
+                            "No foods available",
+                            systemImage: "fork.knife.circle",
+                            description: Text("Add a custom food or log a food before creating a saved meal.")
+                        )
+                    } else {
+                        List(foods) { food in
+                            Button {
+                                onSelect(food)
+                                dismiss()
+                            } label: {
+                                FoodResultRow(food: food)
+                            }
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
+                        .scrollContentBackground(.hidden)
                     }
                 }
             }
