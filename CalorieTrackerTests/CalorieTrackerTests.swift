@@ -3,6 +3,14 @@ import XCTest
 @testable import CalorieTracker
 
 final class CalorieTrackerTests: XCTestCase {
+    func testOlderNutrientSnapshotsDecodeFiberAsUnavailable() throws {
+        let data = Data(#"{"calories":100,"carbs":20,"fat":2,"protein":5}"#.utf8)
+
+        let nutrients = try JSONDecoder().decode(MacroNutrients.self, from: data)
+
+        XCTAssertNil(nutrients.fiber)
+    }
+
     func testAnalyticsDiagnosticEventDecodesHistoryWithoutPayload() throws {
         let data = Data(#"{"id":"event-001","type":"app.launched","occurredAt":"2026-08-25T12:00:00Z","state":"uploaded"}"#.utf8)
         let decoder = JSONDecoder()
@@ -555,7 +563,13 @@ final class CalorieTrackerTests: XCTestCase {
             name: "Banana",
             brand: nil,
             barcode: nil,
-            nutrients: MacroNutrients(calories: 89, carbs: 22.8, fat: 0.3, protein: 1.1),
+            nutrients: MacroNutrients(
+                calories: 89,
+                carbs: 22.8,
+                fat: 0.3,
+                protein: 1.1,
+                fiber: 2.6
+            ),
             baseAmountGrams: 100,
             servingGrams: 118,
             servingDescription: "1 medium"
@@ -565,7 +579,50 @@ final class CalorieTrackerTests: XCTestCase {
 
         let entry = try XCTUnwrap(store.entries(on: Date()).first)
         XCTAssertEqual(entry.nutrients.calories, 44.5, accuracy: 0.001)
+        XCTAssertEqual(try XCTUnwrap(entry.nutrients.fiber), 1.3, accuracy: 0.001)
         XCTAssertEqual(store.preference(for: food), QuantityPreference(amount: 50, unit: .grams))
+    }
+
+    @MainActor
+    func testFiberDailyTotalUsesKnownEntriesWhenOtherFoodsLackFiberData() throws {
+        let day = testDate(day: 1)
+        let store = DiaryStore(
+            document: DiaryDocument(),
+            fileURL: temporaryDiaryURL(),
+            calendar: testCalendar,
+            referenceDate: day
+        )
+        var knownFiberFood = testFood(calories: 100, name: "Beans")
+        knownFiberFood.nutrients.fiber = 7
+        store.log(knownFiberFood, amount: 1, unit: .serving, on: day)
+        XCTAssertEqual(try XCTUnwrap(store.totals(on: day).fiber), 7, accuracy: 0.001)
+
+        store.log(testFood(calories: 50, name: "Unknown fiber food"), amount: 1, unit: .serving, on: day)
+
+        XCTAssertEqual(try XCTUnwrap(store.totals(on: day).fiber), 7, accuracy: 0.001)
+    }
+
+    @MainActor
+    func testFiberDailyTotalUsesKnownMealComponentsWhenMealFiberIsIncomplete() throws {
+        let day = testDate(day: 1)
+        let store = DiaryStore(
+            document: DiaryDocument(),
+            fileURL: temporaryDiaryURL(),
+            calendar: testCalendar,
+            referenceDate: day
+        )
+        var knownFiberFood = testFood(calories: 100, name: "Lentils")
+        knownFiberFood.nutrients.fiber = 8
+        let unknownFiberFood = testFood(calories: 50, name: "Unknown meal ingredient")
+        let meal = try XCTUnwrap(store.saveMeal(name: "Mixed meal", items: [
+            MealItem(id: UUID(), food: knownFiberFood, amount: 1, unit: .serving, portionID: "serving"),
+            MealItem(id: UUID(), food: unknownFiberFood, amount: 1, unit: .serving, portionID: "serving")
+        ]))
+
+        store.logMeal(meal, on: day)
+
+        XCTAssertNil(store.entries(on: day).first?.nutrients.fiber)
+        XCTAssertEqual(try XCTUnwrap(store.totals(on: day).fiber), 8, accuracy: 0.001)
     }
 
     @MainActor
@@ -863,6 +920,7 @@ final class CalorieTrackerTests: XCTestCase {
             carbs: 20,
             fat: 2,
             protein: 4,
+            fiber: 3,
             servingGrams: 40
         )
         store.log(food, amount: 1, unit: .serving, on: day)
@@ -879,15 +937,19 @@ final class CalorieTrackerTests: XCTestCase {
             carbs: 25,
             fat: 3,
             protein: 6,
+            fiber: 5,
             servingGrams: 50
         ))
 
         XCTAssertEqual(store.document.customFoods.first?.name, "Updated oats")
         XCTAssertEqual(store.document.customFoods.first?.nutrients.calories, 150)
+        XCTAssertEqual(store.document.customFoods.first?.nutrients.fiber, 5)
         XCTAssertEqual(store.document.meals.first?.items.first?.food.name, "Updated oats")
+        XCTAssertEqual(store.document.meals.first?.nutrients.fiber, 5)
         let loggedFood = try XCTUnwrap(store.entries(on: day).first)
         XCTAssertEqual(loggedFood.food.name, "Updated oats")
         XCTAssertEqual(loggedFood.nutrients.calories, 150, accuracy: 0.001)
+        XCTAssertEqual(loggedFood.nutrients.fiber, 5)
 
         let reloaded = DiaryStore(fileURL: fileURL)
         XCTAssertEqual(reloaded.document.customFoods.first?.name, "Updated oats")
@@ -1141,6 +1203,11 @@ final class CalorieTrackerTests: XCTestCase {
         let combinedSources = Set(catalog.searchAll("milk", limit: 100).map(\.source))
         XCTAssertTrue(combinedSources.contains(.usda))
         XCTAssertTrue(combinedSources.contains(.openFoodFacts))
+
+        let banana = try XCTUnwrap(
+            catalog.search("banana raw", source: .usda).first { $0.name == "Banana, raw" }
+        )
+        XCTAssertEqual(try XCTUnwrap(banana.nutrients.fiber), 1.7, accuracy: 0.001)
     }
 
     func testCatalogPreservesNaturalPortions() throws {
@@ -1231,6 +1298,7 @@ final class CalorieTrackerTests: XCTestCase {
 
         XCTAssertEqual(store.entries(on: day).first?.food.containsProcessedMeat, true)
         XCTAssertEqual(store.entries(on: day).first?.food.containsRedMeat, false)
+        XCTAssertEqual(store.entries(on: day).first?.nutrients.fiber, 0)
         XCTAssertEqual(store.document.customFoods.first?.containsProcessedMeat, true)
         XCTAssertEqual(store.document.customFoods.first?.containsRedMeat, false)
     }
@@ -1627,7 +1695,7 @@ extension CalorieTrackerTests {
 
         let reloaded = DiaryStore(fileURL: fileURL, calendar: testCalendar, referenceDate: day)
         let reloadedEntry = try XCTUnwrap(reloaded.alcoholEntry(on: day))
-        XCTAssertEqual(reloaded.document.schemaVersion, 7)
+        XCTAssertEqual(reloaded.document.schemaVersion, 8)
         XCTAssertEqual(reloadedEntry.id, entry.id)
         XCTAssertEqual(reloadedEntry.date, entry.date)
         XCTAssertEqual(reloadedEntry.drinks, entry.drinks)
@@ -1922,7 +1990,8 @@ extension CalorieTrackerTests {
             "calories": 750,
             "carbohydratesGrams": 32,
             "fatGrams": 40,
-            "proteinGrams": 60
+            "proteinGrams": 60,
+            "fiberGrams": 8
           },
           "notes": "  Dressing is the biggest uncertainty.  "
         }
@@ -1941,6 +2010,7 @@ extension CalorieTrackerTests {
         XCTAssertEqual(food.nutrients.carbs, 32)
         XCTAssertEqual(food.nutrients.fat, 40)
         XCTAssertEqual(food.nutrients.protein, 60)
+        XCTAssertEqual(food.nutrients.fiber, 8)
         XCTAssertEqual(food.servingGrams, 510)
         XCTAssertEqual(food.availablePortions.first?.label, "whole bowl")
         XCTAssertEqual(food.nutrients(for: 1, unit: .serving, portionID: "imported-serving"), food.nutrients)

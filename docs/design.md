@@ -5,7 +5,8 @@
 1. The default screen answers “what have I logged today?” immediately.
 2. Repeated-food flows optimize for one tap; search results use a lightweight
    quantity sheet before logging when an amount has not yet been remembered.
-3. Only calories, carbohydrates, fat, and protein are visually prominent.
+3. Calories, carbohydrates, fat, and protein remain visually prominent; optional
+   health-focus metrics live in Trends.
 4. Source identity is visible but quiet, making the dataset bake-off possible
    without cluttering routine use.
 
@@ -18,8 +19,9 @@
   rows show current values or status so the user's setup is understandable at a
   glance.
 - **Trends**, opened by tapping the diary summary, shows the last 30 days in a
-  calorie chart with optional drink markers and a daily macro chart. Its toolbar
-  contains focused health-metric controls and the food-weight report.
+  calorie chart with optional drink markers, an optional daily Fiber chart, and
+  a daily macro chart. Its toolbar contains focused health-metric controls and
+  the food-weight report.
 
 When the macro summary card scrolls fully out of view, its calorie total remains
 visible as a compact navigation-title item and continues updating with the diary.
@@ -45,7 +47,7 @@ sheet keeps one aggregate count and one optional type per day; plus and minus
 buttons change only the drink count. An unspecified drink uses 150 calories.
 Beer uses 150, wine 125, spirits 100, and cocktails 200 calories per drink. The
 selected estimate contributes to the diary calorie total without adding
-carbohydrates, fat, or protein. Reopening the sheet edits the same daily
+carbohydrates, fat, protein, or Fiber. Reopening the sheet edits the same daily
 aggregate, and saving zero removes it. The alcohol action displays the saved
 count. The aggregate also appears as an orange wine-glass row in Logged; tapping
 the row reopens its editor. Trends stacks one large, vertically spaced orange
@@ -58,13 +60,17 @@ Add action; tapping or swiping a row opens an editor, while swipe-to-delete
 remains available for both kinds of personal item.
 
 The Focus Areas section in Settings and the matching Trends toolbar menu
-contain independent Alcohol, Processed Meat, and Red Meat switches in that
-order. Both surfaces share the same local preferences. Disabling Alcohol hides
+contain independent Alcohol, Fiber, Processed Meat, and Red Meat switches in
+that order. Both surfaces share the same local preferences. Disabling Alcohol hides
 the diary's quick-entry action, wine-glass markers, and alcohol-specific chart
 copy while retaining alcohol calories in the calorie line. Trends omits disabled
 meat series from the weekly chart and tapped-week detail; when neither meat focus
 is selected, the meat-days card is omitted entirely so the screen remains
-centered on the user's chosen metrics.
+centered on the user's chosen metrics. Disabling Fiber removes its daily-grams
+card without changing food data or the diary action bar. Fiber remains separate
+from the stacked macro summary because it is already included in carbohydrates.
+Days containing any food without Fiber data are omitted from the Fiber series
+and identified by explanatory chart copy rather than represented as zero.
 
 Settings also links to AI Food & Meal Import instructions and one copyable,
 tool-neutral prompt. The prompt tells an assistant to create a `.calfood`

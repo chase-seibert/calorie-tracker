@@ -116,7 +116,8 @@ final class HealthKitStore: ObservableObject {
             .dietaryEnergyConsumed,
             .dietaryCarbohydrates,
             .dietaryFatTotal,
-            .dietaryProtein
+            .dietaryProtein,
+            .dietaryFiber
         ].compactMap { HKObjectType.quantityType(forIdentifier: $0) }
     }
 
@@ -172,15 +173,17 @@ final class HealthKitStore: ObservableObject {
     }
 
     private func samples(for entry: DiaryEntry, types: [HKQuantityType]) -> [HKQuantitySample] {
-        let values: [(HKQuantityTypeIdentifier, Double, HKUnit)] = [
+        let values: [(HKQuantityTypeIdentifier, Double?, HKUnit)] = [
             (.dietaryEnergyConsumed, entry.nutrients.calories, .kilocalorie()),
             (.dietaryCarbohydrates, entry.nutrients.carbs, .gram()),
             (.dietaryFatTotal, entry.nutrients.fat, .gram()),
-            (.dietaryProtein, entry.nutrients.protein, .gram())
+            (.dietaryProtein, entry.nutrients.protein, .gram()),
+            (.dietaryFiber, entry.nutrients.fiber, .gram())
         ]
 
         return values.compactMap { identifier, value, unit in
-            guard let type = types.first(where: { $0.identifier == identifier.rawValue }) else { return nil }
+            guard let value,
+                  let type = types.first(where: { $0.identifier == identifier.rawValue }) else { return nil }
             let quantity = HKQuantity(unit: unit, doubleValue: max(value, 0))
             let syncID = syncIdentifier(for: entry, type: type)
             let metadata: [String: Any] = [
@@ -203,7 +206,8 @@ final class HealthKitStore: ObservableObject {
             (.dietaryEnergyConsumed, .kilocalorie()),
             (.dietaryCarbohydrates, .gram()),
             (.dietaryFatTotal, .gram()),
-            (.dietaryProtein, .gram())
+            (.dietaryProtein, .gram()),
+            (.dietaryFiber, .gram())
         ]
 
         return units.compactMap { identifier, unit in

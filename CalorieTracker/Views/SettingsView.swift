@@ -5,6 +5,7 @@ struct SettingsView: View {
     @EnvironmentObject private var diary: DiaryStore
     @EnvironmentObject private var healthKit: HealthKitStore
     @AppStorage("trends.focus.alcohol") private var tracksAlcohol = true
+    @AppStorage("trends.focus.fiber") private var tracksFiber = true
     @AppStorage("trends.focus.processedMeat") private var tracksProcessedMeat = true
     @AppStorage("trends.focus.redMeat") private var tracksRedMeat = true
     let catalog: CatalogStore
@@ -25,6 +26,7 @@ struct SettingsView: View {
 
             Section {
                 Toggle("Alcohol", isOn: $tracksAlcohol)
+                Toggle("Fiber", isOn: $tracksFiber)
                 Toggle("Processed Meat", isOn: $tracksProcessedMeat)
                 Toggle("Red Meat", isOn: $tracksRedMeat)
             } header: {
@@ -241,7 +243,7 @@ private struct AppleHealthSettingsView: View {
             }
 
             Section("Nutrition Data") {
-                Text("Calorie Tracker writes calories, carbohydrates, fat, and protein for logged foods, meals, and alcohol estimates.")
+                Text("Calorie Tracker writes calories, carbohydrates, fat, protein, and available fiber for logged foods, meals, and alcohol estimates.")
                     .foregroundStyle(.secondary)
             }
         }
@@ -831,6 +833,7 @@ struct CustomFoodEditorView: View {
     @State private var carbs: Double
     @State private var fat: Double
     @State private var protein: Double
+    @State private var fiber: Double?
     @State private var servingGrams: Double
     @State private var containsProcessedMeat: Bool
     @State private var containsRedMeat: Bool
@@ -843,11 +846,12 @@ struct CustomFoodEditorView: View {
         case carbs
         case fat
         case protein
+        case fiber
         case servingGrams
 
         var selectsAllOnFocus: Bool {
             switch self {
-            case .calories, .carbs, .fat, .protein, .servingGrams:
+            case .calories, .carbs, .fat, .protein, .fiber, .servingGrams:
                 return true
             case .name, .brand:
                 return false
@@ -870,6 +874,7 @@ struct CustomFoodEditorView: View {
         _carbs = State(initialValue: food?.nutrients.carbs ?? 0)
         _fat = State(initialValue: food?.nutrients.fat ?? 0)
         _protein = State(initialValue: food?.nutrients.protein ?? 0)
+        _fiber = State(initialValue: food?.nutrients.fiber)
         _servingGrams = State(initialValue: food?.servingGrams ?? food?.baseAmountGrams ?? 100)
         _containsProcessedMeat = State(initialValue: food?.containsProcessedMeat ?? false)
         _containsRedMeat = State(initialValue: food?.containsRedMeat ?? false)
@@ -888,6 +893,7 @@ struct CustomFoodEditorView: View {
                     decimalFieldRow("Carbohydrates (g)", value: $carbs, field: .carbs)
                     decimalFieldRow("Fat (g)", value: $fat, field: .fat)
                     decimalFieldRow("Protein (g)", value: $protein, field: .protein)
+                    optionalDecimalFieldRow("Fiber (g, optional)", value: $fiber, field: .fiber)
                     decimalFieldRow("Serving size (g)", value: $servingGrams, field: .servingGrams)
                 }
 
@@ -959,6 +965,26 @@ struct CustomFoodEditorView: View {
         .simultaneousGesture(TapGesture().onEnded { focus(field) })
     }
 
+    private func optionalDecimalFieldRow(
+        _ label: String,
+        value: Binding<Double?>,
+        field: Field
+    ) -> some View {
+        LabeledContent {
+            TextField("", value: value, format: .number)
+                .focused($focusedField, equals: field)
+                .keyboardType(.decimalPad)
+                .multilineTextAlignment(.trailing)
+                .frame(width: 96)
+                .foregroundStyle(.primary)
+        } label: {
+            Text(label)
+                .foregroundStyle(.secondary)
+        }
+        .contentShape(Rectangle())
+        .simultaneousGesture(TapGesture().onEnded { focus(field) })
+    }
+
     private func save() {
         guard canSave else { return }
         let savedFood: Food?
@@ -971,6 +997,7 @@ struct CustomFoodEditorView: View {
                 carbs: carbs,
                 fat: fat,
                 protein: protein,
+                fiber: fiber,
                 servingGrams: servingGrams,
                 containsProcessedMeat: containsProcessedMeat,
                 containsRedMeat: containsRedMeat
@@ -984,6 +1011,7 @@ struct CustomFoodEditorView: View {
                 carbs: carbs,
                 fat: fat,
                 protein: protein,
+                fiber: fiber,
                 servingGrams: servingGrams,
                 containsProcessedMeat: containsProcessedMeat,
                 containsRedMeat: containsRedMeat

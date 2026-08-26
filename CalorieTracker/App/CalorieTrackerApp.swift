@@ -133,6 +133,7 @@ enum AppTheme {
     static let carbs = Color(uiColor: .systemBlue)
     static let fat = Color(uiColor: .systemPurple)
     static let protein = Color(uiColor: .systemGreen)
+    static let fiber = Color(uiColor: .systemBrown)
     static let gapDay = Color(uiColor: .systemGray)
     static let cheatDay = Color(uiColor: .systemOrange)
     static let processedMeat = Color(uiColor: .systemTeal)

@@ -149,6 +149,7 @@ class Food:
     carbs: float
     fat: float
     protein: float
+    fiber: float | None
     base_grams: float
     serving_grams: float | None
     serving_description: str | None
@@ -338,7 +339,7 @@ def read_foods(path: Path) -> list[Food]:
         rows = database.execute(
             """
             SELECT rowid, source_id, source, name, brand, barcode, calories,
-                   carbs, fat, protein, base_grams, serving_grams,
+                   carbs, fat, protein, fiber, base_grams, serving_grams,
                    serving_description, portions_json, rank
             FROM foods ORDER BY rowid
             """
@@ -371,6 +372,7 @@ def create_database(path: Path, source_path: Path, foods: list[Food], groups: li
                 carbs REAL NOT NULL,
                 fat REAL NOT NULL,
                 protein REAL NOT NULL,
+                fiber REAL,
                 base_grams REAL NOT NULL,
                 serving_grams REAL,
                 serving_description TEXT,
@@ -416,6 +418,7 @@ def create_database(path: Path, source_path: Path, foods: list[Food], groups: li
                 carbs REAL NOT NULL,
                 fat REAL NOT NULL,
                 protein REAL NOT NULL,
+                fiber REAL,
                 base_grams REAL NOT NULL,
                 serving_grams REAL,
                 serving_description TEXT,
@@ -433,7 +436,7 @@ def create_database(path: Path, source_path: Path, foods: list[Food], groups: li
             """
         )
         database.executemany(
-            "INSERT INTO source_foods VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO source_foods VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [tuple(food.__dict__.values()) for food in foods],
         )
         for group in groups:
@@ -475,7 +478,7 @@ def create_database(path: Path, source_path: Path, foods: list[Food], groups: li
             )
             canonical = group.canonical
             database.execute(
-                "INSERT INTO foods VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO foods VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     canonical.source_id,
                     canonical.source,
@@ -486,6 +489,7 @@ def create_database(path: Path, source_path: Path, foods: list[Food], groups: li
                     canonical.carbs,
                     canonical.fat,
                     canonical.protein,
+                    canonical.fiber,
                     canonical.base_grams,
                     canonical.serving_grams,
                     canonical.serving_description,
@@ -510,7 +514,7 @@ def create_database(path: Path, source_path: Path, foods: list[Food], groups: li
             """
         )
         metadata = {
-            "schema_version": "grouped-1",
+            "schema_version": "grouped-2",
             "grouping_algorithm_version": ALGORITHM_VERSION,
             "source_catalog": str(source_path.resolve()),
             "source_food_count": str(len(foods)),

@@ -40,7 +40,7 @@ final class CatalogStore: @unchecked Sendable {
 
         let sql = """
             SELECT f.source_id, f.source, f.name, f.brand, f.barcode,
-                   f.calories, f.carbs, f.fat, f.protein, f.base_grams,
+                   f.calories, f.carbs, f.fat, f.protein, f.fiber, f.base_grams,
                    f.serving_grams, f.serving_description, f.portions_json,
                    f.contains_processed_meat, f.contains_red_meat
             FROM foods_fts
@@ -78,7 +78,7 @@ final class CatalogStore: @unchecked Sendable {
 
         let sql = """
             SELECT f.source_id, f.source, f.name, f.brand, f.barcode,
-                   f.calories, f.carbs, f.fat, f.protein, f.base_grams,
+                   f.calories, f.carbs, f.fat, f.protein, f.fiber, f.base_grams,
                    f.serving_grams, f.serving_description, f.portions_json,
                    f.contains_processed_meat, f.contains_red_meat
             FROM foods_fts
@@ -108,7 +108,7 @@ final class CatalogStore: @unchecked Sendable {
     func popular(source: FoodSource, limit: Int = 50) -> [Food] {
         let sql = """
             SELECT source_id, source, name, brand, barcode, calories, carbs,
-                   fat, protein, base_grams, serving_grams, serving_description, portions_json,
+                   fat, protein, fiber, base_grams, serving_grams, serving_description, portions_json,
                    contains_processed_meat, contains_red_meat
             FROM foods WHERE source = ? ORDER BY rank DESC, name LIMIT ?
             """
@@ -123,7 +123,7 @@ final class CatalogStore: @unchecked Sendable {
         guard !digits.isEmpty else { return nil }
         let sql = """
             SELECT source_id, source, name, brand, barcode, calories, carbs,
-                   fat, protein, base_grams, serving_grams, serving_description, portions_json,
+                   fat, protein, fiber, base_grams, serving_grams, serving_description, portions_json,
                    contains_processed_meat, contains_red_meat
             FROM foods WHERE barcode = ? ORDER BY CASE source WHEN 'off' THEN 0 ELSE 1 END, rank DESC LIMIT 1
             """
@@ -165,6 +165,22 @@ final class CatalogStore: @unchecked Sendable {
         )
     }
 
+    func fiber(sourceID: String, source: FoodSource) -> Double? {
+        lock.lock()
+        defer { lock.unlock() }
+        guard let database else { return nil }
+        var statement: OpaquePointer?
+        defer { sqlite3_finalize(statement) }
+        let sql = "SELECT fiber FROM foods WHERE source = ? AND source_id = ? LIMIT 1"
+        guard sqlite3_prepare_v2(database, sql, -1, &statement, nil) == SQLITE_OK,
+              let statement else { return nil }
+        bind(source.rawValue, at: 1, to: statement)
+        bind(sourceID, at: 2, to: statement)
+        guard sqlite3_step(statement) == SQLITE_ROW,
+              sqlite3_column_type(statement, 0) != SQLITE_NULL else { return nil }
+        return sqlite3_column_double(statement, 0)
+    }
+
     private func queryFoods(sql: String, bindValues: (OpaquePointer) -> Void) -> [Food] {
         lock.lock()
         defer { lock.unlock() }
@@ -190,14 +206,17 @@ final class CatalogStore: @unchecked Sendable {
                     calories: sqlite3_column_double(statement, 5),
                     carbs: sqlite3_column_double(statement, 6),
                     fat: sqlite3_column_double(statement, 7),
-                    protein: sqlite3_column_double(statement, 8)
+                    protein: sqlite3_column_double(statement, 8),
+                    fiber: sqlite3_column_type(statement, 9) == SQLITE_NULL
+                        ? nil
+                        : sqlite3_column_double(statement, 9)
                 ),
-                baseAmountGrams: sqlite3_column_double(statement, 9),
-                servingGrams: sqlite3_column_type(statement, 10) == SQLITE_NULL ? nil : sqlite3_column_double(statement, 10),
-                servingDescription: text(statement, 11),
-                portions: decodePortions(text(statement, 12)),
-                containsProcessedMeat: sqlite3_column_int(statement, 13) != 0,
-                containsRedMeat: sqlite3_column_int(statement, 14) != 0
+                baseAmountGrams: sqlite3_column_double(statement, 10),
+                servingGrams: sqlite3_column_type(statement, 11) == SQLITE_NULL ? nil : sqlite3_column_double(statement, 11),
+                servingDescription: text(statement, 12),
+                portions: decodePortions(text(statement, 13)),
+                containsProcessedMeat: sqlite3_column_int(statement, 14) != 0,
+                containsRedMeat: sqlite3_column_int(statement, 15) != 0
             ))
         }
         return result

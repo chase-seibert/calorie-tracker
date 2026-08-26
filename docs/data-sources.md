@@ -35,9 +35,11 @@ build-time controls. The initial bake-off snapshot requests 1,000 OFF products
 to stay within the public search service's documented anti-abuse limits.
 
 The checked-in snapshot currently contains 13,545 USDA foods and 935 popular,
-U.S.-tagged Open Food Facts products with calorie data in a roughly 4.6 MB SQLite
+U.S.-tagged Open Food Facts products with calorie data in a roughly 4.7 MB SQLite
 file. It now retains every usable source portion rather than pruning each food
-to one serving.
+to one serving. Dietary Fiber is available for 12,820 USDA rows and 789 Open
+Food Facts rows (13,609 of 14,480 foods, or 94.0% overall); missing Fiber remains
+nullable rather than being compiled as zero.
 
 ## Coverage expansion options
 

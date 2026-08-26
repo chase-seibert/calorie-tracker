@@ -6,6 +6,7 @@ struct CustomFoodDefinition: Codable, Equatable, Sendable {
         var carbohydratesGrams: Double
         var fatGrams: Double
         var proteinGrams: Double
+        var fiberGrams: Double? = nil
     }
 
     var name: String
@@ -33,13 +34,15 @@ struct CustomFoodDefinition: Codable, Equatable, Sendable {
             nutrition.calories,
             nutrition.carbohydratesGrams,
             nutrition.fatGrams,
-            nutrition.proteinGrams
+            nutrition.proteinGrams,
+            nutrition.fiberGrams
         ]
-        guard nutrientValues.allSatisfy({ $0.isFinite && $0 >= 0 }),
+        guard nutrientValues.compactMap({ $0 }).allSatisfy({ $0.isFinite && $0 >= 0 }),
               nutrition.calories <= 10_000,
               nutrition.carbohydratesGrams <= 1_000,
               nutrition.fatGrams <= 1_000,
-              nutrition.proteinGrams <= 1_000 else {
+              nutrition.proteinGrams <= 1_000,
+              (nutrition.fiberGrams ?? 0) <= 1_000 else {
             throw CustomImportError.invalidNutrition
         }
     }
@@ -57,7 +60,8 @@ struct CustomFoodDefinition: Codable, Equatable, Sendable {
                 calories: normalized.nutrition.calories,
                 carbs: normalized.nutrition.carbohydratesGrams,
                 fat: normalized.nutrition.fatGrams,
-                protein: normalized.nutrition.proteinGrams
+                protein: normalized.nutrition.proteinGrams,
+                fiber: normalized.nutrition.fiberGrams
             ),
             baseAmountGrams: grams,
             servingGrams: grams,
@@ -220,7 +224,8 @@ enum CustomImportFile: Equatable, Sendable {
         "calories": 750,
         "carbohydratesGrams": 32,
         "fatGrams": 40,
-        "proteinGrams": 60
+        "proteinGrams": 60,
+        "fiberGrams": 8
       },
       "containsProcessedMeat": false,
       "containsRedMeat": false,
@@ -241,7 +246,8 @@ enum CustomImportFile: Equatable, Sendable {
             "calories": 300,
             "carbohydratesGrams": 4,
             "fatGrams": 12,
-            "proteinGrams": 45
+            "proteinGrams": 45,
+            "fiberGrams": 2
           },
           "containsProcessedMeat": false,
           "containsRedMeat": false,
@@ -255,7 +261,8 @@ enum CustomImportFile: Equatable, Sendable {
             "calories": 220,
             "carbohydratesGrams": 40,
             "fatGrams": 4,
-            "proteinGrams": 8
+            "proteinGrams": 8,
+            "fiberGrams": 6
           }
         }
       ],

@@ -42,7 +42,7 @@ Each retained catalog row keeps only:
 
 - source and source ID;
 - name, brand, and barcode;
-- calories, carbohydrates, fat, and protein per 100 g;
+- calories, carbohydrates, fat, protein, and optional Fiber per 100 g;
 - usable portion labels and their gram weights;
 - compiled processed-meat and unprocessed-red-meat presence flags;
 - a source popularity/ranking value.

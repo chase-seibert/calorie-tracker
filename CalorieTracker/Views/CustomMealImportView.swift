@@ -72,6 +72,7 @@ struct CustomFoodImportView: View {
                 carbs: definition.nutrition.carbohydratesGrams,
                 fat: definition.nutrition.fatGrams,
                 protein: definition.nutrition.proteinGrams,
+                fiber: definition.nutrition.fiberGrams,
                 servingGrams: definition.servingGrams,
                 servingDescription: "1 \(definition.servingDescription)",
                 containsProcessedMeat: definition.containsProcessedMeat ?? false,
@@ -139,6 +140,9 @@ struct CustomMealImportView: View {
                     nutrientTotal("Carbohydrates", totalNutrients.carbs, suffix: " g")
                     nutrientTotal("Fat", totalNutrients.fat, suffix: " g")
                     nutrientTotal("Protein", totalNutrients.protein, suffix: " g")
+                    if let fiber = totalNutrients.fiber {
+                        nutrientTotal("Fiber", fiber, suffix: " g")
+                    }
                 }
 
                 ForEach(Array(foods.indices), id: \.self) { index in
@@ -299,6 +303,7 @@ private struct ImportedFoodFields: View {
         decimalField("Carbohydrates (g)", value: $food.nutrition.carbohydratesGrams)
         decimalField("Fat (g)", value: $food.nutrition.fatGrams)
         decimalField("Protein (g)", value: $food.nutrition.proteinGrams)
+        optionalDecimalField("Fiber (g, optional)", value: $food.nutrition.fiberGrams)
         Toggle("Contains processed meat", isOn: optionalBool($food.containsProcessedMeat))
         Toggle("Contains red meat", isOn: optionalBool($food.containsRedMeat))
         TextField("Notes (optional)", text: notesBinding, axis: .vertical)
@@ -313,6 +318,15 @@ private struct ImportedFoodFields: View {
     }
 
     private func decimalField(_ title: String, value: Binding<Double>) -> some View {
+        LabeledContent(title) {
+            TextField(title, value: value, format: .number)
+                .keyboardType(.decimalPad)
+                .multilineTextAlignment(.trailing)
+                .frame(width: 90)
+        }
+    }
+
+    private func optionalDecimalField(_ title: String, value: Binding<Double?>) -> some View {
         LabeledContent(title) {
             TextField(title, value: value, format: .number)
                 .keyboardType(.decimalPad)

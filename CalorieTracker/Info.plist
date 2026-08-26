@@ -54,7 +54,7 @@
 	<key>NSHealthShareUsageDescription</key>
 	<string>CalorieTracker reads nutrition data you choose to share with it.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>CalorieTracker writes calories, carbohydrates, fat, and protein for foods you log.</string>
+	<string>CalorieTracker writes calories, carbohydrates, fat, protein, and available fiber for foods you log.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

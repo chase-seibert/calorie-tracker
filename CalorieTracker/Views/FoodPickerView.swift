@@ -1077,6 +1077,9 @@ struct QuantityEditor: View {
                         nutrient("Carbs", preview.carbs, suffix: "g")
                         nutrient("Fat", preview.fat, suffix: "g")
                         nutrient("Protein", preview.protein, suffix: "g")
+                        if let fiber = preview.fiber {
+                            nutrient("Fiber", fiber, suffix: "g")
+                        }
                     }
 
                     Button(action: save) {

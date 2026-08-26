@@ -64,6 +64,7 @@ class CatalogFood:
     carbs: float
     fat: float
     protein: float
+    fiber: float | None = None
     base_grams: float = 100.0
     serving_grams: float | None = None
     serving_description: str | None = None
@@ -468,6 +469,7 @@ def parse_usda_food(raw: dict, kind: str) -> CatalogFood | None:
         carbs=max(first_amount(nutrient_values, 1005), 0),
         fat=max(first_amount(nutrient_values, 1004), 0),
         protein=max(first_amount(nutrient_values, 1003), 0),
+        fiber=optional_amount(nutrient_values, 1079),
         serving_grams=serving_grams,
         serving_description=serving_description,
         portions=tuple(portions),
@@ -486,6 +488,11 @@ def first_nutrient(values: dict[int, tuple[float, str]], identifiers: list[int])
 
 def first_amount(values: dict[int, tuple[float, str]], identifier: int) -> float:
     return values.get(identifier, (0.0, ""))[0]
+
+
+def optional_amount(values: dict[int, tuple[float, str]], identifier: int) -> float | None:
+    value = values.get(identifier)
+    return max(value[0], 0) if value is not None else None
 
 
 def off_foods(products: int | None = None, search: bool = False) -> Iterator[CatalogFood]:
@@ -529,6 +536,7 @@ def off_foods(products: int | None = None, search: bool = False) -> Iterator[Cat
                 else ()
             )
             contains_processed_meat, contains_red_meat = classify_off_meat(raw, name)
+            fiber = finite_number(nutriments.get("fiber_100g"), float("nan"))
             yield CatalogFood(
                 source_id=barcode,
                 source="off",
@@ -539,6 +547,7 @@ def off_foods(products: int | None = None, search: bool = False) -> Iterator[Cat
                 carbs=max(finite_number(nutriments.get("carbohydrates_100g")), 0),
                 fat=max(finite_number(nutriments.get("fat_100g")), 0),
                 protein=max(finite_number(nutriments.get("proteins_100g")), 0),
+                fiber=max(fiber, 0) if math.isfinite(fiber) else None,
                 serving_grams=serving_grams or None,
                 serving_description=serving_description,
                 portions=portions,
@@ -558,11 +567,11 @@ def parse_grams(text: str | None) -> float | None:
 def seed_foods() -> Iterable[CatalogFood]:
     # Small fallback used only when building without cached upstream data.
     return [
-        CatalogFood("seed-banana", "usda", "Banana, raw", None, None, 89, 22.84, 0.33, 1.09, serving_grams=118, serving_description="1 medium"),
-        CatalogFood("seed-egg", "usda", "Egg, whole, cooked, hard-boiled", None, None, 155, 1.12, 10.61, 12.58, serving_grams=50, serving_description="1 large"),
-        CatalogFood("seed-chicken", "usda", "Chicken breast, roasted", None, None, 165, 0, 3.57, 31.02, serving_grams=85, serving_description="3 oz"),
-        CatalogFood("737628064502", "off", "Greek Yogurt, Plain", "Fage", "737628064502", 97, 3, 5, 9, serving_grams=170, serving_description="170 g", rank=100),
-        CatalogFood("049000028904", "off", "Sparkling Water", "Topo Chico", "049000028904", 0, 0, 0, 0, serving_grams=355, serving_description="355 ml", rank=80),
+        CatalogFood("seed-banana", "usda", "Banana, raw", None, None, 89, 22.84, 0.33, 1.09, fiber=2.6, serving_grams=118, serving_description="1 medium"),
+        CatalogFood("seed-egg", "usda", "Egg, whole, cooked, hard-boiled", None, None, 155, 1.12, 10.61, 12.58, fiber=0, serving_grams=50, serving_description="1 large"),
+        CatalogFood("seed-chicken", "usda", "Chicken breast, roasted", None, None, 165, 0, 3.57, 31.02, fiber=0, serving_grams=85, serving_description="3 oz"),
+        CatalogFood("737628064502", "off", "Greek Yogurt, Plain", "Fage", "737628064502", 97, 3, 5, 9, fiber=0, serving_grams=170, serving_description="170 g", rank=100),
+        CatalogFood("049000028904", "off", "Sparkling Water", "Topo Chico", "049000028904", 0, 0, 0, 0, fiber=0, serving_grams=355, serving_description="355 ml", rank=80),
     ]
 
 
@@ -586,6 +595,7 @@ def create_database(output: Path, foods: Iterable[CatalogFood]) -> tuple[int, di
             carbs REAL NOT NULL,
             fat REAL NOT NULL,
             protein REAL NOT NULL,
+            fiber REAL,
             base_grams REAL NOT NULL,
             serving_grams REAL,
             serving_description TEXT,
@@ -603,9 +613,9 @@ def create_database(output: Path, foods: Iterable[CatalogFood]) -> tuple[int, di
     insert = """
         INSERT OR REPLACE INTO foods (
             source_id, source, name, brand, barcode, calories, carbs, fat,
-            protein, base_grams, serving_grams, serving_description, portions_json,
+            protein, fiber, base_grams, serving_grams, serving_description, portions_json,
             contains_processed_meat, contains_red_meat, rank
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
     count = 0
     counts: dict[str, int] = {}
@@ -622,6 +632,7 @@ def create_database(output: Path, foods: Iterable[CatalogFood]) -> tuple[int, di
                 food.carbs,
                 food.fat,
                 food.protein,
+                food.fiber,
                 food.base_grams,
                 food.serving_grams,
                 food.serving_description,
@@ -651,7 +662,7 @@ def create_database(output: Path, foods: Iterable[CatalogFood]) -> tuple[int, di
         );
         INSERT INTO foods_fts(rowid, name, brand)
             SELECT rowid, name, coalesce(brand, '') FROM foods;
-        INSERT INTO metadata VALUES ('schema_version', '3');
+        INSERT INTO metadata VALUES ('schema_version', '4');
         INSERT INTO metadata VALUES ('usda_release', '2026-04-30 foundation; 2018-04 SR Legacy; 2024-10-31 FNDDS');
         INSERT INTO metadata VALUES ('off_scope', 'popular products tagged United States with calorie data');
         ANALYZE;

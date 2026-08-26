@@ -40,7 +40,8 @@ food:
     "calories": 750,
     "carbohydratesGrams": 32,
     "fatGrams": 40,
-    "proteinGrams": 60
+    "proteinGrams": 60,
+    "fiberGrams": 8
   },
   "containsProcessedMeat": false,
   "containsRedMeat": false,
@@ -67,7 +68,8 @@ totals from `foods`; top-level nutrition is intentionally absent.
         "calories": 300,
         "carbohydratesGrams": 4,
         "fatGrams": 12,
-        "proteinGrams": 45
+        "proteinGrams": 45,
+        "fiberGrams": 2
       },
       "containsProcessedMeat": false,
       "containsRedMeat": false
@@ -80,7 +82,8 @@ totals from `foods`; top-level nutrition is intentionally absent.
         "calories": 310,
         "carbohydratesGrams": 54,
         "fatGrams": 6,
-        "proteinGrams": 13
+        "proteinGrams": 13,
+        "fiberGrams": 12
       }
     },
     {
@@ -91,7 +94,8 @@ totals from `foods`; top-level nutrition is intentionally absent.
         "calories": 190,
         "carbohydratesGrams": 10,
         "fatGrams": 13,
-        "proteinGrams": 8
+        "proteinGrams": 8,
+        "fiberGrams": 3
       }
     }
   ],
@@ -105,13 +109,14 @@ should be separate foods when they are calorically material.
 
 ## Validation and behavior
 
-All fields except `notes`, `containsProcessedMeat`, and `containsRedMeat` are
-required. The optional meat fields are booleans, default to false when absent,
-and remain editable in the review screen. Red meat means unprocessed mammalian
-meat; a mixed food can set both flags. Numeric fields contain numbers rather
-than strings or ranges. `servingGrams` is the estimated weight of the portion
-described by `servingDescription`, preserving meaningful food-weight reports.
-Fiber is intentionally absent because the app does not currently track it.
+All fields except `notes`, `fiberGrams`, `containsProcessedMeat`, and
+`containsRedMeat` are required. `fiberGrams` is an optional nonnegative number;
+when absent, Fiber remains unavailable rather than defaulting to zero. The
+optional meat fields are booleans, default to false when absent, and remain
+editable in the review screen. Red meat means unprocessed mammalian meat; a
+mixed food can set both flags. Numeric fields contain numbers rather than strings
+or ranges. `servingGrams` is the estimated weight of the portion described by
+`servingDescription`, preserving meaningful food-weight reports.
 
 The app validates that extensions and format identifiers agree, limits a meal to
 1–50 foods, caps files at 256 KiB, and rejects unsupported versions, blank names

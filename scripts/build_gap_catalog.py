@@ -59,6 +59,7 @@ def gap_foods(per_query: int):
                 if serving_grams > 0
                 else ()
             )
+            fiber = finite_number(nutriments.get("fiber_100g"), float("nan"))
             yield CatalogFood(
                 source_id=barcode,
                 source="off",
@@ -69,6 +70,7 @@ def gap_foods(per_query: int):
                 carbs=max(finite_number(nutriments.get("carbohydrates_100g")), 0),
                 fat=max(finite_number(nutriments.get("fat_100g")), 0),
                 protein=max(finite_number(nutriments.get("proteins_100g")), 0),
+                fiber=max(fiber, 0) if fiber == fiber else None,
                 serving_grams=serving_grams or None,
                 serving_description=serving_description,
                 portions=portions,

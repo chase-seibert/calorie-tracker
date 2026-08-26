@@ -18,7 +18,7 @@ INVALID_XML = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
 HEADERS = [
     "Source ID", "Source", "Food name", "Brand", "Barcode",
     "Calories / 100 g", "Carbs (g) / 100 g", "Fat (g) / 100 g",
-    "Protein (g) / 100 g", "Base grams", "Serving grams",
+    "Protein (g) / 100 g", "Fiber (g) / 100 g", "Base grams", "Serving grams",
     "Serving description", "Portions", "Contains processed meat",
     "Contains red meat", "Rank",
 ]
@@ -62,7 +62,7 @@ def rows() -> list[list[object]]:
     connection.row_factory = sqlite3.Row
     query = """
         SELECT source_id, source, name, brand, barcode, calories, carbs, fat,
-               protein, base_grams, serving_grams, serving_description,
+               protein, fiber, base_grams, serving_grams, serving_description,
                portions_json, contains_processed_meat, contains_red_meat, rank
         FROM foods
         ORDER BY source, rank DESC, name
@@ -73,7 +73,7 @@ def rows() -> list[list[object]]:
             row["source_id"],
             {"usda": "USDA", "off": "Open Food Facts"}.get(row["source"], row["source"]),
             row["name"], row["brand"], row["barcode"],
-            row["calories"], row["carbs"], row["fat"], row["protein"],
+            row["calories"], row["carbs"], row["fat"], row["protein"], row["fiber"],
             row["base_grams"], row["serving_grams"], row["serving_description"],
             portion_text(row["portions_json"]),
             "Yes" if row["contains_processed_meat"] else "No",

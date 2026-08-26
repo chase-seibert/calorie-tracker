@@ -639,6 +639,7 @@ def create_database(path: Path, source_path: Path, foods: list[Food], families: 
                 carbs REAL NOT NULL,
                 fat REAL NOT NULL,
                 protein REAL NOT NULL,
+                fiber REAL,
                 base_grams REAL NOT NULL,
                 serving_grams REAL,
                 serving_description TEXT,
@@ -697,6 +698,7 @@ def create_database(path: Path, source_path: Path, foods: list[Food], families: 
                 carbs REAL NOT NULL,
                 fat REAL NOT NULL,
                 protein REAL NOT NULL,
+                fiber REAL,
                 base_grams REAL NOT NULL,
                 serving_grams REAL,
                 serving_description TEXT,
@@ -719,6 +721,7 @@ def create_database(path: Path, source_path: Path, foods: list[Food], families: 
                 carbs REAL NOT NULL,
                 fat REAL NOT NULL,
                 protein REAL NOT NULL,
+                fiber REAL,
                 base_grams REAL NOT NULL,
                 serving_grams REAL,
                 serving_description TEXT,
@@ -734,7 +737,7 @@ def create_database(path: Path, source_path: Path, foods: list[Food], families: 
             """
         )
         database.executemany(
-            "INSERT INTO source_foods VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO source_foods VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [tuple(food.__dict__.values()) for food in foods],
         )
         for family in families:
@@ -795,7 +798,7 @@ def create_database(path: Path, source_path: Path, foods: list[Food], families: 
                 canonical = variant.canonical
                 aliases = " | ".join(dict.fromkeys(member.name for member in variant.members))
                 database.execute(
-                    "INSERT INTO variant_foods VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO variant_foods VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     (
                         variant.variant_id,
                         family.family_id,
@@ -808,6 +811,7 @@ def create_database(path: Path, source_path: Path, foods: list[Food], families: 
                         canonical.carbs,
                         canonical.fat,
                         canonical.protein,
+                        canonical.fiber,
                         canonical.base_grams,
                         canonical.serving_grams,
                         canonical.serving_description,
@@ -821,7 +825,7 @@ def create_database(path: Path, source_path: Path, foods: list[Food], families: 
                 1_000_000 if family.default_variant.identity.context == "generic" else 0
             )
             database.execute(
-                "INSERT INTO foods VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO foods VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     canonical.source_id,
                     canonical.source,
@@ -832,6 +836,7 @@ def create_database(path: Path, source_path: Path, foods: list[Food], families: 
                     canonical.carbs,
                     canonical.fat,
                     canonical.protein,
+                    canonical.fiber,
                     canonical.base_grams,
                     canonical.serving_grams,
                     canonical.serving_description,
@@ -868,7 +873,7 @@ def create_database(path: Path, source_path: Path, foods: list[Food], families: 
             """
         )
         metadata = {
-            "schema_version": "family-variant-1",
+            "schema_version": "family-variant-2",
             "identity_algorithm_version": ALGORITHM_VERSION,
             "source_catalog": str(source_path.resolve()),
             "source_food_count": str(len(foods)),

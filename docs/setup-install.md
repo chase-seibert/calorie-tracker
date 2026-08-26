@@ -47,9 +47,9 @@ Connect Chase's iPhone 17 Pro, trust the Mac if prompted, and run
 ID `00008150-000E41422E40401C` by default.
 
 On the first launch, open Settings in CalorieTracker and choose Connect Apple
-Health. Grant write access for calories, carbohydrates, fat, and protein when
-prompted. HealthKit is unavailable in the simulator, so the connection flow
-must be exercised on the iPhone.
+Health. Grant write access for calories, carbohydrates, fat, protein, and Fiber
+when prompted. HealthKit is unavailable in the simulator, so the connection
+flow must be exercised on the iPhone.
 
 For normal development without a cable, pair the iPhone once in Xcode: open
 Manage Devices from the run-destination menu and select the iPhone as the build

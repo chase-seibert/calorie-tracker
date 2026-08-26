@@ -28,12 +28,12 @@ saved-meal link, preserving quantity edits, break-apart, reports, and HealthKit
 sync without joining `DiaryDocument.meals`. Each review offers an explicit opt-in
 to save for reuse. See `docs/custom-import-files.md` for both public schemas.
 
-When Apple Health is connected, `HealthKitStore` mirrors each diary entry as
-four nutrition quantity samples: dietary energy, carbohydrates, total fat, and
-protein. Each sample uses the diary entry UUID as a sync identifier, so edits
-replace the previous samples and deletions remove only samples created by this
-app. Authorization is requested only from Settings; HealthKit synchronization
-is skipped until write access is granted.
+When Apple Health is connected, `HealthKitStore` mirrors each diary entry as up
+to five nutrition quantity samples: dietary energy, carbohydrates, total fat,
+protein, and dietary Fiber when known. Each sample uses the diary entry UUID as
+a sync identifier, so edits replace the previous samples and deletions remove
+only samples created by this app. Authorization is requested only from Settings;
+HealthKit synchronization is skipped until write access is granted.
 
 Alcohol entries remain separate from food entries in storage but render as a
 dedicated row in the diary's Logged section. They are excluded from food meal
@@ -109,14 +109,15 @@ otherwise its historical component snapshot supplies the classification.
 
 The user's visible focus areas are lightweight `UserDefaults` preferences,
 separate from the diary document because they affect presentation rather than
-food or diary data. Alcohol, processed-meat, and red-meat preferences default on
-to retain the existing experience. Settings exposes the durable controls, while
-the Trends toolbar menu changes them in context. Both surfaces bind to the same
-keys. Diary also reads the alcohol key to conditionally include its quick-entry
-action. Trends conditionally builds drink annotations, chart copy, meat series,
-legends, and week-detail groups from those preferences. Alcohol calories remain
-in daily nutrition totals when its display focus is off, and the meat card is
-omitted when both meat focuses are off.
+food or diary data. Alcohol, Fiber, processed-meat, and red-meat preferences
+default on to retain the existing experience. Settings exposes the durable
+controls, while the Trends toolbar menu changes them in context. Both surfaces
+bind to the same keys. Diary also reads the alcohol key to conditionally include
+its quick-entry action; Fiber does not add one. Trends conditionally builds drink
+annotations, Fiber bars, chart copy, meat series, legends, and week-detail groups
+from those preferences. Alcohol calories remain in daily nutrition totals when
+its display focus is off, and the meat card is omitted when both meat focuses
+are off.
 
 The food-weight report is derived on demand from the local `DiaryDocument` and
 does not create persistent report state. It filters to the current day and the
@@ -178,7 +179,12 @@ excluded.
 ## Catalog schema
 
 Every food is normalized to a base quantity and unit plus calories, carbs, fat,
-and protein for that quantity. All usable source portions are stored as compact
+protein, and optional Fiber for that quantity. Fiber remains nullable so an
+upstream omission is not interpreted as zero on an individual food. Trends uses
+a best-effort daily Fiber total: known entries and known saved-meal components
+are summed while unknown contributions are omitted. Existing catalog-backed
+diary snapshots are backfilled by stable source ID, while older custom foods
+remain unknown until edited. All usable source portions are stored as compact
 JSON so one food can expose choices such as ounces, grams, large egg,
 tablespoon, cup, or branded serving without duplicating nutrition rows.
 Searchable metadata is intentionally limited to source ID, name, brand,

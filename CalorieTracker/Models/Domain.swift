@@ -40,15 +40,50 @@ struct MacroNutrients: Codable, Hashable, Sendable {
     var carbs: Double
     var fat: Double
     var protein: Double
+    var fiber: Double?
 
-    static let zero = MacroNutrients(calories: 0, carbs: 0, fat: 0, protein: 0)
+    static let zero = MacroNutrients(calories: 0, carbs: 0, fat: 0, protein: 0, fiber: 0)
+
+    init(
+        calories: Double,
+        carbs: Double,
+        fat: Double,
+        protein: Double,
+        fiber: Double? = nil
+    ) {
+        self.calories = calories
+        self.carbs = carbs
+        self.fat = fat
+        self.protein = protein
+        self.fiber = fiber
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case calories
+        case carbs
+        case fat
+        case protein
+        case fiber
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        calories = try container.decode(Double.self, forKey: .calories)
+        carbs = try container.decode(Double.self, forKey: .carbs)
+        fat = try container.decode(Double.self, forKey: .fat)
+        protein = try container.decode(Double.self, forKey: .protein)
+        fiber = try container.decodeIfPresent(Double.self, forKey: .fiber)
+    }
 
     static func + (lhs: MacroNutrients, rhs: MacroNutrients) -> MacroNutrients {
         MacroNutrients(
             calories: lhs.calories + rhs.calories,
             carbs: lhs.carbs + rhs.carbs,
             fat: lhs.fat + rhs.fat,
-            protein: lhs.protein + rhs.protein
+            protein: lhs.protein + rhs.protein,
+            fiber: lhs.fiber.flatMap { leftFiber in
+                rhs.fiber.map { leftFiber + $0 }
+            }
         )
     }
 
@@ -57,7 +92,8 @@ struct MacroNutrients: Codable, Hashable, Sendable {
             calories: calories * factor,
             carbs: carbs * factor,
             fat: fat * factor,
-            protein: protein * factor
+            protein: protein * factor,
+            fiber: fiber.map { $0 * factor }
         )
     }
 }
@@ -188,7 +224,7 @@ struct AlcoholEntry: Codable, Hashable, Identifiable, Sendable {
     }
 
     var nutrients: MacroNutrients {
-        MacroNutrients(calories: Double(calories), carbs: 0, fat: 0, protein: 0)
+        MacroNutrients(calories: Double(calories), carbs: 0, fat: 0, protein: 0, fiber: 0)
     }
 }
 
@@ -431,7 +467,7 @@ struct MagicFoodSuggestionResult: Sendable {
 }
 
 struct DiaryDocument: Codable, Sendable {
-    var schemaVersion = 7
+    var schemaVersion = 8
     var dailyCalorieGoal: Int? = nil
     var trackingStartDate: Date? = nil
     var dayStatuses: [DayStatus] = []

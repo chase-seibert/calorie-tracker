@@ -4,6 +4,7 @@ import SwiftUI
 struct TrendsView: View {
     @EnvironmentObject private var diary: DiaryStore
     @AppStorage("trends.focus.alcohol") private var tracksAlcohol = true
+    @AppStorage("trends.focus.fiber") private var tracksFiber = true
     @AppStorage("trends.focus.processedMeat") private var tracksProcessedMeat = true
     @AppStorage("trends.focus.redMeat") private var tracksRedMeat = true
     @State private var selectedMeatWeek: WeeklyMeatDays?
@@ -35,6 +36,9 @@ struct TrendsView: View {
             ScrollView {
                 VStack(spacing: 18) {
                     calorieAndAlcoholChart
+                    if tracksFiber {
+                        fiberChart
+                    }
                     if tracksProcessedMeat || tracksRedMeat {
                         meatDaysChart
                     }
@@ -48,6 +52,7 @@ struct TrendsView: View {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Menu {
                     Toggle("Alcohol", isOn: $tracksAlcohol)
+                    Toggle("Fiber", isOn: $tracksFiber)
                     Toggle("Processed Meat", isOn: $tracksProcessedMeat)
                     Toggle("Red Meat", isOn: $tracksRedMeat)
                 } label: {
@@ -285,6 +290,46 @@ struct TrendsView: View {
                 }
             }
             .frame(height: 240)
+            specialDayLegend
+        }
+        .padding(18)
+        .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 22))
+    }
+
+    private var fiberChart: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Fiber")
+                    .font(.title3.weight(.bold))
+                Text("Daily grams")
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.muted)
+            }
+            Chart {
+                ForEach(points) { point in
+                    if let fiber = point.nutrients.fiber {
+                        BarMark(
+                            x: .value("Date", point.date, unit: .day),
+                            y: .value("Fiber", fiber)
+                        )
+                        .foregroundStyle(AppTheme.fiber)
+                        .accessibilityLabel(point.date.formatted(date: .complete, time: .omitted))
+                        .accessibilityValue("\(fiber.cleanAmount) grams of fiber")
+                    }
+                    if let status = point.status {
+                        RuleMark(x: .value("Special day", point.date))
+                            .foregroundStyle(statusColor(status).opacity(0.5))
+                            .lineStyle(StrokeStyle(lineWidth: 6))
+                    }
+                }
+            }
+            .chartXAxis {
+                AxisMarks(values: .automatic(desiredCount: 5)) { value in
+                    AxisGridLine().foregroundStyle(.clear)
+                    AxisValueLabel(format: .dateTime.month(.abbreviated).day())
+                }
+            }
+            .frame(height: 210)
             specialDayLegend
         }
         .padding(18)

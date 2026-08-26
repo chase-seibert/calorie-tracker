@@ -117,14 +117,21 @@
   device calendar week and counts each category at most once per day. Tapping a
   week shows the qualifying foods grouped by day and category. Custom food,
   saved-meal, and import review editors expose both flags.
-- Settings and the Trends toolbar expose Alcohol, Processed Meat, and Red Meat,
-  in that order, as independent focus toggles. Disabling Alcohol hides drink
+- Foods may also carry dietary Fiber grams. Catalog, custom-food, and import
+  values scale with logged quantity and aggregate through meals. Individual
+  foods may have unavailable Fiber; the 30-day daily-grams chart is best effort
+  and sums every entry or meal component with known Fiber. Fiber does not become
+  a Home quick-entry action or a fourth segment in the carbohydrate-inclusive
+  macro bar.
+- Settings and the Trends toolbar expose Alcohol, Fiber, Processed Meat, and Red
+  Meat, in that order, as independent focus toggles. Disabling Alcohol hides drink
   markers, alcohol-specific chart labels, and the diary's alcohol quick-entry
-  action but does not remove alcohol calories from the daily total. A disabled
-  meat focus is omitted from the weekly chart, its legend, and the tapped-week
-  detail. Disabling both meat focuses hides the meat-days card. All focuses remain
-  enabled by default for compatibility with existing behavior, and logged data
-  remains local regardless of display selection.
+  action but does not remove alcohol calories from the daily total. Disabling
+  Fiber hides its chart without changing logged nutrition or Home. A disabled meat
+  focus is omitted from the weekly chart, its legend, and the tapped-week detail.
+  Disabling both meat focuses hides the meat-days card. All focuses remain enabled
+  by default for compatibility with existing behavior, and logged data remains
+  local regardless of display selection.
 - Marking a cheat day uses one Yes action. Once marked, compact estimate pills
   offer 500, 1,000, 1,500, and 2,000 calories above the Logged list. The chosen
   value appears as one calorie-only “Cheat day adjustment,” and choosing another

@@ -24,7 +24,7 @@ final class DiaryStore: ObservableObject {
         self.fileURL = fileURL ?? Self.defaultFileURL()
         self.catalog = catalog
         self.healthKit = healthKit
-        self.document = Self.backfilledMeatClassifications(
+        self.document = Self.backfilledFoodMetadata(
             in: Self.load(from: self.fileURL) ?? DiaryDocument(),
             catalog: catalog
         )
@@ -43,7 +43,7 @@ final class DiaryStore: ObservableObject {
         self.fileURL = fileURL ?? Self.defaultFileURL()
         self.catalog = catalog
         self.healthKit = healthKit
-        self.document = Self.backfilledMeatClassifications(in: document, catalog: catalog)
+        self.document = Self.backfilledFoodMetadata(in: document, catalog: catalog)
         prepareDayTracking(referenceDate: referenceDate)
     }
 
@@ -59,7 +59,25 @@ final class DiaryStore: ObservableObject {
     }
 
     func totals(on date: Date) -> MacroNutrients {
-        entries(on: date).reduce(alcoholEntry(on: date)?.nutrients ?? .zero) { $0 + $1.nutrients }
+        let dayEntries = entries(on: date)
+        var total = dayEntries.reduce(alcoholEntry(on: date)?.nutrients ?? .zero) {
+            $0 + $1.nutrients
+        }
+        total.fiber = dayEntries.reduce(alcoholEntry(on: date)?.nutrients.fiber ?? 0) {
+            subtotal, entry in
+            if let fiber = entry.nutrients.fiber {
+                return subtotal + fiber
+            }
+            let knownMealItemFiber = entry.mealItems?.compactMap { item in
+                item.food.nutrients(
+                    for: item.amount,
+                    unit: item.unit,
+                    portionID: item.portionID
+                ).fiber
+            }.reduce(0, +) ?? 0
+            return subtotal + knownMealItemFiber
+        }
+        return total
     }
 
     func meatPresence(on date: Date) -> MeatClassification {
@@ -778,6 +796,7 @@ final class DiaryStore: ObservableObject {
         carbs: Double,
         fat: Double,
         protein: Double,
+        fiber: Double? = nil,
         servingGrams: Double,
         servingDescription: String = "1 serving",
         containsProcessedMeat: Bool = false,
@@ -796,7 +815,13 @@ final class DiaryStore: ObservableObject {
             name: name.trimmingCharacters(in: .whitespacesAndNewlines),
             brand: brand.trimmingCharacters(in: .whitespacesAndNewlines),
             barcode: nil,
-            nutrients: MacroNutrients(calories: calories, carbs: carbs, fat: fat, protein: protein),
+            nutrients: MacroNutrients(
+                calories: calories,
+                carbs: carbs,
+                fat: fat,
+                protein: protein,
+                fiber: fiber
+            ),
             baseAmountGrams: max(servingGrams, 0.01),
             servingGrams: max(servingGrams, 0.01),
             servingDescription: normalizedServingDescription.isEmpty ? "1 serving" : normalizedServingDescription,
@@ -822,6 +847,7 @@ final class DiaryStore: ObservableObject {
         carbs: Double,
         fat: Double,
         protein: Double,
+        fiber: Double? = nil,
         servingGrams: Double,
         containsProcessedMeat: Bool? = nil,
         containsRedMeat: Bool? = nil
@@ -840,7 +866,8 @@ final class DiaryStore: ObservableObject {
             calories: calories,
             carbs: carbs,
             fat: fat,
-            protein: protein
+            protein: protein,
+            fiber: fiber
         )
         updatedFood.baseAmountGrams = normalizedServingGrams
         updatedFood.servingGrams = normalizedServingGrams
@@ -1191,6 +1218,14 @@ final class DiaryStore: ObservableObject {
 
     func displayedFood(_ food: Food) -> Food {
         var displayedFood = food
+        if displayedFood.nutrients.fiber == nil,
+           displayedFood.source != .custom,
+           let fiber = catalog?.fiber(
+               sourceID: displayedFood.sourceID,
+               source: displayedFood.source
+           ) {
+            displayedFood.nutrients.fiber = fiber
+        }
         if displayedFood.meatClassification == nil {
             let classification = displayedFood.source == .custom
                 ? Self.fallbackMeatClassification(for: displayedFood.name)
@@ -1269,7 +1304,7 @@ final class DiaryStore: ObservableObject {
 
     private func prepareDayTracking(referenceDate: Date) {
         let today = calendar.startOfDay(for: referenceDate)
-        document.schemaVersion = 7
+        document.schemaVersion = 8
         document.dayStatuses = document.dayStatuses.map { status in
             var normalized = status
             normalized.date = calendar.startOfDay(for: status.date)
@@ -1346,7 +1381,13 @@ final class DiaryStore: ObservableObject {
             name: "Cheat day adjustment",
             brand: nil,
             barcode: nil,
-            nutrients: MacroNutrients(calories: Double(calories), carbs: 0, fat: 0, protein: 0),
+            nutrients: MacroNutrients(
+                calories: Double(calories),
+                carbs: 0,
+                fat: 0,
+                protein: 0,
+                fiber: 0
+            ),
             baseAmountGrams: 1,
             servingGrams: 1,
             servingDescription: "1 adjustment",
@@ -1371,7 +1412,8 @@ final class DiaryStore: ObservableObject {
             calories: Double(alcohol.caloriesPerDrink),
             carbs: 0,
             fat: 0,
-            protein: 0
+            protein: 0,
+            fiber: 0
         )
         let food = Food(
             sourceID: "alcohol-\(alcohol.type?.rawValue ?? "default")",
@@ -1710,36 +1752,45 @@ final class DiaryStore: ObservableObject {
         )
     }
 
-    private static func backfilledMeatClassifications(
+    private static func backfilledFoodMetadata(
         in source: DiaryDocument,
         catalog: CatalogStore?
     ) -> DiaryDocument {
-        func classified(_ sourceFood: Food) -> Food {
-            guard sourceFood.meatClassification == nil else { return sourceFood }
+        func enriched(_ sourceFood: Food) -> Food {
             var food = sourceFood
-            let classification: MeatClassification
-            if sourceFood.source != .custom,
-               let catalogClassification = catalog?.meatClassification(
+            if food.nutrients.fiber == nil,
+               sourceFood.source != .custom,
+               let fiber = catalog?.fiber(
                    sourceID: sourceFood.sourceID,
                    source: sourceFood.source
                ) {
-                classification = catalogClassification
-            } else {
-                classification = fallbackMeatClassification(for: sourceFood.name)
+                food.nutrients.fiber = fiber
             }
-            food.containsProcessedMeat = classification.containsProcessedMeat
-            food.containsRedMeat = classification.containsRedMeat
+            if food.meatClassification == nil {
+                let classification: MeatClassification
+                if sourceFood.source != .custom,
+                   let catalogClassification = catalog?.meatClassification(
+                       sourceID: sourceFood.sourceID,
+                       source: sourceFood.source
+                   ) {
+                    classification = catalogClassification
+                } else {
+                    classification = fallbackMeatClassification(for: sourceFood.name)
+                }
+                food.containsProcessedMeat = classification.containsProcessedMeat
+                food.containsRedMeat = classification.containsRedMeat
+            }
             return food
         }
 
         var document = source
-        document.customFoods = document.customFoods.map(classified)
-        document.favorites = document.favorites.map(classified)
+        document.customFoods = document.customFoods.map(enriched)
+        document.favorites = document.favorites.map(enriched)
         document.meals = document.meals.map { sourceMeal in
             var meal = sourceMeal
             meal.items = meal.items.map { sourceItem in
                 var item = sourceItem
-                item.food = classified(item.food)
+                item.food = enriched(item.food)
                 return item
             }
             return meal
@@ -1748,12 +1799,31 @@ final class DiaryStore: ObservableObject {
         document.entries = document.entries.map { sourceEntry in
             var entry = sourceEntry
             let existingClassification = entry.food.meatClassification
-            entry.food = classified(entry.food)
+            entry.food = enriched(entry.food)
             entry.mealItems = entry.mealItems?.map { sourceItem in
                 var item = sourceItem
-                item.food = classified(item.food)
+                item.food = enriched(item.food)
                 return item
             }
+
+            if entry.isMeal, let items = entry.mealItems {
+                let totalFiber = items.reduce(.zero) { total, item in
+                    total + item.food.nutrients(
+                        for: item.amount,
+                        unit: item.unit,
+                        portionID: item.portionID
+                    )
+                }.fiber
+                entry.nutrients.fiber = totalFiber
+                entry.food.nutrients.fiber = totalFiber.map { $0 / max(entry.amount, 0.01) }
+            } else if entry.nutrients.fiber == nil {
+                entry.nutrients.fiber = entry.food.nutrients(
+                    for: entry.amount,
+                    unit: entry.unit,
+                    portionID: entry.portionID
+                ).fiber
+            }
+
             guard entry.isMeal else { return entry }
 
             let classification: MeatClassification
