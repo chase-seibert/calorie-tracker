@@ -4,6 +4,7 @@ import UIKit
 struct DiaryView: View {
     @EnvironmentObject private var diary: DiaryStore
     @Environment(\.scenePhase) private var scenePhase
+    @AppStorage("trends.focus.alcohol") private var tracksAlcohol = true
     let catalog: CatalogStore
 
     @State private var dayOffset = 0
@@ -239,19 +240,21 @@ struct DiaryView: View {
                             onConfirm: confirmCheatDayAction
                         )
 
-                        Button {
-                            beginLoggingAlcohol()
-                        } label: {
-                            AlcoholActionIcon(drinks: diary.alcoholDrinkCount(on: date))
-                                .frame(width: 34, height: 34)
+                        if tracksAlcohol {
+                            Button {
+                                beginLoggingAlcohol()
+                            } label: {
+                                AlcoholActionIcon(drinks: diary.alcoholDrinkCount(on: date))
+                                    .frame(width: 34, height: 34)
+                            }
+                            .buttonStyle(.bordered)
+                            .buttonBorderShape(.circle)
+                            .controlSize(.large)
+                            .tint(AppTheme.coral)
+                            .opacity(isCheatDay ? 0.5 : 1)
+                            .accessibilityLabel("Log alcohol")
+                            .accessibilityValue(alcoholAccessibilityValue)
                         }
-                        .buttonStyle(.bordered)
-                        .buttonBorderShape(.circle)
-                        .controlSize(.large)
-                        .tint(AppTheme.coral)
-                        .opacity(isCheatDay ? 0.5 : 1)
-                        .accessibilityLabel("Log alcohol")
-                        .accessibilityValue(alcoholAccessibilityValue)
 
                         Button {
                             beginLoggingFood()

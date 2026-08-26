@@ -14,11 +14,12 @@
 - **Diary** is the sole root screen: date strip, macro summary, entries, a
   prominent add button, and an upper-right Settings button.
 - **Settings** is a compact setup and management hub organized into Goals &
-  Logging, Food & Meals, Connections, and Data & Privacy. Its rows show current
-  values or status so the user's setup is understandable at a glance.
-- **Trends**, opened by tapping the diary summary, shows a combined
-  calorie-and-drink chart and a daily macro chart. Its toolbar contains focused
-  food-metric controls and the food-weight report.
+  Logging, Focus Areas, Food & Meals, Connections, and Data & Privacy. Its
+  rows show current values or status so the user's setup is understandable at a
+  glance.
+- **Trends**, opened by tapping the diary summary, shows the last 30 days in a
+  calorie chart with optional drink markers and a daily macro chart. Its toolbar
+  contains focused health-metric controls and the food-weight report.
 
 When the macro summary card scrolls fully out of view, its calorie total remains
 visible as a compact navigation-title item and continues updating with the diary.
@@ -35,8 +36,10 @@ total macro grams, and a color-keyed legend retains the exact gram values.
 Tapping the calorie total or macro chart navigates directly to Trends.
 
 The bottom action bar orders compact orange cheat-day and alcohol actions before
-the primary Log food button, which receives most of the width. This leaves the top
-bar clear for the scrolled calorie summary, streak count, and Settings. The
+the primary Log food button, which receives most of the width. When the Alcohol
+focus is disabled, its quick-entry action disappears and Log food expands into
+the freed space while Cheat day remains compact. This leaves the top bar clear
+for the scrolled calorie summary, streak count, and Settings. The
 wine-glass action opens a compact alcohol entry sheet for the selected day. The
 sheet keeps one aggregate count and one optional type per day; plus and minus
 buttons change only the drink count. An unspecified drink uses 150 calories.
@@ -54,10 +57,14 @@ opens a catalog with Custom Foods and Saved Meals sections. Each section has an
 Add action; tapping or swiping a row opens an editor, while swipe-to-delete
 remains available for both kinds of personal item.
 
-The Trend focus area toolbar menu contains independent Processed Meat and Red
-Meat switches. Trends omits disabled series from the weekly chart and
-tapped-week detail; when neither is selected, the meat-days card is omitted
-entirely so the screen remains centered on the user's chosen metrics.
+The Focus Areas section in Settings and the matching Trends toolbar menu
+contain independent Alcohol, Processed Meat, and Red Meat switches in that
+order. Both surfaces share the same local preferences. Disabling Alcohol hides
+the diary's quick-entry action, wine-glass markers, and alcohol-specific chart
+copy while retaining alcohol calories in the calorie line. Trends omits disabled
+meat series from the weekly chart and tapped-week detail; when neither meat focus
+is selected, the meat-days card is omitted entirely so the screen remains
+centered on the user's chosen metrics.
 
 Settings also links to AI Food & Meal Import instructions and one copyable,
 tool-neutral prompt. The prompt tells an assistant to create a `.calfood`

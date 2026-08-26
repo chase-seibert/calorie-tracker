@@ -27,7 +27,6 @@ platform, version, and audience). Event properties are strings.
 | `health.authorization_requested` | The Apple Health connection flow begins | — |
 | `health.authorization_completed` | The authorization flow returns | `result` |
 | `health.sync_requested` / `health.sync_completed` | A launch, authorization, or manual full sync begins/finishes | `source`; completion also includes `result` |
-| `trends.range_changed` | The Trends range changes | `days` |
 | `import.opened` / `import.failed` | An import file is parsed or rejected | Successful opens include `item_type` |
 | `food_search.no_match` | A completed text search returns no results | `query`, `result_count` |
 | `food_search.nothing_selected` | A completed search with results ends without a diary log | `query`, `result_count` |

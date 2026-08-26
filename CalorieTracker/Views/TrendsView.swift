@@ -3,13 +3,15 @@ import SwiftUI
 
 struct TrendsView: View {
     @EnvironmentObject private var diary: DiaryStore
+    @AppStorage("trends.focus.alcohol") private var tracksAlcohol = true
     @AppStorage("trends.focus.processedMeat") private var tracksProcessedMeat = true
     @AppStorage("trends.focus.redMeat") private var tracksRedMeat = true
-    @State private var range = 30
     @State private var selectedMeatWeek: WeeklyMeatDays?
 
+    private let trendDays = 30
+
     private var points: [TrendPoint] {
-        diary.totalsByDay(numberOfDays: range).map {
+        diary.totalsByDay(numberOfDays: trendDays).map {
             TrendPoint(
                 date: $0.date,
                 nutrients: $0.nutrients,
@@ -24,7 +26,7 @@ struct TrendsView: View {
     }
 
     private var weeklyMeatPoints: [WeeklyMeatDays] {
-        diary.weeklyMeatDays(numberOfDays: range)
+        diary.weeklyMeatDays(numberOfDays: trendDays)
     }
 
     var body: some View {
@@ -32,13 +34,6 @@ struct TrendsView: View {
             AppTheme.background.ignoresSafeArea()
             ScrollView {
                 VStack(spacing: 18) {
-                    Picker("Range", selection: $range) {
-                        Text("14 days").tag(14)
-                        Text("30 days").tag(30)
-                        Text("90 days").tag(90)
-                    }
-                    .pickerStyle(.segmented)
-
                     calorieAndAlcoholChart
                     if tracksProcessedMeat || tracksRedMeat {
                         meatDaysChart
@@ -52,6 +47,7 @@ struct TrendsView: View {
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Menu {
+                    Toggle("Alcohol", isOn: $tracksAlcohol)
                     Toggle("Processed Meat", isOn: $tracksProcessedMeat)
                     Toggle("Red Meat", isOn: $tracksRedMeat)
                 } label: {
@@ -75,12 +71,6 @@ struct TrendsView: View {
             .presentationDetents([.medium, .large])
         }
         .analyticsScreen("trends")
-        .onChange(of: range) { _, newRange in
-            AppAnalytics.capture(
-                "trends.range_changed",
-                properties: ["days": String(newRange)]
-            )
-        }
     }
 
     private var meatDaysChart: some View {
@@ -121,7 +111,7 @@ struct TrendsView: View {
                 AxisMarks(values: [0, 1, 2, 3, 4, 5, 6, 7])
             }
             .chartXAxis {
-                AxisMarks(values: .automatic(desiredCount: range == 90 ? 5 : 4)) { value in
+                AxisMarks(values: .automatic(desiredCount: 4)) { value in
                     AxisGridLine().foregroundStyle(.clear)
                     AxisValueLabel(format: .dateTime.month(.abbreviated).day())
                 }
@@ -196,7 +186,7 @@ struct TrendsView: View {
     }
 
     private func meatDays(in week: WeeklyMeatDays) -> [MeatDayFoods] {
-        diary.meatDayFoods(numberOfDays: range).filter {
+        diary.meatDayFoods(numberOfDays: trendDays).filter {
             $0.date >= week.weekStart
                 && $0.date <= week.weekEnd
                 && ((tracksProcessedMeat && !$0.processedMeatFoods.isEmpty)
@@ -207,10 +197,13 @@ struct TrendsView: View {
     private var calorieAndAlcoholChart: some View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Calories & drinks").font(.title3.weight(.bold))
-                Text("Each wine glass is one drink")
-                    .font(.caption)
-                    .foregroundStyle(AppTheme.muted)
+                Text(tracksAlcohol ? "Calories & drinks" : "Calories")
+                    .font(.title3.weight(.bold))
+                if tracksAlcohol {
+                    Text("Each wine glass is one drink")
+                        .font(.caption)
+                        .foregroundStyle(AppTheme.muted)
+                }
             }
             Chart {
                 ForEach(points) { point in
@@ -237,14 +230,14 @@ struct TrendsView: View {
                             .foregroundStyle(statusColor(status).opacity(0.5))
                             .lineStyle(StrokeStyle(lineWidth: 6))
                     }
-                    if point.alcoholDrinks > 0 {
+                    if tracksAlcohol, point.alcoholDrinks > 0 {
                         PointMark(
                             x: .value("Date", point.date),
                             y: .value("Drink stack baseline", 0)
                         )
                         .foregroundStyle(.clear)
                         .annotation(position: .top, spacing: 3) {
-                            AlcoholTrendStack(drinks: point.alcoholDrinks, range: range)
+                            AlcoholTrendStack(drinks: point.alcoholDrinks)
                         }
                     }
                 }
@@ -419,29 +412,12 @@ private struct MeatWeekFoodsView: View {
 
 private struct AlcoholTrendStack: View {
     let drinks: Int
-    let range: Int
-
-    private var iconSize: CGFloat {
-        switch range {
-        case 0...14: 16
-        case 15...30: 14
-        default: 10
-        }
-    }
-
-    private var iconSpacing: CGFloat {
-        switch range {
-        case 0...14: 3
-        case 15...30: 2
-        default: 1
-        }
-    }
 
     var body: some View {
-        VStack(spacing: iconSpacing) {
+        VStack(spacing: 2) {
             ForEach(0..<drinks, id: \.self) { _ in
                 Image(systemName: "wineglass.fill")
-                    .font(.system(size: iconSize, weight: .semibold))
+                    .font(.system(size: 14, weight: .semibold))
             }
         }
         .foregroundStyle(AppTheme.coral)

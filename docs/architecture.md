@@ -73,8 +73,10 @@ few top-level sections use eager vertical layout, avoiding stale lazy-stack
 positions while the collection reports a new intrinsic height. The persistent
 logging controls reserve the bottom safe area but ignore keyboard-only safe-area
 changes from the food-picker sheet so they remain anchored after dismissal. The
-fixed cheat-day and alcohol actions lead the row, while the primary Log food
-action follows and expands to use the available width.
+fixed cheat-day and optional alcohol actions lead the row, while the primary Log
+food action follows and expands to use the available width. The alcohol focus
+preference removes its action entirely, allowing Log food to consume the freed
+space without changing the compact cheat-day control.
 
 Custom foods and saved meals are separate collections in the personal document.
 Settings presents them together as the Personal Library while retaining their
@@ -100,17 +102,21 @@ Saved meals have optional explicit overrides and otherwise derive both flags fro
 their component foods.
 
 Meat trends are presence-based rather than quantity-based. `DiaryStore` reduces
-each day to two booleans, then groups the selected Trends range by the device's
-calendar week. Multiple matching foods on one day still contribute one day to
-that category. A meal-level explicit flag controls the saved meal; otherwise its
-historical component snapshot supplies the classification.
+each day to two booleans, then groups the fixed 30-day Trends window by the
+device's calendar week. Multiple matching foods on one day still contribute one
+day to that category. A meal-level explicit flag controls the saved meal;
+otherwise its historical component snapshot supplies the classification.
 
-The user's visible Trend focus areas are lightweight `UserDefaults` preferences,
+The user's visible focus areas are lightweight `UserDefaults` preferences,
 separate from the diary document because they affect presentation rather than
-food or diary data. Processed-meat and red-meat preferences default on to retain
-the existing experience. The Trends toolbar menu changes them in context.
-Trends conditionally builds chart series, legends, and week-detail groups from
-those preferences and omits the complete card when both are off.
+food or diary data. Alcohol, processed-meat, and red-meat preferences default on
+to retain the existing experience. Settings exposes the durable controls, while
+the Trends toolbar menu changes them in context. Both surfaces bind to the same
+keys. Diary also reads the alcohol key to conditionally include its quick-entry
+action. Trends conditionally builds drink annotations, chart copy, meat series,
+legends, and week-detail groups from those preferences. Alcohol calories remain
+in daily nutrition totals when its display focus is off, and the meat card is
+omitted when both meat focuses are off.
 
 The food-weight report is derived on demand from the local `DiaryDocument` and
 does not create persistent report state. It filters to the current day and the

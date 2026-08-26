@@ -4,6 +4,9 @@ import UIKit
 struct SettingsView: View {
     @EnvironmentObject private var diary: DiaryStore
     @EnvironmentObject private var healthKit: HealthKitStore
+    @AppStorage("trends.focus.alcohol") private var tracksAlcohol = true
+    @AppStorage("trends.focus.processedMeat") private var tracksProcessedMeat = true
+    @AppStorage("trends.focus.redMeat") private var tracksRedMeat = true
     let catalog: CatalogStore
 
     var body: some View {
@@ -18,6 +21,16 @@ struct SettingsView: View {
                         value: calorieGoalDescription
                     )
                 }
+            }
+
+            Section {
+                Toggle("Alcohol", isOn: $tracksAlcohol)
+                Toggle("Processed Meat", isOn: $tracksProcessedMeat)
+                Toggle("Red Meat", isOn: $tracksRedMeat)
+            } header: {
+                Text("Focus Areas")
+            } footer: {
+                Text("Choose which focused health metrics appear in the app. These preferences only change the display; your logged data stays on your phone.")
             }
 
             Section("Food & Meals") {

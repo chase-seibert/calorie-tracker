@@ -92,14 +92,16 @@
 - The diary summary displays carbs, fat, and protein as one stacked horizontal
   bar, in that order, with exact gram values in its legend.
 - Tapping calories, carbs, fat, or protein in the diary summary navigates to
-  Trends.
+  Trends, which uses a fixed 30-day window without alternate range controls.
 - The top diary bar keeps the lightning-bolt streak count and Settings so the
   compact calorie summary has room in portrait. The bottom safe-area bar gives
   compact orange cheat-day and alcohol actions first, followed by a larger Log
-  food button that receives most of the width. An active cheat day adds a green
-  check to the orange action icon and disables food and alcohol logging until
-  the user confirms that they want to undo it from the icon, status banner, or
-  logging action.
+  food button that receives most of the width. When the Alcohol focus is
+  disabled, its quick-entry action is omitted and Log food expands into the
+  available space while Cheat day remains compact. An active cheat day adds a
+  green check to the orange action icon and disables food and alcohol logging
+  until the user confirms that they want to undo it from the icon, status banner,
+  or logging action.
 - Alcohol quick entry stores one aggregate count and one optional type per day.
   Plus and minus change the count; reopening edits that same aggregate, and zero
   removes it. An unspecified drink uses 150 calories; beer uses 150, wine 125,
@@ -107,7 +109,7 @@
   as an orange wine-glass row in Logged and can be tapped to edit it. Alcohol
   calories contribute to diary totals. Trends shows each day's count as a
   vertical stack of orange wine-glass icons within the calorie chart rather
-  than as a separate alcohol chart.
+  than as a separate alcohol chart when the Alcohol focus is enabled.
 - Foods carry independent processed-meat and unprocessed-red-meat presence flags.
   Processed meat includes cured, salted, smoked, fermented, dried, or otherwise
   preserved meat from red meat or poultry. Red meat means unprocessed mammalian
@@ -115,11 +117,14 @@
   device calendar week and counts each category at most once per day. Tapping a
   week shows the qualifying foods grouped by day and category. Custom food,
   saved-meal, and import review editors expose both flags.
-- The Trends toolbar exposes processed meat and red meat as independent focus
-  toggles. A disabled focus is omitted from the weekly chart, its legend, and
-  the tapped-week detail. Disabling both hides the meat-days card. Both focuses
-  remain enabled by default for compatibility with existing behavior, and food
-  classification remains local regardless of display selection.
+- Settings and the Trends toolbar expose Alcohol, Processed Meat, and Red Meat,
+  in that order, as independent focus toggles. Disabling Alcohol hides drink
+  markers, alcohol-specific chart labels, and the diary's alcohol quick-entry
+  action but does not remove alcohol calories from the daily total. A disabled
+  meat focus is omitted from the weekly chart, its legend, and the tapped-week
+  detail. Disabling both meat focuses hides the meat-days card. All focuses remain
+  enabled by default for compatibility with existing behavior, and logged data
+  remains local regardless of display selection.
 - Marking a cheat day uses one Yes action. Once marked, compact estimate pills
   offer 500, 1,000, 1,500, and 2,000 calories above the Logged list. The chosen
   value appears as one calorie-only “Cheat day adjustment,” and choosing another
