@@ -22,9 +22,9 @@ struct TrendsView: View {
         }
     }
 
-    private var visibleStatuses: [DayStatusKind] {
-        DayStatusKind.allCases.filter { status in points.contains { $0.status == status } }
-    }
+    private var cheatDayCount: Int { points.count { $0.status == .cheat } }
+
+    private var gapDayCount: Int { points.count { $0.status == .gap } }
 
     private var weeklyMeatPoints: [WeeklyMeatDays] {
         diary.weeklyMeatDays(numberOfDays: trendDays)
@@ -35,6 +35,7 @@ struct TrendsView: View {
             AppTheme.background.ignoresSafeArea()
             ScrollView {
                 VStack(spacing: 18) {
+                    statusCounts
                     calorieAndAlcoholChart
                     if tracksFiber {
                         fiberChart
@@ -47,7 +48,7 @@ struct TrendsView: View {
                 .padding(16)
             }
         }
-        .navigationTitle("Trends")
+        .navigationTitle("Last 30 Days")
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Menu {
@@ -76,6 +77,38 @@ struct TrendsView: View {
             .presentationDetents([.medium, .large])
         }
         .analyticsScreen("trends")
+    }
+
+    private var statusCounts: some View {
+        HStack(spacing: 10) {
+            statusCount(
+                cheatDayCount,
+                title: "Cheat days",
+                color: AppTheme.cheatDay
+            )
+            statusCount(
+                gapDayCount,
+                title: "Gap days",
+                color: AppTheme.gapDay
+            )
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func statusCount(_ count: Int, title: String, color: Color) -> some View {
+        HStack(spacing: 6) {
+            Text(count.formatted())
+                .font(.subheadline.weight(.bold).monospacedDigit())
+                .foregroundStyle(color)
+            Text(title)
+                .font(.caption.weight(.medium))
+                .foregroundStyle(AppTheme.muted)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(color.opacity(0.12), in: Capsule())
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(title): \(count)")
     }
 
     private var meatDaysChart: some View {
@@ -230,11 +263,6 @@ struct TrendsView: View {
                         )
                     )
                     .interpolationMethod(.catmullRom)
-                    if let status = point.status {
-                        RuleMark(x: .value("Special day", point.date))
-                            .foregroundStyle(statusColor(status).opacity(0.5))
-                            .lineStyle(StrokeStyle(lineWidth: 6))
-                    }
                     if tracksAlcohol, point.alcoholDrinks > 0 {
                         PointMark(
                             x: .value("Date", point.date),
@@ -254,7 +282,6 @@ struct TrendsView: View {
                 }
             }
             .frame(height: 220)
-            specialDayLegend
         }
         .padding(18)
         .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 22))
@@ -271,11 +298,6 @@ struct TrendsView: View {
                         .foregroundStyle(by: .value("Macro", "Fat"))
                     LineMark(x: .value("Date", point.date), y: .value("Grams", point.nutrients.protein), series: .value("Macro", "Protein"))
                         .foregroundStyle(by: .value("Macro", "Protein"))
-                    if let status = point.status {
-                        RuleMark(x: .value("Special day", point.date))
-                            .foregroundStyle(statusColor(status).opacity(0.5))
-                            .lineStyle(StrokeStyle(lineWidth: 6))
-                    }
                 }
             }
             .chartForegroundStyleScale([
@@ -290,7 +312,6 @@ struct TrendsView: View {
                 }
             }
             .frame(height: 240)
-            specialDayLegend
         }
         .padding(18)
         .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 22))
@@ -316,11 +337,6 @@ struct TrendsView: View {
                         .accessibilityLabel(point.date.formatted(date: .complete, time: .omitted))
                         .accessibilityValue("\(fiber.cleanAmount) grams of fiber")
                     }
-                    if let status = point.status {
-                        RuleMark(x: .value("Special day", point.date))
-                            .foregroundStyle(statusColor(status).opacity(0.5))
-                            .lineStyle(StrokeStyle(lineWidth: 6))
-                    }
                 }
             }
             .chartXAxis {
@@ -330,37 +346,11 @@ struct TrendsView: View {
                 }
             }
             .frame(height: 210)
-            specialDayLegend
         }
         .padding(18)
         .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 22))
     }
 
-    @ViewBuilder
-    private var specialDayLegend: some View {
-        if !visibleStatuses.isEmpty {
-            HStack(spacing: 14) {
-                ForEach(visibleStatuses, id: \.self) { status in
-                    HStack(spacing: 6) {
-                        Capsule()
-                            .fill(statusColor(status))
-                            .frame(width: 6, height: 18)
-                        Text(status.title)
-                            .font(.caption)
-                            .foregroundStyle(AppTheme.muted)
-                    }
-                }
-            }
-            .accessibilityElement(children: .combine)
-        }
-    }
-
-    private func statusColor(_ status: DayStatusKind) -> Color {
-        switch status {
-        case .gap: AppTheme.gapDay
-        case .cheat: AppTheme.cheatDay
-        }
-    }
 }
 
 private struct MeatWeekFoodsView: View {

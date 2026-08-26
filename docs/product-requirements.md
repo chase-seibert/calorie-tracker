@@ -136,8 +136,8 @@
   offer 500, 1,000, 1,500, and 2,000 calories above the Logged list. The chosen
   value appears as one calorie-only “Cheat day adjustment,” and choosing another
   value replaces it.
-- Gap and cheat days appear as distinct vertical markers with a key in both
-  trend charts.
+- Trends summarizes gap-day and cheat-day counts beneath its title for the fixed
+  30-day window; those statuses do not add vertical markers to individual charts.
 - Light and dark appearances use adaptive backgrounds, elevated cards, primary
   and secondary text, control fills, source badges, macro colors, and action
   colors across Diary, Log Food, quantity editing, Settings, and Trends.

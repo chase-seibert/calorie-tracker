@@ -20,8 +20,10 @@
   glance.
 - **Trends**, opened by tapping the diary summary, shows the last 30 days in a
   calorie chart with optional drink markers, an optional daily Fiber chart, and
-  a daily macro chart. Its toolbar contains focused health-metric controls and
-  the food-weight report.
+  a daily macro chart. Compact, semantically tinted cheat-day and gap-day count
+  pills sit beneath the “Last 30 Days” title instead of repeating status markers
+  across the charts. Its toolbar contains focused health-metric controls and the
+  food-weight report.
 
 When the macro summary card scrolls fully out of view, its calorie total remains
 visible as a compact navigation-title item and continues updating with the diary.
