@@ -7,7 +7,7 @@ The SwiftUI app has two local data layers:
 1. A read-only, bundled SQLite catalog containing normalized food records and an
    FTS5 search index. `CatalogStore` performs source-filtered search and barcode
    lookup without loading the catalog into memory.
-2. A small writable JSON document in Application Support managed by `DiaryStore`.
+2. A small writable JSON document in the VitaChase App Group container managed by `DiaryStore`.
    It holds diary entries, day statuses, the streak tracking start date,
    favorites, meals, remembered quantities, custom foods, and stable-ID custom
    food names. It also stores at most one aggregate alcohol entry per day, with
@@ -15,6 +15,30 @@ The SwiftUI app has two local data layers:
 
 This split keeps a large catalog immutable and fast while making the personal
 data schema easy to evolve and back up.
+
+The main app and `VitaChaseWidgets` extension share App Group
+`group.com.cseibert.CalorieTracker`. The first main-app launch copies a legacy
+Application Support diary into the group container without deleting the old
+file. `QuickLogSnapshot` provides extension-safe Recent resolution, arbitrary-
+timestamp Magic calculation, and calorie-goal progress. `QuickLogRepository`
+performs atomic background writes for App Intents and widget buttons. Normal
+`DiaryStore` saves reload the widget timeline, while the app reloads the shared
+document whenever it becomes active so background intent writes appear in the
+diary.
+
+Two App Intents are indexed by Siri and Shortcuts. `LogRecentItemIntent` uses an
+`AppEntity` query backed only by ordered Recent items; an exact normalized name
+returns the newest matching stable ID. Leading articles are ignored and a
+conjunction of exact Recent names resolves to a composite selection; an unknown
+name resolves to no entity. `CaloriesRemainingIntent` reports the signed
+difference between the goal and today's food plus alcohol calories and converts
+read failures into useful spoken guidance. The Quick Log widget reuses the log
+intent, stores a short-lived receipt in App Group defaults, and schedules
+timeline entries at the next 5 AM, 11 AM, and 3 PM Magic band boundaries. A
+separate Calories Left widget reloads on diary writes and at local midnight.
+Dynamic Home Screen quick actions contain the current Magic stable IDs; UIKit
+must launch or resume the main app to deliver those actions, so the main
+`DiaryStore` handles them without presenting a confirmation dialog.
 
 The app exports `com.cseibert.calorietracker.food` and
 `com.cseibert.calorietracker.meal`, backed by `.calfood` and `.calmeal`.
@@ -200,7 +224,8 @@ single format, deduplicates them, and builds an external-content FTS5 index.
 
 Debug builds running in the iOS Simulator load the checked-in
 `CalorieTracker/Resources/Fixtures/DeviceDiaryFixture.json` instead of the
-normal Application Support diary. The fixture is a date-relative snapshot of
+normal persistent diary. The fixture is written to the App Group container so
+the widget and App Intents can read it. It is a date-relative snapshot of
 the device diary: its captured current day is rebased to the simulator's current
 day at launch. The loader also normalizes repeated breakfast, lunch, and dinner
 sets across the two previous days, then gives today and tomorrow unrelated sample
@@ -223,7 +248,7 @@ The UI-test target launches against an isolated temporary diary when the
 `CALORIE_TRACKER_UI_TEST_FIXTURE` environment variable is set. The reorder test
 performs a real long-press drag, verifies the row moved on screen, relaunches the
 app without resetting the fixture, and verifies the order persisted. It never
-reads or modifies the user's normal Application Support diary.
+reads or modifies the user's normal App Group diary.
 
 The UI-test target is intentionally isolated in the shared
 `CalorieTrackerUITests` scheme. Normal app builds and `make test` must not build

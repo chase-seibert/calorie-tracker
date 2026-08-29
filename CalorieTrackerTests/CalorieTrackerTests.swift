@@ -2232,6 +2232,145 @@ extension CalorieTrackerTests {
         }
     }
 
+    func testQuickLogRecentNameResolutionUsesMostRecentExactMatch() {
+        let older = testFood(calories: 80, name: "Cappuccino")
+        var newer = testFood(calories: 120, name: "Cappuccino")
+        newer = Food(
+            sourceID: "newer-cappuccino",
+            source: newer.source,
+            name: newer.name,
+            brand: newer.brand,
+            barcode: newer.barcode,
+            nutrients: newer.nutrients,
+            baseAmountGrams: newer.baseAmountGrams,
+            servingGrams: newer.servingGrams,
+            servingDescription: newer.servingDescription,
+            portions: newer.portions
+        )
+        var document = DiaryDocument()
+        document.entries = [
+            DiaryEntry(
+                id: UUID(),
+                date: testDate(day: 10),
+                food: older,
+                amount: 1,
+                unit: .serving,
+                nutrients: older.nutrients,
+                loggedAt: testDate(day: 10),
+                portionID: "serving"
+            ),
+            DiaryEntry(
+                id: UUID(),
+                date: testDate(day: 11),
+                food: newer,
+                amount: 1,
+                unit: .serving,
+                nutrients: newer.nutrients,
+                loggedAt: testDate(day: 11),
+                portionID: "serving"
+            )
+        ]
+        let matches = QuickLogSnapshot(document: document, calendar: testCalendar)
+            .recentSelections(matching: "cappuccino")
+
+        XCTAssertEqual(matches.count, 1)
+        XCTAssertEqual(matches.first?.id, "food:\(newer.id)")
+    }
+
+    func testQuickLogRecentNameResolutionSupportsArticlesAndCompoundRequests() {
+        let cappuccino = testFood(calories: 120, name: "Cappuccino")
+        let feta = testFood(calories: 80, name: "Feta Cheese")
+        var document = DiaryDocument()
+        document.entries = [
+            DiaryEntry(
+                id: UUID(),
+                date: testDate(day: 10),
+                food: cappuccino,
+                amount: 1,
+                unit: .serving,
+                nutrients: cappuccino.nutrients,
+                loggedAt: testDate(day: 10),
+                portionID: "serving"
+            ),
+            DiaryEntry(
+                id: UUID(),
+                date: testDate(day: 11),
+                food: feta,
+                amount: 1,
+                unit: .serving,
+                nutrients: feta.nutrients,
+                loggedAt: testDate(day: 11),
+                portionID: "serving"
+            )
+        ]
+        document.rememberedQuantities = [
+            cappuccino.id: QuantityPreference(amount: 1, unit: .serving, portionID: "serving"),
+            feta.id: QuantityPreference(amount: 1, unit: .serving, portionID: "serving")
+        ]
+
+        let matches = QuickLogSnapshot(document: document, calendar: testCalendar)
+            .recentSelections(matching: "a cappuccino and feta cheese")
+
+        XCTAssertEqual(matches.count, 1)
+        XCTAssertEqual(Set(matches[0].itemIDs), Set(["food:\(cappuccino.id)", "food:\(feta.id)"]))
+        XCTAssertEqual(matches[0].subtitle, "200 cal")
+    }
+
+    func testQuickLogRepositoryLogsRememberedQuantityWithoutOpeningApp() throws {
+        let fileURL = temporaryDiaryURL()
+        let food = testFood(calories: 90, name: "Cappuccino")
+        let historyDate = testDate(day: 10)
+        let logDate = testDate(day: 12)
+        var document = DiaryDocument()
+        document.trackingStartDate = historyDate
+        document.entries = [DiaryEntry(
+            id: UUID(),
+            date: historyDate,
+            food: food,
+            amount: 1,
+            unit: .serving,
+            nutrients: food.nutrients,
+            loggedAt: historyDate,
+            portionID: "serving"
+        )]
+        document.rememberedQuantities[food.id] = QuantityPreference(
+            amount: 2,
+            unit: .serving,
+            portionID: "serving"
+        )
+        try write(document, to: fileURL)
+
+        let result = try QuickLogRepository(fileURL: fileURL, calendar: testCalendar)
+            .log(selectionID: "food:\(food.id)", at: logDate)
+        let saved = try readDiary(from: fileURL)
+        let loggedEntry = try XCTUnwrap(saved.entries.first {
+            testCalendar.isDate($0.date, inSameDayAs: logDate)
+        })
+
+        XCTAssertEqual(result, QuickLogResult(title: "Cappuccino", loggedItemCount: 1))
+        XCTAssertEqual(loggedEntry.amount, 2)
+        XCTAssertEqual(loggedEntry.nutrients.calories, 180)
+    }
+
+    func testQuickLogCaloriesRemainingIncludesFoodAndAlcohol() throws {
+        let date = testDate(day: 12)
+        var document = DiaryDocument()
+        document.dailyCalorieGoal = 2_000
+        document.entries = [testEntry(calories: 650, date: date, name: "Lunch")]
+        document.alcoholEntries = [AlcoholEntry(
+            id: UUID(),
+            date: date,
+            drinks: 1,
+            type: .wine,
+            loggedAt: date
+        )]
+
+        let remaining = try QuickLogSnapshot(document: document, calendar: testCalendar)
+            .caloriesRemaining(at: date)
+
+        XCTAssertEqual(remaining, 1_225)
+    }
+
     private var testCalendar: Calendar {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(secondsFromGMT: 0)!
@@ -2246,6 +2385,22 @@ extension CalorieTrackerTests {
         FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
             .appendingPathComponent("diary.json")
+    }
+
+    private func write(_ document: DiaryDocument, to fileURL: URL) throws {
+        try FileManager.default.createDirectory(
+            at: fileURL.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        try encoder.encode(document).write(to: fileURL, options: .atomic)
+    }
+
+    private func readDiary(from fileURL: URL) throws -> DiaryDocument {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode(DiaryDocument.self, from: Data(contentsOf: fileURL))
     }
 
     private func testFood(calories: Double, name: String) -> Food {

@@ -531,6 +531,38 @@ final class DiaryStore: ObservableObject {
         return loggedItems
     }
 
+    @discardableResult
+    func logQuickSelection(_ selectionID: String, on date: Date = Date()) -> QuickLogResult? {
+        let snapshot = QuickLogSnapshot(document: document, calendar: calendar)
+        guard let selection = snapshot.selection(id: selectionID), canLogFood(on: date) else {
+            return nil
+        }
+
+        var loggedCount = 0
+        for itemID in selection.itemIDs {
+            guard let item = snapshot.item(id: itemID) else { continue }
+            let previousEntryCount = entries(on: date).count
+            switch item {
+            case let .food(food):
+                quickLog(food, on: date)
+            case let .meal(meal):
+                logMeal(meal, on: date)
+            }
+            if entries(on: date).count > previousEntryCount {
+                loggedCount += 1
+            }
+        }
+
+        guard loggedCount == selection.itemIDs.count else { return nil }
+        return QuickLogResult(title: selection.title, loggedItemCount: loggedCount)
+    }
+
+    func reloadFromDisk(referenceDate: Date = Date()) {
+        guard let loaded = Self.load(from: fileURL) else { return }
+        document = Self.backfilledFoodMetadata(in: loaded, catalog: catalog)
+        prepareDayTracking(referenceDate: referenceDate)
+    }
+
     func isFavorite(_ food: Food) -> Bool {
         document.favorites.contains { $0.id == food.id }
     }
@@ -1949,6 +1981,7 @@ final class DiaryStore: ObservableObject {
             encoder.dateEncodingStrategy = .iso8601
             try encoder.encode(document).write(to: fileURL, options: .atomic)
             lastSaveError = nil
+            SharedDiaryStorage.reloadWidget()
         } catch {
             lastSaveError = error.localizedDescription
         }
@@ -1962,8 +1995,6 @@ final class DiaryStore: ObservableObject {
     }
 
     private static func defaultFileURL() -> URL {
-        let root = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        return root.appendingPathComponent("CalorieTracker", isDirectory: true)
-            .appendingPathComponent("Diary.json")
+        SharedDiaryStorage.defaultFileURL()
     }
 }

@@ -6,6 +6,10 @@
   available so that navigating the dates I actually use is effortless.
 - As someone who repeats foods, I want to log recent, frequent, and favorite
   foods with one tap so that routine tracking is as fast as possible.
+- As someone logging outside the app, I want the app icon to expose the current
+  Magic suggestions, Siri to log one or more exact recent foods or meals by name
+  and report calories left, and Home or Lock Screen widgets to log
+  time-appropriate Magic or recent items without opening the app.
 - As someone whose breakfast and lunch repeat, I want Magic to suggest up to
   four foods or food sets from my last 10 days at that time of day, so I can
   log a routine with one tap without first turning it into a saved meal.
@@ -165,6 +169,20 @@
   modes; the diary's primary persistent action is the larger Log food button.
 - Magic's explanation appears below its suggestions and lists the breakfast,
   lunch, and dinner time ranges.
+- Home Screen icon quick actions mirror only the current Magic suggestions. iOS
+  launches or resumes VitaChase before the selected action is logged; the diary
+  remains visible without an additional confirmation dialog.
+- Siri and Shortcuts expose “Log Recent Food or Meal” and “Calories Left Today.”
+  Exact spoken names resolve to the most recently logged matching Recent item;
+  compound requests log every resolved name together. Items absent from Recent
+  fail without logging, and a missing daily goal returns spoken guidance to
+  configure one.
+- The interactive Quick Log widget prefers Magic and falls back to Recent. Its
+  timeline changes at 5 AM, 11 AM, and 3 PM local time. Small and Lock Screen
+  widgets expose the leading action, the medium widget exposes up to three, and
+  the large widget exposes up to eight. It shows a temporary visual receipt after
+  logging. A separate Calories Left widget shows daily-goal progress. Widget
+  buttons and App Intents update the shared diary without opening the app.
 
 ## Explicit non-goals
 

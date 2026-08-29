@@ -20,7 +20,7 @@ OFF_PAGES ?= 10
 DEBUG_CATALOG_DIR := data/work/catalogs
 DEBUG_REPORT_DIR := data/work/catalog-reports
 
-.PHONY: setup format lint simulator-ready test ui-test-reorder ui-test-fixture build clean catalog catalog-refresh catalog-grouped-report catalog-family-report catalog-debug-off-search-10000 catalog-debug-gap catalog-debug-report catalog-debug sim-compile sim-build sim-launch phone-build phone-install phone-launch phone-deploy phone-wifi-check phone-wifi-deploy
+.PHONY: setup format lint simulator-ready test ui-test-reorder ui-test-fixture build clean catalog catalog-refresh catalog-grouped-report catalog-family-report catalog-debug-off-search-10000 catalog-debug-gap catalog-debug-report catalog-debug sim-compile sim-build sim-runtime-build sim-launch phone-build phone-install phone-launch phone-deploy phone-wifi-check phone-wifi-deploy
 
 setup: catalog
 
@@ -102,7 +102,16 @@ sim-compile:
 
 sim-build: sim-compile
 
-sim-launch: sim-build
+sim-runtime-build:
+	xcodebuild \
+	  -project $(PROJECT) \
+	  -scheme $(SCHEME) \
+	  -configuration $(CONFIGURATION) \
+	  -destination '$(GENERIC_SIM_DESTINATION)' \
+	  -derivedDataPath $(DERIVED_DATA) \
+	  build
+
+sim-launch: sim-runtime-build
 	@set -eu; \
 	UDID=$$(xcrun simctl list devices available | awk -F '[()]' -v name="$(SIM_DEVICE_NAME)" '{ display=$$1; sub(/^[[:space:]]+/, "", display); sub(/[[:space:]]+$$/, "", display); if (display == name && $$0 !~ /unavailable/) { print $$2; exit } }'); \
 	if [ -z "$$UDID" ]; then \

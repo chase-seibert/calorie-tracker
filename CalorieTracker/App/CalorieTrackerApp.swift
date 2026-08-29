@@ -2,6 +2,7 @@ import SwiftUI
 
 @main
 struct CalorieTrackerApp: App {
+    @UIApplicationDelegateAdaptor(VitaChaseAppDelegate.self) private var appDelegate
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var diary: DiaryStore
     @StateObject private var healthKit: HealthKitStore
@@ -9,6 +10,7 @@ struct CalorieTrackerApp: App {
     private let analytics = AnalyticsService.shared
 
     init() {
+        VitaChaseAppShortcuts.updateAppShortcutParameters()
         let healthKit = HealthKitStore()
         let catalog = CatalogStore()
         self.catalog = catalog
@@ -26,6 +28,7 @@ struct CalorieTrackerApp: App {
                 .environmentObject(healthKit)
                 .tint(AppTheme.coral)
                 .task {
+                    HomeScreenQuickActions.update(document: diary.document)
                     await analytics.start()
                     await analytics.recordAppLaunch()
                     guard healthKit.authorizationState == .authorized else { return }
@@ -39,8 +42,16 @@ struct CalorieTrackerApp: App {
                     ])
                 }
                 .onChange(of: scenePhase) { _, phase in
-                    guard phase == .active else { return }
-                    Task { await analytics.appBecameActive() }
+                    switch phase {
+                    case .active:
+                        diary.reloadFromDisk()
+                        VitaChaseAppShortcuts.updateAppShortcutParameters()
+                        Task { await analytics.appBecameActive() }
+                    case .inactive, .background:
+                        HomeScreenQuickActions.update(document: diary.document)
+                    @unknown default:
+                        break
+                    }
                 }
         }
     }

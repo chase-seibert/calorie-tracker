@@ -2,7 +2,6 @@ import Foundation
 
 enum DiaryFixtureLoader {
     private static let fixtureName = "DeviceDiaryFixture"
-    private static let fixtureDirectoryName = "CalorieTrackerFixtures"
 
     @MainActor
     static func makeDeviceStore(
@@ -22,9 +21,7 @@ enum DiaryFixtureLoader {
             return DiaryStore(catalog: catalog, healthKit: healthKit)
         }
 
-        let fileURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent(fixtureDirectoryName, isDirectory: true)
-            .appendingPathComponent("DeviceDiary.json")
+        let fileURL = SharedDiaryStorage.defaultFileURL()
 
         if !reset, FileManager.default.fileExists(atPath: fileURL.path) {
             return DiaryStore(

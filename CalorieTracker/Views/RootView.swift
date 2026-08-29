@@ -2,6 +2,8 @@ import SwiftUI
 
 struct RootView: View {
     let catalog: CatalogStore
+    @EnvironmentObject private var diary: DiaryStore
+    @ObservedObject private var quickActionRouter = HomeScreenQuickActionRouter.shared
     @State private var importRequest: ImportRequest?
     @State private var importError: String?
 
@@ -24,6 +26,9 @@ struct RootView: View {
             } message: {
                 Text(importError ?? "Unknown error")
             }
+            .onReceive(quickActionRouter.$request.compactMap { $0 }) { request in
+                handleQuickAction(request)
+            }
     }
 
     private func openImportFile(_ url: URL) {
@@ -41,6 +46,14 @@ struct RootView: View {
             importError = error.localizedDescription
             AppAnalytics.capture("import.failed")
         }
+    }
+
+    private func handleQuickAction(_ request: HomeScreenQuickActionRequest) {
+        defer { quickActionRouter.consume(request) }
+        guard let result = diary.logQuickSelection(request.selectionID) else { return }
+        AppAnalytics.capture("diary.quick_action_logged", properties: [
+            "item_count": String(result.loggedItemCount)
+        ])
     }
 }
 

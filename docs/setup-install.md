@@ -2,12 +2,15 @@
 
 ## Simulator
 
-Run `make sim-launch`. The target builds with signing disabled, boots the default
-iPhone 17 Pro simulator, installs the app, and launches it.
+Run `make sim-launch`. The target boots the default iPhone 17 Pro simulator,
+installs the app, and launches it. The runtime build is ad-hoc signed so the app
+and widget receive their shared App Group entitlement;
+`make sim-compile` remains the signing-disabled compile-only path.
 Debug simulator runs load and reset the date-relative device fixture by default,
 including manual launches from Xcode. The fixture always supplies diary entries
 for yesterday, today, and tomorrow plus unobstructed repeated sets for every
-Magic time band.
+Magic time band. It is written to the shared App Group container so the widget,
+Siri intents, and icon quick actions exercise the same fixture.
 Set `CALORIE_TRACKER_DISABLE_SIMULATOR_FIXTURE=1` in the scheme environment when
 you explicitly need an empty, persistent simulator diary.
 
@@ -45,6 +48,21 @@ never displayed.
 Connect Chase's iPhone 17 Pro, trust the Mac if prompted, and run
 `make phone-deploy`. The project uses Apple Personal Team `96NAC4VTEN` and device
 ID `00008150-000E41422E40401C` by default.
+
+The app and widget targets both require the App Groups capability with
+`group.com.cseibert.CalorieTracker`. Automatic signing should create or update
+the app and widget provisioning profiles. After installing, launch VitaChase
+once so it can migrate an existing diary and publish its Siri shortcuts and
+dynamic icon actions. Add “VitaChase Quick Log” or “VitaChase Calories Left”
+from the Home or Lock Screen widget gallery. See `docs/quick-entry.md` for
+supported Siri phrases and system behavior.
+
+If device signing reports `No Accounts` or says that a provisioning profile
+does not support the App Group, sign back into the development team in Xcode →
+Settings → Accounts. Then open Signing & Capabilities for both the
+`CalorieTracker` and `VitaChaseWidgets` targets and let automatic signing
+regenerate their profiles. The same App Group must be enabled for both bundle
+identifiers.
 
 On the first launch, open Settings in CalorieTracker and choose Connect Apple
 Health. Grant write access for calories, carbohydrates, fat, protein, and Fiber
