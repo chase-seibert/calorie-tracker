@@ -140,6 +140,7 @@ private struct SettingsValueLabel: View {
 
 private struct CalorieGoalSettingsView: View {
     @EnvironmentObject private var diary: DiaryStore
+    @FocusState private var calorieGoalIsFocused: Bool
 
     var body: some View {
         Form {
@@ -148,6 +149,7 @@ private struct CalorieGoalSettingsView: View {
                     Text("Calories per day")
                     Spacer()
                     TextField("Not set", text: calorieGoalText)
+                        .focused($calorieGoalIsFocused)
                         .keyboardType(.numberPad)
                         .multilineTextAlignment(.trailing)
                         .monospacedDigit()
@@ -173,6 +175,14 @@ private struct CalorieGoalSettingsView: View {
         .background(AppTheme.background)
         .navigationTitle("Calorie Goal")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Save") {
+                    calorieGoalIsFocused = false
+                }
+            }
+        }
         .analyticsScreen("settings_calorie_goal")
     }
 
