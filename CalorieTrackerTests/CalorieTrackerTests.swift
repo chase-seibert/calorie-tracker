@@ -3,6 +3,51 @@ import XCTest
 @testable import CalorieTracker
 
 final class CalorieTrackerTests: XCTestCase {
+    func testFirstTimeOnboardingAppearsForAnEmptyDiary() {
+        let suiteName = "CalorieTrackerTests.Onboarding.Empty.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        FirstTimeOnboarding.prepareForLaunch(
+            document: DiaryDocument(),
+            defaults: defaults
+        )
+
+        XCTAssertNil(defaults.object(forKey: FirstTimeOnboarding.completedKey))
+        XCTAssertFalse(defaults.bool(forKey: FirstTimeOnboarding.completedKey))
+    }
+
+    func testFirstTimeOnboardingSkipsExistingUsers() {
+        let suiteName = "CalorieTrackerTests.Onboarding.Existing.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        var document = DiaryDocument()
+        document.dailyCalorieGoal = 2_000
+
+        FirstTimeOnboarding.prepareForLaunch(
+            document: document,
+            defaults: defaults
+        )
+
+        XCTAssertTrue(defaults.bool(forKey: FirstTimeOnboarding.completedKey))
+    }
+
+    func testFirstTimeOnboardingPreservesAnExplicitDeveloperReset() {
+        let suiteName = "CalorieTrackerTests.Onboarding.Reset.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        defaults.set(false, forKey: FirstTimeOnboarding.completedKey)
+        var document = DiaryDocument()
+        document.dailyCalorieGoal = 2_000
+
+        FirstTimeOnboarding.prepareForLaunch(
+            document: document,
+            defaults: defaults
+        )
+
+        XCTAssertFalse(defaults.bool(forKey: FirstTimeOnboarding.completedKey))
+    }
+
     func testOlderNutrientSnapshotsDecodeFiberAsUnavailable() throws {
         let data = Data(#"{"calories":100,"carbs":20,"fat":2,"protein":5}"#.utf8)
 

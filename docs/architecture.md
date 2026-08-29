@@ -145,6 +145,14 @@ from those preferences. Alcohol calories remain in daily nutrition totals when
 its display focus is off, and the meat card is omitted when both meat focuses
 are off.
 
+`FirstTimeOnboarding` owns a versioned `UserDefaults` completion key. At launch,
+an empty diary with no completion value presents `FocusOnboardingView` as a
+non-dismissible full-screen cover. A diary containing existing user data writes
+the completion value automatically so upgrades do not interrupt established
+users. An explicit false value remains authoritative, allowing the DEBUG-only
+Developer Diagnostics reset to restore all focus defaults and replay onboarding
+even when the diary already contains data.
+
 The food-weight report is derived on demand from the local `DiaryDocument` and
 does not create persistent report state. It filters to the current day and the
 previous 89 calendar days, excludes calorie-only adjustments, expands

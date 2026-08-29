@@ -26,6 +26,10 @@ and `make test` do not build or run it. Use this slower test for changes to the
 logged-food list, drag/drop, swipe deletion, or diary ordering; do not add it to
 the routine build or unit-test workflow.
 
+To exercise first-time onboarding in a DEBUG build, open Settings → Developer
+Diagnostics → Reset First-Time Onboarding. The reset restores every optional
+focus area to its enabled default and presents the onboarding immediately.
+
 ## Analytics configuration
 
 Copy `Config/AnalyticsConfig.example.plist` to the git-ignored

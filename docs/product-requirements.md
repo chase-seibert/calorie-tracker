@@ -68,6 +68,8 @@
   red meat, regardless of quantity.
 - As someone with specific nutrition priorities, I want to choose which focused
   food metrics appear in Trends so the app emphasizes only what I care about.
+- As a new user, I want to choose my nutrition focus areas before I start
+  tracking so the diary and Trends emphasize the metrics that matter to me.
 - As someone analyzing what I eat, I want to share a last-90-days Markdown
   report of foods by total whole-ounce weight, with meals expanded into their
   historical component foods, so I can send it to ChatGPT and ask questions.
@@ -136,6 +138,12 @@
   Disabling both meat focuses hides the meat-days card. All focuses remain enabled
   by default for compatibility with existing behavior, and logged data remains
   local regardless of display selection.
+- A first launch with an empty diary presents a required focus-selection screen
+  before the diary. Calories and macros are always included; Alcohol, Fiber,
+  Processed Meat, and Red Meat are independently selectable and begin enabled.
+  Start Tracking persists those selections. Existing users with diary data skip
+  this onboarding during upgrade, while a DEBUG-only developer action restores
+  the default selections and immediately presents the onboarding again.
 - Compact estimate pills above the Logged list offer calorie-only adjustments of
   500, 1,000, 1,500, and 2,000 calories on cheat days. A DEBUG-only, off-by-default
   “Always show quick calories” experiment exposes them on every day. Choosing

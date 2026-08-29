@@ -13,12 +13,14 @@ struct CalorieTrackerApp: App {
         VitaChaseAppShortcuts.updateAppShortcutParameters()
         let healthKit = HealthKitStore()
         let catalog = CatalogStore()
-        self.catalog = catalog
-        _healthKit = StateObject(wrappedValue: healthKit)
-        _diary = StateObject(wrappedValue: LaunchConfiguration.makeDiaryStore(
+        let diary = LaunchConfiguration.makeDiaryStore(
             healthKit: healthKit,
             catalog: catalog
-        ))
+        )
+        FirstTimeOnboarding.prepareForLaunch(document: diary.document)
+        self.catalog = catalog
+        _healthKit = StateObject(wrappedValue: healthKit)
+        _diary = StateObject(wrappedValue: diary)
     }
 
     var body: some Scene {
@@ -54,6 +56,31 @@ struct CalorieTrackerApp: App {
                     }
                 }
         }
+    }
+}
+
+enum FirstTimeOnboarding {
+    static let completedKey = "onboarding.focus.v1.completed"
+
+    static func prepareForLaunch(
+        document: DiaryDocument,
+        defaults: UserDefaults = .standard
+    ) {
+        guard defaults.object(forKey: completedKey) == nil else { return }
+        guard hasExistingUserData(document) else { return }
+        defaults.set(true, forKey: completedKey)
+    }
+
+    private static func hasExistingUserData(_ document: DiaryDocument) -> Bool {
+        document.trackingStartDate != nil
+            || document.dailyCalorieGoal != nil
+            || !document.entries.isEmpty
+            || !document.alcoholEntries.isEmpty
+            || !document.favorites.isEmpty
+            || !document.customFoods.isEmpty
+            || !document.meals.isEmpty
+            || !document.dayStatuses.isEmpty
+            || !document.rememberedQuantities.isEmpty
     }
 }
 

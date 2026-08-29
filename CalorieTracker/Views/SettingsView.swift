@@ -369,6 +369,13 @@ private struct PrivacyAnalyticsView: View {
 
 #if DEBUG
 private struct DeveloperDiagnosticsView: View {
+    @AppStorage(FirstTimeOnboarding.completedKey) private var completedFocusOnboarding = false
+    @AppStorage("trends.focus.alcohol") private var tracksAlcohol = true
+    @AppStorage("trends.focus.fiber") private var tracksFiber = true
+    @AppStorage("trends.focus.processedMeat") private var tracksProcessedMeat = true
+    @AppStorage("trends.focus.redMeat") private var tracksRedMeat = true
+    @State private var showingOnboardingResetConfirmation = false
+
     var body: some View {
         List {
             Section {
@@ -386,12 +393,30 @@ private struct DeveloperDiagnosticsView: View {
             } footer: {
                 Text("Inspect the local event queue, upload state, retries, and recent delivery outcomes.")
             }
+
+            Section("First-Time Experience") {
+                Button("Reset First-Time Onboarding", systemImage: "arrow.counterclockwise") {
+                    showingOnboardingResetConfirmation = true
+                }
+            }
         }
         .scrollContentBackground(.hidden)
         .background(AppTheme.background)
         .navigationTitle("Developer Diagnostics")
         .navigationBarTitleDisplayMode(.inline)
         .analyticsScreen("developer_diagnostics")
+        .alert("Reset first-time onboarding?", isPresented: $showingOnboardingResetConfirmation) {
+            Button("Reset", role: .destructive) {
+                tracksAlcohol = true
+                tracksFiber = true
+                tracksProcessedMeat = true
+                tracksRedMeat = true
+                completedFocusOnboarding = false
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This restores the default focus selections and immediately presents onboarding again.")
+        }
     }
 }
 
