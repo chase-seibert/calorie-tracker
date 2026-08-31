@@ -30,3 +30,10 @@ The installed Spreadsheets skill's documented Node runtime could not load
 `@oai/artifact-tool`. For the explicit XLSX export request, a self-contained
 OOXML exporter was used as a fallback, then the workbook was successfully
 converted to a native Google Sheet and verified.
+
+## 2026-08-31: Restricted simctl connection flapped during screenshot capture
+
+CoreSimulatorService intermittently reported an invalid connection from the
+restricted shell even though other Simulator devices were booted. Opening the
+macOS Simulator app and running the install, launch, and screenshot commands
+with host access restored the workflow without changing or erasing devices.

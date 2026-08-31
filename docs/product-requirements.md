@@ -151,9 +151,13 @@
 - A first launch with an empty diary presents a required focus-selection screen
   before the diary. Calories and macros are always included; Alcohol, Fiber,
   Processed Meat, and Red Meat are independently selectable and begin enabled.
-  Start Tracking persists those selections. Existing users with diary data skip
-  this onboarding during upgrade, while a DEBUG-only developer action restores
-  the default selections and immediately presents the onboarding again.
+  The next optional pages explain cheat days, gap days, and alcohol tracking,
+  walk through Magic mode, offer a daily calorie goal, connect Apple Health, and
+  finish with guidance for importing history from another app. Every page after
+  focus can be skipped. Existing users with diary data skip this onboarding
+  during upgrade, while a DEBUG-only developer action restores the default
+  selections, returns to Home, and immediately presents onboarding again without
+  deleting diary data, custom foods, or saved meals.
 - Compact estimate pills above the Logged list offer calorie-only adjustments of
   500, 1,000, 1,500, and 2,000 calories on cheat days. A DEBUG-only, off-by-default
   “Always show quick calories” experiment exposes them on every day. Choosing

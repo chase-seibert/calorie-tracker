@@ -152,12 +152,18 @@ its display focus is off, and the meat card is omitted when both meat focuses
 are off.
 
 `FirstTimeOnboarding` owns a versioned `UserDefaults` completion key. At launch,
-an empty diary with no completion value presents `FocusOnboardingView` as a
-non-dismissible full-screen cover. A diary containing existing user data writes
-the completion value automatically so upgrades do not interrupt established
-users. An explicit false value remains authoritative, allowing the DEBUG-only
-Developer Diagnostics reset to restore all focus defaults and replay onboarding
-even when the diary already contains data.
+an empty diary with no completion value presents `FirstTimeOnboardingView` as a
+non-dismissible full-screen cover. Its required first page selects focus areas;
+later optional pages explain cheat/gap/alcohol tracking, walk through Magic mode,
+offer a daily calorie goal, connect Apple Health, and finish with history-import
+guidance. Optional pages use a compact top-bar back chevron and Skip action,
+with a prominent Log Food-style Next button floating at the lower right; the
+focus page has no back or skip action.
+A diary containing existing user data writes the completion value automatically
+so upgrades do not interrupt established users. An explicit false value remains
+authoritative, allowing the DEBUG-only Developer Diagnostics reset to restore all
+focus defaults, recreate the Home root, and replay onboarding without changing
+the diary document or any logged data.
 
 The food-weight report is derived on demand from the local `DiaryDocument` and
 does not create persistent report state. It filters to the current day and the

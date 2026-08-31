@@ -411,11 +411,12 @@ private struct DeveloperDiagnosticsView: View {
                 tracksFiber = true
                 tracksProcessedMeat = true
                 tracksRedMeat = true
+                NotificationCenter.default.post(name: FirstTimeOnboarding.resetNotification, object: nil)
                 completedFocusOnboarding = false
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This restores the default focus selections and immediately presents onboarding again.")
+            Text("This restores the default focus selections, returns to Home, and presents onboarding again. Your logged foods, custom foods, and saved meals are not deleted.")
         }
     }
 }

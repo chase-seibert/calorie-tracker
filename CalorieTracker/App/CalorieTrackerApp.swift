@@ -61,6 +61,7 @@ struct CalorieTrackerApp: App {
 
 enum FirstTimeOnboarding {
     static let completedKey = "onboarding.focus.v1.completed"
+    static let resetNotification = Notification.Name("FirstTimeOnboarding.didReset")
 
     static func prepareForLaunch(
         document: DiaryDocument,
