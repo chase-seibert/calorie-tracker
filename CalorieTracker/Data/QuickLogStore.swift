@@ -3,6 +3,18 @@ import Foundation
 import WidgetKit
 #endif
 
+enum VitaChaseDeepLink: Equatable {
+    case logFood
+
+    static let logFoodURL = URL(string: "vitachase://log-food")!
+
+    init?(url: URL) {
+        guard url.scheme?.lowercased() == "vitachase" else { return nil }
+        guard url.host?.lowercased() == "log-food" else { return nil }
+        self = .logFood
+    }
+}
+
 enum SharedDiaryStorage {
     static let appGroupIdentifier = "group.com.cseibert.CalorieTracker"
     static let widgetKind = "VitaChaseQuickLog"

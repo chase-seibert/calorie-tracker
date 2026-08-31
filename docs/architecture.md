@@ -39,6 +39,10 @@ separate Calories Left widget reloads on diary writes and at local midnight.
 Dynamic Home Screen quick actions contain the current Magic stable IDs; UIKit
 must launch or resume the main app to deliver those actions, so the main
 `DiaryStore` handles them without presenting a confirmation dialog.
+Both widgets assign a `vitachase://log-food` URL to their non-intent surface, and
+the circular Add widget links to it directly. `RootView` validates that route
+before presenting the diary's existing Log Food sheet; other URLs continue
+through the document-import path.
 
 The app exports `com.cseibert.calorietracker.food` and
 `com.cseibert.calorietracker.meal`, backed by `.calfood` and `.calmeal`.

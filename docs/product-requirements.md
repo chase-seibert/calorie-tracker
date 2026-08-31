@@ -190,7 +190,11 @@
   widgets expose the leading action, the medium widget exposes up to three, and
   the large widget exposes up to eight. It shows a temporary visual receipt after
   logging. A separate Calories Left widget shows daily-goal progress. Widget
-  buttons and App Intents update the shared diary without opening the app.
+  buttons and App Intents update the shared diary without opening the app. The
+  Calories Left widget, circular Add widget, and non-button Quick Log surface
+  open the app directly to Log Food. Calories Left displays either “calories
+  left” or “calories over” beneath the number; its thin progress ring adds a
+  second pass with a dot between 100% and 200% of the goal.
 
 ## Explicit non-goals
 

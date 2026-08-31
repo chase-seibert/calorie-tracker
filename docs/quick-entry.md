@@ -44,7 +44,15 @@ write, the widget reloads and shows a green “Logged” receipt for ten minutes
 “VitaChase Calories Left” is a separate widget for the Home or Lock Screen. It
 shows the remaining (or over-goal) calories and progress against the daily goal.
 Diary changes reload both widget types, and the calories widget schedules a new
-entry at the next local midnight.
+entry at the next local midnight. Tapping the Calories Left widget opens the app
+directly to Log Food. Its copy explicitly says “calories left” or “calories
+over” beneath the number. Once consumption passes 100% of the goal, the thin
+progress ring makes a second pass around the circle with a dot marking the
+current over-goal position, capped at 200%.
+
+Tapping the circular Add widget also opens Log Food. On larger Quick Log widgets,
+the named suggestion buttons continue to log immediately; tapping elsewhere on
+the widget opens Log Food.
 
 The widget prefers current Magic recommendations and falls back to Recent when
 Magic has no eligible result. Its timeline precomputes the next breakfast,

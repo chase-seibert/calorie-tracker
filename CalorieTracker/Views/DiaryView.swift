@@ -11,19 +11,10 @@ struct DiaryView: View {
     private let alwaysShowQuickCalories = false
 #endif
     let catalog: CatalogStore
+    @Binding var foodPickerLaunch: FoodPickerLaunch?
 
     @State private var dayOffset = 0
     @State private var currentDay = Calendar.current.startOfDay(for: Date())
-    @State private var foodPickerLaunch: FoodPickerLaunch? = {
-        let arguments = ProcessInfo.processInfo.arguments
-        if arguments.contains("--show-magic-food-picker") {
-            return .mode(.magic)
-        }
-        guard arguments.contains("--show-food-search") || arguments.contains("--show-food-picker") else {
-            return nil
-        }
-        return .search
-    }()
     @State private var showingMealName = false
     @State private var showingDeleteConfirmation = false
     @State private var mealName = ""
@@ -870,6 +861,17 @@ enum FoodPickerLaunch: Identifiable {
         case let .mode(mode):
             mode
         }
+    }
+
+    static var initialLaunch: FoodPickerLaunch? {
+        let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains("--show-magic-food-picker") {
+            return .mode(.magic)
+        }
+        guard arguments.contains("--show-food-search") || arguments.contains("--show-food-picker") else {
+            return nil
+        }
+        return .search
     }
 }
 

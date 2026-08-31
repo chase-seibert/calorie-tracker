@@ -3,6 +3,15 @@ import XCTest
 @testable import CalorieTracker
 
 final class CalorieTrackerTests: XCTestCase {
+    func testWidgetLogFoodDeepLinkRoutesOnlyTheExpectedURL() throws {
+        XCTAssertEqual(
+            VitaChaseDeepLink(url: VitaChaseDeepLink.logFoodURL),
+            .logFood
+        )
+        XCTAssertNil(VitaChaseDeepLink(url: try XCTUnwrap(URL(string: "vitachase://settings"))))
+        XCTAssertNil(VitaChaseDeepLink(url: try XCTUnwrap(URL(string: "https://example.com/log-food"))))
+    }
+
     func testFirstTimeOnboardingAppearsForAnEmptyDiary() {
         let suiteName = "CalorieTrackerTests.Onboarding.Empty.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!

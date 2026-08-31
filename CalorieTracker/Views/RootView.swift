@@ -5,12 +5,13 @@ struct RootView: View {
     @EnvironmentObject private var diary: DiaryStore
     @ObservedObject private var quickActionRouter = HomeScreenQuickActionRouter.shared
     @AppStorage(FirstTimeOnboarding.completedKey) private var completedFocusOnboarding = false
+    @State private var foodPickerLaunch = FoodPickerLaunch.initialLaunch
     @State private var importRequest: ImportRequest?
     @State private var importError: String?
 
     var body: some View {
-        DiaryView(catalog: catalog)
-            .onOpenURL(perform: openImportFile)
+        DiaryView(catalog: catalog, foodPickerLaunch: $foodPickerLaunch)
+            .onOpenURL(perform: handleOpenURL)
             .sheet(item: $importRequest) { request in
                 switch request.file {
                 case let .food(file):
@@ -37,6 +38,15 @@ struct RootView: View {
                 FocusOnboardingView()
                     .interactiveDismissDisabled()
             }
+    }
+
+    private func handleOpenURL(_ url: URL) {
+        if VitaChaseDeepLink(url: url) == .logFood {
+            foodPickerLaunch = .search
+            AppAnalytics.capture("widget.opened_log_food")
+            return
+        }
+        openImportFile(url)
     }
 
     private func openImportFile(_ url: URL) {

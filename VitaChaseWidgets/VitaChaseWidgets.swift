@@ -88,18 +88,21 @@ struct QuickLogWidgetView: View {
     let entry: QuickLogWidgetEntry
 
     var body: some View {
-        switch family {
-        case .accessoryCircular:
-            circularContent
-        case .accessoryRectangular:
-            lockScreenContent
-        case .systemSmall:
-            smallContent
-        case .systemLarge:
-            largeContent
-        default:
-            mediumContent
+        Group {
+            switch family {
+            case .accessoryCircular:
+                circularContent
+            case .accessoryRectangular:
+                lockScreenContent
+            case .systemSmall:
+                smallContent
+            case .systemLarge:
+                largeContent
+            default:
+                mediumContent
+            }
         }
+        .widgetURL(VitaChaseDeepLink.logFoodURL)
     }
 
     private var smallContent: some View {
@@ -163,24 +166,15 @@ struct QuickLogWidgetView: View {
     }
 
     private var circularContent: some View {
-        Group {
-            if let selection = entry.selections.first {
-                Button(intent: LogRecentItemIntent(item: QuickLogSelectionEntity(selection: selection))) {
-                    ZStack {
-                        AccessoryWidgetBackground()
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title)
-                    }
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Log \(selection.title)")
-            } else {
-                ZStack {
-                    AccessoryWidgetBackground()
-                    Image(systemName: "fork.knife")
-                }
+        Link(destination: VitaChaseDeepLink.logFoodURL) {
+            ZStack {
+                AccessoryWidgetBackground()
+                Image(systemName: "plus.circle.fill")
+                    .font(.title)
             }
         }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Open Log Food in VitaChase")
         .containerBackground(.clear, for: .widget)
     }
 
@@ -336,19 +330,22 @@ struct CaloriesLeftWidgetView: View {
     let entry: CaloriesLeftWidgetEntry
 
     var body: some View {
-        switch family {
-        case .accessoryCircular:
-            circularContent
-        case .accessoryInline:
-            Label(summary, systemImage: "flame.fill")
-                .containerBackground(.clear, for: .widget)
-        case .accessoryRectangular:
-            rectangularContent
-        case .systemMedium:
-            mediumContent
-        default:
-            smallContent
+        Group {
+            switch family {
+            case .accessoryCircular:
+                circularContent
+            case .accessoryInline:
+                Label(summary, systemImage: "flame.fill")
+                    .containerBackground(.clear, for: .widget)
+            case .accessoryRectangular:
+                rectangularContent
+            case .systemMedium:
+                mediumContent
+            default:
+                smallContent
+            }
         }
+        .widgetURL(VitaChaseDeepLink.logFoodURL)
     }
 
     private var smallContent: some View {
@@ -357,13 +354,15 @@ struct CaloriesLeftWidgetView: View {
                 .font(.headline)
                 .foregroundStyle(.orange)
             Spacer(minLength: 0)
-            Text(primaryValue)
-                .font(.system(.largeTitle, design: .rounded, weight: .bold))
-                .minimumScaleFactor(0.7)
-                .monospacedDigit()
-            Text(statusLabel)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(displayValue)
+                    .font(.system(.title2, design: .rounded, weight: .bold))
+                    .minimumScaleFactor(0.7)
+                    .monospacedDigit()
+                Text(displayStatus)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
             ProgressView(value: progress)
                 .tint(.orange)
         }
@@ -373,14 +372,12 @@ struct CaloriesLeftWidgetView: View {
 
     private var mediumContent: some View {
         HStack(spacing: 18) {
-            Gauge(value: progress) {
-                Image(systemName: "flame.fill")
-            } currentValueLabel: {
-                Text(primaryValue)
-                    .font(.headline)
-                    .minimumScaleFactor(0.5)
-            }
-            .gaugeStyle(.accessoryCircularCapacity)
+            CaloriesProgressRing(
+                progress: ringProgress,
+                value: compactValue,
+                status: compactStatus,
+                size: 82
+            )
             VStack(alignment: .leading, spacing: 4) {
                 Text("Calories Left Today")
                     .font(.headline)
@@ -399,14 +396,12 @@ struct CaloriesLeftWidgetView: View {
     }
 
     private var circularContent: some View {
-        Gauge(value: progress) {
-            Image(systemName: "flame.fill")
-        } currentValueLabel: {
-            Text(shortValue)
-                .font(.caption.bold())
-                .minimumScaleFactor(0.5)
-        }
-        .gaugeStyle(.accessoryCircularCapacity)
+        CaloriesProgressRing(
+            progress: ringProgress,
+            value: compactValue,
+            status: compactStatus,
+            size: 44
+        )
         .containerBackground(.clear, for: .widget)
     }
 
@@ -427,12 +422,22 @@ struct CaloriesLeftWidgetView: View {
         return min(max(Double(goal - remaining) / Double(goal), 0), 1)
     }
 
-    private var primaryValue: String {
+    private var ringProgress: Double {
+        guard let goal = entry.goal, goal > 0, let remaining = entry.remaining else { return 0 }
+        return min(max(Double(goal - remaining) / Double(goal), 0), 2)
+    }
+
+    private var displayValue: String {
         guard let remaining = entry.remaining else { return "—" }
         return abs(remaining).formatted()
     }
 
-    private var shortValue: String {
+    private var displayStatus: String {
+        guard let remaining = entry.remaining else { return "Set a goal in VitaChase" }
+        return remaining >= 0 ? "calories left" : "calories over"
+    }
+
+    private var compactValue: String {
         guard let remaining = entry.remaining else { return "—" }
         let value = abs(remaining)
         if value >= 1_000 {
@@ -441,9 +446,9 @@ struct CaloriesLeftWidgetView: View {
         return value.formatted()
     }
 
-    private var statusLabel: String {
-        guard let remaining = entry.remaining else { return "Set a goal in VitaChase" }
-        return remaining >= 0 ? "calories remaining" : "calories over"
+    private var compactStatus: String {
+        guard let remaining = entry.remaining else { return "" }
+        return remaining >= 0 ? "left" : "over"
     }
 
     private var summary: String {
@@ -451,6 +456,60 @@ struct CaloriesLeftWidgetView: View {
         return remaining >= 0
             ? "\(remaining.formatted()) calories left"
             : "\((-remaining).formatted()) calories over"
+    }
+}
+
+private struct CaloriesProgressRing: View {
+    let progress: Double
+    let value: String
+    let status: String
+    let size: CGFloat
+
+    private let baseLineWidth: CGFloat = 4
+    private let progressColor = Color.orange.opacity(0.88)
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(.secondary.opacity(0.22), lineWidth: baseLineWidth)
+
+            Circle()
+                .trim(from: 0, to: min(progress, 1))
+                .stroke(progressColor, style: StrokeStyle(lineWidth: baseLineWidth, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+
+            if progress > 1 {
+                Circle()
+                    .trim(from: 0, to: min(progress - 1, 1))
+                    .stroke(progressColor, style: StrokeStyle(lineWidth: baseLineWidth, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+
+                Circle()
+                    .fill(progressColor)
+                    .frame(width: baseLineWidth * 2.1, height: baseLineWidth * 2.1)
+                    // The arc's centerline is at the outer radius of the Circle
+                    // shape. Keep the marker on that same radius instead of
+                    // shifting it inward by half the stroke width.
+                    .offset(y: -(size / 2))
+                    .rotationEffect(.degrees(min(progress - 1, 1) * 360))
+            }
+
+            VStack(spacing: -1) {
+                Text(value)
+                    .font(.system(size: size * 0.25, weight: .bold, design: .rounded))
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
+                    .monospacedDigit()
+                if !status.isEmpty {
+                    Text(status)
+                        .font(.system(size: size * 0.15, weight: .medium, design: .rounded))
+                        .lineLimit(1)
+                }
+            }
+            .multilineTextAlignment(.center)
+        }
+        .frame(width: size, height: size)
+        .accessibilityLabel(value)
     }
 }
 
