@@ -1233,6 +1233,44 @@ final class DiaryStore: ObservableObject {
         healthKit?.sync(entries: [document.entries[index]])
     }
 
+    /// Updates the ingredients for one logged meal without changing the saved meal template.
+    /// The logged entry becomes a snapshot so later edits to the saved meal do not overwrite
+    /// this intentional per-entry adjustment.
+    func updateMealEntry(entryID: UUID, amount: Double, items: [MealItem]) {
+        guard
+            let index = document.entries.firstIndex(where: { $0.id == entryID }),
+            document.entries[index].isMeal,
+            amount > 0,
+            !items.isEmpty,
+            items.allSatisfy({ $0.amount.isFinite && $0.amount > 0 }),
+            canLogFood(on: document.entries[index].date)
+        else { return }
+
+        let clampedAmount = max(amount, 0.01)
+        let baseItems = items.map { item in
+            var baseItem = item
+            baseItem.amount /= clampedAmount
+            return baseItem
+        }
+        let baseNutrients = baseItems.reduce(.zero) { total, item in
+            total + item.food.nutrients(
+                for: item.amount,
+                unit: item.unit,
+                portionID: item.portionID
+            )
+        }
+
+        document.entries[index].savedMealID = nil
+        document.entries[index].amount = clampedAmount
+        document.entries[index].unit = .serving
+        document.entries[index].portionID = "saved-meal"
+        document.entries[index].food.nutrients = baseNutrients
+        document.entries[index].nutrients = baseNutrients.scaled(by: clampedAmount)
+        document.entries[index].mealItems = items
+        persist()
+        healthKit?.sync(entries: [document.entries[index]])
+    }
+
     @discardableResult
     func renameMeal(mealID: UUID, name: String) -> Bool {
         let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)

@@ -39,6 +39,8 @@
 - As someone logging a saved meal, I want to tap its list row to choose the
   number of servings, see its calorie and macro breakdown, and review its foods
   while renaming the meal without changing its constituent foods.
+- As someone correcting a logged meal, I want to edit an individual ingredient's
+  amount with its unit visible, without changing the reusable saved meal.
 - As someone who uses personal names for foods, I want to rename a logged food
   and have that name persist in the diary and future searches.
 - As someone tracking against a target, I want to set an optional daily calorie

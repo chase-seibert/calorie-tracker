@@ -144,8 +144,10 @@ Saved meal rows use the same interaction: + logs one meal, while tapping the
 row opens the quantity editor in meal servings. The meal editor keeps the name
 editable through the same pencil action as foods, shows the
 calorie/carbohydrate/fat/protein breakdown, and lists the constituent foods
-without offering edits to them. Logged meal rows open this same meal editor so
-changing servings updates the entry and its break-apart quantities.
+with clearly labeled, editable amounts and units. Logged meal rows open this
+same meal editor so changing servings updates the entry and its break-apart
+quantities; changing an ingredient creates an intentional per-entry snapshot
+without changing the reusable saved meal.
 
 The Select control beside the Logged heading enters meal selection mode. The
 user explicitly checks one or more entries and names the combination. The

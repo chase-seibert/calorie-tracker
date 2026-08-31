@@ -927,6 +927,7 @@ struct QuantityEditor: View {
     @State private var amount: Double
     @State private var unitChoice: QuantityUnitChoice
     @State private var mealItems: [MealItem]
+    @State private var mealItemsWereEdited = false
     @State private var showingNameEditor = false
     @FocusState private var amountIsFocused: Bool
 
@@ -1093,13 +1094,24 @@ struct QuantityEditor: View {
 
                     if isMealEditor, !mealItems.isEmpty {
                         VStack(alignment: .leading, spacing: 10) {
-                            Text("Contains")
+                            Text(entryID == nil ? "Contains" : "Meal ingredients")
                                 .font(.headline)
-                            ForEach(mealItems) { item in
-                                MealItemRow(item: item)
+                            if entryID != nil {
+                                Text("Adjust quantities for this logged meal only.")
+                                    .font(.caption)
+                                    .foregroundStyle(AppTheme.muted)
+                                ForEach($mealItems) { item in
+                                    MealItemEditorRow(item: item) {
+                                        mealItemsWereEdited = true
+                                    }
+                                }
+                            } else {
+                                ForEach(mealItems) { item in
+                                    MealItemRow(item: item)
+                                }
                             }
                         }
-                        .padding(14)
+                        .padding(16)
                         .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 16))
                     }
 
@@ -1197,6 +1209,20 @@ struct QuantityEditor: View {
                     } else {
                         unitChoice = .ounces
                     }
+                }
+            }
+            .onChange(of: amount) { oldAmount, newAmount in
+                guard entryID != nil, oldAmount > 0, newAmount > 0, oldAmount != newAmount else { return }
+                let scale = newAmount / oldAmount
+                mealItems = mealItems.map { item in
+                    var scaledItem = item
+                    scaledItem.amount *= scale
+                    return scaledItem
+                }
+                // One-off meals have no saved template to recalculate from, so
+                // persist the scaled snapshot alongside the new serving count.
+                if mealID == nil {
+                    mealItemsWereEdited = true
                 }
             }
             .onDisappear {
@@ -1307,7 +1333,11 @@ struct QuantityEditor: View {
         if let entryID {
             let previousEntry = diary.document.entries.first { $0.id == entryID }
             if isMealEditor {
-                diary.updateMealEntry(entryID: entryID, amount: amount)
+                if mealItemsWereEdited {
+                    diary.updateMealEntry(entryID: entryID, amount: amount, items: mealItems)
+                } else {
+                    diary.updateMealEntry(entryID: entryID, amount: amount)
+                }
             } else {
                 diary.updateEntry(
                     entryID: entryID,
@@ -1447,6 +1477,93 @@ private struct MealItemRow: View {
             "\(item.amount.cleanAmount) \(item.unit.rawValue)"
         case .serving:
             "\(item.amount.cleanAmount) \(item.food.portion(id: item.portionID)?.label ?? "serving")"
+        }
+    }
+}
+
+struct MealItemEditorRow: View {
+    @Binding var item: MealItem
+    var onAmountChanged: () -> Void = {}
+    @FocusState private var amountIsFocused: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .center, spacing: 12) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(item.food.name)
+                        .font(.body.weight(.semibold))
+                        .lineLimit(2)
+                    Text(calorieDescription)
+                        .font(.caption)
+                        .foregroundStyle(AppTheme.muted)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                HStack(spacing: 8) {
+                    TextField("Amount", value: amountBinding, format: .number.precision(.fractionLength(0...2)))
+                        .keyboardType(.decimalPad)
+                        .multilineTextAlignment(.trailing)
+                        .monospacedDigit()
+                        .frame(width: 68)
+                        .textFieldStyle(.roundedBorder)
+                        .focused($amountIsFocused)
+                        .onChange(of: amountIsFocused) { _, isFocused in
+                            if isFocused { selectAllAmount() }
+                        }
+                        .accessibilityLabel("Editable amount for " + item.food.name)
+                        .accessibilityHint("Enter the quantity in " + unitLabel)
+                    Text(unitLabel)
+                        .font(.subheadline)
+                        .foregroundStyle(AppTheme.muted)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .frame(maxWidth: 110, alignment: .leading)
+                }
+            }
+        }
+        .padding(.vertical, 7)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Quantity for " + item.food.name)
+    }
+
+    private var amountBinding: Binding<Double> {
+        Binding(
+            get: { item.amount },
+            set: {
+                let clamped = min(max($0, 0.01), 100)
+                guard clamped != item.amount else { return }
+                item.amount = clamped
+                onAmountChanged()
+            }
+        )
+    }
+
+    private var unitLabel: String {
+        switch item.unit {
+        case .grams, .ounces:
+            item.unit.title
+        case .serving:
+            item.food.portion(id: item.portionID)?.label ?? item.unit.title
+        }
+    }
+
+    private var calorieDescription: String {
+        Int(nutrients.calories.rounded()).formatted() + " calories"
+    }
+
+    private var nutrients: MacroNutrients {
+        item.food.nutrients(for: item.amount, unit: item.unit, portionID: item.portionID)
+    }
+
+    private func selectAllAmount() {
+        DispatchQueue.main.async {
+            UIApplication.shared.sendAction(
+                #selector(UIResponder.selectAll(_:)),
+                to: nil,
+                from: nil,
+                for: nil
+            )
         }
     }
 }

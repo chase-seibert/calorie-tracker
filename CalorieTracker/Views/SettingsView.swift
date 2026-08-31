@@ -1131,7 +1131,7 @@ private struct SavedMealEditorView: View {
                     TextField("Name", text: $name)
                 }
 
-                Section("Foods") {
+                Section {
                     if items.isEmpty {
                         Text("Add at least one food to save this meal.")
                             .font(.subheadline)
@@ -1146,6 +1146,10 @@ private struct SavedMealEditorView: View {
                     Button("Add food", systemImage: "plus") {
                         showingFoodPicker = true
                     }
+                } header: {
+                    Text("Foods")
+                } footer: {
+                    Text("Set each ingredient's amount and unit. These quantities are used whenever you log this saved meal.")
                 }
 
                 Section {
@@ -1242,61 +1246,11 @@ private struct SavedMealEditorView: View {
 private struct SavedMealItemEditorRow: View {
     @Binding var item: MealItem
     let onDelete: () -> Void
-    @FocusState private var amountIsFocused: Bool
 
     var body: some View {
-        HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 3) {
-                Text(item.food.name)
-                    .font(.body.weight(.semibold))
-                    .lineLimit(2)
-                Text(quantityDescription)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-            TextField("Amount", value: amountBinding, format: .number.precision(.fractionLength(0...2)))
-                .keyboardType(.decimalPad)
-                .multilineTextAlignment(.trailing)
-                .monospacedDigit()
-                .frame(width: 80)
-                .focused($amountIsFocused)
-                .onChange(of: amountIsFocused) { _, isFocused in
-                    if isFocused {
-                        selectAllAmount()
-                    }
-                }
-            .accessibilityLabel("Quantity for \(item.food.name)")
-        }
+        MealItemEditorRow(item: $item)
         .swipeActions {
             Button("Remove", systemImage: "trash", role: .destructive, action: onDelete)
-        }
-    }
-
-    private var amountBinding: Binding<Double> {
-        Binding(
-            get: { item.amount },
-            set: { item.amount = min(max($0, 0.01), 100) }
-        )
-    }
-
-    private func selectAllAmount() {
-        DispatchQueue.main.async {
-            UIApplication.shared.sendAction(
-                #selector(UIResponder.selectAll(_:)),
-                to: nil,
-                from: nil,
-                for: nil
-            )
-        }
-    }
-
-    private var quantityDescription: String {
-        switch item.unit {
-        case .grams, .ounces:
-            return "\(item.amount.cleanAmount) \(item.unit.rawValue)"
-        case .serving:
-            return "\(item.amount.cleanAmount) \(item.food.portion(id: item.portionID)?.label ?? "serving")"
         }
     }
 }

@@ -1630,6 +1630,49 @@ final class CalorieTrackerTests: XCTestCase {
     }
 
     @MainActor
+    func testLoggedMealIngredientEditUpdatesOnlyThatEntry() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let fileURL = folder.appendingPathComponent("diary.json")
+        let day = Date()
+        let store = DiaryStore(fileURL: fileURL)
+        func food(_ name: String, calories: Double) -> Food {
+            Food(
+                sourceID: name.lowercased(),
+                source: .custom,
+                name: name,
+                brand: nil,
+                barcode: nil,
+                nutrients: MacroNutrients(calories: calories, carbs: 1, fat: 1, protein: 1),
+                baseAmountGrams: 100,
+                servingGrams: nil,
+                servingDescription: nil
+            )
+        }
+
+        let toast = food("Toast", calories: 100)
+        let eggs = food("Eggs", calories: 200)
+        let meal = try XCTUnwrap(store.saveMeal(
+            name: "Breakfast",
+            items: [
+                MealItem(id: UUID(), food: toast, amount: 100, unit: .grams),
+                MealItem(id: UUID(), food: eggs, amount: 100, unit: .grams)
+            ]
+        ))
+        store.logMeal(meal, on: day)
+        let logged = try XCTUnwrap(store.entries(on: day).first)
+        var editedItems = try XCTUnwrap(logged.mealItems)
+        editedItems[0].amount = 150
+
+        store.updateMealEntry(entryID: logged.id, amount: logged.amount, items: editedItems)
+
+        let editedEntry = try XCTUnwrap(store.entries(on: day).first)
+        XCTAssertNil(editedEntry.savedMealID)
+        XCTAssertEqual(editedEntry.mealItems?.map(\.amount) ?? [], [150, 100])
+        XCTAssertEqual(editedEntry.nutrients.calories, 350, accuracy: 0.001)
+        XCTAssertEqual(store.document.meals.first?.items.map(\.amount) ?? [], [100, 100])
+    }
+
+    @MainActor
     func testRenamingMealUpdatesSavedMealAndLoggedEntries() throws {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let fileURL = folder.appendingPathComponent("diary.json")
