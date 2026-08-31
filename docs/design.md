@@ -147,7 +147,9 @@ calorie/carbohydrate/fat/protein breakdown, and lists the constituent foods
 with clearly labeled, editable amounts and units. Logged meal rows open this
 same meal editor so changing servings updates the entry and its break-apart
 quantities; changing an ingredient creates an intentional per-entry snapshot
-without changing the reusable saved meal.
+without changing the reusable saved meal. Adding an ingredient from the saved-meal
+editor opens a food-only picker with search, All foods, Recent, Frequent, and
+Favorites modes; meals are never offered as ingredients.
 
 The Select control beside the Logged heading enters meal selection mode. The
 user explicitly checks one or more entries and names the combination. The
