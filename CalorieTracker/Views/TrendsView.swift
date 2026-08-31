@@ -10,6 +10,9 @@ struct TrendsView: View {
     @State private var selectedMeatWeek: WeeklyMeatDays?
 
     private let trendDays = 30
+    private let fiberGramsPerThousandCalories = 14.0
+    private let recommendedRedMeatDaysPerWeek = 2.0
+    private let recommendedProcessedMeatDaysPerWeek = 0.0
 
     private var points: [TrendPoint] {
         diary.totalsByDay(numberOfDays: trendDays).map {
@@ -28,6 +31,11 @@ struct TrendsView: View {
 
     private var weeklyMeatPoints: [WeeklyMeatDays] {
         diary.weeklyMeatDays(numberOfDays: trendDays)
+    }
+
+    private var recommendedFiberGrams: Double {
+        let calorieBaseline = diary.dailyCalorieGoal ?? 2_000
+        return Double(calorieBaseline) / 1_000 * fiberGramsPerThousandCalories
     }
 
     var body: some View {
@@ -118,6 +126,9 @@ struct TrendsView: View {
                 Text("A day counts once per category, regardless of quantity")
                     .font(.caption)
                     .foregroundStyle(AppTheme.muted)
+                Text("Guidance: up to 2 red-meat days; little or no processed meat")
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.muted)
             }
             Chart {
                 ForEach(weeklyMeatPoints) { point in
@@ -142,6 +153,16 @@ struct TrendsView: View {
                         .accessibilityLabel("Red meat, week of \(point.weekStart.formatted(date: .abbreviated, time: .omitted))")
                         .accessibilityValue("\(point.redMeatDays) days")
                     }
+                }
+                if tracksProcessedMeat {
+                    RuleMark(y: .value("Processed meat target", recommendedProcessedMeatDaysPerWeek))
+                        .foregroundStyle(AppTheme.processedMeat.opacity(0.7))
+                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 4]))
+                }
+                if tracksRedMeat {
+                    RuleMark(y: .value("Red meat target", recommendedRedMeatDaysPerWeek))
+                        .foregroundStyle(AppTheme.redMeat.opacity(0.7))
+                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 4]))
                 }
             }
             .chartYScale(domain: 0...7)
@@ -235,7 +256,7 @@ struct TrendsView: View {
     private var calorieAndAlcoholChart: some View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(tracksAlcohol ? "Calories & drinks" : "Calories")
+                Text("Calories")
                     .font(.title3.weight(.bold))
                 if tracksAlcohol {
                     Text("Each wine glass is one drink")
@@ -274,6 +295,11 @@ struct TrendsView: View {
                         }
                     }
                 }
+                if let goal = diary.dailyCalorieGoal {
+                    RuleMark(y: .value("Daily calorie target", goal))
+                        .foregroundStyle(AppTheme.coral.opacity(0.75))
+                        .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
+                }
             }
             .chartXAxis {
                 AxisMarks(values: .automatic(desiredCount: 5)) { value in
@@ -289,15 +315,38 @@ struct TrendsView: View {
 
     private var macroChart: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Macros").font(.title3.weight(.bold))
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Macros").font(.title3.weight(.bold))
+                Text("Stacked daily grams")
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.muted)
+            }
             Chart {
                 ForEach(points) { point in
-                    LineMark(x: .value("Date", point.date), y: .value("Grams", point.nutrients.carbs), series: .value("Macro", "Carbs"))
-                        .foregroundStyle(by: .value("Macro", "Carbs"))
-                    LineMark(x: .value("Date", point.date), y: .value("Grams", point.nutrients.fat), series: .value("Macro", "Fat"))
-                        .foregroundStyle(by: .value("Macro", "Fat"))
-                    LineMark(x: .value("Date", point.date), y: .value("Grams", point.nutrients.protein), series: .value("Macro", "Protein"))
+                    let carbs = max(point.nutrients.carbs, 0)
+                    let fat = max(point.nutrients.fat, 0)
+                    let protein = max(point.nutrients.protein, 0)
+                    AreaMark(
+                        x: .value("Date", point.date),
+                        yStart: .value("Baseline", 0.0),
+                        yEnd: .value("Grams", protein)
+                    )
                         .foregroundStyle(by: .value("Macro", "Protein"))
+                        .interpolationMethod(.catmullRom)
+                    AreaMark(
+                        x: .value("Date", point.date),
+                        yStart: .value("Grams", protein),
+                        yEnd: .value("Grams", protein + fat)
+                    )
+                        .foregroundStyle(by: .value("Macro", "Fat"))
+                        .interpolationMethod(.catmullRom)
+                    AreaMark(
+                        x: .value("Date", point.date),
+                        yStart: .value("Grams", protein + fat),
+                        yEnd: .value("Grams", protein + fat + carbs)
+                    )
+                        .foregroundStyle(by: .value("Macro", "Carbs"))
+                        .interpolationMethod(.catmullRom)
                 }
             }
             .chartForegroundStyleScale([
@@ -311,7 +360,8 @@ struct TrendsView: View {
                     AxisValueLabel(format: .dateTime.month(.abbreviated).day())
                 }
             }
-            .frame(height: 240)
+            .chartLegend(position: .bottom, spacing: 16)
+            .frame(height: 260)
         }
         .padding(18)
         .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 22))
@@ -322,7 +372,7 @@ struct TrendsView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Fiber")
                     .font(.title3.weight(.bold))
-                Text("Daily grams")
+                Text("Daily recommendation: \(recommendedFiberGrams.cleanAmount) g")
                     .font(.caption)
                     .foregroundStyle(AppTheme.muted)
             }
@@ -338,6 +388,9 @@ struct TrendsView: View {
                         .accessibilityValue("\(fiber.cleanAmount) grams of fiber")
                     }
                 }
+                RuleMark(y: .value("Daily fiber recommendation", recommendedFiberGrams))
+                    .foregroundStyle(AppTheme.fiber.opacity(0.8))
+                    .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
             }
             .chartXAxis {
                 AxisMarks(values: .automatic(desiredCount: 5)) { value in

@@ -64,6 +64,9 @@
   macros, and log it as a one-off without sharing my conversation or cluttering
   my personal catalogs.
 - As a user looking for patterns, I want calorie and macro trends by day.
+- As someone comparing intake with health targets, I want Trends to show a
+  daily calorie target, a daily fiber recommendation, and weekly red- and
+  processed-meat guidance alongside the charts.
 - As someone tracking alcohol without itemizing every drink, I want a fast daily
   drink count with an optional single type, estimated calories, and drink-count
   trends.
@@ -157,6 +160,11 @@
   independent and remains on the now-normal day.
 - Trends summarizes gap-day and cheat-day counts beneath its title for the fixed
   30-day window; those statuses do not add vertical markers to individual charts.
+- Trends overlays a dashed calorie-target line when a daily goal is configured,
+  a fiber recommendation based on 14 grams per 1,000 goal calories (28 grams
+  when no goal is configured), and weekly meat guidance of no more than two
+  red-meat days and little or no processed meat. The macro trend is a stacked
+  area chart for carbohydrates, fat, and protein.
 - Light and dark appearances use adaptive backgrounds, elevated cards, primary
   and secondary text, control fills, source badges, macro colors, and action
   colors across Diary, Log Food, quantity editing, Settings, and Trends.
