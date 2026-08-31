@@ -628,6 +628,16 @@ final class DiaryStore: ObservableObject {
         }
     }
 
+    /// Hand-created meals shown in Personal Library.
+    var customMeals: [SavedMeal] {
+        alphabetizedMeals.filter { !$0.isImported }
+    }
+
+    /// Imported meal snapshots shown in the Log Food meal picker.
+    var importedMeals: [SavedMeal] {
+        alphabetizedMeals.filter(\.isImported)
+    }
+
     var recentFoods: [Food] {
         uniqueFoods(
             from: document.entries.filter { !$0.isMeal && !$0.isCheatDayAdjustment }
@@ -1002,7 +1012,8 @@ final class DiaryStore: ObservableObject {
         name: String,
         items: [MealItem],
         containsProcessedMeat: Bool? = nil,
-        containsRedMeat: Bool? = nil
+        containsRedMeat: Bool? = nil,
+        origin: SavedMealOrigin = .custom
     ) -> SavedMeal? {
         let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedName.isEmpty, !items.isEmpty else { return nil }
@@ -1011,7 +1022,8 @@ final class DiaryStore: ObservableObject {
             name: normalizedName,
             items: items,
             containsProcessedMeat: containsProcessedMeat,
-            containsRedMeat: containsRedMeat
+            containsRedMeat: containsRedMeat,
+            origin: origin
         )
         document.meals.insert(meal, at: 0)
         persist()
@@ -1040,7 +1052,8 @@ final class DiaryStore: ObservableObject {
             name: normalizedName,
             items: items,
             containsProcessedMeat: containsProcessedMeat ?? previousMeal.containsProcessedMeat,
-            containsRedMeat: containsRedMeat ?? previousMeal.containsRedMeat
+            containsRedMeat: containsRedMeat ?? previousMeal.containsRedMeat,
+            origin: previousMeal.origin
         )
         for index in document.entries.indices where document.entries[index].savedMealID == mealID {
             var entry = document.entries[index]
@@ -1414,6 +1427,7 @@ final class DiaryStore: ObservableObject {
     }
 
     private func prepareDayTracking(referenceDate: Date) {
+        migrateLegacyImportedMealEntries()
         let today = calendar.startOfDay(for: referenceDate)
         document.schemaVersion = 8
         document.dayStatuses = document.dayStatuses.map { status in
@@ -1440,6 +1454,46 @@ final class DiaryStore: ObservableObject {
 
         finalizePastDays(referenceDate: referenceDate)
         persist()
+    }
+
+    /// Older imports stored only the meal entry snapshot and left `savedMealID`
+    /// empty. Promote those entries to imported meal snapshots so they continue
+    /// to participate in Recent and can be logged again after an upgrade.
+    private func migrateLegacyImportedMealEntries() {
+        var mealsByID = Dictionary(uniqueKeysWithValues: document.meals.map { ($0.id, $0) })
+        for index in document.entries.indices {
+            let entry = document.entries[index]
+            guard entry.isMeal,
+                  entry.savedMealID == nil,
+                  let scaledItems = entry.mealItems,
+                  !scaledItems.isEmpty
+            else { continue }
+
+            let mealID: UUID
+            if entry.food.sourceID.hasPrefix("saved-meal-") {
+                mealID = UUID(uuidString: String(entry.food.sourceID.dropFirst("saved-meal-".count))) ?? UUID()
+            } else {
+                mealID = UUID()
+            }
+            let mealItems = scaledItems.map { item in
+                var baseItem = item
+                baseItem.amount /= max(entry.amount, 0.01)
+                return baseItem
+            }
+            if mealsByID[mealID] == nil {
+                let meal = SavedMeal(
+                    id: mealID,
+                    name: entry.food.name,
+                    items: mealItems,
+                    containsProcessedMeat: entry.food.containsProcessedMeat,
+                    containsRedMeat: entry.food.containsRedMeat,
+                    origin: .imported
+                )
+                document.meals.append(meal)
+                mealsByID[mealID] = meal
+            }
+            document.entries[index].savedMealID = mealID
+        }
     }
 
     private func reconcileAutomaticStatus(on date: Date) {

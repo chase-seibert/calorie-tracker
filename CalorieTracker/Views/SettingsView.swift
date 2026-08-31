@@ -106,7 +106,7 @@ struct SettingsView: View {
 
     private var personalLibraryDescription: String {
         let foodCount = diary.document.customFoods.count
-        let mealCount = diary.document.meals.count
+        let mealCount = diary.customMeals.count
         return "\(foodCount) \(foodCount == 1 ? "food" : "foods") · \(mealCount) \(mealCount == 1 ? "meal" : "meals")"
     }
 
@@ -820,11 +820,11 @@ private struct PersonalCatalogView: View {
                 Button("Add", systemImage: "plus") {
                     mealEditorPresentation = .add
                 }
-                if diary.document.meals.isEmpty {
+                if diary.customMeals.isEmpty {
                     Label("No saved meals yet", systemImage: "square.stack.3d.up")
                         .foregroundStyle(.secondary)
                 } else {
-                    ForEach(diary.alphabetizedMeals) { meal in
+                    ForEach(diary.customMeals) { meal in
                         PersonalMealRow(meal: meal)
                             .contentShape(Rectangle())
                             .onTapGesture {

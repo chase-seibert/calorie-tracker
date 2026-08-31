@@ -1668,21 +1668,37 @@ private struct MealsList: View {
             )
         } else {
             List {
-                ForEach(diary.alphabetizedMeals) { meal in
-                    MealListActionRow(
-                        meal: meal,
-                        onQuickLog: { onQuickLog(meal) },
-                        onEdit: { onEdit(meal) }
-                    )
-                    .swipeActions {
-                        Button("Delete", role: .destructive) {
-                            diary.deleteMeal(meal)
-                            AppAnalytics.capture("meal.deleted", properties: ["origin": "food_picker"])
+                if !diary.customMeals.isEmpty {
+                    Section("Hand-created meals") {
+                        ForEach(diary.customMeals) { meal in
+                            mealRow(for: meal)
+                        }
+                    }
+                }
+                if !diary.importedMeals.isEmpty {
+                    Section("Imported meals") {
+                        ForEach(diary.importedMeals) { meal in
+                            mealRow(for: meal)
                         }
                     }
                 }
             }
             .scrollContentBackground(.hidden)
+        }
+    }
+
+    @ViewBuilder
+    private func mealRow(for meal: SavedMeal) -> some View {
+        MealListActionRow(
+            meal: meal,
+            onQuickLog: { onQuickLog(meal) },
+            onEdit: { onEdit(meal) }
+        )
+        .swipeActions {
+            Button("Delete", role: .destructive) {
+                diary.deleteMeal(meal)
+                AppAnalytics.capture("meal.deleted", properties: ["origin": "food_picker"])
+            }
         }
     }
 }

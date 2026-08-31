@@ -59,10 +59,13 @@
 - As someone who creates personal foods and meals, I want a browsable Custom
   catalog in Settings so I can add and edit custom foods and saved meals as well
   as confirm and manage what I have saved.
+- As someone importing an AI-estimated meal, I want its component foods retained
+  in an imported meal snapshot for Recent and repeat logging without having that
+  snapshot appear in my hand-created Saved Meals catalog.
 - As someone who estimates photographed food manually with an AI assistant, I
   want to open a small app-owned food or meal file, review its calories and
-  macros, and log it as a one-off without sharing my conversation or cluttering
-  my personal catalogs.
+  macros, and log it without sharing my conversation or cluttering my personal
+  catalogs.
 - As a user looking for patterns, I want calorie and macro trends by day.
 - As someone comparing intake with health targets, I want Trends to show a
   daily calorie target, a daily fiber recommendation, and weekly red- and
@@ -172,8 +175,10 @@
   aggregate food and `.calmeal` represents a named list of food snapshots.
   Opening either presents an editable review sheet before anything is saved.
   Log records one serving on the current day; saving to Custom foods or Saved
-  meals is an explicit, off-by-default choice. A one-off meal remains breakable
-  into its foods. Invalid, mismatched-extension, oversized, and
+  meals is an explicit, off-by-default choice. Imported meals retain their
+  component snapshots for Recent and remain breakable into their foods without
+  entering the hand-created Saved Meals catalog. Invalid, mismatched-extension,
+  oversized, and
   unsupported-version files show an error and do not mutate the diary.
 - The icon-only Magic pill uses breakfast from 5–11 AM, lunch from 11 AM–3 PM,
   and dinner for the remaining hours in the device's local time. Repeated sets

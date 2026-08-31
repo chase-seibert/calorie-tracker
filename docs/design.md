@@ -64,10 +64,12 @@ the row reopens its editor. Trends stacks one large, vertically spaced orange
 wine-glass icon per drink on that day at the base of the calorie chart. The icon
 stack uses screen-space sizing independent of the calorie axis.
 
-The Personal Library row in Settings shows separate food and meal counts and
-opens a catalog with Custom Foods and Saved Meals sections. Each section has an
-Add action; tapping or swiping a row opens an editor, while swipe-to-delete
-remains available for both kinds of personal item.
+The Personal Library row in Settings shows separate food and hand-created meal
+counts and opens a catalog with Custom Foods and Saved Meals sections. Imported
+meal snapshots are retained for Recent and quick logging, but are not included
+in this hand-created catalog. Each section has an Add action; tapping or
+swiping a row opens an editor, while swipe-to-delete remains available for both
+kinds of personal item.
 
 The Focus Areas section in Settings and the matching Trends toolbar menu
 contain independent Alcohol, Fiber, Processed Meat, and Red Meat switches in
@@ -92,10 +94,11 @@ Opening either attachment presents a native review sheet. Food imports expose
 editable name, serving description, serving weight, calories, carbohydrates,
 fat, protein, and notes. Meal imports expose the same fields for every food and
 show a calculated meal total. The primary Log action adds one serving to today.
-Saving to Custom foods or Saved meals is off by default. A one-off imported meal
-is stored as a meal entry with its component snapshots, so it can be inspected,
-rescaled, or broken apart without creating reusable catalog items. Files contain
-only structured estimates; no conversation URL or assistant account is shared.
+Saving to Custom foods or Saved meals is off by default. An imported meal is
+stored as an imported meal snapshot with its component foods, so it can appear
+in Recent, be logged again, inspected, rescaled, or broken apart without being
+added to the hand-created Saved Meals catalog. Files contain only structured
+estimates; no conversation URL or assistant account is shared.
 
 The Trends toolbar links to a food-weight report that previews the last 90
 calendar days as foods sorted by exact total weight, displayed as whole ounces.
@@ -107,7 +110,9 @@ as ChatGPT.
 The add-food sheet opens with an already-focused search field and keyboard, with
 the current Magic suggestions filling the pane until the user starts typing.
 The full Log Food sheet includes Magic, Recent, Frequent, Favorites, Meals, and
-Scan modes. Typing immediately replaces the selected mode with combined
+Scan modes. The Meals mode puts hand-created meals in a top section and imported
+meal snapshots in a separate section below. Typing immediately replaces the
+selected mode with combined
 personal, USDA, and Open Food Facts results; Search is not a separate mode or
 source picker. Matching favorite foods and saved meals lead the results in one
 alphabetized group, and saved meals can be found by their names.

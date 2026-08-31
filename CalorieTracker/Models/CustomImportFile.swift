@@ -183,7 +183,8 @@ struct CustomMealFile: Codable, Equatable, Sendable {
                     unit: .serving,
                     portionID: food.availablePortions.first?.id
                 )
-            }
+            },
+            origin: .imported
         )
     }
 

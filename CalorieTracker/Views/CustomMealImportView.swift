@@ -214,7 +214,11 @@ struct CustomMealImportView: View {
         let previousEntryCount = diary.entries(on: Date()).count
         let loggedMeal: SavedMeal
         if saveForReuse {
-            guard let savedMeal = diary.saveMeal(name: importedMeal.name, items: importedMeal.items) else {
+            guard let savedMeal = diary.saveMeal(
+                name: importedMeal.name,
+                items: importedMeal.items,
+                origin: .imported
+            ) else {
                 return
             }
             loggedMeal = savedMeal
@@ -224,8 +228,19 @@ struct CustomMealImportView: View {
             ])
             diary.logMeal(savedMeal, on: Date())
         } else {
-            loggedMeal = importedMeal
-            diary.logOneOffMeal(importedMeal, on: Date())
+            // Keep the imported meal snapshot in the meal store even when the user
+            // does not opt into the hand-created Saved Meals library. This lets the
+            // complete meal (including its component foods) appear in Recent and be
+            // logged again without recreating its ingredients.
+            guard let importedMealSnapshot = diary.saveMeal(
+                name: importedMeal.name,
+                items: importedMeal.items,
+                origin: .imported
+            ) else {
+                return
+            }
+            loggedMeal = importedMealSnapshot
+            diary.logMeal(importedMealSnapshot, on: Date())
         }
         if diary.entries(on: Date()).count > previousEntryCount {
             AppAnalytics.capture(
@@ -235,8 +250,8 @@ struct CustomMealImportView: View {
                     method: "file_import",
                     mode: "import",
                     isFavorite: saveForReuse && diary.isFavorite(loggedMeal),
-                    foodKind: saveForReuse ? "imported" : "one_off",
-                    includeLocalID: saveForReuse,
+                    foodKind: "imported",
+                    includeLocalID: true,
                     savedForReuse: saveForReuse
                 )
             )

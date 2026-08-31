@@ -2222,6 +2222,7 @@ extension CalorieTrackerTests {
         let meal = file.makeMeal()
 
         XCTAssertEqual(meal.name, "Chicken and rice")
+        XCTAssertEqual(meal.origin, .imported)
         XCTAssertEqual(meal.items.map(\.food.name), ["Chicken", "Rice"])
         XCTAssertEqual(meal.items.map(\.food.servingGrams), [170, 190])
         XCTAssertEqual(meal.nutrients, MacroNutrients(calories: 540, carbs: 52, fat: 13, protein: 50))
@@ -2229,7 +2230,8 @@ extension CalorieTrackerTests {
 
     @MainActor
     func testOneOffImportedMealIsBreakableWithoutSavingMealOrFoods() throws {
-        let store = DiaryStore(fileURL: temporaryDiaryURL())
+        let fileURL = temporaryDiaryURL()
+        let store = DiaryStore(fileURL: fileURL)
         let importedMeal = CustomMealFile(
             format: CustomMealFile.formatIdentifier,
             version: CustomMealFile.currentVersion,
@@ -2275,6 +2277,66 @@ extension CalorieTrackerTests {
 
         store.breakApartMeal(entryID: mealEntry.id)
         XCTAssertEqual(store.entries(on: Date()).map(\.food.name), ["Chicken", "Rice"])
+    }
+
+    @MainActor
+    func testLegacyOneOffImportedMealMigratesIntoRecentMealSnapshot() throws {
+        let fileURL = temporaryDiaryURL()
+        let store = DiaryStore(fileURL: fileURL)
+        let food = Food(
+            sourceID: "legacy-imported-food",
+            source: .custom,
+            name: "Rice",
+            brand: nil,
+            barcode: nil,
+            nutrients: MacroNutrients(calories: 240, carbs: 52, fat: 1, protein: 5),
+            baseAmountGrams: 190,
+            servingGrams: 190,
+            servingDescription: "cup"
+        )
+        let meal = SavedMeal(
+            id: UUID(),
+            name: "Imported rice",
+            items: [MealItem(id: UUID(), food: food, amount: 1, unit: .serving)],
+            origin: .imported
+        )
+        store.logOneOffMeal(meal, on: Date())
+
+        let reloaded = DiaryStore(fileURL: fileURL)
+        XCTAssertEqual(reloaded.customMeals.count, 0)
+        let imported = try XCTUnwrap(reloaded.importedMeals.first)
+        XCTAssertEqual(imported.name, "Imported rice")
+        XCTAssertEqual(imported.items.map(\.food.name), ["Rice"])
+        XCTAssertEqual(reloaded.recentItems, [.meal(imported)])
+    }
+
+    @MainActor
+    func testImportedMealIsRetainedForRecentButExcludedFromCustomMeals() throws {
+        let store = DiaryStore(fileURL: temporaryDiaryURL())
+        let food = Food(
+            sourceID: "imported-food",
+            source: .custom,
+            name: "Chicken",
+            brand: nil,
+            barcode: nil,
+            nutrients: MacroNutrients(calories: 300, carbs: 0, fat: 12, protein: 45),
+            baseAmountGrams: 170,
+            servingGrams: 170,
+            servingDescription: "portion"
+        )
+        let item = MealItem(id: UUID(), food: food, amount: 1, unit: .serving)
+        let customMeal = try XCTUnwrap(store.saveMeal(name: "Hand breakfast", items: [item]))
+        let importedMeal = try XCTUnwrap(store.saveMeal(
+            name: "Imported lunch",
+            items: [item],
+            origin: .imported
+        ))
+
+        store.logMeal(importedMeal, on: Date())
+
+        XCTAssertEqual(store.customMeals.map(\.id), [customMeal.id])
+        XCTAssertEqual(store.importedMeals.map(\.id), [importedMeal.id])
+        XCTAssertEqual(store.recentItems, [.meal(importedMeal)])
     }
 
     func testFoodAndMealFormatsRequireTheirMatchingExtensions() throws {

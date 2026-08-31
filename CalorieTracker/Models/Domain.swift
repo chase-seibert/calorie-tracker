@@ -358,12 +358,68 @@ struct MealItem: Codable, Hashable, Identifiable, Sendable {
     var portionID: String? = nil
 }
 
+enum SavedMealOrigin: String, Codable, Hashable, Sendable {
+    case custom
+    case imported
+}
+
 struct SavedMeal: Codable, Hashable, Identifiable, Sendable {
     let id: UUID
     var name: String
     var items: [MealItem]
     var containsProcessedMeat: Bool? = nil
     var containsRedMeat: Bool? = nil
+    /// Imported meals are retained as reusable snapshots for Recent and quick logging,
+    /// but are kept out of the user's hand-created Personal Library.
+    var origin: SavedMealOrigin = .custom
+
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case items
+        case containsProcessedMeat
+        case containsRedMeat
+        case origin
+    }
+
+    init(
+        id: UUID,
+        name: String,
+        items: [MealItem],
+        containsProcessedMeat: Bool? = nil,
+        containsRedMeat: Bool? = nil,
+        origin: SavedMealOrigin = .custom
+    ) {
+        self.id = id
+        self.name = name
+        self.items = items
+        self.containsProcessedMeat = containsProcessedMeat
+        self.containsRedMeat = containsRedMeat
+        self.origin = origin
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        items = try container.decode([MealItem].self, forKey: .items)
+        containsProcessedMeat = try container.decodeIfPresent(Bool.self, forKey: .containsProcessedMeat)
+        containsRedMeat = try container.decodeIfPresent(Bool.self, forKey: .containsRedMeat)
+        // Files written before imported meal support have no origin key and are custom meals.
+        origin = try container.decodeIfPresent(SavedMealOrigin.self, forKey: .origin) ?? .custom
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(name, forKey: .name)
+        try container.encode(items, forKey: .items)
+        try container.encodeIfPresent(containsProcessedMeat, forKey: .containsProcessedMeat)
+        try container.encodeIfPresent(containsRedMeat, forKey: .containsRedMeat)
+        try container.encode(origin, forKey: .origin)
+    }
+
+    var isImported: Bool { origin == .imported }
 
     var resolvedContainsProcessedMeat: Bool {
         containsProcessedMeat ?? items.contains { $0.food.containsProcessedMeat == true }
