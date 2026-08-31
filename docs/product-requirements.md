@@ -90,7 +90,7 @@
   a manual override and optional calorie estimate.
 - As someone building a consistent habit, I want a visible streak count and a
   report covering calories, macros, ranges, and my most-logged item during the
-  current streak.
+  current streak, where each day with at least one logged food or meal counts.
 
 ## Interaction and presentation requirements
 

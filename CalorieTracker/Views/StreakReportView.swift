@@ -53,7 +53,7 @@ struct StreakReportView: View {
         VStack(alignment: .leading, spacing: 8) {
             Label("How streaks work", systemImage: "info.circle.fill")
                 .font(.headline)
-            Text("Your streak counts consecutive days with food logged. A gap day or cheat day ends the streak. Today does not count against you until it is over.")
+            Text("Your streak counts consecutive days with at least one food or meal logged. A day without food or a meal ends the streak. Today does not count against you until it is over.")
                 .font(.subheadline)
                 .foregroundStyle(AppTheme.muted)
             if summary.dayCount == 0 {

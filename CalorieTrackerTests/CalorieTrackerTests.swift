@@ -1927,7 +1927,7 @@ extension CalorieTrackerTests {
     }
 
     @MainActor
-    func testStreakSummaryUsesConsecutiveLoggedDaysAndStopsAtCheatDay() {
+    func testStreakSummaryUsesConsecutiveLoggedDaysEvenOnCheatDays() {
         let days = (1...3).map { testDate(day: $0) }
         var document = DiaryDocument()
         document.trackingStartDate = days[0]
@@ -1950,6 +1950,29 @@ extension CalorieTrackerTests {
         XCTAssertEqual(summary.mostPopularItem, "Toast")
 
         store.markCheatDay(on: days[1])
+        XCTAssertEqual(store.streak(referenceDate: days[2]).dayCount, 2)
+    }
+
+    @MainActor
+    func testStreakRequiresFoodOrMealAndIgnoresAlcoholOnlyDays() {
+        let days = (1...3).map { testDate(day: $0) }
+        var document = DiaryDocument()
+        document.trackingStartDate = days[0]
+        document.entries = [testEntry(calories: 1_800, date: days[0], name: "Toast")]
+        document.alcoholEntries = [AlcoholEntry(
+            id: UUID(),
+            date: days[1],
+            drinks: 1,
+            type: .wine,
+            loggedAt: days[1]
+        )]
+        let store = DiaryStore(
+            document: document,
+            fileURL: temporaryDiaryURL(),
+            calendar: testCalendar,
+            referenceDate: days[2]
+        )
+
         XCTAssertEqual(store.streak(referenceDate: days[2]).dayCount, 0)
     }
 

@@ -86,8 +86,10 @@ samples. Cheat days with an adjustment sync their logged entries plus the
 adjustment. Stable per-day HealthKit sync identifiers let status or adjustment
 changes remove the zero override safely.
 
-The current streak walks backward across consecutive non-special days that have
-food entries. An empty current day is ignored until it ends. The streak report
+The current streak walks backward across consecutive days with at least one
+food or meal entry. Calorie thresholds, manual cheat-day labels, and alcohol-only
+days do not make a logged food day ineligible; a day with no food or meal ends
+the streak. An empty current day is ignored until it ends. The streak report
 derives averages, calorie and macro ranges, and the most frequently logged food
 or meal from those dates.
 

@@ -300,7 +300,7 @@ final class DiaryStore: ObservableObject {
         let today = calendar.startOfDay(for: referenceDate)
         var cursor = today
 
-        if status(on: today) == nil && !hasTrackedData(on: today) {
+        if !hasLoggedFoodOrMeal(on: today) {
             guard let yesterday = calendar.date(byAdding: .day, value: -1, to: today) else {
                 return .empty
             }
@@ -310,7 +310,7 @@ final class DiaryStore: ObservableObject {
         let lowerBound = document.trackingStartDate.map(calendar.startOfDay(for:)) ?? today
         var dates: [Date] = []
         while cursor >= lowerBound {
-            guard status(on: cursor) == nil, hasTrackedData(on: cursor) else { break }
+            guard hasLoggedFoodOrMeal(on: cursor) else { break }
             dates.append(cursor)
             guard let previous = calendar.date(byAdding: .day, value: -1, to: cursor) else { break }
             cursor = previous
@@ -1533,6 +1533,10 @@ final class DiaryStore: ObservableObject {
 
     private func hasTrackedData(on date: Date) -> Bool {
         !entries(on: date).isEmpty || alcoholDrinkCount(on: date) > 0
+    }
+
+    private func hasLoggedFoodOrMeal(on date: Date) -> Bool {
+        entries(on: date).contains { !$0.isCheatDayAdjustment }
     }
 
     private func makeCalorieAdjustment(calories: Int, on date: Date) -> DiaryEntry {
