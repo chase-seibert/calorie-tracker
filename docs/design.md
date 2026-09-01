@@ -19,13 +19,13 @@
   rows show current values or status so the user's setup is understandable at a
   glance.
 - **Trends**, opened by tapping the diary summary, shows the last 30 days in a
-  calorie chart with an optional daily target line and drink markers, an
-  optional daily Fiber chart with its recommendation line, and a stacked daily
-  macro area chart. The meat chart includes weekly guidance lines for red and
-  processed meat. Compact, semantically tinted cheat-day and gap-day count
-  pills sit beneath the “Last 30 Days” title instead of repeating status markers
-  across the charts. Its toolbar contains focused health-metric controls and the
-  food-weight report.
+  food-calorie chart with an optional daily target line, a separate daily alcohol
+  drink chart, an optional daily Fiber chart with its recommendation line, and a
+  stacked daily macro area chart. The meat chart includes weekly guidance lines
+  for red and processed meat. Compact, semantically tinted cheat-day and gap-day
+  count pills sit beneath the “Last 30 Days” title instead of repeating status
+  markers across the charts. Its toolbar contains focused health-metric controls
+  and the food-weight report.
 
 When the macro summary card scrolls fully out of view, its calorie total remains
 visible as a compact navigation-title item and continues updating with the diary.
@@ -60,9 +60,9 @@ selected estimate contributes to the diary calorie total without adding
 carbohydrates, fat, protein, or Fiber. Reopening the sheet edits the same daily
 aggregate, and saving zero removes it. The alcohol action displays the saved
 count. The aggregate also appears as an orange wine-glass row in Logged; tapping
-the row reopens its editor. Trends stacks one large, vertically spaced orange
-wine-glass icon per drink on that day at the base of the calorie chart. The icon
-stack uses screen-space sizing independent of the calorie axis.
+the row reopens its editor. Trends shows the drink count in a separate daily
+alcohol chart, keeping alcohol calories out of the food-calorie series while
+retaining them in the diary total.
 
 The Personal Library row in Settings shows separate food and hand-created meal
 counts and opens a catalog with Custom Foods and Saved Meals sections. Imported
@@ -74,8 +74,8 @@ kinds of personal item.
 The Focus Areas section in Settings and the matching Trends toolbar menu
 contain independent Alcohol, Fiber, Processed Meat, and Red Meat switches in
 that order. Both surfaces share the same local preferences. Disabling Alcohol hides
-the diary's quick-entry action, wine-glass markers, and alcohol-specific chart
-copy while retaining alcohol calories in the calorie line. Trends omits disabled
+the diary's quick-entry action and alcohol chart while retaining alcohol calories
+in the diary total. Trends omits disabled
 meat series from the weekly chart and tapped-week detail; when neither meat focus
 is selected, the meat-days card is omitted entirely so the screen remains
 centered on the user's chosen metrics. Disabling Fiber removes its daily-grams

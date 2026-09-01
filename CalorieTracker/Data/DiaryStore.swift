@@ -80,6 +80,10 @@ final class DiaryStore: ObservableObject {
         return total
     }
 
+    func caloriesExcludingAlcohol(on date: Date) -> Double {
+        max(totals(on: date).calories - Double(alcoholEntry(on: date)?.calories ?? 0), 0)
+    }
+
     func meatPresence(on date: Date) -> MeatClassification {
         entries(on: date).reduce(.none) { result, entry in
             guard !entry.isCheatDayAdjustment else { return result }

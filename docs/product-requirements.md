@@ -123,9 +123,9 @@
   removes it. An unspecified drink uses 150 calories; beer uses 150, wine 125,
   spirits 100, and cocktails 200 calories per drink. A saved aggregate appears
   as an orange wine-glass row in Logged and can be tapped to edit it. Alcohol
-  calories contribute to diary totals. Trends shows each day's count as a
-  vertical stack of orange wine-glass icons within the calorie chart rather
-  than as a separate alcohol chart when the Alcohol focus is enabled.
+  calories contribute to diary totals. When the Alcohol focus is enabled, Trends
+  shows each day's count in a separate alcohol chart, while the calorie chart
+  shows food calories against the daily target.
 - Foods carry independent processed-meat and unprocessed-red-meat presence flags.
   Processed meat includes cured, salted, smoked, fermented, dried, or otherwise
   preserved meat from red meat or poultry. Red meat means unprocessed mammalian

@@ -1789,6 +1789,7 @@ extension CalorieTrackerTests {
         XCTAssertNil(entry.type)
         XCTAssertEqual(entry.caloriesPerDrink, 150)
         XCTAssertEqual(store.totals(on: day).calories, 500, accuracy: 0.001)
+        XCTAssertEqual(store.caloriesExcludingAlcohol(on: day), 200, accuracy: 0.001)
 
         let reloaded = DiaryStore(fileURL: fileURL, calendar: testCalendar, referenceDate: day)
         let reloadedEntry = try XCTUnwrap(reloaded.alcoholEntry(on: day))
@@ -1799,6 +1800,7 @@ extension CalorieTrackerTests {
         XCTAssertEqual(reloadedEntry.type, entry.type)
         XCTAssertEqual(reloadedEntry.loggedAt.timeIntervalSince(entry.loggedAt), 0, accuracy: 1)
         XCTAssertEqual(reloaded.totals(on: day).calories, 500, accuracy: 0.001)
+        XCTAssertEqual(reloaded.caloriesExcludingAlcohol(on: day), 200, accuracy: 0.001)
     }
 
     @MainActor

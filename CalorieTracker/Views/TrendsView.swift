@@ -15,12 +15,14 @@ struct TrendsView: View {
     private let recommendedProcessedMeatDaysPerWeek = 0.0
 
     private var points: [TrendPoint] {
-        diary.totalsByDay(numberOfDays: trendDays).map {
-            TrendPoint(
-                date: $0.date,
-                nutrients: $0.nutrients,
-                alcoholDrinks: diary.alcoholDrinkCount(on: $0.date),
-                status: diary.status(on: $0.date)?.kind
+        diary.totalsByDay(numberOfDays: trendDays).map { total in
+            let alcohol = diary.alcoholEntry(on: total.date)
+            return TrendPoint(
+                date: total.date,
+                nutrients: total.nutrients,
+                calories: diary.caloriesExcludingAlcohol(on: total.date),
+                alcoholDrinks: alcohol?.drinks ?? 0,
+                status: diary.status(on: total.date)?.kind
             )
         }
     }
@@ -44,7 +46,10 @@ struct TrendsView: View {
             ScrollView {
                 VStack(spacing: 18) {
                     statusCounts
-                    calorieAndAlcoholChart
+                    calorieChart
+                    if tracksAlcohol {
+                        alcoholChart
+                    }
                     if tracksFiber {
                         fiberChart
                     }
@@ -253,28 +258,26 @@ struct TrendsView: View {
         }
     }
 
-    private var calorieAndAlcoholChart: some View {
+    private var calorieChart: some View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Calories")
                     .font(.title3.weight(.bold))
-                if tracksAlcohol {
-                    Text("Each wine glass is one drink")
-                        .font(.caption)
-                        .foregroundStyle(AppTheme.muted)
-                }
+                Text(diary.dailyCalorieGoal.map { "Target: \($0.formatted()) calories" } ?? "Target: Not set")
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.muted)
             }
             Chart {
                 ForEach(points) { point in
                     LineMark(
                         x: .value("Date", point.date),
-                        y: .value("Calories", point.nutrients.calories)
+                        y: .value("Calories", point.calories)
                     )
                     .foregroundStyle(AppTheme.coral)
                     .interpolationMethod(.catmullRom)
                     AreaMark(
                         x: .value("Date", point.date),
-                        y: .value("Calories", point.nutrients.calories)
+                        y: .value("Calories", point.calories)
                     )
                     .foregroundStyle(
                         LinearGradient(
@@ -284,16 +287,6 @@ struct TrendsView: View {
                         )
                     )
                     .interpolationMethod(.catmullRom)
-                    if tracksAlcohol, point.alcoholDrinks > 0 {
-                        PointMark(
-                            x: .value("Date", point.date),
-                            y: .value("Drink stack baseline", 0)
-                        )
-                        .foregroundStyle(.clear)
-                        .annotation(position: .top, spacing: 3) {
-                            AlcoholTrendStack(drinks: point.alcoholDrinks)
-                        }
-                    }
                 }
                 if let goal = diary.dailyCalorieGoal {
                     RuleMark(y: .value("Daily calorie target", goal))
@@ -311,6 +304,60 @@ struct TrendsView: View {
         }
         .padding(18)
         .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 22))
+    }
+
+    private var alcoholChart: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Alcohol")
+                    .font(.title3.weight(.bold))
+                Text("Daily drinks · each wine glass is one drink")
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.muted)
+            }
+            Chart {
+                ForEach(points) { point in
+                    if point.alcoholDrinks > 0 {
+                        BarMark(
+                            x: .value("Date", point.date, unit: .day),
+                            y: .value("Drinks", point.alcoholDrinks)
+                        )
+                        .foregroundStyle(AppTheme.coral)
+                        .accessibilityLabel(point.date.formatted(date: .complete, time: .omitted))
+                        .accessibilityValue("\(point.alcoholDrinks) drink\(point.alcoholDrinks == 1 ? "" : "s")")
+                    }
+                }
+            }
+            .chartYScale(domain: 0...Double(maximumAlcoholDrinks))
+            .chartYAxis {
+                AxisMarks(values: .automatic(desiredCount: 4))
+            }
+            .chartXAxis {
+                AxisMarks(values: .automatic(desiredCount: 5)) { value in
+                    AxisGridLine().foregroundStyle(.clear)
+                    AxisValueLabel(format: .dateTime.month(.abbreviated).day())
+                }
+            }
+            .frame(height: 190)
+
+            HStack(spacing: 6) {
+                Image(systemName: "wineglass.fill")
+                    .foregroundStyle(AppTheme.coral)
+                Circle()
+                    .fill(AppTheme.coral)
+                    .frame(width: 8, height: 8)
+                Text("Drinks")
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.muted)
+            }
+            .accessibilityElement(children: .combine)
+        }
+        .padding(18)
+        .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 22))
+    }
+
+    private var maximumAlcoholDrinks: Int {
+        max(points.map(\.alcoholDrinks).max() ?? 0, 1)
     }
 
     private var macroChart: some View {
@@ -498,25 +545,10 @@ private struct MeatWeekFoodsView: View {
     }
 }
 
-private struct AlcoholTrendStack: View {
-    let drinks: Int
-
-    var body: some View {
-        VStack(spacing: 2) {
-            ForEach(0..<drinks, id: \.self) { _ in
-                Image(systemName: "wineglass.fill")
-                    .font(.system(size: 14, weight: .semibold))
-            }
-        }
-        .foregroundStyle(AppTheme.coral)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(drinks) drink\(drinks == 1 ? "" : "s")")
-    }
-}
-
 private struct TrendPoint: Identifiable {
     let date: Date
     let nutrients: MacroNutrients
+    let calories: Double
     let alcoholDrinks: Int
     let status: DayStatusKind?
     var id: Date { date }

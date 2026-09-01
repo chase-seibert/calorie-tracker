@@ -37,3 +37,11 @@ CoreSimulatorService intermittently reported an invalid connection from the
 restricted shell even though other Simulator devices were booted. Opening the
 macOS Simulator app and running the install, launch, and screenshot commands
 with host access restored the workflow without changing or erasing devices.
+
+## 2026-09-01: Host-side test build could not launch the simulator
+
+The host-side `make test` path compiled and linked the app and test bundle, but
+the test session could not materialize a worker because CoreSimulator was
+unavailable and the attached iPhone was passcode protected. Treat the source
+build as verified and report simulator test execution as unverified until a
+usable simulator runtime is available.

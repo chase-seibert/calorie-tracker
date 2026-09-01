@@ -69,8 +69,10 @@ selection and reordering while contributing their estimated calories to daily
 totals, calorie goals, streak statistics, and automatic day classification.
 `DiaryStore` converts each alcohol aggregate to a stable-ID, calorie-only
 nutrition entry when synchronizing Apple Health. Trends reads the persisted
-counts directly and overlays one wine-glass icon per drink in a vertical stack
-at the base of that day's calorie series.
+counts directly for a separate daily alcohol chart and subtracts the aggregate's
+estimated calories from the food-calorie series. Alcohol calories remain in the
+diary total and therefore continue to affect calorie goals and automatic day
+classification.
 
 On launch, `DiaryStore` finalizes every elapsed day since tracking began. Empty
 days become gap days. When a calorie goal exists, nonempty days below 75% or
