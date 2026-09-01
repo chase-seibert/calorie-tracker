@@ -96,23 +96,17 @@ struct StreakReportView: View {
             macroRow(
                 "Carbs",
                 color: AppTheme.carbs,
-                average: summary.averageNutrients.carbs,
-                minimum: summary.minimumNutrients.carbs,
-                maximum: summary.maximumNutrients.carbs
+                average: summary.averageNutrients.carbs
             )
             macroRow(
                 "Fat",
                 color: AppTheme.fat,
-                average: summary.averageNutrients.fat,
-                minimum: summary.minimumNutrients.fat,
-                maximum: summary.maximumNutrients.fat
+                average: summary.averageNutrients.fat
             )
             macroRow(
                 "Protein",
                 color: AppTheme.protein,
-                average: summary.averageNutrients.protein,
-                minimum: summary.minimumNutrients.protein,
-                maximum: summary.maximumNutrients.protein
+                average: summary.averageNutrients.protein
             )
         }
         .padding(18)
@@ -120,21 +114,34 @@ struct StreakReportView: View {
     }
 
     private var popularItem: some View {
-        HStack(spacing: 14) {
-            Image(systemName: "fork.knife")
-                .font(.title2)
-                .foregroundStyle(AppTheme.coral)
-                .frame(width: 44, height: 44)
-                .background(AppTheme.coral.opacity(0.12), in: Circle())
-            VStack(alignment: .leading, spacing: 3) {
-                Text("Most logged")
-                    .font(.caption)
-                    .foregroundStyle(AppTheme.muted)
-                Text(summary.mostPopularItem ?? "No foods yet")
-                    .font(.headline)
-                    .lineLimit(2)
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 10) {
+                Image(systemName: "fork.knife")
+                    .font(.title2)
+                    .foregroundStyle(AppTheme.coral)
+                    .frame(width: 36, height: 36)
+                    .background(AppTheme.coral.opacity(0.12), in: Circle())
+                Text("Frequent foods")
+                    .font(.title3.weight(.bold))
             }
-            Spacer()
+
+            if summary.frequentFoods.isEmpty {
+                Text("No foods yet")
+                    .font(.subheadline)
+                    .foregroundStyle(AppTheme.muted)
+            } else {
+                ForEach(summary.frequentFoods) { food in
+                    HStack(spacing: 10) {
+                        Text(food.name)
+                            .font(.subheadline.weight(.semibold))
+                            .lineLimit(2)
+                        Spacer(minLength: 8)
+                        Text("\(food.count) \(food.count == 1 ? "log" : "logs")")
+                            .font(.caption.monospacedDigit())
+                            .foregroundStyle(AppTheme.muted)
+                    }
+                }
+            }
         }
         .padding(18)
         .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 22))
@@ -161,9 +168,7 @@ struct StreakReportView: View {
     private func macroRow(
         _ title: String,
         color: Color,
-        average: Double,
-        minimum: Double,
-        maximum: Double
+        average: Double
     ) -> some View {
         HStack {
             Circle()
@@ -174,9 +179,6 @@ struct StreakReportView: View {
             Spacer()
             Text("avg \(average.cleanAmount)g")
                 .font(.subheadline.monospacedDigit())
-            Text("\(minimum.cleanAmount)–\(maximum.cleanAmount)g")
-                .font(.caption.monospacedDigit())
-                .foregroundStyle(AppTheme.muted)
         }
     }
 

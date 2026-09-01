@@ -1956,6 +1956,34 @@ extension CalorieTrackerTests {
     }
 
     @MainActor
+    func testStreakSummaryListsFrequentFoodsByCount() {
+        let days = (1...3).map { testDate(day: $0) }
+        var document = DiaryDocument()
+        document.trackingStartDate = days[0]
+        document.entries = [
+            testEntry(calories: 100, date: days[0], name: "Toast"),
+            testEntry(calories: 100, date: days[1], name: "Toast"),
+            testEntry(calories: 100, date: days[0], name: "Eggs"),
+            testEntry(calories: 100, date: days[1], name: "Apple")
+        ]
+        let store = DiaryStore(
+            document: document,
+            fileURL: temporaryDiaryURL(),
+            calendar: testCalendar,
+            referenceDate: days[2]
+        )
+
+        XCTAssertEqual(
+            store.streak(referenceDate: days[2]).frequentFoods,
+            [
+                FrequentFood(name: "Toast", count: 2),
+                FrequentFood(name: "Apple", count: 1),
+                FrequentFood(name: "Eggs", count: 1)
+            ]
+        )
+    }
+
+    @MainActor
     func testStreakRequiresFoodOrMealAndIgnoresAlcoholOnlyDays() {
         let days = (1...3).map { testDate(day: $0) }
         var document = DiaryDocument()

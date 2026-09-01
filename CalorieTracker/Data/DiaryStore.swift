@@ -342,7 +342,7 @@ final class DiaryStore: ObservableObject {
             averageNutrients: total.scaled(by: 1 / count),
             minimumNutrients: minimum,
             maximumNutrients: maximum,
-            mostPopularItem: mostPopularItem(on: Set(dates))
+            frequentFoods: frequentFoods(on: Set(dates))
         )
     }
 
@@ -1608,17 +1608,21 @@ final class DiaryStore: ObservableObject {
         )
     }
 
-    private func mostPopularItem(on dates: Set<Date>) -> String? {
+    private func frequentFoods(on dates: Set<Date>) -> [FrequentFood] {
         let entries = document.entries.filter {
             !$0.isCheatDayAdjustment && dates.contains(calendar.startOfDay(for: $0.date))
         }
         let grouped = Dictionary(grouping: entries, by: { $0.food.name })
-        return grouped.max { left, right in
-            if left.value.count == right.value.count {
-                return left.key.localizedCaseInsensitiveCompare(right.key) == .orderedDescending
+        return grouped
+            .map { FrequentFood(name: $0.key, count: $0.value.count) }
+            .sorted { left, right in
+                if left.count == right.count {
+                    return left.name.localizedCaseInsensitiveCompare(right.name) == .orderedAscending
+                }
+                return left.count > right.count
             }
-            return left.value.count < right.value.count
-        }?.key
+            .prefix(5)
+            .map { $0 }
     }
 
     private func syncHealthData(on date: Date) {

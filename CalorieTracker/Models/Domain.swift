@@ -133,17 +133,26 @@ struct StreakSummary: Equatable, Sendable {
     let averageNutrients: MacroNutrients
     let minimumNutrients: MacroNutrients
     let maximumNutrients: MacroNutrients
-    let mostPopularItem: String?
+    let frequentFoods: [FrequentFood]
 
     var dayCount: Int { dates.count }
+
+    var mostPopularItem: String? { frequentFoods.first?.name }
 
     static let empty = StreakSummary(
         dates: [],
         averageNutrients: .zero,
         minimumNutrients: .zero,
         maximumNutrients: .zero,
-        mostPopularItem: nil
+        frequentFoods: []
     )
+}
+
+struct FrequentFood: Equatable, Identifiable, Sendable {
+    let name: String
+    let count: Int
+
+    var id: String { name }
 }
 
 struct DailyCalorieProgress: Equatable, Sendable {
