@@ -64,12 +64,13 @@ the row reopens its editor. Trends shows the drink count in a separate daily
 alcohol chart, keeping alcohol calories out of the food-calorie series while
 retaining them in the diary total.
 
-The Personal Library row in Settings shows separate food and hand-created meal
-counts and opens a catalog with Custom Foods and Saved Meals sections. Imported
-meal snapshots are retained for Recent and quick logging, but are not included
-in this hand-created catalog. Each section has an Add action; tapping or
-swiping a row opens an editor, while swipe-to-delete remains available for both
-kinds of personal item.
+The Food & Meals section in Settings contains the Personal Library, AI Food &
+Meal Import, and Food Data Sources rows. The Personal Library row shows separate
+food and hand-created meal counts and opens a catalog with Custom Foods and Saved
+Meals sections. Imported meal snapshots are retained for Recent and quick
+logging, but are not included in this hand-created catalog. Each section has an
+Add action; tapping or swiping a row opens an editor, while swipe-to-delete
+remains available for both kinds of personal item.
 
 The Focus Areas section in Settings and the matching Trends toolbar menu
 contain independent Alcohol, Fiber, Processed Meat, and Red Meat switches in

@@ -51,6 +51,16 @@ struct SettingsView: View {
                 } label: {
                     Label("AI Food & Meal Import", systemImage: "square.and.arrow.down")
                 }
+
+                NavigationLink {
+                    FoodDataSourcesView(catalog: catalog)
+                } label: {
+                    SettingsValueLabel(
+                        title: "Food Data Sources",
+                        systemImage: "cylinder.split.1x2",
+                        value: "USDA · Open Food Facts"
+                    )
+                }
             }
 
             Section("Connections") {
@@ -66,16 +76,6 @@ struct SettingsView: View {
             }
 
             Section("Data & Privacy") {
-                NavigationLink {
-                    FoodDataSourcesView(catalog: catalog)
-                } label: {
-                    SettingsValueLabel(
-                        title: "Food Data Sources",
-                        systemImage: "cylinder.split.1x2",
-                        value: "USDA · Open Food Facts"
-                    )
-                }
-
                 NavigationLink {
                     PrivacyAnalyticsView()
                 } label: {
