@@ -263,6 +263,8 @@ struct Food: Codable, Hashable, Identifiable, Sendable {
     var portions: [FoodPortion]? = nil
     var containsProcessedMeat: Bool? = nil
     var containsRedMeat: Bool? = nil
+    // Optional for pre-resolution snapshots. Missing provenance is never treated as user consent to overwrite.
+    var meatResolution: FoodMeatResolution? = nil
 
     var id: String { "\(source.rawValue):\(sourceID)" }
 

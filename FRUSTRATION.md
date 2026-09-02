@@ -1,5 +1,12 @@
 # Frustration Log
 
+## 2026-09-02: Classification enrichment changed legacy snapshots
+
+The storage round-trip check caught added provenance on already-classified
+legacy ingredient snapshots. Preserve complete pre-existing values and absent
+provenance as-is; attach resolution metadata only when resolving missing values
+or accepting an explicit correction. Keep JSON conversion free of enrichment.
+
 ## 2026-09-01: CoreDevice shared-container listing can omit the live diary
 
 On the owner's phone, appDataContainer listing worked but appGroupDataContainer

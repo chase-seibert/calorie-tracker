@@ -1,6 +1,138 @@
 import SwiftUI
 import UIKit
 
+/// Optional choices distinguish an untouched default from an intentional No.
+struct FoodMeatFields: View {
+    @EnvironmentObject private var diary: DiaryStore
+    let name: String
+    @Binding var processed: Bool?
+    @Binding var red: Bool?
+    var derivesFromIngredients = false
+    var automaticProcessed: Bool? = nil
+    var automaticRed: Bool? = nil
+    @State private var suggestion: Food?
+
+    var body: some View {
+        Group {
+            field("Contains processed meat", choice: $processed,
+                  suggested: derivesFromIngredients ? automaticProcessed : suggestion?.containsProcessedMeat,
+                  source: suggestion?.meatResolution?.processed)
+            field("Contains red meat", choice: $red,
+                  suggested: derivesFromIngredients ? automaticRed : suggestion?.containsRedMeat,
+                  source: suggestion?.meatResolution?.red)
+        }
+        .task(id: name) {
+            guard !derivesFromIngredients else { return }
+            suggestion = nil
+            let result = await diary.suggestedMeatClassification(name: name)
+            guard !Task.isCancelled else { return }
+            suggestion = result
+        }
+    }
+
+    private func field(_ title: String, choice: Binding<Bool?>, suggested: Bool?, source: FoodMetadataSource?) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Picker(title, selection: choice) {
+                Text("Automatic").tag(nil as Bool?)
+                Text("Yes").tag(true as Bool?)
+                Text("No").tag(false as Bool?)
+            }
+            if let suggested {
+                let reason = derivesFromIngredients ? "ingredients" : (source == .catalog ? "catalog match" : "food name")
+                Text("Automatic: \(suggested ? "Yes" : "No") — \(reason)")
+                    .font(.caption).foregroundStyle(.secondary)
+                if let selected = choice.wrappedValue, selected != suggested {
+                    Text("Your value differs from the suggestion. It will be kept unless you choose Automatic.")
+                        .font(.caption).foregroundStyle(.orange)
+                }
+            } else if choice.wrappedValue == nil {
+                Text("Unknown — not counted as confirmed meat. Choose Yes or No if you know.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+        }
+    }
+}
+
+struct ReviewClassificationsView: View {
+    @EnvironmentObject private var diary: DiaryStore
+    @State private var reviews: [FoodResolutionReview] = []
+    @State private var loading = true
+    @State private var error: String?
+    @State private var confirmingApprovals = false
+    @State private var pendingApprovals: [FoodResolutionReview] = []
+
+    var body: some View {
+        List {
+            Section {
+                Text("Review missing or conflicting classifications in saved foods and diary history. Currently, suggestions cover processed and red meat. Corrections preserve nutrition, portions, and meal overrides.")
+                if !reviews.isEmpty {
+                    Button("Approve All (\(reviews.count))") {
+                        pendingApprovals = reviews
+                        confirmingApprovals = true
+                    }
+                    .disabled(loading || diary.isSaving || error != nil)
+                    Text("Approve individually or approve all listed suggestions with one verified SQLite backup.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+            }
+            if loading { ProgressView("Checking food snapshots…") }
+            if diary.isSaving { ProgressView("Saving changes…") }
+            if let error { Text(error).foregroundStyle(.red) }
+            if !loading && error == nil && reviews.isEmpty { Text("No classification changes suggested.") }
+            ForEach(reviews) { review in
+                Section(review.food.name) {
+                    Text("\(review.food.servingDescription ?? "Food snapshot") · \(review.food.nutrients.calories.cleanAmount) cal")
+                        .font(.caption).foregroundStyle(.secondary)
+                    Text("Processed meat: \(label(review.food.containsProcessedMeat)) → \(label(review.suggestion.containsProcessedMeat, suggestion: true))")
+                    Text("Red meat: \(label(review.food.containsRedMeat)) → \(label(review.suggestion.containsRedMeat, suggestion: true))")
+                    Text(review.suggestion.meatResolution?.processed == .catalog || review.suggestion.meatResolution?.red == .catalog
+                         ? "Suggestion uses matching catalog foods." : "Suggestion uses the food name.")
+                        .font(.caption).foregroundStyle(.secondary)
+                    Text("Only matching snapshots are updated. Existing explicit values require your approval here.")
+                        .font(.caption).foregroundStyle(.secondary)
+                    Button("Approve Suggestion") { approve([review]) }
+                        .disabled(loading || diary.isSaving || error != nil)
+                }
+            }
+        }
+        .navigationTitle("Review Classifications")
+        .confirmationDialog("Approve all \(pendingApprovals.count) suggestions?", isPresented: $confirmingApprovals,
+                            titleVisibility: .visible) {
+            Button("Approve All") { approve(pendingApprovals) }
+            Button("Cancel", role: .cancel) { pendingApprovals = [] }
+        } message: {
+            Text("This updates matching food snapshots throughout your history and library, including replacing existing explicit meat classifications. Nutrition, portions, and meal overrides stay unchanged. One verified SQLite backup is created first. If any suggestion is stale, none will be applied.")
+        }
+        .task { await reload() }
+        .refreshable {
+            guard !diary.isSaving && !confirmingApprovals else { return }
+            await reload()
+        }
+    }
+
+    private func label(_ value: Bool?, suggestion: Bool = false) -> String {
+        value.map { $0 ? "Yes" : "No" } ?? (suggestion ? "Keep current (unknown)" : "Unknown")
+    }
+
+    private func approve(_ approvals: [FoodResolutionReview]) {
+        diary.run {
+            do { try await diary.applyFoodResolutionReviews(approvals) }
+            catch {
+                await reload()
+                throw error
+            }
+            await reload()
+        }
+    }
+
+    private func reload() async {
+        loading = true
+        defer { loading = false }
+        do { reviews = try await diary.foodResolutionReview(); error = nil }
+        catch { self.error = error.localizedDescription }
+    }
+}
+
 struct CustomFoodImportView: View {
     @EnvironmentObject private var diary: DiaryStore
     @Environment(\.dismiss) private var dismiss
@@ -63,35 +195,11 @@ struct CustomFoodImportView: View {
     private func logFood() {
         diary.run {
             guard canLog else { return }
-            let definition = food.normalized()
-            let loggedFood: Food
-            if saveForReuse {
-                loggedFood = try await diary.addCustomFood(
-                    name: definition.name,
-                    brand: "",
-                    calories: definition.nutrition.calories,
-                    carbs: definition.nutrition.carbohydratesGrams,
-                    fat: definition.nutrition.fatGrams,
-                    protein: definition.nutrition.proteinGrams,
-                    fiber: definition.nutrition.fiberGrams,
-                    servingGrams: definition.servingGrams,
-                    servingDescription: "1 \(definition.servingDescription)",
-                    containsProcessedMeat: definition.containsProcessedMeat ?? false,
-                    containsRedMeat: definition.containsRedMeat ?? false
-                )
-                AppAnalytics.capture("custom_food.created", properties: ["origin": "file_import"])
-            } else {
-                loggedFood = definition.makeFood()
-            }
-
             let previousEntryCount = diary.entries(on: Date()).count
-            try await diary.log(
-                loggedFood,
-                amount: 1,
-                unit: .serving,
-                portionID: loggedFood.availablePortions.first?.id,
-                on: Date()
-            )
+            let loggedFood = try await diary.logImportedFood(food.normalized().makeFood(), saveForReuse: saveForReuse, on: Date())
+            if saveForReuse {
+                AppAnalytics.capture("custom_food.created", properties: ["origin": "file_import"])
+            }
             if diary.entries(on: Date()).count > previousEntryCount {
                 AppAnalytics.capture(
                     "food_log.completed",
@@ -216,41 +324,11 @@ struct CustomMealImportView: View {
             guard canLog else { return }
             let importedMeal = reviewedFile.makeMeal()
             let previousEntryCount = diary.entries(on: Date()).count
-            let loggedMeal: SavedMeal
+            let loggedMeal = try await diary.logImportedMeal(importedMeal, on: Date())
             if saveForReuse {
-                guard
-                    let savedMeal = try await diary.saveMeal(
-                        name: importedMeal.name,
-                        items: importedMeal.items,
-                        origin: .imported
-                    )
-                else {
-                    return
-                }
-                loggedMeal = savedMeal
-                AppAnalytics.capture(
-                    "meal.created",
-                    properties: [
-                        "origin": "file_import",
-                        "item_count": String(importedMeal.items.count),
-                    ])
-                try await diary.logMeal(savedMeal, on: Date())
-            } else {
-                // Keep the imported meal snapshot in the meal store even when the user
-                // does not opt into the hand-created Saved Meals library. This lets the
-                // complete meal (including its component foods) appear in Recent and be
-                // logged again without recreating its ingredients.
-                guard
-                    let importedMealSnapshot = try await diary.saveMeal(
-                        name: importedMeal.name,
-                        items: importedMeal.items,
-                        origin: .imported
-                    )
-                else {
-                    return
-                }
-                loggedMeal = importedMealSnapshot
-                try await diary.logMeal(importedMealSnapshot, on: Date())
+                AppAnalytics.capture("meal.created", properties: [
+                    "origin": "file_import", "item_count": String(importedMeal.items.count)
+                ])
             }
             if diary.entries(on: Date()).count > previousEntryCount {
                 AppAnalytics.capture(
@@ -331,8 +409,13 @@ private struct ImportedFoodFields: View {
         decimalField("Fat (g)", value: $food.nutrition.fatGrams)
         decimalField("Protein (g)", value: $food.nutrition.proteinGrams)
         optionalDecimalField("Fiber (g, optional)", value: $food.nutrition.fiberGrams)
-        Toggle("Contains processed meat", isOn: optionalBool($food.containsProcessedMeat))
-        Toggle("Contains red meat", isOn: optionalBool($food.containsRedMeat))
+        FoodMeatFields(name: food.name,
+            processed: Binding(get: { food.containsProcessedMeat }, set: {
+                food.containsProcessedMeat = $0; food.processedMeatWasEdited = true
+            }),
+            red: Binding(get: { food.containsRedMeat }, set: {
+                food.containsRedMeat = $0; food.redMeatWasEdited = true
+            }))
         TextField("Notes (optional)", text: notesBinding, axis: .vertical)
             .lineLimit(2...5)
     }
@@ -362,10 +445,4 @@ private struct ImportedFoodFields: View {
         }
     }
 
-    private func optionalBool(_ value: Binding<Bool?>) -> Binding<Bool> {
-        Binding(
-            get: { value.wrappedValue ?? false },
-            set: { value.wrappedValue = $0 }
-        )
-    }
 }

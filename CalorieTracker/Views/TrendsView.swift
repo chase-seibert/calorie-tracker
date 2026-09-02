@@ -211,6 +211,13 @@ struct TrendsView: View {
             Text("Tap a week to see the foods included")
                 .font(.caption2)
                 .foregroundStyle(AppTheme.muted)
+            let unknownCount = diary.unknownMeatEntryCount(processed: tracksProcessedMeat, red: tracksRedMeat)
+            if unknownCount > 0 {
+                Text("\(unknownCount) entries have unknown meat classifications. This chart counts confirmed presence only.")
+                    .font(.caption).foregroundStyle(.secondary)
+                NavigationLink("Review Classifications") { ReviewClassificationsView() }
+                    .font(.caption)
+            }
         }
         .padding(18)
         .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 22))

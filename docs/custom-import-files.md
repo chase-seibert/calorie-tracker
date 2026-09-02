@@ -112,8 +112,11 @@ should be separate foods when they are calorically material.
 All fields except `notes`, `fiberGrams`, `containsProcessedMeat`, and
 `containsRedMeat` are required. `fiberGrams` is an optional nonnegative number;
 when absent, Fiber remains unavailable rather than defaulting to zero. The
-optional meat fields are booleans, default to false when absent, and remain
-editable in the review screen. Red meat means unprocessed mammalian meat; a
+optional meat fields are booleans. Omitted values remain unknown until local
+catalog/name resolution supplies evidence; they never default to false. Review
+offers Automatic/Yes/No, shows inferred values and warns about disagreements
+with explicit supplied values. Your explicit choice wins. Resolution preserves
+the imported nutrition and portions. Red meat means unprocessed mammalian meat; a
 mixed food can set both flags. Numeric fields contain numbers rather than strings
 or ranges. `servingGrams` is the estimated weight of the portion described by
 `servingDescription`, preserving meaningful food-weight reports.
@@ -124,9 +127,13 @@ or serving descriptions, negative/non-finite nutrition, and implausibly large
 values. A `.calmeal` using the former aggregate-food shape is invalid; that
 shape now belongs exclusively to `.calfood`.
 
-A one-off `.calfood` logs without adding a Custom Food. A one-off `.calmeal`
-logs as one meal entry containing component snapshots without adding a Saved
-Meal or Custom Foods. The diary entry can still be rescaled and broken apart.
+A one-off `.calfood` logs without adding a Custom Food. A `.calmeal` logs as
+one meal entry and retains an imported reusable snapshot for Recent/quick logging,
+without joining the hand-created Saved Meals library. Its components do not
+become Custom Foods. The diary entry can still be rescaled and broken apart.
+SQLite commits the reusable snapshot and entry atomically. See
+[Food classification resolution](food-resolution.md) for matching rules and
+reviewed historical corrections.
 
 ## Assistant prompt
 

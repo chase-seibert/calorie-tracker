@@ -136,6 +136,7 @@ struct DiaryTool {
 
     static func selfTest() async throws {
         try migrationSelfTest()
+        try foodResolutionSelfTest()
         let directory = try temporaryDirectory()
         defer { try? FileManager.default.removeItem(at: directory) }
         let today = Calendar.current.startOfDay(for: Date())
@@ -249,6 +250,86 @@ struct DiaryTool {
         print("PASS: quick-log receipt and historical search")
         try repository.validate()
         print("All storage self-tests passed.")
+    }
+
+    static func foodResolutionSelfTest() throws {
+        let directory = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let day = Calendar.current.startOfDay(for: Date())
+        let url = directory.appendingPathComponent("resolution.sqlite")
+        let catalog = CatalogStore(url: URL(fileURLWithPath: "CalorieTracker/Resources/FoodCatalog.sqlite3"))
+        let repository = try DiaryRepository(fileURL: url, catalog: catalog)
+        var bacon = food("Bacon")
+        bacon.containsProcessedMeat = nil
+        bacon.containsRedMeat = nil
+        let item = MealItem(id: UUID(), food: bacon, amount: 1, unit: .serving)
+        let meal = SavedMeal(id: UUID(), name: "Soup with bacon", items: [item], origin: .imported)
+        let saved = try repository.performSync(scope: .day(day)) { try $0.logImportedMeal(meal, on: day) }
+        let snapshot = try repository.snapshotSync().document
+        try require(snapshot.entries[0].mealItems?[0].food.containsProcessedMeat == true, "Omitted bacon flag not resolved.")
+        try require(saved.items[0].food.nutrients == bacon.nutrients, "Resolution changed nutrition.")
+        // Assert persisted SQL columns, not just the decoded snapshot or presentation engine.
+        try rawSQL("""
+            CREATE TEMP TABLE verify_flags(value INTEGER CHECK(value = 1));
+            INSERT INTO verify_flags SELECT processed_meat FROM diary_entries;
+            INSERT INTO verify_flags SELECT json_extract(payload, '$.food.containsProcessedMeat') FROM entry_ingredients;
+            """, at: url)
+        let reopened = try DiaryRepository(fileURL: url, catalog: catalog)
+        let nextDay = Calendar.current.date(byAdding: .day, value: 1, to: day)!
+        _ = try reopened.performSync(scope: .window(reference: nextDay, selectedDay: nil)) {
+            $0.logQuickSelection("meal:" + saved.id.uuidString, on: nextDay)
+        }
+        try require(repository.snapshotSync().document.entries.count == 2, "Quick log failed after reopening SQLite.")
+        let before = try encode(repository.snapshotSync().document)
+        do {
+            try repository.performSync(scope: .day(day)) { engine in
+                _ = try engine.logImportedMeal(meal, on: day)
+                throw Failure(message: "Simulated failed import")
+            }
+        } catch is Failure {}
+        try require(before == encode(repository.snapshotSync().document), "Failed import left library or entry rows behind.")
+        let id = snapshot.entries[0].id
+        try repository.performSync(scope: .entries([id])) { engine in
+            engine.updateMealEntry(entryID: id, amount: 1, items: [MealItem(
+                id: UUID(), food: food("Beans"), amount: 1, unit: .serving)])
+        }
+        try rawSQL("""
+            CREATE TEMP TABLE verify_edit(value INTEGER CHECK(value = 0));
+            INSERT INTO verify_edit SELECT processed_meat FROM diary_entries WHERE id = '\(id.uuidString)';
+            """, at: url)
+        try repository.validate()
+        print("PASS: food resolution, SQL chart/ingredient parity, quick logging, atomic import rollback, ingredient edits")
+
+        let batchURL = directory.appendingPathComponent("batch.sqlite")
+        let batchRepository = try DiaryRepository(fileURL: batchURL, catalog: catalog)
+        var legacyBacon = food("Bacon")
+        legacyBacon.containsProcessedMeat = false
+        legacyBacon.containsRedMeat = false
+        var legacyBeef = food("Beef")
+        legacyBeef.containsProcessedMeat = false
+        legacyBeef.containsRedMeat = false
+        let legacyMeal = SavedMeal(id: UUID(), name: "Legacy mixed meal", items: [legacyBacon, legacyBeef].map {
+            MealItem(id: UUID(), food: $0, amount: 1, unit: .serving)
+        })
+        let legacy = DiaryEngine(document: DiaryDocument())
+        legacy.logOneOffMeal(legacyMeal, on: day)
+        try batchRepository.importDocument(legacy.document)
+        let reviews = DiaryEngine(document: legacy.document, catalog: catalog).foodResolutionReview()
+        try require(reviews.count == 2, "Expected both batch classification suggestions.")
+        try batchRepository.performSync(scope: .foods(Set(reviews.map { $0.food.id }))) {
+            try $0.applyFoodResolutionReviews(reviews)
+        }
+        try rawSQL("""
+            CREATE TEMP TABLE verify_batch(value INTEGER NOT NULL CHECK(value = 1));
+            INSERT INTO verify_batch SELECT processed_meat FROM diary_entries;
+            INSERT INTO verify_batch SELECT red_meat FROM diary_entries;
+            INSERT INTO verify_batch SELECT json_extract(payload, '$.food.containsProcessedMeat')
+              FROM entry_ingredients WHERE json_extract(payload, '$.food.name') = 'Bacon';
+            INSERT INTO verify_batch SELECT json_extract(payload, '$.food.containsRedMeat')
+              FROM entry_ingredients WHERE json_extract(payload, '$.food.name') = 'Beef';
+            """, at: batchURL)
+        try batchRepository.validate()
+        print("PASS: Approve All keeps both SQL chart flags and ingredient classifications consistent")
     }
 
     static func migrationSelfTest() throws {

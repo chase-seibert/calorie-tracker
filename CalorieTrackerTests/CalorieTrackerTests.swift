@@ -3,6 +3,345 @@ import XCTest
 @testable import CalorieTracker
 
 final class CalorieTrackerTests: XCTestCase {
+    private var resolutionCatalog: CatalogStore {
+        CatalogStore(url: URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("CalorieTracker/Resources/FoodCatalog.sqlite3"))
+    }
+
+    func testImportedBaconResolvesAndSurvivesSQLiteAndQuickLogging() throws {
+        let json = #"{"format":"calorie-tracker-meal","version":1,"name":"White Bean, Kale & Pasta Soup with Bacon","foods":[{"name":"Bacon","servingDescription":"3/4 slice, cooked and chopped","servingGrams":12,"nutrition":{"calories":32,"carbohydratesGrams":0.1,"fatGrams":2.5,"proteinGrams":2.3,"fiberGrams":0}},{"name":"White beans","servingDescription":"1/4 can","servingGrams":64,"nutrition":{"calories":73,"carbohydratesGrams":12.8,"fatGrams":0.3,"proteinGrams":4.8,"fiberGrams":3.5}}]}"#
+        let file = try JSONDecoder().decode(CustomMealFile.self, from: Data(json.utf8))
+        let meal = file.makeMeal()
+        XCTAssertNil(meal.items[0].food.containsProcessedMeat)
+        let url = temporaryDiaryURL()
+        let day = testDate(day: 1)
+        let repository = try DiaryRepository(fileURL: url, calendar: testCalendar, catalog: resolutionCatalog)
+        let saved = try repository.performSync(scope: .day(day)) { try $0.logImportedMeal(meal, on: day) }
+        let bacon = saved.items[0].food
+        XCTAssertEqual(bacon.containsProcessedMeat, true)
+        XCTAssertEqual(bacon.containsRedMeat, false)
+        XCTAssertEqual(bacon.meatResolution?.processed, .catalog)
+        XCTAssertEqual(bacon.id, meal.items[0].food.id)
+        XCTAssertEqual(bacon.nutrients, meal.items[0].food.nutrients)
+        XCTAssertEqual(bacon.servingGrams, 12)
+        XCTAssertEqual(bacon.portions, meal.items[0].food.portions)
+        let reopened = try DiaryRepository(fileURL: url, calendar: testCalendar, catalog: resolutionCatalog)
+        var snapshot = try reopened.snapshotSync().document
+        XCTAssertEqual(snapshot.entries[0].mealItems, saved.items)
+        let next = testDate(day: 2)
+        let result = try reopened.performSync(scope: .window(reference: next, selectedDay: nil)) {
+            $0.logQuickSelection("meal:" + saved.id.uuidString, on: next)
+        }
+        XCTAssertNotNil(result)
+        snapshot = try repository.snapshotSync().document
+        let engine = DiaryEngine(document: snapshot, calendar: testCalendar)
+        XCTAssertEqual(engine.weeklyMeatDays(numberOfDays: 2, referenceDate: next).map(\.processedMeatDays).reduce(0, +), 2)
+        XCTAssertEqual(engine.meatDayFoods(numberOfDays: 1, referenceDate: day).first?.processedMeatFoods,
+                       [meal.name + " — Bacon"])
+        XCTAssertEqual(snapshot.entries[0].nutrients, meal.nutrients)
+    }
+
+    func testResolverHandlesUnknownsQualifiersAndPerFlagOverrides() throws {
+        let resolver = FoodResolver(catalog: resolutionCatalog)
+        for (name, processed, red) in [("Bacon", true, false), ("Turkey bacon", true, false),
+                                      ("Bacon, meatless", false, false), ("vegan bacon", false, false),
+                                      ("Beef broth", false, false)] {
+            let resolved = resolver.resolve(testFood(calories: 12, name: name))
+            XCTAssertEqual(resolved.containsProcessedMeat, processed, name)
+            XCTAssertEqual(resolved.containsRedMeat, red, name)
+        }
+        for name in ["House special", "Soup without bacon", "Bacon flavored seasoning"] {
+            XCTAssertNil(FoodResolver(catalog: nil).resolve(testFood(calories: 12, name: name)).containsProcessedMeat, name)
+        }
+        var imported = CustomFoodDefinition(name: "Bacon", servingDescription: "slice", servingGrams: 12,
+            nutrition: .init(calories: 32, carbohydratesGrams: 0.1, fatGrams: 2.5, proteinGrams: 2.3),
+            notes: nil, containsProcessedMeat: false)
+        var resolved = resolver.resolve(imported.makeFood())
+        XCTAssertEqual(resolved.containsProcessedMeat, false)
+        XCTAssertEqual(resolved.containsRedMeat, false)
+        XCTAssertEqual(resolved.meatResolution?.processed, .imported)
+        XCTAssertEqual(resolver.suggestion(for: resolved).containsProcessedMeat, true)
+        imported.processedMeatWasEdited = true
+        resolved = resolver.resolve(imported.makeFood())
+        XCTAssertEqual(resolved.meatResolution?.processed, .user)
+        XCTAssertEqual(resolved.containsProcessedMeat, false)
+        // Review-only provenance cannot be forged in an imported file.
+        let encoded = try JSONEncoder().encode(imported)
+        XCTAssertFalse(String(decoding: encoded, as: UTF8.self).contains("WasEdited"))
+        var legacy = testFood(calories: 12, name: "Bacon")
+        legacy.containsProcessedMeat = false
+        legacy.containsRedMeat = false
+        XCTAssertEqual(resolver.resolve(legacy), legacy)
+    }
+
+    func testResolverDoesNotConfuseIngredientMatchingWithExactIdentity() {
+        let resolver = FoodResolver(catalog: resolutionCatalog)
+        let bacon = resolver.resolve(testFood(calories: 32, name: "Bacon"))
+        XCTAssertNil(bacon.meatResolution?.matchedFoodID, "Generic bacon has multiple preparations.")
+        var exact = testFood(calories: 32, name: "Pork, cured, bacon, cooked, restaurant")
+        exact = resolver.resolve(exact)
+        XCTAssertEqual(exact.meatResolution?.matchedFoodID, "usda:749420")
+        XCTAssertEqual(exact.source, .custom)
+        XCTAssertEqual(exact.nutrients.calories, 32)
+        let unknown = resolver.resolve(testFood(calories: 12, name: "House special"))
+        XCTAssertNil(unknown.meatResolution?.matchedFoodID)
+        XCTAssertNil(unknown.containsProcessedMeat)
+        XCTAssertNil(unknown.containsRedMeat)
+    }
+
+    func testManualFoodAutomaticClassificationAndUserOverrideSurviveEdits() throws {
+        let engine = DiaryEngine(document: DiaryDocument(), catalog: resolutionCatalog)
+        let food = engine.addCustomFood(name: "Bacon", brand: "", calories: 32, carbs: 0.1, fat: 2.5,
+                                       protein: 2.3, servingGrams: 12)
+        XCTAssertEqual(food.containsProcessedMeat, true)
+        XCTAssertTrue(engine.updateCustomFood(foodID: food.id, name: "Bacon", brand: "", calories: 32,
+            carbs: 0.1, fat: 2.5, protein: 2.3, servingGrams: 12,
+            meatOverrides: FoodMeatOverrides(processed: false, red: nil)))
+        XCTAssertEqual(engine.document.customFoods[0].containsProcessedMeat, false)
+        XCTAssertEqual(engine.document.customFoods[0].meatResolution?.processed, .user)
+        XCTAssertTrue(engine.updateCustomFood(foodID: food.id, name: "Bacon", brand: "", calories: 32,
+            carbs: 0.1, fat: 2.5, protein: 2.3, servingGrams: 12,
+            meatOverrides: FoodMeatOverrides(processed: nil, red: nil)))
+        XCTAssertEqual(engine.document.customFoods[0].containsProcessedMeat, true)
+        let renamed = engine.document.customFoods[0]
+        var vegan = renamed
+        vegan.name = "Vegan bacon"
+        XCTAssertEqual(FoodResolver(catalog: nil).resolve(vegan).containsProcessedMeat, false)
+    }
+
+    func testMealResolutionRecomputesIngredientsButKeepsExplicitOverrides() throws {
+        let day = testDate(day: 1)
+        let repository = try DiaryRepository(fileURL: temporaryDiaryURL(), calendar: testCalendar, catalog: resolutionCatalog)
+        let bacon = MealItem(id: UUID(), food: testFood(calories: 32, name: "Bacon"), amount: 1, unit: .serving)
+        let beans = MealItem(id: UUID(), food: testFood(calories: 73, name: "White beans"), amount: 1, unit: .serving)
+        let meal = SavedMeal(id: UUID(), name: "Soup", items: [beans])
+        try repository.performSync(scope: .day(day)) { $0.logOneOffMeal(meal, on: day) }
+        let id = try XCTUnwrap(repository.snapshotSync().document.entries.first?.id)
+        try repository.performSync(scope: .entries([id])) { $0.updateMealEntry(entryID: id, amount: 1, items: [bacon, beans]) }
+        var document = try repository.snapshotSync().document
+        XCTAssertTrue(DiaryEngine(document: document, calendar: testCalendar).meatPresence(on: day).containsProcessedMeat)
+        try repository.performSync(scope: .entries([id])) { $0.updateMealEntry(entryID: id, amount: 1, items: [beans]) }
+        document = try repository.snapshotSync().document
+        XCTAssertFalse(DiaryEngine(document: document, calendar: testCalendar).meatPresence(on: day).containsProcessedMeat)
+        let overridden = SavedMeal(id: UUID(), name: "Explicit no", items: [bacon], containsProcessedMeat: false)
+        try repository.performSync(scope: .day(day)) { $0.logOneOffMeal(overridden, on: day) }
+        let overrideID = try XCTUnwrap(repository.snapshotSync().document.entries.last?.id)
+        try repository.performSync(scope: .entries([overrideID])) {
+            $0.updateMealEntry(entryID: overrideID, amount: 1, items: [bacon, beans])
+        }
+        document = try repository.snapshotSync().document
+        XCTAssertFalse(DiaryEngine(document: document, calendar: testCalendar).meatPresence(on: day).containsProcessedMeat)
+    }
+
+    func testHistoricalResolutionRequiresReviewPreservesDataAndRejectsStaleSuggestions() throws {
+        let day = testDate(day: 1)
+        let url = temporaryDiaryURL()
+        let repository = try DiaryRepository(fileURL: url, calendar: testCalendar, catalog: resolutionCatalog)
+        var bacon = testFood(calories: 32, name: "Bacon")
+        bacon.containsProcessedMeat = false
+        bacon.containsRedMeat = false
+        var initial = DiaryDocument()
+        initial.customFoods = [bacon]
+        initial.favorites = [bacon]
+        initial.rememberedQuantities[bacon.id] = QuantityPreference(amount: 2, unit: .serving)
+        let ingredient = MealItem(id: UUID(), food: bacon, amount: 1, unit: .serving)
+        initial.meals = [SavedMeal(id: UUID(), name: "Soup", items: [ingredient], origin: .imported)]
+        try repository.importDocument(initial)
+        try repository.performSync(scope: .day(day)) { $0.logMeal(initial.meals[0], on: day) }
+        let before = try repository.snapshotSync().document
+        let review = try XCTUnwrap(DiaryEngine(document: before, catalog: resolutionCatalog).foodResolutionReview().first)
+        XCTAssertFalse(DiaryEngine(document: before, calendar: testCalendar).meatPresence(on: day).containsProcessedMeat)
+        let backup = url.deletingLastPathComponent().appendingPathComponent("BeforeCorrection.sqlite")
+        try repository.backup(to: backup)
+        try repository.performSync(scope: .food(bacon.id)) { try $0.applyFoodResolutionReview(review) }
+        let after = try repository.snapshotSync().document
+        XCTAssertEqual(after.entries[0].nutrients, before.entries[0].nutrients)
+        XCTAssertEqual(after.entries[0].id, before.entries[0].id)
+        XCTAssertEqual(after.entries[0].mealItems?[0].id, ingredient.id)
+        XCTAssertEqual(after.rememberedQuantities, before.rememberedQuantities)
+        XCTAssertEqual(after.customFoods[0].containsProcessedMeat, true)
+        XCTAssertEqual(after.favorites[0].meatResolution?.processed, .user)
+        XCTAssertEqual(after.meals[0].items[0].food.containsProcessedMeat, true)
+        XCTAssertTrue(DiaryEngine(document: after, calendar: testCalendar).meatPresence(on: day).containsProcessedMeat)
+        let second = try DiaryRepository(fileURL: url, calendar: testCalendar)
+        XCTAssertThrowsError(try second.performSync(scope: .food(bacon.id)) { try $0.applyFoodResolutionReview(review) })
+        XCTAssertEqual(try DiaryJSONMigration.canonicalData(after), try DiaryJSONMigration.canonicalData(repository.snapshotSync().document))
+        let restored = try DiaryRepository(fileURL: backup, calendar: testCalendar)
+        XCTAssertEqual(try DiaryJSONMigration.canonicalData(before), try DiaryJSONMigration.canonicalData(restored.snapshotSync().document))
+    }
+
+    @MainActor
+    func testApproveAllClassificationsCreatesOneBackupAndPreservesMealOverrides() async throws {
+        let url = temporaryDiaryURL()
+        let oldDay = testCalendar.date(byAdding: .year, value: -3, to: testDate(day: 1))!
+        var bacon = testFood(calories: 32, name: "Bacon")
+        bacon.containsProcessedMeat = false
+        bacon.containsRedMeat = false
+        var beef = testFood(calories: 120, name: "Beef")
+        beef.containsProcessedMeat = false
+        beef.containsRedMeat = false
+        let meal = SavedMeal(id: UUID(), name: "Reviewed soup", items: [
+            MealItem(id: UUID(), food: bacon, amount: 2, unit: .serving),
+            MealItem(id: UUID(), food: beef, amount: 1, unit: .serving)
+        ], containsProcessedMeat: false)
+        var original = DiaryDocument()
+        original.customFoods = [bacon, beef]
+        original.favorites = [bacon]
+        original.meals = [meal]
+        let engine = DiaryEngine(document: original, calendar: testCalendar)
+        engine.logMeal(meal, on: oldDay)
+        engine.log(bacon, amount: 3, unit: .serving, on: oldDay)
+        engine.log(testFood(calories: 55, name: "House special"), amount: 1, unit: .serving, on: oldDay)
+        let store = DiaryStore(document: engine.document, fileURL: url, calendar: testCalendar,
+                               catalog: resolutionCatalog, usesWindow: false)
+        await store.reloadFromDisk(referenceDate: oldDay)
+        let before = try XCTUnwrap(store.repository).snapshotSync().document
+        let reviews = try await store.foodResolutionReview()
+        XCTAssertEqual(reviews.count, 2)
+        try await store.applyFoodResolutionReviews(reviews)
+        let reopened = try DiaryRepository(fileURL: url, calendar: testCalendar)
+        let after = try reopened.snapshotSync().document
+        XCTAssertEqual(after.customFoods.map(\.containsProcessedMeat), [true, false])
+        XCTAssertEqual(after.customFoods.map(\.containsRedMeat), [false, true])
+        XCTAssertEqual(after.favorites[0].containsProcessedMeat, true)
+        XCTAssertEqual(after.entries.map(\.id), before.entries.map(\.id))
+        XCTAssertEqual(after.entries.map(\.nutrients), before.entries.map(\.nutrients))
+        XCTAssertEqual(after.entries.map(\.amount), before.entries.map(\.amount))
+        XCTAssertEqual(after.rememberedQuantities, before.rememberedQuantities)
+        let updatedMeal = try XCTUnwrap(after.entries.first { $0.isMeal })
+        XCTAssertEqual(updatedMeal.mealItems?.map(\.food.containsProcessedMeat), [true, false])
+        XCTAssertEqual(updatedMeal.mealItems?.map(\.food.containsRedMeat), [false, true])
+        XCTAssertEqual(updatedMeal.processedMeatOverride, false)
+        XCTAssertEqual(updatedMeal.food.containsProcessedMeat, false)
+        XCTAssertEqual(updatedMeal.food.containsRedMeat, true)
+        XCTAssertEqual(after.entries.last, before.entries.last, "Unmatched snapshots must not change.")
+        let remaining = try await store.foodResolutionReview()
+        XCTAssertTrue(remaining.isEmpty)
+        let backupDirectory = url.deletingLastPathComponent().appendingPathComponent("ClassificationBackups")
+        let backups = try FileManager.default.contentsOfDirectory(at: backupDirectory, includingPropertiesForKeys: nil)
+            .filter { $0.pathExtension == "sqlite" }
+        XCTAssertEqual(backups.count, 1, "One consistent backup for the whole batch, not one per suggestion.")
+        let backup = try DiaryRepository(fileURL: XCTUnwrap(backups.first), calendar: testCalendar)
+        try backup.validate()
+        XCTAssertEqual(try DiaryJSONMigration.canonicalData(before),
+                       try DiaryJSONMigration.canonicalData(backup.snapshotSync().document))
+        try reopened.validate()
+    }
+
+    func testApproveAllClassificationsRejectsStaleAndDuplicateBatchesWithoutPartialChanges() throws {
+        let url = temporaryDiaryURL()
+        let repository = try DiaryRepository(fileURL: url, calendar: testCalendar, catalog: resolutionCatalog)
+        var original = DiaryDocument()
+        original.customFoods = ["Bacon", "Beef"].map { name in
+            var food = testFood(calories: 32, name: name)
+            food.containsProcessedMeat = false
+            food.containsRedMeat = false
+            return food
+        }
+        try repository.importDocument(original)
+        let reviews = DiaryEngine(document: original, catalog: resolutionCatalog).foodResolutionReview()
+        XCTAssertEqual(reviews.count, 2)
+        let duplicateEngine = DiaryEngine(document: original, catalog: resolutionCatalog)
+        XCTAssertThrowsError(try duplicateEngine.applyFoodResolutionReviews([reviews[0], reviews[0]]))
+        XCTAssertEqual(duplicateEngine.document.customFoods, original.customFoods)
+        let otherWriter = try DiaryRepository(fileURL: url, calendar: testCalendar, catalog: resolutionCatalog)
+        try otherWriter.performSync(scope: .food(original.customFoods[1].id)) {
+            $0.document.customFoods[1].name = "Changed while reviewing"
+        }
+        let before = try repository.snapshotSync()
+        XCTAssertThrowsError(try repository.performSync(scope: .foods(Set(reviews.map { $0.food.id }))) {
+            try $0.applyFoodResolutionReviews(reviews)
+        })
+        let after = try repository.snapshotSync()
+        XCTAssertEqual(after.revision, before.revision)
+        XCTAssertEqual(try DiaryJSONMigration.canonicalData(after.document),
+                       try DiaryJSONMigration.canonicalData(before.document))
+        let inMemory = DiaryEngine(document: before.document, catalog: resolutionCatalog)
+        XCTAssertThrowsError(try inMemory.applyFoodResolutionReviews(reviews))
+        XCTAssertEqual(inMemory.document.customFoods, before.document.customFoods)
+    }
+
+    @MainActor
+    func testApproveAllClassificationsRequiresBackupAndEmptyBatchIsANoOp() async throws {
+        let url = temporaryDiaryURL()
+        var bacon = testFood(calories: 32, name: "Bacon")
+        bacon.containsProcessedMeat = false
+        bacon.containsRedMeat = false
+        var initial = DiaryDocument()
+        initial.customFoods = [bacon]
+        let store = DiaryStore(document: initial, fileURL: url, catalog: resolutionCatalog)
+        await store.reloadFromDisk()
+        let repository = try XCTUnwrap(store.repository)
+        let before = try repository.snapshotSync()
+        let directory = url.deletingLastPathComponent().appendingPathComponent("ClassificationBackups")
+        try await store.applyFoodResolutionReviews([])
+        XCTAssertFalse(FileManager.default.fileExists(atPath: directory.path))
+        // A file at the backup-directory path forces a real filesystem failure.
+        try Data("not a directory".utf8).write(to: directory)
+        let reviews = try await store.foodResolutionReview()
+        do {
+            try await store.applyFoodResolutionReviews(reviews)
+            XCTFail("Classification changes require a successful backup.")
+        } catch { }
+        let after = try repository.snapshotSync()
+        XCTAssertEqual(after.revision, before.revision)
+        XCTAssertEqual(try DiaryJSONMigration.canonicalData(after.document),
+                       try DiaryJSONMigration.canonicalData(before.document))
+    }
+
+    func testBatchFoodScopeHandlesManyIDsAndIncludesHistoricalIngredients() throws {
+        let day = testDate(day: 1)
+        let repository = try DiaryRepository(fileURL: temporaryDiaryURL(), catalog: resolutionCatalog)
+        let bacon = testFood(calories: 32, name: "Bacon")
+        let meal = SavedMeal(id: UUID(), name: "Soup", items: [
+            MealItem(id: UUID(), food: bacon, amount: 1, unit: .serving)
+        ])
+        try repository.performSync(scope: .day(day)) {
+            $0.logOneOffMeal(meal, on: day)
+            $0.log(testFood(calories: 55, name: "House special"), amount: 1, unit: .serving, on: day)
+        }
+        var ids = Set((0..<1_500).map { "missing:\($0)" })
+        ids.insert(bacon.id)
+        ids.insert("food:'quoted\"id")
+        let snapshot = try repository.snapshotSync(scope: .foods(ids)).document
+        XCTAssertEqual(snapshot.entries.count, 1)
+        XCTAssertEqual(snapshot.entries[0].mealItems?.first?.food.id, bacon.id)
+        XCTAssertTrue(try repository.snapshotSync(scope: .foods([])).document.entries.isEmpty)
+    }
+
+    func testKnownBaconSandwichCatalogFlagsAndNameRulesAgree() {
+        for id in ["170312", "170313"] {
+            XCTAssertEqual(resolutionCatalog.food(sourceID: id, source: .usda)?.containsProcessedMeat, true)
+        }
+        XCTAssertTrue(DiaryEngine.fallbackMeatClassification(for: "Bacon sandwich on white bread").containsProcessedMeat)
+        XCTAssertFalse(DiaryEngine.fallbackMeatClassification(for: "Hot dog buns").containsProcessedMeat)
+    }
+
+    func testUnknownMeatCountsAndStaleMealLoggingUseCommittedClassification() throws {
+        let day = testDate(day: 1)
+        let repository = try DiaryRepository(fileURL: temporaryDiaryURL(), calendar: testCalendar, catalog: resolutionCatalog)
+        let unknown = testFood(calories: 200, name: "House special")
+        let bacon = testFood(calories: 32, name: "Bacon")
+        let stale = SavedMeal(id: UUID(), name: "Soup", items: [MealItem(id: UUID(), food: unknown, amount: 1, unit: .serving)])
+        try repository.performSync(scope: .day(day)) { engine in
+            engine.document.meals = [stale]
+            engine.logMeal(stale, on: day)
+        }
+        var engine = DiaryEngine(document: try repository.snapshotSync().document, calendar: testCalendar)
+        XCTAssertEqual(engine.unknownMeatEntryCount(numberOfDays: 1, referenceDate: day), 1)
+        try repository.performSync(scope: .meal(stale.id)) {
+            _ = $0.updateSavedMeal(mealID: stale.id, name: stale.name,
+                items: [MealItem(id: UUID(), food: bacon, amount: 1, unit: .serving)])
+        }
+        try repository.performSync(scope: .day(day)) { $0.logMeal(stale, on: day) }
+        engine = DiaryEngine(document: try repository.snapshotSync().document, calendar: testCalendar)
+        XCTAssertEqual(engine.unknownMeatEntryCount(numberOfDays: 1, referenceDate: day), 0)
+        XCTAssertEqual(engine.weeklyMeatDays(numberOfDays: 1, referenceDate: day).first?.processedMeatDays, 1)
+        let mixed = FoodResolver(catalog: nil).resolve(testFood(calories: 200, name: "Bacon soup"))
+        XCTAssertEqual(mixed.containsProcessedMeat, true)
+        XCTAssertNil(mixed.containsRedMeat, "Naming bacon is not evidence that a soup has no other meat.")
+    }
+
     func testOnDeviceJSONMigrationPreservesBackupAndIsIdempotent() throws {
         let destination = temporaryDiaryURL()
         let directory = destination.deletingLastPathComponent()

@@ -85,6 +85,16 @@ from the stacked macro summary because it is already included in carbohydrates.
 Days containing any food without Fiber data are omitted from the Fiber series
 and identified by explanatory chart copy rather than represented as zero.
 
+Food and import editors offer Automatic/Yes/No meat classification choices,
+explain automatic suggestions, and warn about conflicting explicit values.
+Settings → Food & Meals → Review Classifications offers backed-up, explicit
+correction of matching historical food snapshots. Users can approve individual
+suggestions or confirm Approve All, which shows the suggestion count and applies
+the entire reviewed batch atomically after one verified backup. A stale suggestion
+rejects the batch without partial changes. It currently covers processed and red
+meat, preserving explicit meal overrides. Unknown entries are identified
+in Trends rather than described as confirmed meat-free days.
+
 Settings also links to AI Food & Meal Import instructions and one copyable,
 tool-neutral prompt. The prompt tells an assistant to create a `.calfood`
 attachment by default, representing the full pictured portion as one aggregate

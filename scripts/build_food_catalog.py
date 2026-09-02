@@ -146,7 +146,8 @@ def classify_meat_text(text: str, category: str = "") -> tuple[bool, bool]:
         )
     )
     explicit_processed = bool(PROCESSED_MEAT_PATTERN.search(processed_text))
-    if explicit_processed and NON_MEAT_NAME_PATTERN.search(text) and not has_red_species and not has_poultry:
+    is_mixed_dish = bool(re.search(r"\b(?:sandwich|sub|salad|pizza|soup|burger)\b", text, re.IGNORECASE))
+    if explicit_processed and NON_MEAT_NAME_PATTERN.search(text) and not has_red_species and not has_poultry and not is_mixed_dish:
         explicit_processed = False
     method_processed = bool(PROCESS_METHOD_PATTERN.search(processed_text)) and (
         has_red_species or has_other_meat

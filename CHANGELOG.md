@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-09-02
+
+- Renamed historical review to Review Classifications with a checklist icon; added confirmed Approve All
+  with one verified backup, atomic batch updates, and stale-batch rejection.
+- Resolve missing AI-import and custom-food meat flags locally, preserving
+  nutrition, portions, identities and independent explicit overrides.
+- Added Automatic/Yes/No review, provenance in SQLite row payloads, atomic
+  imports, unknown-classification chart notices and backed-up historical review.
+- Corrected six bacon/ham/cold-cut sandwich catalog false negatives without
+  changing any food's nutrition or portions.
+
 ## 2026-09-01
 
 - Moved diary/history, personal library, favorites, quantities, day status, and

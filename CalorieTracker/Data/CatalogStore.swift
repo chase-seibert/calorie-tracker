@@ -132,6 +132,18 @@ final class CatalogStore: @unchecked Sendable {
         }.first
     }
 
+    func food(sourceID: String, source: FoodSource) -> Food? {
+        queryFoods(sql: """
+            SELECT source_id, source, name, brand, barcode, calories, carbs, fat, protein, fiber,
+                   base_grams, serving_grams, serving_description, portions_json,
+                   contains_processed_meat, contains_red_meat
+            FROM foods WHERE source_id = ? AND source = ? LIMIT 1
+            """) {
+            bind(sourceID, at: 1, to: $0)
+            bind(source.rawValue, at: 2, to: $0)
+        }.first
+    }
+
     func count(source: FoodSource) -> Int {
         lock.lock()
         defer { lock.unlock() }

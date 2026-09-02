@@ -33,6 +33,7 @@ enum DiaryScope: Sendable {
     case search(String)
     case entries(Set<UUID>)
     case food(String)
+    case foods(Set<String>)
     case meal(UUID)
     case window(reference: Date, selectedDay: Date?)
 }
@@ -221,10 +222,12 @@ final class DiaryRepository: @unchecked Sendable {
     private let calendar: Calendar
     private let queue = DispatchQueue(label: "com.cseibert.CalorieTracker.diary", qos: .userInitiated)
     private var db: OpaquePointer?
+    private let catalog: CatalogStore?
 
-    init(fileURL: URL, calendar: Calendar = .current) throws {
+    init(fileURL: URL, calendar: Calendar = .current, catalog: CatalogStore? = CatalogStore()) throws {
         self.fileURL = fileURL
         self.calendar = calendar
+        self.catalog = catalog
         do { try queue.sync { try open() } } catch {
             if let db {
                 sqlite3_close_v2(db)
@@ -321,7 +324,7 @@ final class DiaryRepository: @unchecked Sendable {
     private func mutate<T>(scope: DiaryScope, _ action: (DiaryEngine) throws -> T) throws -> T {
         try transaction {
             let before = try readSnapshot(scope: scope).document
-            let engine = DiaryEngine(document: before, calendar: calendar)
+            let engine = DiaryEngine(document: before, calendar: calendar, catalog: catalog)
             let result = try action(engine)
             try applyChanges(from: before, to: engine.document)
             if engine.clearsPersonalData {
@@ -433,7 +436,7 @@ final class DiaryRepository: @unchecked Sendable {
         document.dayStatuses = try objects("SELECT payload FROM day_statuses ORDER BY day")
         document.alcoholEntries = try objects("SELECT payload FROM alcohol_entries ORDER BY day")
 
-        let (predicate, bindings) = predicate(for: scope)
+        let (predicate, bindings) = try predicate(for: scope)
         document.entries = try objects("SELECT payload FROM diary_entries WHERE \(predicate) ORDER BY rowid", bindings)
         let ingredientRows = try rows(
             "SELECT entry_id, payload FROM entry_ingredients WHERE entry_id IN (SELECT id FROM diary_entries WHERE \(predicate)) ORDER BY entry_id, position",
@@ -447,7 +450,7 @@ final class DiaryRepository: @unchecked Sendable {
         return DiarySnapshot(document: document, revision: try scalar("SELECT revision FROM store_state WHERE id = 1"))
     }
 
-    private func predicate(for scope: DiaryScope) -> (String, [Value]) {
+    private func predicate(for scope: DiaryScope) throws -> (String, [Value]) {
         switch scope {
         case .all: return ("1", [])
         case .library: return ("0", [])
@@ -485,6 +488,17 @@ final class DiaryRepository: @unchecked Sendable {
                 "food_id = ? OR id IN (SELECT entry_id FROM entry_ingredients WHERE food_id = ?) OR meal_id IN (SELECT meal_id FROM meal_ingredients WHERE food_id = ?)",
                 [.text(id), .text(id), .text(id)]
             )
+        case .foods(let ids):
+            guard !ids.isEmpty else { return ("0", []) }
+            // One bound JSON array avoids SQLite's variable limit for large approval batches.
+            let encoded = String(decoding: try JSONEncoder().encode(ids.sorted()), as: UTF8.self)
+            return (
+                """
+                food_id IN (SELECT value FROM json_each(?1))
+                  OR id IN (SELECT entry_id FROM entry_ingredients WHERE food_id IN (SELECT value FROM json_each(?1)))
+                  OR meal_id IN (SELECT meal_id FROM meal_ingredients WHERE food_id IN (SELECT value FROM json_each(?1)))
+                """, [.text(encoded)]
+            )
         case .meal(let id): return ("meal_id = ?", [.text(id.uuidString)])
         case .window(let reference, let selected):
             let start = calendar.date(byAdding: .day, value: -89, to: calendar.startOfDay(for: reference))!
@@ -493,7 +507,7 @@ final class DiaryRepository: @unchecked Sendable {
                 "(day >= ? AND day < ?) OR id IN (SELECT id FROM diary_entries WHERE kind IS NULL GROUP BY item_key HAVING logged_at = max(logged_at) ORDER BY max(logged_at) DESC LIMIT 30)"
             var values: [Value] = [.real(start.timeIntervalSince1970), .real(end.timeIntervalSince1970)]
             if let selected {
-                let (dayPredicate, dayValues) = self.predicate(for: .day(selected))
+                let (dayPredicate, dayValues) = try self.predicate(for: .day(selected))
                 predicate += " OR (\(dayPredicate))"
                 values += dayValues
             }

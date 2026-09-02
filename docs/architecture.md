@@ -134,9 +134,12 @@ Catalog foods also carry two compiled presence flags: processed meat and
 unprocessed red meat. The catalog builder derives them from USDA food categories,
 FNDDS ingredient recipes, Open Food Facts category and ingredient tags, and
 token-aware name rules. Source categories and ingredient lists remain build-time
-inputs rather than shipped catalog payloads. Existing diary food snapshots are
-backfilled at launch by stable source ID; legacy custom foods use the same
-conservative name classifier and can then be corrected in the Custom editor.
+inputs rather than shipped catalog payloads. `FoodResolver` fills missing flags
+for new imports and custom foods using conservative catalog matching and name
+rules, without changing nutrition or identity. Per-field provenance is stored in
+existing SQLite row payloads. Historical corrections require explicit review and
+a verified SQLite backup; normal launch and JSON conversion do not reclassify
+history. See `docs/food-resolution.md` for matching and transaction boundaries.
 Saved meals have optional explicit overrides and otherwise derive both flags from
 their component foods.
 

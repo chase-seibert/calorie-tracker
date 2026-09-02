@@ -57,6 +57,7 @@ class DiaryStore: ObservableObject {
         let url = fileURL
         let calendar = calendar
         let initial = initialDocument
+        let catalog = catalog
         let task = Task.detached {
             if initial == nil, url == SharedDiaryStorage.defaultFileURL(), !SharedDiaryStorage.usesSimulatorFixture {
                 guard SharedDiaryStorage.hasSharedContainer else {
@@ -66,7 +67,7 @@ class DiaryStore: ObservableObject {
                     destination: url, sources: SharedDiaryStorage.legacyDiaryURLs,
                     backupDirectory: SharedDiaryStorage.migrationBackupDirectory, calendar: calendar)
             }
-            let repository = try DiaryRepository(fileURL: url, calendar: calendar)
+            let repository = try DiaryRepository(fileURL: url, calendar: calendar, catalog: catalog)
             if let initial { try repository.importDocument(initial) }
             return repository
         }
@@ -176,7 +177,7 @@ class DiaryStore: ObservableObject {
     #if DEBUG
         // Synchronous adapters are only for existing small unit-test fixtures, never called by the app.
         func loadTestFixture(referenceDate: Date) throws {
-            let repository = try DiaryRepository(fileURL: fileURL, calendar: calendar)
+            let repository = try DiaryRepository(fileURL: fileURL, calendar: calendar, catalog: catalog)
             if let initialDocument {
                 let enriched = DiaryEngine.backfilledFoodMetadata(in: initialDocument, catalog: catalog)
                 try repository.importDocument(enriched)
@@ -403,8 +404,8 @@ class DiaryStore: ObservableObject {
         fiber: Double? = nil,
         servingGrams: Double,
         servingDescription: String = "1 serving",
-        containsProcessedMeat: Bool = false,
-        containsRedMeat: Bool = false
+        containsProcessedMeat: Bool? = nil,
+        containsRedMeat: Bool? = nil
     ) async throws -> Food {
         try await perform(scope: .library) {
             $0.addCustomFood(
@@ -426,13 +427,14 @@ class DiaryStore: ObservableObject {
         fiber: Double? = nil,
         servingGrams: Double,
         containsProcessedMeat: Bool? = nil,
-        containsRedMeat: Bool? = nil
+        containsRedMeat: Bool? = nil,
+        meatOverrides: FoodMeatOverrides? = nil
     ) async throws -> Bool {
         try await perform(scope: .food(foodID)) {
             $0.updateCustomFood(
                 foodID: foodID, name: name, brand: brand, calories: calories, carbs: carbs, fat: fat, protein: protein,
                 fiber: fiber, servingGrams: servingGrams, containsProcessedMeat: containsProcessedMeat,
-                containsRedMeat: containsRedMeat)
+                containsRedMeat: containsRedMeat, meatOverrides: meatOverrides)
         }
     }
 
@@ -457,12 +459,13 @@ class DiaryStore: ObservableObject {
         name: String,
         items: [MealItem],
         containsProcessedMeat: Bool? = nil,
-        containsRedMeat: Bool? = nil
+        containsRedMeat: Bool? = nil,
+        meatOverrides: FoodMeatOverrides? = nil
     ) async throws -> Bool {
         try await perform(scope: .meal(mealID)) {
             $0.updateSavedMeal(
                 mealID: mealID, name: name, items: items, containsProcessedMeat: containsProcessedMeat,
-                containsRedMeat: containsRedMeat)
+                containsRedMeat: containsRedMeat, meatOverrides: meatOverrides)
         }
     }
 
@@ -484,6 +487,56 @@ class DiaryStore: ObservableObject {
 
     func logMeal(_ meal: SavedMeal, amount: Double = 1, on date: Date) async throws {
         try await perform(scope: .day(date)) { $0.logMeal(meal, amount: amount, on: date) }
+    }
+
+    func logImportedFood(_ food: Food, saveForReuse: Bool, on date: Date) async throws -> Food {
+        try await perform(scope: .day(date)) { try $0.logImportedFood(food, saveForReuse: saveForReuse, on: date) }
+    }
+
+    func logImportedMeal(_ meal: SavedMeal, on date: Date) async throws -> SavedMeal {
+        try await perform(scope: .day(date)) { try $0.logImportedMeal(meal, on: date) }
+    }
+
+    func suggestedMeatClassification(name: String) async -> Food {
+        let catalog = catalog
+        return await Task.detached {
+            FoodResolver(catalog: catalog).resolve(Food(
+                sourceID: "preview", source: .custom, name: name, brand: nil, barcode: nil,
+                nutrients: .zero, baseAmountGrams: 1, servingGrams: nil, servingDescription: nil))
+        }.value
+    }
+
+    func unknownMeatEntryCount(processed: Bool, red: Bool) -> Int {
+        engine.unknownMeatEntryCount(processed: processed, red: red)
+    }
+
+    func foodResolutionReview() async throws -> [FoodResolutionReview] {
+        let repository = try await open()
+        let catalog = catalog
+        let document = try await repository.snapshot(scope: .all).document
+        return await Task.detached { DiaryEngine(document: document, catalog: catalog).foodResolutionReview() }.value
+    }
+
+    func applyFoodResolutionReview(_ review: FoodResolutionReview) async throws {
+        try await applyFoodResolutionReviews([review])
+    }
+
+    func applyFoodResolutionReviews(_ reviews: [FoodResolutionReview]) async throws {
+        guard !reviews.isEmpty else { return }
+        let repository = try await open()
+        let backup = repository.fileURL.deletingLastPathComponent()
+            .appendingPathComponent("ClassificationBackups", isDirectory: true)
+            .appendingPathComponent(UUID().uuidString + ".sqlite")
+        try await Task.detached {
+            try FileManager.default.createDirectory(at: backup.deletingLastPathComponent(), withIntermediateDirectories: true,
+                                                    attributes: [.posixPermissions: 0o700])
+            try repository.backup(to: backup)
+            try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: backup.path)
+            try DiaryRepository(fileURL: backup, catalog: nil).validate()
+        }.value
+        try await perform(scope: .foods(Set(reviews.map { $0.food.id }))) {
+            try $0.applyFoodResolutionReviews(reviews)
+        }
     }
 
     func logOneOffMeal(_ meal: SavedMeal, amount: Double = 1, on date: Date) async throws {

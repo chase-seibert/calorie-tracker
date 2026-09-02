@@ -318,7 +318,9 @@ final class DiaryEngine {
         guard canLogFood(on: date) else { return }
         clearAutomaticStatus(on: date)
         let clampedAmount = max(amount, 0.01)
-        let foodToLog = displayedFood(food)
+        let current = document.customFoods.first { $0.id == food.id }
+            ?? document.favorites.first { $0.id == food.id } ?? food
+        let foodToLog = displayedFood(current)
         let entry = DiaryEntry(
             id: UUID(),
             date: calendar.startOfDay(for: date),
@@ -663,8 +665,8 @@ final class DiaryEngine {
         fiber: Double? = nil,
         servingGrams: Double,
         servingDescription: String = "1 serving",
-        containsProcessedMeat: Bool = false,
-        containsRedMeat: Bool = false
+        containsProcessedMeat: Bool? = nil,
+        containsRedMeat: Bool? = nil
     ) -> Food {
         let normalizedServingDescription =
             servingDescription
@@ -700,8 +702,10 @@ final class DiaryEngine {
             containsProcessedMeat: containsProcessedMeat,
             containsRedMeat: containsRedMeat
         )
-        document.customFoods.insert(food, at: 0)
-        return food
+        let resolved = FoodResolver(catalog: catalog).applying(
+            FoodMeatOverrides(processed: containsProcessedMeat, red: containsRedMeat), to: food)
+        document.customFoods.insert(resolved, at: 0)
+        return resolved
     }
 
     @discardableResult
@@ -716,7 +720,8 @@ final class DiaryEngine {
         fiber: Double? = nil,
         servingGrams: Double,
         containsProcessedMeat: Bool? = nil,
-        containsRedMeat: Bool? = nil
+        containsRedMeat: Bool? = nil,
+        meatOverrides: FoodMeatOverrides? = nil
     ) -> Bool {
         let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         let normalizedBrand = brand.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -745,8 +750,22 @@ final class DiaryEngine {
                 grams: normalizedServingGrams
             )
         ]
-        updatedFood.containsProcessedMeat = containsProcessedMeat ?? updatedFood.containsProcessedMeat ?? false
-        updatedFood.containsRedMeat = containsRedMeat ?? updatedFood.containsRedMeat ?? false
+        if let meatOverrides {
+            updatedFood = FoodResolver(catalog: catalog).applying(meatOverrides, to: updatedFood)
+        } else if containsProcessedMeat != nil || containsRedMeat != nil {
+            var provenance = updatedFood.meatResolution ?? FoodMeatResolution(
+                processed: .legacy, red: .legacy, inputName: updatedFood.name)
+            if let containsProcessedMeat {
+                updatedFood.containsProcessedMeat = containsProcessedMeat
+                provenance.processed = .user
+            }
+            if let containsRedMeat {
+                updatedFood.containsRedMeat = containsRedMeat
+                provenance.red = .user
+            }
+            updatedFood.meatResolution = provenance
+        }
+        updatedFood = FoodResolver(catalog: catalog).resolve(updatedFood)
 
         document.customFoods[customFoodIndex] = updatedFood
         document.customFoodNames.removeValue(forKey: foodID)
@@ -796,7 +815,7 @@ final class DiaryEngine {
         let meal = SavedMeal(
             id: UUID(),
             name: normalizedName,
-            items: items,
+            items: resolvedItems(items),
             containsProcessedMeat: containsProcessedMeat,
             containsRedMeat: containsRedMeat,
             origin: origin
@@ -811,7 +830,8 @@ final class DiaryEngine {
         name: String,
         items: [MealItem],
         containsProcessedMeat: Bool? = nil,
-        containsRedMeat: Bool? = nil
+        containsRedMeat: Bool? = nil,
+        meatOverrides: FoodMeatOverrides? = nil
     ) -> Bool {
         let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedName.isEmpty,
@@ -823,9 +843,9 @@ final class DiaryEngine {
         document.meals[mealIndex] = SavedMeal(
             id: mealID,
             name: normalizedName,
-            items: items,
-            containsProcessedMeat: containsProcessedMeat ?? previousMeal.containsProcessedMeat,
-            containsRedMeat: containsRedMeat ?? previousMeal.containsRedMeat,
+            items: resolvedItems(items),
+            containsProcessedMeat: meatOverrides.map(\.processed) ?? (containsProcessedMeat ?? previousMeal.containsProcessedMeat),
+            containsRedMeat: meatOverrides.map(\.red) ?? (containsRedMeat ?? previousMeal.containsRedMeat),
             origin: previousMeal.origin
         )
         for index in document.entries.indices where document.entries[index].savedMealID == mealID {
@@ -927,6 +947,7 @@ final class DiaryEngine {
     }
 
     func logMeal(_ meal: SavedMeal, amount: Double = 1, on date: Date) {
+        let meal = document.meals.first { $0.id == meal.id } ?? meal
         guard !meal.items.isEmpty, amount > 0, canLogFood(on: date) else { return }
         clearAutomaticStatus(on: date)
         let entry = makeMealEntry(
@@ -1004,6 +1025,7 @@ final class DiaryEngine {
     /// The logged entry becomes a snapshot so later edits to the saved meal do not overwrite
     /// this intentional per-entry adjustment.
     func updateMealEntry(entryID: UUID, amount: Double, items: [MealItem]) {
+        let items = resolvedItems(items)
         guard
             let index = document.entries.firstIndex(where: { $0.id == entryID }),
             document.entries[index].isMeal,
@@ -1035,7 +1057,7 @@ final class DiaryEngine {
         document.entries[index].food.nutrients = baseNutrients
         document.entries[index].nutrients = baseNutrients.scaled(by: clampedAmount)
         document.entries[index].mealItems = items
-        let classification = Self.meatClassification(for: items)
+        let classification = entryMeatClassification(document.entries[index])
         document.entries[index].food.containsProcessedMeat = classification.containsProcessedMeat
         document.entries[index].food.containsRedMeat = classification.containsRedMeat
     }
@@ -1106,21 +1128,10 @@ final class DiaryEngine {
         {
             displayedFood.nutrients.fiber = fiber
         }
-        if displayedFood.meatClassification == nil {
-            let classification =
-                displayedFood.source == .custom
-                ? Self.fallbackMeatClassification(for: displayedFood.name)
-                : catalog?.meatClassification(
-                    sourceID: displayedFood.sourceID,
-                    source: displayedFood.source
-                ) ?? Self.fallbackMeatClassification(for: displayedFood.name)
-            displayedFood.containsProcessedMeat = classification.containsProcessedMeat
-            displayedFood.containsRedMeat = classification.containsRedMeat
-        }
         if let customName = document.customFoodNames[food.id], !customName.isEmpty {
             displayedFood.name = customName
         }
-        return displayedFood
+        return FoodResolver(catalog: catalog).resolve(displayedFood)
     }
 
     @discardableResult
@@ -1446,7 +1457,7 @@ final class DiaryEngine {
                 baseItem.amount /= entry.amount
                 return baseItem
             }
-            classification = entry.food.meatClassification ?? Self.meatClassification(for: baseItems)
+            classification = entryMeatClassification(entry)
         } else {
             return
         }
@@ -1488,6 +1499,8 @@ final class DiaryEngine {
         loggedAt: Date,
         displayOrder: Int? = nil
     ) -> DiaryEntry {
+        var meal = meal
+        meal.items = resolvedItems(meal.items)
         let clampedAmount = max(amount, 0.01)
         let scaledItems = meal.items.map { item in
             var scaledItem = item
@@ -1574,7 +1587,9 @@ final class DiaryEngine {
     }
 
     private static func classification(for food: Food) -> MeatClassification {
-        food.meatClassification ?? fallbackMeatClassification(for: food.name)
+        // Unknown flags do not count as presence; resolve before persistence, not during chart rendering.
+        MeatClassification(containsProcessedMeat: food.containsProcessedMeat == true,
+                           containsRedMeat: food.containsRedMeat == true)
     }
 
     private static func uniqueNames(_ names: [String]) -> [String] {
@@ -1611,22 +1626,7 @@ final class DiaryEngine {
             {
                 food.nutrients.fiber = fiber
             }
-            if food.meatClassification == nil {
-                let classification: MeatClassification
-                if sourceFood.source != .custom,
-                    let catalogClassification = catalog?.meatClassification(
-                        sourceID: sourceFood.sourceID,
-                        source: sourceFood.source
-                    )
-                {
-                    classification = catalogClassification
-                } else {
-                    classification = fallbackMeatClassification(for: sourceFood.name)
-                }
-                food.containsProcessedMeat = classification.containsProcessedMeat
-                food.containsRedMeat = classification.containsRedMeat
-            }
-            return food
+            return FoodResolver(catalog: catalog).resolve(food)
         }
 
         var document = source
@@ -1736,7 +1736,8 @@ final class DiaryEngine {
         if containsProcessed,
             matches(nonMeatNamePattern, in: name),
             !matches(redPattern, in: name),
-            !matches(poultryPattern, in: name)
+            !matches(poultryPattern, in: name),
+            !matches(#"\b(?:sandwich|sub|salad|pizza|soup|burger)\b"#, in: name)
         {
             containsProcessed = false
         }
@@ -1756,6 +1757,125 @@ final class DiaryEngine {
             containsProcessedMeat: containsProcessed,
             containsRedMeat: containsRed
         )
+    }
+
+    private func resolvedItems(_ items: [MealItem]) -> [MealItem] {
+        items.map { item in
+            var result = item
+            result.food = FoodResolver(catalog: catalog).resolve(item.food)
+            return result
+        }
+    }
+
+    func logImportedFood(_ food: Food, saveForReuse: Bool, on date: Date) throws -> Food {
+        guard canLogFood(on: date) else { throw DiaryDatabaseError.invalidData("Food logging is disabled for this day.") }
+        let food = FoodResolver(catalog: catalog).resolve(food)
+        if saveForReuse { document.customFoods.insert(food, at: 0) }
+        log(food, amount: 1, unit: .serving, portionID: food.availablePortions.first?.id, on: date)
+        return food
+    }
+
+    func logImportedMeal(_ meal: SavedMeal, on date: Date) throws -> SavedMeal {
+        guard canLogFood(on: date), !meal.items.isEmpty else {
+            throw DiaryDatabaseError.invalidData("The meal cannot be logged on this day.")
+        }
+        var resolved = meal
+        resolved.items = resolvedItems(meal.items)
+        document.meals.insert(resolved, at: 0)
+        logMeal(resolved, on: date)
+        return resolved
+    }
+
+    /// Explicit audit only; normal loading and JSON conversion never reclassify historical records.
+    func foodResolutionReview() -> [FoodResolutionReview] {
+        let foods = document.customFoods + document.favorites + document.meals.flatMap { $0.items.map(\.food) }
+            + document.entries.filter { !$0.isCheatDayAdjustment }.flatMap { entry in
+                entry.isMeal ? (entry.mealItems ?? []).map(\.food) : [entry.food]
+            }
+        var seen = Set<Food>()
+        let resolver = FoodResolver(catalog: catalog)
+        return foods.compactMap { food in
+            guard seen.insert(food).inserted else { return nil }
+            let suggestion = resolver.suggestion(for: food)
+            let changed = (suggestion.containsProcessedMeat != nil && suggestion.containsProcessedMeat != food.containsProcessedMeat)
+                || (suggestion.containsRedMeat != nil && suggestion.containsRedMeat != food.containsRedMeat)
+            return changed ? FoodResolutionReview(food: food, suggestion: suggestion) : nil
+        }.sorted { $0.food.name.localizedStandardCompare($1.food.name) == .orderedAscending }
+    }
+
+    /// Compare snapshots again inside the transaction. Do not overwrite another writer's newer correction.
+    func applyFoodResolutionReview(_ review: FoodResolutionReview) throws {
+        try applyFoodResolutionReviews([review])
+    }
+
+    /// Apply only the reviewed batch, in one pass over original snapshots. A stale item rejects the entire batch.
+    func applyFoodResolutionReviews(_ reviews: [FoodResolutionReview]) throws {
+        guard !reviews.isEmpty else { return }
+        var suggestions: [Food: Food] = [:]
+        for review in reviews {
+            guard suggestions.updateValue(review.suggestion, forKey: review.food) == nil else {
+                throw DiaryDatabaseError.invalidData("A food appears more than once in this review. Reload the suggestions.")
+            }
+        }
+        var matched = Set<Food>()
+        func corrected(_ food: Food) -> Food {
+            guard let suggestion = suggestions[food] else { return food }
+            matched.insert(food)
+            return FoodResolver(catalog: catalog).applying(FoodMeatOverrides(
+                processed: suggestion.containsProcessedMeat ?? food.containsProcessedMeat,
+                red: suggestion.containsRedMeat ?? food.containsRedMeat), to: food)
+        }
+        func items(_ items: [MealItem]) -> [MealItem] {
+            items.map { item in
+                var result = item
+                result.food = corrected(item.food)
+                return result
+            }
+        }
+        var updated = document
+        updated.customFoods = document.customFoods.map(corrected)
+        updated.favorites = document.favorites.map(corrected)
+        updated.meals = document.meals.map { meal in
+            var result = meal
+            result.items = items(meal.items)
+            return result
+        }
+        for index in document.entries.indices {
+            var entry = document.entries[index]
+            if entry.isMeal {
+                let previousItems = entry.mealItems
+                entry.mealItems = entry.mealItems.map(items)
+                if entry.mealItems != previousItems {
+                    let classification = entryMeatClassification(entry)
+                    entry.food.containsProcessedMeat = classification.containsProcessedMeat
+                    entry.food.containsRedMeat = classification.containsRedMeat
+                }
+            } else { entry.food = corrected(entry.food) }
+            updated.entries[index] = entry
+        }
+        guard matched.count == suggestions.count else {
+            throw DiaryDatabaseError.invalidData("Some foods changed since review. No classifications were updated. Reload the suggestions.")
+        }
+        document = updated
+    }
+
+    func unknownMeatEntryCount(numberOfDays: Int = 30, referenceDate: Date = Date(),
+                               processed: Bool = true, red: Bool = true) -> Int {
+        guard numberOfDays > 0 else { return 0 }
+        let end = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: referenceDate))!
+        let start = calendar.date(byAdding: .day, value: -numberOfDays, to: end)!
+        return document.entries.filter { entry in
+            guard entry.date >= start, entry.date < end, !entry.isCheatDayAdjustment else { return false }
+            guard entry.isMeal, let items = entry.mealItems else {
+                return (processed && entry.food.containsProcessedMeat == nil) || (red && entry.food.containsRedMeat == nil)
+            }
+            func unknown(_ key: KeyPath<Food, Bool?>, override: Bool?) -> Bool {
+                override == nil && !items.contains { $0.food[keyPath: key] == true }
+                    && items.contains { $0.food[keyPath: key] == nil }
+            }
+            return (processed && unknown(\.containsProcessedMeat, override: entry.processedMeatOverride))
+                || (red && unknown(\.containsRedMeat, override: entry.redMeatOverride))
+        }.count
     }
 
     func healthEntries(on date: Date) -> [DiaryEntry] {

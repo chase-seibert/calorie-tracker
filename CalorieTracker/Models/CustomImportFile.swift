@@ -16,6 +16,13 @@ struct CustomFoodDefinition: Codable, Equatable, Sendable {
     var notes: String?
     var containsProcessedMeat: Bool? = nil
     var containsRedMeat: Bool? = nil
+    // Review-only state, deliberately not accepted from the interchange file.
+    var processedMeatWasEdited = false
+    var redMeatWasEdited = false
+
+    private enum CodingKeys: String, CodingKey {
+        case name, servingDescription, servingGrams, nutrition, notes, containsProcessedMeat, containsRedMeat
+    }
 
     func validate() throws {
         guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
@@ -71,8 +78,12 @@ struct CustomFoodDefinition: Codable, Equatable, Sendable {
                 label: normalized.servingDescription,
                 grams: grams
             )],
-            containsProcessedMeat: normalized.containsProcessedMeat ?? false,
-            containsRedMeat: normalized.containsRedMeat ?? false
+            containsProcessedMeat: normalized.containsProcessedMeat,
+            containsRedMeat: normalized.containsRedMeat,
+            meatResolution: FoodMeatResolution(
+                processed: normalized.containsProcessedMeat == nil ? .unknown : (processedMeatWasEdited ? .user : .imported),
+                red: normalized.containsRedMeat == nil ? .unknown : (redMeatWasEdited ? .user : .imported),
+                inputName: normalized.name)
         )
     }
 
@@ -270,7 +281,7 @@ enum CustomImportFile: Equatable, Sendable {
       "notes": "Short explanation of the overall estimate and biggest uncertainty"
     }
 
-    Replace every example value with your estimate. Use numbers, not ranges. Estimate each serving weight even if uncertain. For a meal file, list meaningful constituent foods and include oils, dressings, or sauces when calorically material; do not add top-level nutrition because the app calculates totals from the foods. Return the selected .calfood or .calmeal as a downloadable UTF-8 JSON attachment, not only as a code block.
+    Replace every example value with your estimate. Use numbers, not ranges. Estimate each serving weight even if uncertain. For a meal file, list meaningful constituent foods and include oils, dressings, or sauces when calorically material; do not add top-level nutrition because the app calculates totals from the foods. Set containsProcessedMeat to true for actual bacon, ham, sausage, or other processed meat; meatless substitutes are different foods. Red meat means unprocessed mammalian meat. Set each meat flag only when known; omit an uncertain flag instead of copying the example false. The app can resolve missing flags without replacing your nutrition estimate. Return the selected .calfood or .calmeal as a downloadable UTF-8 JSON attachment, not only as a code block.
     """
 
     static func load(from url: URL) throws -> CustomImportFile {

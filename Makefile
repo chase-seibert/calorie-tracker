@@ -54,7 +54,7 @@ ui-test-fixture: simulator-ready
 
 build: sim-build
 
-DIARY_TOOL_SOURCES := CalorieTracker/Models/Domain.swift CalorieTracker/Data/DiaryEngine.swift CalorieTracker/Data/DiaryRepository.swift CalorieTracker/Data/QuickLogStore.swift CalorieTracker/Data/CatalogStore.swift scripts/DiaryTool.swift
+DIARY_TOOL_SOURCES := CalorieTracker/Models/Domain.swift CalorieTracker/Data/FoodResolution.swift CalorieTracker/Data/DiaryEngine.swift CalorieTracker/Data/DiaryRepository.swift CalorieTracker/Data/QuickLogStore.swift CalorieTracker/Data/CatalogStore.swift scripts/DiaryTool.swift
 
 .PHONY: diary-tool storage-test storage-benchmark diary-convert diary-validate
 diary-tool: build/diary-tool
@@ -82,6 +82,10 @@ clean:
 
 catalog:
 	$(PYTHON) scripts/build_food_catalog.py --output CalorieTracker/Resources/FoodCatalog.sqlite3
+
+.PHONY: catalog-test
+catalog-test:
+	$(PYTHON) scripts/test_meat_classification.py
 
 catalog-refresh:
 	$(PYTHON) scripts/build_food_catalog.py --download --off-pages $(OFF_PAGES) --output CalorieTracker/Resources/FoodCatalog.sqlite3

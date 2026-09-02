@@ -44,6 +44,14 @@ rows cascade when their parent entry or template is deleted. Nullable Fiber,
 ingredient order, original UUIDs, and detached meal snapshots are preserved.
 New meal logs store explicit category overrides separately from derived flags.
 
+Food resolution adds optional provenance inside those existing food payloads;
+it needs no SQL schema change. Imports commit library snapshots and diary rows in
+one transaction. Reviewed historical corrections use indexed food scopes after a
+verified SQLite backup, not a stale full-document save. Approve All uses one backup
+and one transaction for the reviewed batch; any stale suggestion aborts the batch.
+See
+[Food classification resolution](food-resolution.md). Conversion remains lossless.
+
 `DiaryStore` is a main-actor presentation facade. Opening, saving, and loading
 run off the main thread. Its entry cache contains 90 days, the selected diary
 day, and the newest 30 distinct Recent items. Historical search queries the
