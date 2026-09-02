@@ -174,7 +174,7 @@ struct QuickLogWidgetView: View {
             }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Open Log Food in VitaChase")
+        .accessibilityLabel("Open Log Food in Yum Chase")
         .containerBackground(.clear, for: .widget)
     }
 
@@ -202,7 +202,7 @@ struct QuickLogWidgetView: View {
                 }
                 .buttonStyle(.plain)
             } else {
-                Text("Open VitaChase to create recents")
+                Text("Open Yum Chase to create recents")
                     .font(.caption)
                     .lineLimit(2)
             }
@@ -242,7 +242,7 @@ struct QuickLogWidgetView: View {
     }
 
     private var emptyState: some View {
-        Text("Open VitaChase to build your recent suggestions.")
+        Text("Open Yum Chase to build your recent suggestions.")
             .font(.caption)
             .foregroundStyle(.secondary)
     }
@@ -275,7 +275,7 @@ struct VitaChaseQuickLogWidget: Widget {
         StaticConfiguration(kind: kind, provider: QuickLogWidgetProvider()) { entry in
             QuickLogWidgetView(entry: entry)
         }
-        .configurationDisplayName("VitaChase Quick Log")
+        .configurationDisplayName("Yum Chase Quick Log")
         .description("Log a Magic or recent food and check today’s calories left.")
         .supportedFamilies([
             .systemSmall,
@@ -433,7 +433,7 @@ struct CaloriesLeftWidgetView: View {
     }
 
     private var displayStatus: String {
-        guard let remaining = entry.remaining else { return "Set a goal in VitaChase" }
+        guard let remaining = entry.remaining else { return "Set a goal in Yum Chase" }
         return remaining >= 0 ? "calories left" : "calories over"
     }
 
@@ -520,7 +520,7 @@ struct VitaChaseCaloriesLeftWidget: Widget {
         StaticConfiguration(kind: kind, provider: CaloriesLeftWidgetProvider()) { entry in
             CaloriesLeftWidgetView(entry: entry)
         }
-        .configurationDisplayName("VitaChase Calories Left")
+        .configurationDisplayName("Yum Chase Calories Left")
         .description("See how many calories remain against today’s goal.")
         .supportedFamilies([
             .systemSmall,

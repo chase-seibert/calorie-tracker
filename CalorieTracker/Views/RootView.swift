@@ -196,7 +196,7 @@ private struct FocusOnboardingStep: View {
                 VStack(alignment: .leading, spacing: 24) {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("What do you want to focus on?").font(.title.bold())
-                    Text("Calories and macros are always included. Choose any additional areas you want VitaChase to emphasize.")
+                    Text("Calories and macros are always included. Choose any additional areas you want Yum Chase to emphasize.")
                         .font(.body).foregroundStyle(.secondary)
                 }
                 VStack(spacing: 12) {
@@ -278,7 +278,7 @@ private struct HistoryImportOnboardingStep: View {
     let onContinue: () -> Void
 
     var body: some View {
-        OnboardingPage(icon: "arrow.down.doc", title: "Import history from another app", message: "If another app can export your foods or meals, VitaChase can import them from a small .calfood or .calmeal file. Your data stays on this device.", analyticsName: "onboarding_history_import", onBack: onBack, onContinue: onContinue) {
+        OnboardingPage(icon: "arrow.down.doc", title: "Import history from another app", message: "If another app can export your foods or meals, Yum Chase can import them from a small .calfood or .calmeal file. Your data stays on this device.", analyticsName: "onboarding_history_import", onBack: onBack, onContinue: onContinue) {
             HStack {
                 Spacer()
                 Button { showingImportGuide = true } label: { Label("Open import guide", systemImage: "book.pages") }
@@ -305,7 +305,7 @@ private struct AppleHealthOnboardingStep: View {
     let onContinue: () -> Void
 
     var body: some View {
-        OnboardingPage(icon: "heart.fill", title: "Connect Apple Health", message: "VitaChase can write calories, macros, and fiber from your logged foods and meals to Apple Health. This is optional and can be changed in Settings.", analyticsName: "onboarding_apple_health", onBack: onBack, onContinue: onContinue) {
+        OnboardingPage(icon: "heart.fill", title: "Connect Apple Health", message: "Yum Chase can write calories, macros, and fiber from your logged foods and meals to Apple Health. This is optional and can be changed in Settings.", analyticsName: "onboarding_apple_health", onBack: onBack, onContinue: onContinue) {
             if healthKit.authorizationState == .authorized {
                 Label("Apple Health connected", systemImage: "checkmark.circle.fill").foregroundStyle(AppTheme.protein)
             } else if healthKit.isAvailable {
@@ -337,7 +337,7 @@ private struct TrackingConceptsOnboardingStep: View {
 
     var body: some View {
         OnboardingPage(icon: "calendar.badge.clock", title: "Understand your tracking days", message: "A little context helps the trends make sense.", analyticsName: "onboarding_tracking_concepts", onBack: onBack, onContinue: onContinue) {
-            conceptRow("sparkles", "Cheat days", "A planned higher-calorie day. VitaChase keeps the adjustment visible so your weekly picture stays honest.")
+            conceptRow("sparkles", "Cheat days", "A planned higher-calorie day. Yum Chase keeps the adjustment visible so your weekly picture stays honest.")
             conceptRow("minus.circle", "Gap days", "A day with no food or meal log. It is left blank rather than counted as a success or failure.")
             conceptRow("wineglass", "Alcohol", "Drinks are tracked separately, while their estimated calories still count toward the day’s total.")
         }

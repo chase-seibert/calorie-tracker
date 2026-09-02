@@ -218,7 +218,7 @@ enum CustomImportFile: Equatable, Sendable {
     static let maximumFileSize = 256 * 1_024
 
     static let assistantPrompt = """
-    Analyze the pictured food manually and create exactly one downloadable Calorie Tracker JSON attachment.
+    Analyze the pictured food manually and create exactly one downloadable Yum Chase JSON attachment.
 
     DEFAULT DECISION RULE:
     - Unless I explicitly ask for a meal file or ask you to separate the dish into a list of foods, create a .calfood file representing the entire pictured portion as one food.
@@ -370,9 +370,9 @@ enum CustomImportError: LocalizedError, Equatable {
         case .fileTooLarge:
             "The import file is too large."
         case .invalidJSON:
-            "The file isn’t valid Calorie Tracker JSON."
+            "The file isn’t valid Yum Chase JSON."
         case .wrongFormat:
-            "This file is not a supported Calorie Tracker food or meal."
+            "This file is not a supported Yum Chase food or meal."
         case let .unsupportedVersion(version):
             "Import file version \(version) isn’t supported by this version of the app."
         case let .extensionMismatch(expected):

@@ -65,9 +65,9 @@ ID `00008150-000E41422E40401C` by default.
 
 The app and widget targets both require the App Groups capability with
 `group.com.cseibert.CalorieTracker`. Automatic signing should create or update
-the app and widget provisioning profiles. After installing, launch VitaChase
+the app and widget provisioning profiles. After installing, launch Yum Chase
 once so it can migrate an existing diary and publish its Siri shortcuts and
-dynamic icon actions. Add “VitaChase Quick Log” or “VitaChase Calories Left”
+dynamic icon actions. Add “Yum Chase Quick Log” or “Yum Chase Calories Left”
 from the Home or Lock Screen widget gallery. See `docs/quick-entry.md` for
 supported Siri phrases and system behavior.
 
@@ -78,7 +78,7 @@ Settings → Accounts. Then open Signing & Capabilities for both the
 regenerate their profiles. The same App Group must be enabled for both bundle
 identifiers.
 
-On the first launch, open Settings in CalorieTracker and choose Connect Apple
+On the first launch, open Settings in Yum Chase and choose Connect Apple
 Health. Grant write access for calories, carbohydrates, fat, protein, and Fiber
 when prompted. HealthKit is unavailable in the simulator, so the connection
 flow must be exercised on the iPhone.

@@ -3,6 +3,33 @@ import XCTest
 @testable import CalorieTracker
 
 final class CalorieTrackerTests: XCTestCase {
+    func testYumChaseBrandingPreservesInstallationAndWidgetIdentity() throws {
+        let app = Bundle.main
+        XCTAssertEqual(app.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String, "Yum Chase")
+        XCTAssertEqual(app.object(forInfoDictionaryKey: "CFBundleName") as? String, "Yum Chase")
+        XCTAssertEqual(app.bundleIdentifier, "com.cseibert.CalorieTracker")
+        XCTAssertEqual(SharedDiaryStorage.appGroupIdentifier, "group.com.cseibert.CalorieTracker")
+        XCTAssertEqual(SharedDiaryStorage.widgetKind, "VitaChaseQuickLog")
+        XCTAssertEqual(SharedDiaryStorage.caloriesWidgetKind, "VitaChaseCaloriesLeft")
+        XCTAssertEqual(VitaChaseDeepLink.logFoodURL.absoluteString, "vitachase://log-food")
+
+        let widgetsURL = try XCTUnwrap(app.builtInPlugInsURL).appendingPathComponent("VitaChaseWidgets.appex")
+        let widgets = try XCTUnwrap(Bundle(url: widgetsURL))
+        XCTAssertEqual(widgets.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String, "Yum Chase Widgets")
+        XCTAssertEqual(widgets.bundleIdentifier, "com.cseibert.CalorieTracker.Widgets")
+
+        let icons = try XCTUnwrap(app.object(forInfoDictionaryKey: "CFBundleIcons") as? [String: Any])
+        let primaryIcon = try XCTUnwrap(icons["CFBundlePrimaryIcon"] as? [String: Any])
+        XCTAssertEqual(primaryIcon["CFBundleIconName"] as? String, "AppIcon")
+    }
+
+    func testAppIconUsesTheApprovedPeachMochiArtwork() throws {
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let selected = root.appendingPathComponent("docs/icon-concepts/2026-09-02-round-2/yum-chase-01-peach-mochi.png")
+        let appIcon = root.appendingPathComponent("CalorieTracker/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png")
+        XCTAssertEqual(try Data(contentsOf: appIcon), try Data(contentsOf: selected))
+    }
+
     private var resolutionCatalog: CatalogStore {
         CatalogStore(url: URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
             .appendingPathComponent("CalorieTracker/Resources/FoodCatalog.sqlite3"))

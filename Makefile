@@ -56,7 +56,13 @@ build: sim-build
 
 DIARY_TOOL_SOURCES := CalorieTracker/Models/Domain.swift CalorieTracker/Data/FoodResolution.swift CalorieTracker/Data/DiaryEngine.swift CalorieTracker/Data/DiaryRepository.swift CalorieTracker/Data/QuickLogStore.swift CalorieTracker/Data/CatalogStore.swift scripts/DiaryTool.swift
 
-.PHONY: diary-tool storage-test storage-benchmark diary-convert diary-validate
+.PHONY: diary-tool storage-test storage-benchmark diary-convert diary-validate icon-review
+ICON_DIR ?= docs/icon-concepts/2026-09-02
+
+icon-review:
+	mkdir -p build/DiaryModuleCache
+	xcrun swift -module-cache-path build/DiaryModuleCache scripts/render_icon_review.swift "$(ICON_DIR)"
+
 diary-tool: build/diary-tool
 
 build/diary-tool: $(DIARY_TOOL_SOURCES)

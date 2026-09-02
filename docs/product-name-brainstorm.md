@@ -1,16 +1,70 @@
 # Product name brainstorm
 
-## Current local trial
+## Selected name and icon — September 2, 2026
 
-The current name under evaluation is **VitaChase**, written as one CamelCase
-compound and pronounced as two words. The installed app uses this name on the
-iPhone Home Screen so it can be evaluated through normal daily use.
+The app is **Yum Chase**, with a space, as explicitly selected by Chase. This
+overrides the earlier one-word CamelCase preference and the VitaChase trial.
+The selected icon is **Y1 Peach Mochi**, the first YumChase concept from
+[round 2](icon-concepts/2026-09-02-round-2/README.md).
 
-This is a local naming trial, not a final branding or availability decision.
-The Xcode project, target, executable, source folders, bundle identifier, data
-directories, HealthKit identifiers, document formats, and in-app terminology
-remain `CalorieTracker` or “Calorie Tracker” where applicable. Only the bundle
-display name changes during this trial.
+![Selected Peach Mochi app icon](icon-concepts/2026-09-02-round-2/yum-chase-01-peach-mochi.png)
+
+The Home Screen name, diary title, widgets, Siri responses, onboarding, import
+instructions, and system permission copy use Yum Chase. The approved opaque
+1024×1024 PNG is copied unchanged into the primary AppIcon asset; iOS supplies
+the rounded-corner mask.
+
+The Xcode project, targets, executable, source folders, bundle identifiers, App
+Group, widget kinds, existing `vitachase://` links, storage directories, HealthKit
+identifiers, and `.calfood`/`.calmeal` formats remain unchanged. This is a branding
+update, not a data migration or a new app installation. Physical-device deployment
+is a separate step; update the existing app without uninstalling it.
+
+Availability screening, App Store reservation, and formal trademark clearance
+have not been performed for Yum Chase. Selection is not a claim of availability.
+
+## Earlier brainstorm shortlist — September 2, 2026
+
+The latest direction is more playful and food-positive: savoring food, enjoying
+flavor, the physical actions of eating, and feeling satisfied. The initial
+shortlist used one-word CamelCase compounds ending in `Chase`, while letting a
+subtitle explain the tracking features; the selected spelling above supersedes it.
+
+Chase explicitly liked these seven candidates. **UmamiChase** was the strongest
+stated preference, with **ChompChase** second in the first round. The other five
+were liked additions rather than a ranked order. These preferences preceded the
+Yum Chase selection above.
+
+| Candidate | Appeal |
+| --- | --- |
+| **UmamiChase** | Rich flavor and food appreciation, with a little sophistication. |
+| **ChompChase** | Playful, physical eating action; strong personality and mascot potential. |
+| **SavorChase** | Enjoying every bite; warm, intentional, and less cartoonish. |
+| **GustoChase** | Eating with enthusiasm and appetite; energetic without being silly. |
+| **CrunchChase** | Satisfying texture and sound, with a second meaning of crunching numbers. |
+| **ZestChase** | Bright flavor and an appetite for life; bridges sophistication and playfulness. |
+| **YumChase** | Short, cheerful, and immediately associated with enjoying food. |
+
+[AI-generated icon concepts for all seven names](icon-concepts/2026-09-02/README.md)
+include 1024×1024 PNGs, the exact prompts, and a comparison at 40–60 pixels in
+color and grayscale. These first-round assets remain historical concepts.
+
+[Round 2: higher-fidelity icon explorations](icon-concepts/2026-09-02-round-2/README.md)
+adds three four-color concepts each for YumChase, ChompChase, and UmamiChase,
+with labeled comparison sheets and small-size checks. Y1 Peach Mochi was selected
+for the app after reviewing the nine concepts on a mock Home Screen.
+
+Earlier working presentation for UmamiChase, retained as brainstorm history:
+
+- **App Store name:** UmamiChase
+- **Subtitle:** Food, macros & daily patterns
+- **Positioning:** Track what you eat. Chase what matters.
+
+Availability status as of this brainstorm: App Store, Google Play, broader web,
+domain, and trademark screening **have not been performed for these seven
+candidates**. The older VitaChase screening below does not apply to them.
+App Store reservation and formal trademark clearance remain separate next steps.
+The selected name and implementation scope are recorded at the top of this document.
 
 ## Product naming brief
 
@@ -26,8 +80,8 @@ The name should therefore:
 - feel focused, fast, and confident without promising medical outcomes;
 - be memorable and natural in “Open ___” and “I logged it in ___”;
 - remain legible beneath an iPhone app icon;
-- support the portfolio convention of a one-word CamelCase compound ending in
-  `Chase`;
+- support the portfolio's `Chase` suffix, with the approved two-word spelling
+  **Yum Chase**;
 - avoid sounding derivative of an established calorie-tracking app.
 
 ## U.S. App Store naming survey
@@ -68,7 +122,7 @@ Lose It!, an instrument such as Cronometer, a coined brand such as Lifesum or
 Yazio, or a specific system such as MacroFactor. The subtitle and App Store
 description can carry the category explanation.
 
-## Recommended direction: VitaChase
+## Earlier recommendation — August 28, 2026: VitaChase
 
 **VitaChase** uses *vita*, meaning life, as a compact bridge between nutrition,
 vitality, and long-term health. It does not reduce the product to calories,
@@ -129,8 +183,8 @@ category brands.
 
 ## Naming guardrails
 
-- Use `Chase` as the suffix in a single CamelCase product name.
-- Let people pronounce the compound as two words.
+- Use **Yum Chase**, including the space, for all current product presentation.
+- Keep the earlier CamelCase spellings only when discussing historical candidates.
 - Avoid `Chaser` and avoid leading with Chase.
 - Avoid names centered only on calories when selectable health focus areas are
   a core differentiator.
@@ -146,3 +200,11 @@ category brands.
 - **August 28, 2026:** Began a local Home Screen trial of **VitaChase** by
   changing only the iOS bundle display name. No internal project rename was
   performed.
+- **September 2, 2026:** Shortlisted **UmamiChase**, **ChompChase**,
+  **SavorChase**, **GustoChase**, **CrunchChase**, **ZestChase**, and **YumChase**
+  after exploring food enjoyment, eating actions, and satisfaction. UmamiChase
+  leads the stated preferences; no final rename or new availability screening
+  was performed.
+- **September 2, 2026:** Selected **Yum Chase** (with a space) and **Y1 Peach
+  Mochi** as the app name and icon. Updated user-facing branding and the primary
+  app icon while preserving installation, storage, widget, and import identities.

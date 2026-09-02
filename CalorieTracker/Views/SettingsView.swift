@@ -262,7 +262,7 @@ private struct AppleHealthSettingsView: View {
             }
 
             Section("Nutrition Data") {
-                Text("Calorie Tracker writes calories, carbohydrates, fat, protein, and available fiber for logged foods, meals, and alcohol estimates.")
+                Text("Yum Chase writes calories, carbohydrates, fat, protein, and available fiber for logged foods, meals, and alcohol estimates.")
                     .foregroundStyle(.secondary)
             }
         }

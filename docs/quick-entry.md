@@ -1,14 +1,14 @@
 # System quick entry
 
-VitaChase exposes the same local diary and recommendation data through Home
+Yum Chase exposes the same local diary and recommendation data through Home
 Screen quick actions, Siri/App Intents, and an interactive widget. No food names,
 history, or nutrition data leave the device.
 
 ## Home Screen app icon
 
-Touch and hold VitaChase on the Home Screen to see the current Magic
+Touch and hold Yum Chase on the Home Screen to see the current Magic
 recommendations. Up to four single foods, saved meals, or Magic sets appear with
-their calories. Selecting one launches VitaChase, logs every item with its
+their calories. Selecting one launches Yum Chase, logs every item with its
 remembered quantity, and leaves the diary visible without showing a confirmation
 dialog.
 
@@ -20,12 +20,12 @@ buttons provide that behavior.
 
 The app publishes two App Shortcuts:
 
-- “Log cappuccino in VitaChase” logs the most recently used exact-name match
+- “Log cappuccino in Yum Chase” logs the most recently used exact-name match
   from Recent. Compound requests such as “Log a cappuccino and feta cheese in
-  VitaChase” log each exact Recent match together. Partial matches can be
+  Yum Chase” log each exact Recent match together. Partial matches can be
   resolved by Siri. If every requested name cannot be resolved from Recent,
   nothing is logged.
-- “How many calories do I have left in VitaChase?” reports the daily goal minus
+- “How many calories do I have left in Yum Chase?” reports the daily goal minus
   today's food, meal, adjustment, and alcohol calories. It asks the user to set
   a goal when none exists.
 
@@ -35,13 +35,13 @@ the main app performs its normal health sync.
 
 ## Home and Lock Screen widget
 
-Add “VitaChase Quick Log” from the widget gallery. The small Home Screen widget
+Add “Yum Chase Quick Log” from the widget gallery. The small Home Screen widget
 shows one suggestion, the medium widget shows up to three, and the large widget
 shows up to eight. Circular and rectangular Lock Screen variants log the leading
 suggestion. A button logs directly without opening the app. After a successful
 write, the widget reloads and shows a green “Logged” receipt for ten minutes.
 
-“VitaChase Calories Left” is a separate widget for the Home or Lock Screen. It
+“Yum Chase Calories Left” is a separate widget for the Home or Lock Screen. It
 shows the remaining (or over-goal) calories and progress against the daily goal.
 Diary changes reload both widget types, and the calories widget schedules a new
 entry at the next local midnight. Tapping the Calories Left widget opens the app
@@ -62,6 +62,6 @@ choices change at the same boundaries as the in-app Magic mode.
 ## Shared storage
 
 The app and widget use App Group `group.com.cseibert.CalorieTracker`. On the
-first app launch after upgrading, VitaChase copies the existing Application
+first app launch after upgrading, Yum Chase copies the existing Application
 Support diary into the group container and leaves the legacy file intact as a
 recovery copy. All subsequent writes use the shared copy.

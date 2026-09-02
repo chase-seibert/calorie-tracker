@@ -1,5 +1,12 @@
 # Frustration Log
 
+## 2026-09-02: AppKit contact sheets need a drawable bitmap format
+
+A 24-bit, three-sample RGB `NSBitmapImageRep` loaded but produced a nil
+`NSGraphicsContext(bitmapImageRep:)`. Use a 32-bit, four-sample RGBA bitmap
+for the drawing canvas, fill its background, and keep the actual icon exports
+opaque. This unblocked the small-size/grayscale icon review sheet.
+
 ## 2026-09-02: Classification enrichment changed legacy snapshots
 
 The storage round-trip check caught added provenance on already-classified

@@ -1,6 +1,6 @@
 # Custom food and meal imports
 
-Calorie Tracker owns two small, tool-neutral formats for structured nutrition
+Yum Chase owns two small, tool-neutral formats for structured nutrition
 estimates. Both are UTF-8 JSON:
 
 - `.calfood` represents one aggregate food serving.
@@ -13,15 +13,15 @@ user explicitly requests a meal file or separate foods.
 ## Workflow
 
 1. Send a food photo and any useful context to an assistant.
-2. In Calorie Tracker, open **Settings → AI Food & Meal Import** and copy the
+2. In Yum Chase, open **Settings → AI Food & Meal Import** and copy the
    format prompt.
 3. Paste the prompt after the assistant analyzes the food. Explicitly request a
    meal file or separate foods only when that is desired.
-4. Open or share the returned attachment to Calorie Tracker.
+4. Open or share the returned attachment to Yum Chase.
 5. Review and edit every value. Tap **Log** to add one serving to today.
 6. Enable the save toggle only when the food or meal is worth reusing.
 
-The conversation is not shared with Calorie Tracker. Only the structured import
+The conversation is not shared with Yum Chase. Only the structured import
 file crosses the boundary.
 
 ## `.calfood` version 1

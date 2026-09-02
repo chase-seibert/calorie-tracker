@@ -97,7 +97,7 @@
 - The compact navigation title appears only after the macro summary card is
   fully above the visible diary. It shows consumed calories, includes the
   optional goal when configured, updates with diary changes, and restores the
-  normal “Calorie Tracker” title when the card returns.
+  normal “Yum Chase” title when the card returns.
 - Logged-food deletion uses the native trailing swipe action and supports a full
   swipe. The normal row shows no trash button or destructive long-press action.
 - Logged foods reorder through a long-press drag and visibly move as they are
@@ -175,7 +175,7 @@
 - Light and dark appearances use adaptive backgrounds, elevated cards, primary
   and secondary text, control fills, source badges, macro colors, and action
   colors across Diary, Log Food, quantity editing, Settings, and Trends.
-- Calorie Tracker owns two versioned JSON formats: `.calfood` represents one
+- Yum Chase owns two versioned JSON formats: `.calfood` represents one
   aggregate food and `.calmeal` represents a named list of food snapshots.
   Opening either presents an editable review sheet before anything is saved.
   Log records one serving on the current day; saving to Custom foods or Saved
@@ -199,7 +199,7 @@
 - Magic's explanation appears below its suggestions and lists the breakfast,
   lunch, and dinner time ranges.
 - Home Screen icon quick actions mirror only the current Magic suggestions. iOS
-  launches or resumes VitaChase before the selected action is logged; the diary
+  launches or resumes Yum Chase before the selected action is logged; the diary
   remains visible without an additional confirmation dialog.
 - Siri and Shortcuts expose “Log Recent Food or Meal” and “Calories Left Today.”
   Exact spoken names resolve to the most recently logged matching Recent item;

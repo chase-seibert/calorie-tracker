@@ -7,7 +7,7 @@ The SwiftUI app has two local data layers:
 1. A read-only, bundled SQLite catalog containing normalized food records and an
    FTS5 search index. `CatalogStore` performs source-filtered search and barcode
    lookup without loading the catalog into memory.
-2. A writable `Diary.sqlite` in the VitaChase App Group container, managed by
+2. A writable `Diary.sqlite` in the Yum Chase App Group container, managed by
    `DiaryRepository`. It stores entries and ingredient snapshots, day statuses,
    tracking settings, favorites, meals, quantities, personal foods, custom names,
    daily alcohol aggregates, quick-log receipts, and a durable HealthKit queue.

@@ -1,5 +1,12 @@
 # Design
 
+## Product identity
+
+Use **Yum Chase** (with a space) in user-facing copy. The Home Screen icon is
+the approved **Peach Mochi** artwork from the second icon exploration. Keep its
+opaque, full-bleed 1024×1024 source square; iOS applies the icon mask. Internal
+project names and persistent identifiers remain unchanged for compatibility.
+
 ## Principles
 
 1. The default screen answers “what have I logged today?” immediately.

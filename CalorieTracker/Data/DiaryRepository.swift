@@ -248,7 +248,7 @@ final class DiaryRepository: @unchecked Sendable {
             }
             #if WIDGET_EXTENSION
             guard existed else {
-                throw DiaryDatabaseError.unavailable("Open VitaChase to prepare the diary first.")
+                throw DiaryDatabaseError.unavailable("Open Yum Chase to prepare the diary first.")
             }
             #endif
             if !existed, try SharedDiaryStorage.legacyDiaryURLs.contains(where: { try DiaryJSONMigration.exists($0) }) {

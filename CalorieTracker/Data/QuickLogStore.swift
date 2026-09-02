@@ -125,15 +125,15 @@ enum QuickLogError: LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .unavailable:
-            "VitaChase data isn’t available yet. Open the app once and try again."
+            "Yum Chase data isn’t available yet. Open the app once and try again."
         case .unknownItem:
-            "That food or meal isn’t in your recent VitaChase items."
+            "That food or meal isn’t in your recent Yum Chase items."
         case .loggingDisabled:
             "Food logging is disabled because today is marked as a cheat day."
         case .saveFailed:
-            "VitaChase couldn’t save that entry."
+            "Yum Chase couldn’t save that entry."
         case .calorieGoalNotSet:
-            "Set a daily calorie goal in VitaChase first."
+            "Set a daily calorie goal in Yum Chase first."
         }
     }
 }

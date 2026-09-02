@@ -358,11 +358,11 @@ struct CustomImportGuideView: View {
             Section {
                 step(1, "Send a food photo and any useful context to ChatGPT or another assistant.")
                 step(2, "Paste the prompt below. It creates a .calfood by default, or a .calmeal only when you explicitly request separate foods.")
-                step(3, "Open or share the attachment to Calorie Tracker, review the estimate, and tap Log.")
+                step(3, "Open or share the attachment to Yum Chase, review the estimate, and tap Log.")
             } header: {
                 Text("How it works")
             } footer: {
-                Text("Only the small food or meal file is handed to Calorie Tracker. The app does not receive a chat link or access your conversation.")
+                Text("Only the small food or meal file is handed to Yum Chase. The app does not receive a chat link or access your conversation.")
             }
 
             Section("Format prompt") {

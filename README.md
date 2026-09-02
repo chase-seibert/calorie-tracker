@@ -1,8 +1,13 @@
-# Calorie Tracker
+# Yum Chase
 
 A fast, private, local-first iPhone calorie and macro tracker. The app focuses on
 three days (yesterday, today, tomorrow), makes repeated foods quick to log, and
 keeps the diary and food search on-device.
+
+The app uses the **Yum Chase** name (with a space) and the **Peach Mochi** icon.
+The Xcode project and target remain `CalorieTracker`; bundle IDs, App Group,
+storage paths, and import formats are unchanged so existing installations retain
+their diary and integrations. See [the branding decision](docs/product-name-brainstorm.md).
 
 ## What works
 

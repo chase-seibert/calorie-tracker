@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>VitaChase</string>
+	<string>Yum Chase</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -23,7 +23,7 @@
 	<array>
 		<dict>
 			<key>CFBundleTypeName</key>
-			<string>Calorie Tracker Food</string>
+			<string>Yum Chase Food</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -35,7 +35,7 @@
 		</dict>
 		<dict>
 			<key>CFBundleTypeName</key>
-			<string>Calorie Tracker Meal</string>
+			<string>Yum Chase Meal</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
@@ -53,7 +53,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>$(PRODUCT_NAME)</string>
+	<string>Yum Chase</string>
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
@@ -67,9 +67,9 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Scan food barcodes for local lookup.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>CalorieTracker reads nutrition data you choose to share with it.</string>
+	<string>Yum Chase reads nutrition data you choose to share with it.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>CalorieTracker writes calories, carbohydrates, fat, protein, and available fiber for foods you log.</string>
+	<string>Yum Chase writes calories, carbohydrates, fat, protein, and available fiber for foods you log.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -89,7 +89,7 @@
 				<string>public.json</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>Calorie Tracker Food</string>
+			<string>Yum Chase Food</string>
 			<key>UTTypeIdentifier</key>
 			<string>com.cseibert.calorietracker.food</string>
 			<key>UTTypeTagSpecification</key>
@@ -108,7 +108,7 @@
 				<string>public.json</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>Calorie Tracker Meal</string>
+			<string>Yum Chase Meal</string>
 			<key>UTTypeIdentifier</key>
 			<string>com.cseibert.calorietracker.meal</string>
 			<key>UTTypeTagSpecification</key>

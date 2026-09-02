@@ -112,7 +112,7 @@ struct DiaryView: View {
             .navigationDestination(isPresented: $showingStreak) {
                 StreakReportView()
             }
-            .navigationTitle("Calorie Tracker")
+            .navigationTitle("Yum Chase")
             .toolbar {
                 if !isMacroSummaryVisible {
                     ToolbarItem(placement: .principal) {

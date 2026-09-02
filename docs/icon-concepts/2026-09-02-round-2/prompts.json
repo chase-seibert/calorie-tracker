@@ -1,0 +1,271 @@
+{
+  "date": "2026-09-02",
+  "title": "Nine higher-fidelity icon explorations",
+  "gridTitle": "Three names. Nine richer explorations.",
+  "generator": "built-in image_gen",
+  "output": "1024x1024 opaque PNG",
+  "note": "Four base-color families per concept with tonal shading. New raster explorations using first-round concept references; original assets unchanged.",
+  "icons": [
+    {
+      "brand": "YumChase",
+      "name": "YumChase Y1",
+      "title": "Peach Mochi",
+      "slug": "yum-chase-01-peach-mochi",
+      "reference": "/Users/cseibert/projects/calorie-tracker/docs/icon-concepts/2026-09-02/yum-chase.png",
+      "palette": [
+        [
+          "Coral",
+          "#F36A50"
+        ],
+        [
+          "Cream",
+          "#FFF0D6"
+        ],
+        [
+          "Plum",
+          "#382336"
+        ],
+        [
+          "Peach",
+          "#FFB995"
+        ]
+      ],
+      "concept": "Evolve the delighted lip-licking face into one pillowy, asymmetrical cream mochi-shaped character head. Two closed joyful eyes, a wide plum smile, and one broad peach tongue licking the corner. No limbs, no cheeks or decorative marks, no nose. A soft 3D sculpted confection, velvety matte surface, broad controlled highlights, subtle contact depth. Coral full-bleed background. Original adult-friendly mascot, not a standard emoji.",
+      "prompt": "Use case: stylized-concept.\nAsset type: one high-fidelity iOS app-icon exploration, square 1024×1024.\nInput image role: the single attached image is a concept/identity reference from an earlier minimalist round. Create a fresh exploration with the specified subject and finish, not a comparison sheet or a copy of its flat colors.\nThe product is a private food diary celebrating food enjoyment and personal nutrition awareness.\nKeep one immediately understandable focal point with a bold silhouette. Richer material rendering and controlled dimensional shading are welcome, but no tiny details: it must read clearly at 40–60 pixels and in grayscale. Center the focal object optically, occupying roughly 65–72% of the square, with comfortable safety margin.\nUse precisely the four specified base color families; tonal shading and antialiasing may vary within those colors, but do not introduce extra colored props. Palette labels and hex codes are instructions only: DO NOT draw swatches, labels, letters, words, names or numbers.\nOpaque full-bleed square background to all four SHARP corners. NO baked-in rounded corners, border, inset app tile, badge, device mockup, layout, contact sheet, watermark, caption or extra objects. No photorealistic room or environment. Output one icon only.\nBrand (context only; do not render): YumChase. Exploration: Peach Mochi.\nFour-color palette: Coral #F36A50; Cream #FFF0D6; Plum #382336; Peach #FFB995.\nSubject, composition and rendering: Evolve the delighted lip-licking face into one pillowy, asymmetrical cream mochi-shaped character head. Two closed joyful eyes, a wide plum smile, and one broad peach tongue licking the corner. No limbs, no cheeks or decorative marks, no nose. A soft 3D sculpted confection, velvety matte surface, broad controlled highlights, subtle contact depth. Coral full-bleed background. Original adult-friendly mascot, not a standard emoji.",
+      "sourcePath": "/Users/cseibert/.codex/generated_images/01a05fe8-6e5d-7c12-8fee-d44feb1989f9/exec-021cecd2-2c71-4c3b-9f53-345edc48b4bf.png",
+      "file": "yum-chase-01-peach-mochi.png"
+    },
+    {
+      "brand": "YumChase",
+      "name": "YumChase Y2",
+      "title": "Cherry Smile",
+      "slug": "yum-chase-02-cherry-smile",
+      "reference": "/Users/cseibert/projects/calorie-tracker/docs/icon-concepts/2026-09-02/yum-chase.png",
+      "palette": [
+        [
+          "Cherry",
+          "#B51F47"
+        ],
+        [
+          "Vanilla",
+          "#FFF2D5"
+        ],
+        [
+          "Petal",
+          "#FF91AC"
+        ],
+        [
+          "Burgundy",
+          "#521B35"
+        ]
+      ],
+      "concept": "Retain the concept of two closed-eye arcs and a generous lip-licking smile, but reinterpret the features as beautifully sculpted raised vanilla enamel shapes with a petal-pink tongue and restrained burgundy recessed depth. No enclosing face circle or badge: the face features themselves are the single emblem on a full-bleed cherry background. Rich, tactile, smooth ceramic-enamel polish; rounded bevels, soft localized highlights. Premium food-loving joy, not garish emoji or neon.",
+      "prompt": "Use case: stylized-concept.\nAsset type: one high-fidelity iOS app-icon exploration, square 1024×1024.\nInput image role: the single attached image is a concept/identity reference from an earlier minimalist round. Create a fresh exploration with the specified subject and finish, not a comparison sheet or a copy of its flat colors.\nThe product is a private food diary celebrating food enjoyment and personal nutrition awareness.\nKeep one immediately understandable focal point with a bold silhouette. Richer material rendering and controlled dimensional shading are welcome, but no tiny details: it must read clearly at 40–60 pixels and in grayscale. Center the focal object optically, occupying roughly 65–72% of the square, with comfortable safety margin.\nUse precisely the four specified base color families; tonal shading and antialiasing may vary within those colors, but do not introduce extra colored props. Palette labels and hex codes are instructions only: DO NOT draw swatches, labels, letters, words, names or numbers.\nOpaque full-bleed square background to all four SHARP corners. NO baked-in rounded corners, border, inset app tile, badge, device mockup, layout, contact sheet, watermark, caption or extra objects. No photorealistic room or environment. Output one icon only.\nBrand (context only; do not render): YumChase. Exploration: Cherry Smile.\nFour-color palette: Cherry #B51F47; Vanilla #FFF2D5; Petal #FF91AC; Burgundy #521B35.\nSubject, composition and rendering: Retain the concept of two closed-eye arcs and a generous lip-licking smile, but reinterpret the features as beautifully sculpted raised vanilla enamel shapes with a petal-pink tongue and restrained burgundy recessed depth. No enclosing face circle or badge: the face features themselves are the single emblem on a full-bleed cherry background. Rich, tactile, smooth ceramic-enamel polish; rounded bevels, soft localized highlights. Premium food-loving joy, not garish emoji or neon.",
+      "sourcePath": "/Users/cseibert/.codex/generated_images/01a05fe8-6e5d-7c12-8fee-d44feb1989f9/exec-1d50bfb3-8e95-4bdb-aa17-d86ad33d4ade.png",
+      "file": "yum-chase-02-cherry-smile.png"
+    },
+    {
+      "brand": "YumChase",
+      "name": "YumChase Y3",
+      "title": "Mint Bowl",
+      "slug": "yum-chase-03-mint-bowl",
+      "reference": "/Users/cseibert/projects/calorie-tracker/docs/icon-concepts/2026-09-02/yum-chase.png",
+      "palette": [
+        [
+          "Mint",
+          "#32AA9C"
+        ],
+        [
+          "Cream",
+          "#FFF1D9"
+        ],
+        [
+          "Coral",
+          "#F27365"
+        ],
+        [
+          "Ink",
+          "#173D41"
+        ]
+      ],
+      "concept": "Explore a different food-loving symbol: one mint ceramic bowl with a simple smooth cream dome of rice, integrated as a single compact mascot. The front of the bowl has two curved ink eyes and a delighted ink smile with a small broad coral tongue. No grains, steam, garnish, utensils, limbs or secondary props. Cream full-bleed background, strong mint/ink silhouette. High-fidelity smooth 2.5D ceramic illustration with restrained highlights and well-defined volume. The reference provides the happy expression only, not a layout to copy.",
+      "prompt": "Use case: stylized-concept.\nAsset type: one high-fidelity iOS app-icon exploration, square 1024×1024.\nInput image role: the single attached image is a concept/identity reference from an earlier minimalist round. Create a fresh exploration with the specified subject and finish, not a comparison sheet or a copy of its flat colors.\nThe product is a private food diary celebrating food enjoyment and personal nutrition awareness.\nKeep one immediately understandable focal point with a bold silhouette. Richer material rendering and controlled dimensional shading are welcome, but no tiny details: it must read clearly at 40–60 pixels and in grayscale. Center the focal object optically, occupying roughly 65–72% of the square, with comfortable safety margin.\nUse precisely the four specified base color families; tonal shading and antialiasing may vary within those colors, but do not introduce extra colored props. Palette labels and hex codes are instructions only: DO NOT draw swatches, labels, letters, words, names or numbers.\nOpaque full-bleed square background to all four SHARP corners. NO baked-in rounded corners, border, inset app tile, badge, device mockup, layout, contact sheet, watermark, caption or extra objects. No photorealistic room or environment. Output one icon only.\nBrand (context only; do not render): YumChase. Exploration: Mint Bowl.\nFour-color palette: Mint #32AA9C; Cream #FFF1D9; Coral #F27365; Ink #173D41.\nSubject, composition and rendering: Explore a different food-loving symbol: one mint ceramic bowl with a simple smooth cream dome of rice, integrated as a single compact mascot. The front of the bowl has two curved ink eyes and a delighted ink smile with a small broad coral tongue. No grains, steam, garnish, utensils, limbs or secondary props. Cream full-bleed background, strong mint/ink silhouette. High-fidelity smooth 2.5D ceramic illustration with restrained highlights and well-defined volume. The reference provides the happy expression only, not a layout to copy.",
+      "sourcePath": "/Users/cseibert/.codex/generated_images/01a05fe8-6e5d-7c12-8fee-d44feb1989f9/exec-b28af9a8-e021-46da-bb3e-01eb841c2f16.png",
+      "file": "yum-chase-03-mint-bowl.png"
+    },
+    {
+      "brand": "ChompChase",
+      "name": "ChompChase C1",
+      "title": "Tangerine Buddy",
+      "slug": "chomp-chase-01-tangerine-buddy",
+      "reference": "/Users/cseibert/projects/calorie-tracker/docs/icon-concepts/2026-09-02/chomp-chase.png",
+      "palette": [
+        [
+          "Tangerine",
+          "#F98732"
+        ],
+        [
+          "Midnight",
+          "#173148"
+        ],
+        [
+          "Cream",
+          "#FFF1D9"
+        ],
+        [
+          "Mint",
+          "#81D5B5"
+        ]
+      ],
+      "concept": "Evolve the reference's original bean-shaped chomping head into a plush sculpted tangerine character in side profile: one large round eye with cream surround and midnight pupil, a wide open midnight mouth, exactly two blunt cream teeth, and a single mint tongue as a small accent. No body, ears, horns, limbs, food or particles. Midnight full-bleed background. Refined matte clay with soft broad highlights, gentle volume and a crisply readable silhouette. Cheerful and hungry, never aggressive. Avoid perfect circular bodies, Pac-Man, known mascots and bitten fruit marks.",
+      "prompt": "Use case: stylized-concept.\nAsset type: one high-fidelity iOS app-icon exploration, square 1024×1024.\nInput image role: the single attached image is a concept/identity reference from an earlier minimalist round. Create a fresh exploration with the specified subject and finish, not a comparison sheet or a copy of its flat colors.\nThe product is a private food diary celebrating food enjoyment and personal nutrition awareness.\nKeep one immediately understandable focal point with a bold silhouette. Richer material rendering and controlled dimensional shading are welcome, but no tiny details: it must read clearly at 40–60 pixels and in grayscale. Center the focal object optically, occupying roughly 65–72% of the square, with comfortable safety margin.\nUse precisely the four specified base color families; tonal shading and antialiasing may vary within those colors, but do not introduce extra colored props. Palette labels and hex codes are instructions only: DO NOT draw swatches, labels, letters, words, names or numbers.\nOpaque full-bleed square background to all four SHARP corners. NO baked-in rounded corners, border, inset app tile, badge, device mockup, layout, contact sheet, watermark, caption or extra objects. No photorealistic room or environment. Output one icon only.\nBrand (context only; do not render): ChompChase. Exploration: Tangerine Buddy.\nFour-color palette: Tangerine #F98732; Midnight #173148; Cream #FFF1D9; Mint #81D5B5.\nSubject, composition and rendering: Evolve the reference's original bean-shaped chomping head into a plush sculpted tangerine character in side profile: one large round eye with cream surround and midnight pupil, a wide open midnight mouth, exactly two blunt cream teeth, and a single mint tongue as a small accent. No body, ears, horns, limbs, food or particles. Midnight full-bleed background. Refined matte clay with soft broad highlights, gentle volume and a crisply readable silhouette. Cheerful and hungry, never aggressive. Avoid perfect circular bodies, Pac-Man, known mascots and bitten fruit marks.",
+      "sourcePath": "/Users/cseibert/.codex/generated_images/01a05fe8-6e5d-7c12-8fee-d44feb1989f9/exec-12e942aa-df5e-4770-ab08-2e05196af564.png",
+      "file": "chomp-chase-01-tangerine-buddy.png"
+    },
+    {
+      "brand": "ChompChase",
+      "name": "ChompChase C2",
+      "title": "Pistachio Chomp",
+      "slug": "chomp-chase-02-pistachio-chomp",
+      "reference": "/Users/cseibert/projects/calorie-tracker/docs/icon-concepts/2026-09-02/chomp-chase.png",
+      "palette": [
+        [
+          "Pistachio",
+          "#B7D682"
+        ],
+        [
+          "Lilac",
+          "#C4B0E6"
+        ],
+        [
+          "Cream",
+          "#FFF3D9"
+        ],
+        [
+          "Plum",
+          "#382745"
+        ]
+      ],
+      "concept": "Explore a compact pistachio-green chomping creature head with a gently squared bean silhouette, one expressive plum eye and a big squared plum mouth opening to the right, two oversized cream blunt teeth. Lilac full-bleed background. Upscale soft-touch vinyl/clay render, chunky geometry, broad highlights and restrained ambient occlusion, no speckled texture. No body, accessories, food or scenery. Retain the playful original character idea but vary the head proportions. Avoid a circular Pac-Man shape and any established mascot.",
+      "prompt": "Use case: stylized-concept.\nAsset type: one high-fidelity iOS app-icon exploration, square 1024×1024.\nInput image role: the single attached image is a concept/identity reference from an earlier minimalist round. Create a fresh exploration with the specified subject and finish, not a comparison sheet or a copy of its flat colors.\nThe product is a private food diary celebrating food enjoyment and personal nutrition awareness.\nKeep one immediately understandable focal point with a bold silhouette. Richer material rendering and controlled dimensional shading are welcome, but no tiny details: it must read clearly at 40–60 pixels and in grayscale. Center the focal object optically, occupying roughly 65–72% of the square, with comfortable safety margin.\nUse precisely the four specified base color families; tonal shading and antialiasing may vary within those colors, but do not introduce extra colored props. Palette labels and hex codes are instructions only: DO NOT draw swatches, labels, letters, words, names or numbers.\nOpaque full-bleed square background to all four SHARP corners. NO baked-in rounded corners, border, inset app tile, badge, device mockup, layout, contact sheet, watermark, caption or extra objects. No photorealistic room or environment. Output one icon only.\nBrand (context only; do not render): ChompChase. Exploration: Pistachio Chomp.\nFour-color palette: Pistachio #B7D682; Lilac #C4B0E6; Cream #FFF3D9; Plum #382745.\nSubject, composition and rendering: Explore a compact pistachio-green chomping creature head with a gently squared bean silhouette, one expressive plum eye and a big squared plum mouth opening to the right, two oversized cream blunt teeth. Lilac full-bleed background. Upscale soft-touch vinyl/clay render, chunky geometry, broad highlights and restrained ambient occlusion, no speckled texture. No body, accessories, food or scenery. Retain the playful original character idea but vary the head proportions. Avoid a circular Pac-Man shape and any established mascot.",
+      "sourcePath": "/Users/cseibert/.codex/generated_images/01a05fe8-6e5d-7c12-8fee-d44feb1989f9/exec-5dfe55b6-4785-4170-803a-e45480b0643e.png",
+      "file": "chomp-chase-02-pistachio-chomp.png"
+    },
+    {
+      "brand": "ChompChase",
+      "name": "ChompChase C3",
+      "title": "Berry Bite",
+      "slug": "chomp-chase-03-berry-bite",
+      "reference": "/Users/cseibert/projects/calorie-tracker/docs/icon-concepts/2026-09-02/chomp-chase.png",
+      "palette": [
+        [
+          "Berry",
+          "#7748BC"
+        ],
+        [
+          "Coral",
+          "#F58670"
+        ],
+        [
+          "Cream",
+          "#FFF0DB"
+        ],
+        [
+          "Plum",
+          "#2D1C46"
+        ]
+      ],
+      "concept": "Explore the chomping creature as a three-quarter-view berry-purple rounded head with a short broad snout, one prominent visible eye, a large friendly plum mouth and two cream block teeth. One cohesive mascot head, no body, antennae, limbs, food or other props. Coral full-bleed background. Premium lightly glossy designer-vinyl volume with a few large soft highlights, not many tiny reflections. Exuberant food-loving energy, compact iconic silhouette, visually original. Do not copy a famous game creature or a perfect circle chomper.",
+      "prompt": "Use case: stylized-concept.\nAsset type: one high-fidelity iOS app-icon exploration, square 1024×1024.\nInput image role: the single attached image is a concept/identity reference from an earlier minimalist round. Create a fresh exploration with the specified subject and finish, not a comparison sheet or a copy of its flat colors.\nThe product is a private food diary celebrating food enjoyment and personal nutrition awareness.\nKeep one immediately understandable focal point with a bold silhouette. Richer material rendering and controlled dimensional shading are welcome, but no tiny details: it must read clearly at 40–60 pixels and in grayscale. Center the focal object optically, occupying roughly 65–72% of the square, with comfortable safety margin.\nUse precisely the four specified base color families; tonal shading and antialiasing may vary within those colors, but do not introduce extra colored props. Palette labels and hex codes are instructions only: DO NOT draw swatches, labels, letters, words, names or numbers.\nOpaque full-bleed square background to all four SHARP corners. NO baked-in rounded corners, border, inset app tile, badge, device mockup, layout, contact sheet, watermark, caption or extra objects. No photorealistic room or environment. Output one icon only.\nBrand (context only; do not render): ChompChase. Exploration: Berry Bite.\nFour-color palette: Berry #7748BC; Coral #F58670; Cream #FFF0DB; Plum #2D1C46.\nSubject, composition and rendering: Explore the chomping creature as a three-quarter-view berry-purple rounded head with a short broad snout, one prominent visible eye, a large friendly plum mouth and two cream block teeth. One cohesive mascot head, no body, antennae, limbs, food or other props. Coral full-bleed background. Premium lightly glossy designer-vinyl volume with a few large soft highlights, not many tiny reflections. Exuberant food-loving energy, compact iconic silhouette, visually original. Do not copy a famous game creature or a perfect circle chomper.",
+      "sourcePath": "/Users/cseibert/.codex/generated_images/01a05fe8-6e5d-7c12-8fee-d44feb1989f9/exec-b629401f-c004-4959-b8d0-512fad4fd7ba.png",
+      "file": "chomp-chase-03-berry-bite.png"
+    },
+    {
+      "brand": "UmamiChase",
+      "name": "UmamiChase U1",
+      "title": "Porcini Porcelain",
+      "slug": "umami-chase-01-porcini-porcelain",
+      "reference": "/Users/cseibert/projects/calorie-tracker/docs/icon-concepts/2026-09-02/umami-chase.png",
+      "palette": [
+        [
+          "Aubergine",
+          "#302036"
+        ],
+        [
+          "Chestnut",
+          "#B66A3D"
+        ],
+        [
+          "Cream",
+          "#FCE9C8"
+        ],
+        [
+          "Ochre",
+          "#D9AA61"
+        ]
+      ],
+      "concept": "Evolve the broad savory mushroom from the reference into one beautifully sculpted porcini-like mushroom: a chestnut domed cap, stout cream stem, and one broad ochre underside band. Rich aubergine full-bleed background. High-fidelity glazed-porcelain 2.5D illustration with subtle broad glaze highlights, elegant smooth contours and controlled shadow. Slight three-quarter view while preserving the strong cap-and-stem silhouette. No speckles, detailed gills, grass, face, extra mushrooms or psychedelic symbolism. Savory and sophisticated rather than woodland fantasy.",
+      "prompt": "Use case: stylized-concept.\nAsset type: one high-fidelity iOS app-icon exploration, square 1024×1024.\nInput image role: the single attached image is a concept/identity reference from an earlier minimalist round. Create a fresh exploration with the specified subject and finish, not a comparison sheet or a copy of its flat colors.\nThe product is a private food diary celebrating food enjoyment and personal nutrition awareness.\nKeep one immediately understandable focal point with a bold silhouette. Richer material rendering and controlled dimensional shading are welcome, but no tiny details: it must read clearly at 40–60 pixels and in grayscale. Center the focal object optically, occupying roughly 65–72% of the square, with comfortable safety margin.\nUse precisely the four specified base color families; tonal shading and antialiasing may vary within those colors, but do not introduce extra colored props. Palette labels and hex codes are instructions only: DO NOT draw swatches, labels, letters, words, names or numbers.\nOpaque full-bleed square background to all four SHARP corners. NO baked-in rounded corners, border, inset app tile, badge, device mockup, layout, contact sheet, watermark, caption or extra objects. No photorealistic room or environment. Output one icon only.\nBrand (context only; do not render): UmamiChase. Exploration: Porcini Porcelain.\nFour-color palette: Aubergine #302036; Chestnut #B66A3D; Cream #FCE9C8; Ochre #D9AA61.\nSubject, composition and rendering: Evolve the broad savory mushroom from the reference into one beautifully sculpted porcini-like mushroom: a chestnut domed cap, stout cream stem, and one broad ochre underside band. Rich aubergine full-bleed background. High-fidelity glazed-porcelain 2.5D illustration with subtle broad glaze highlights, elegant smooth contours and controlled shadow. Slight three-quarter view while preserving the strong cap-and-stem silhouette. No speckles, detailed gills, grass, face, extra mushrooms or psychedelic symbolism. Savory and sophisticated rather than woodland fantasy.",
+      "sourcePath": "/Users/cseibert/.codex/generated_images/01a05fe8-6e5d-7c12-8fee-d44feb1989f9/exec-1f5a3890-99f2-4abc-a5b6-e13e79459522.png",
+      "file": "umami-chase-01-porcini-porcelain.png"
+    },
+    {
+      "brand": "UmamiChase",
+      "name": "UmamiChase U2",
+      "title": "Miso Bowl",
+      "slug": "umami-chase-02-miso-bowl",
+      "reference": "/Users/cseibert/projects/calorie-tracker/docs/icon-concepts/2026-09-02/umami-chase.png",
+      "palette": [
+        [
+          "Deep Teal",
+          "#153F43"
+        ],
+        [
+          "Cream",
+          "#FFF0D7"
+        ],
+        [
+          "Amber",
+          "#D99A3E"
+        ],
+        [
+          "Umber",
+          "#694330"
+        ]
+      ],
+      "concept": "Explore a new symbol for savory depth: one generous cream ceramic bowl, seen from slightly above, filled with a smooth amber surface of miso broth and exactly one bold umber shiitake cap partly rising from the broth. The bowl and mushroom form one compact integrated focal object. Deep-teal full-bleed background. Premium 2.5D ceramic-and-food icon rendering with broad soft highlights and limited smooth shading. No spoon, chopsticks, garnish, steam, droplets, text, face, fine gills or soup texture. The reference is a mushroom concept anchor only; do not retain its flat layout.",
+      "prompt": "Use case: stylized-concept.\nAsset type: one high-fidelity iOS app-icon exploration, square 1024×1024.\nInput image role: the single attached image is a concept/identity reference from an earlier minimalist round. Create a fresh exploration with the specified subject and finish, not a comparison sheet or a copy of its flat colors.\nThe product is a private food diary celebrating food enjoyment and personal nutrition awareness.\nKeep one immediately understandable focal point with a bold silhouette. Richer material rendering and controlled dimensional shading are welcome, but no tiny details: it must read clearly at 40–60 pixels and in grayscale. Center the focal object optically, occupying roughly 65–72% of the square, with comfortable safety margin.\nUse precisely the four specified base color families; tonal shading and antialiasing may vary within those colors, but do not introduce extra colored props. Palette labels and hex codes are instructions only: DO NOT draw swatches, labels, letters, words, names or numbers.\nOpaque full-bleed square background to all four SHARP corners. NO baked-in rounded corners, border, inset app tile, badge, device mockup, layout, contact sheet, watermark, caption or extra objects. No photorealistic room or environment. Output one icon only.\nBrand (context only; do not render): UmamiChase. Exploration: Miso Bowl.\nFour-color palette: Deep Teal #153F43; Cream #FFF0D7; Amber #D99A3E; Umber #694330.\nSubject, composition and rendering: Explore a new symbol for savory depth: one generous cream ceramic bowl, seen from slightly above, filled with a smooth amber surface of miso broth and exactly one bold umber shiitake cap partly rising from the broth. The bowl and mushroom form one compact integrated focal object. Deep-teal full-bleed background. Premium 2.5D ceramic-and-food icon rendering with broad soft highlights and limited smooth shading. No spoon, chopsticks, garnish, steam, droplets, text, face, fine gills or soup texture. The reference is a mushroom concept anchor only; do not retain its flat layout.",
+      "sourcePath": "/Users/cseibert/.codex/generated_images/01a05fe8-6e5d-7c12-8fee-d44feb1989f9/exec-4123ade2-4a1b-4d8e-8c49-1f7c36fb44ea.png",
+      "file": "umami-chase-02-miso-bowl.png"
+    },
+    {
+      "brand": "UmamiChase",
+      "name": "UmamiChase U3",
+      "title": "Forest Fold",
+      "slug": "umami-chase-03-forest-fold",
+      "reference": "/Users/cseibert/projects/calorie-tracker/docs/icon-concepts/2026-09-02/umami-chase.png",
+      "palette": [
+        [
+          "Forest",
+          "#173B32"
+        ],
+        [
+          "Moss",
+          "#87A56B"
+        ],
+        [
+          "Cream",
+          "#F6E6C8"
+        ],
+        [
+          "Ochre",
+          "#D4A252"
+        ]
+      ],
+      "concept": "Reinterpret the iconic broad mushroom as an elegant layered-paper sculpture: one rounded moss-green cap, one wide ochre underside crescent, a short cream stem, and deep-forest background. Make the three-dimensional layered edges and broad soft shadows beautifully resolved, with a subtle folded curve through the cap, but no actual paper grain or fine texture. One unified mushroom silhouette, no scenery, spots, tiny gills, face or ornamental objects. Full-bleed forest square. Editorial, tactile and premium; this should feel distinctly different from a ceramic render.",
+      "prompt": "Use case: stylized-concept.\nAsset type: one high-fidelity iOS app-icon exploration, square 1024×1024.\nInput image role: the single attached image is a concept/identity reference from an earlier minimalist round. Create a fresh exploration with the specified subject and finish, not a comparison sheet or a copy of its flat colors.\nThe product is a private food diary celebrating food enjoyment and personal nutrition awareness.\nKeep one immediately understandable focal point with a bold silhouette. Richer material rendering and controlled dimensional shading are welcome, but no tiny details: it must read clearly at 40–60 pixels and in grayscale. Center the focal object optically, occupying roughly 65–72% of the square, with comfortable safety margin.\nUse precisely the four specified base color families; tonal shading and antialiasing may vary within those colors, but do not introduce extra colored props. Palette labels and hex codes are instructions only: DO NOT draw swatches, labels, letters, words, names or numbers.\nOpaque full-bleed square background to all four SHARP corners. NO baked-in rounded corners, border, inset app tile, badge, device mockup, layout, contact sheet, watermark, caption or extra objects. No photorealistic room or environment. Output one icon only.\nBrand (context only; do not render): UmamiChase. Exploration: Forest Fold.\nFour-color palette: Forest #173B32; Moss #87A56B; Cream #F6E6C8; Ochre #D4A252.\nSubject, composition and rendering: Reinterpret the iconic broad mushroom as an elegant layered-paper sculpture: one rounded moss-green cap, one wide ochre underside crescent, a short cream stem, and deep-forest background. Make the three-dimensional layered edges and broad soft shadows beautifully resolved, with a subtle folded curve through the cap, but no actual paper grain or fine texture. One unified mushroom silhouette, no scenery, spots, tiny gills, face or ornamental objects. Full-bleed forest square. Editorial, tactile and premium; this should feel distinctly different from a ceramic render.",
+      "sourcePath": "/Users/cseibert/.codex/generated_images/01a05fe8-6e5d-7c12-8fee-d44feb1989f9/exec-aa23aa66-c71e-400a-a1cf-79974ad93e38.png",
+      "file": "umami-chase-03-forest-fold.png"
+    }
+  ]
+}
