@@ -33,6 +33,7 @@ platform, version, and audience). Event properties are strings.
 | `barcode_search.no_match` | A camera or manual barcode lookup returns no result | `barcode`, `input_source` |
 
 Tracked `screen` values currently include `diary`, `settings`, `trends`,
+`settings_snack_suggestions`,
 `streak`, `food_picker`, `quantity_editor`, `alcohol_editor`,
 `food_weight_report`, `custom_catalog`, `custom_food_editor`,
 `saved_meal_editor`, `import_guide`, `food_import_review`,

@@ -52,6 +52,10 @@ ui-test-reorder: simulator-ready
 ui-test-fixture: simulator-ready
 	xcodebuild -project $(PROJECT) -scheme CalorieTrackerUITests -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -destination-timeout $(SIMULATOR_DESTINATION_TIMEOUT) -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testDeviceFixtureShowsRelativeDays test
 
+.PHONY: ui-test-snacks
+ui-test-snacks: simulator-ready
+	xcodebuild -project $(PROJECT) -scheme CalorieTrackerUITests -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -destination-timeout $(SIMULATOR_DESTINATION_TIMEOUT) -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testSnackSuggestionsSelectionWithoutRemindersAccess test
+
 build: sim-build
 
 DIARY_TOOL_SOURCES := CalorieTracker/Models/Domain.swift CalorieTracker/Data/FoodResolution.swift CalorieTracker/Data/DiaryEngine.swift CalorieTracker/Data/DiaryRepository.swift CalorieTracker/Data/QuickLogStore.swift CalorieTracker/Data/CatalogStore.swift scripts/DiaryTool.swift

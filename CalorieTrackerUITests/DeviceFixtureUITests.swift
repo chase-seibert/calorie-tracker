@@ -57,6 +57,30 @@ final class DeviceFixtureUITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["Nothing logged"].exists)
     }
 
+    func testSnackSuggestionsSelectionWithoutRemindersAccess() {
+        app.launchArguments = ["-onboarding.focus.v1.completed", "YES",
+                               "-trends.focus.fiber", "NO", "-trends.focus.processedMeat", "NO",
+                               "-trends.focus.redMeat", "NO", "-trends.focus.alcohol", "NO"]
+        app.launchEnvironment = ["CALORIE_TRACKER_FIXTURE": "device", "CALORIE_TRACKER_FIXTURE_RESET": "1"]
+        app.launch()
+        XCTAssertTrue(app.buttons["Settings"].waitForExistence(timeout: 5))
+        app.buttons["Settings"].tap()
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Snack Suggestions"].waitForExistence(timeout: 3))
+        app.buttons["Snack Suggestions"].tap()
+        XCTAssertTrue(app.navigationBars["Snack Suggestions"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["0 selected"].exists)
+        app.buttons["Select All"].tap()
+        XCTAssertTrue(app.staticTexts["5 selected"].exists, "Only always-included protein picks should be selected")
+        app.buttons["Clear"].tap()
+        XCTAssertTrue(app.staticTexts["0 selected"].exists)
+        XCTAssertFalse(app.alerts.firstMatch.exists, "Browsing and selection must not request permission")
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Snack Suggestions — Protein Only"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+    }
+
     private func assertDiaryLayout(firstEntrySourceID: String) {
         let heading = app.staticTexts["logged-heading-label"]
         let firstEntry = app.descendants(matching: .any)

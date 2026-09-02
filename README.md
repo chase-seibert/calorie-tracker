@@ -22,6 +22,8 @@ their diary and integrations. See [the branding decision](docs/product-name-brai
 - Select any subset of diary entries and save it as a reusable meal.
 - Barcode scanning and manual barcode entry.
 - Custom foods and saved meals.
+- Focus-based snack suggestions with always-included protein picks and an optional
+  Apple Reminders shopping list. See [snack suggestions](docs/snack-suggestions.md).
 - Daily calorie and macro trend charts.
 - A shareable last-90-days food-weight report with saved meals expanded into
   their individual foods.

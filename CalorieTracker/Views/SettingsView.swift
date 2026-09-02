@@ -32,10 +32,15 @@ struct SettingsView: View {
             } header: {
                 Text("Focus Areas")
             } footer: {
-                Text("Choose which focused health metrics appear in the app. These preferences only change the display; your logged data stays on your phone.")
+                Text("Choose which focused health metrics appear in the app and tailor your snack suggestions. Changing these preferences doesn't change your logged data.")
             }
 
             Section("Food & Meals") {
+                NavigationLink {
+                    SnackSuggestionsView()
+                } label: {
+                    Label("Snack Suggestions", systemImage: "carrot")
+                }
                 NavigationLink {
                     ReviewClassificationsView()
                 } label: {
@@ -364,6 +369,11 @@ private struct PrivacyAnalyticsView: View {
         List {
             Section("On Your Device") {
                 Text("Your diary, personal foods, saved meals, and remembered quantities are stored on your device. The food catalog and search index are bundled with the app, so routine logging does not depend on a network connection.")
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Optional Reminders Export") {
+                Text("Snack suggestions are generated from an on-device library. If you connect Apple Reminders, only the snacks you select and their serving tips are added when you tap Add. The chosen list may sync through its account or be shared with others. Your diary and focus settings aren't exported.")
                     .foregroundStyle(.secondary)
             }
 

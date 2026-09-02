@@ -3,6 +3,193 @@ import XCTest
 @testable import CalorieTracker
 
 final class CalorieTrackerTests: XCTestCase {
+    func testSnackGroupsFollowAllFocusCombinationsAndAlwaysIncludeProtein() {
+        for mask in 0..<16 {
+            let preferences = SnackFocusPreferences(fiber: mask & 1 != 0, processedMeat: mask & 2 != 0,
+                                                    redMeat: mask & 4 != 0, alcohol: mask & 8 != 0)
+            let groups = SnackSuggestions.groups(for: preferences)
+            XCTAssertEqual(groups.map(\.area), SnackFocusArea.allCases.filter(preferences.includes))
+            XCTAssertEqual(groups.first?.area, .protein)
+            XCTAssertFalse(groups.first!.snacks.isEmpty)
+            XCTAssertTrue(groups.flatMap(\.snacks).allSatisfy { !$0.containsProcessedMeat && !$0.containsRedMeat })
+            if preferences.fiber {
+                XCTAssertTrue(groups.first { $0.area == .fiber }!.snacks.contains { $0.id == "almonds" })
+            }
+        }
+    }
+
+    func testSnackMeatExclusionsApplyToEverySectionIndependently() {
+        let reasons = Dictionary(uniqueKeysWithValues: SnackFocusArea.allCases.map { ($0, "Test reason") })
+        let candidates = [
+            SnackSuggestion(id: "plant", name: "Plant", servingTip: "", reasons: reasons),
+            SnackSuggestion(id: "red", name: "Red", servingTip: "", reasons: reasons, containsRedMeat: true),
+            SnackSuggestion(id: "processed", name: "Processed", servingTip: "", reasons: reasons, containsProcessedMeat: true),
+            SnackSuggestion(id: "both", name: "Both", servingTip: "", reasons: reasons, containsProcessedMeat: true, containsRedMeat: true)
+        ]
+        for (processed, red, allowed) in [
+            (false, false, ["plant", "red", "processed", "both"]),
+            (true, false, ["plant", "red"]),
+            (false, true, ["plant", "processed"]),
+            (true, true, ["plant"])
+        ] {
+            let groups = SnackSuggestions.groups(for: .init(fiber: true, processedMeat: processed, redMeat: red, alcohol: true), candidates: candidates)
+            for group in groups { XCTAssertEqual(group.snacks.map(\.id), allowed) }
+        }
+    }
+
+    func testSnackSelectionDeduplicatesAcrossGroupsAndDropsHiddenChoices() {
+        let all = SnackSuggestions.groups(for: .init(fiber: true, processedMeat: true, redMeat: true, alcohol: true))
+        let ids = Set(SnackSuggestions.library.map(\.id))
+        let selected = SnackSuggestions.selectedSnacks(in: all, ids: ids)
+        XCTAssertEqual(selected.count, ids.count)
+        XCTAssertEqual(Set(selected.map(\.id)), ids)
+        let protein = SnackSuggestions.groups(for: .init(fiber: false, processedMeat: false, redMeat: false, alcohol: false))
+        XCTAssertEqual(SnackSuggestions.selectedSnacks(in: protein, ids: ids).map(\.id), protein[0].snacks.map(\.id))
+        XCTAssertTrue(SnackSuggestions.selectedSnacks(in: all, ids: []).isEmpty)
+        for snack in selected { XCTAssertEqual(VitaChaseDeepLink(url: snack.reminderURL), .logFood) }
+    }
+
+    @MainActor
+    func testSnackRemindersRememberExplicitListWithoutRequestingAccessOnOpen() async {
+        let defaults = snackTestDefaults()
+        let client = TestSnackRemindersClient()
+        let store = SnackRemindersStore(client: client, defaults: defaults)
+        store.refreshLists()
+        XCTAssertEqual(client.accessRequests, 0)
+        XCTAssertNil(store.selectedList)
+        let prepared = await store.prepareListChoice()
+        XCTAssertTrue(prepared)
+        XCTAssertNil(store.selectedList, "Never automatically choose a destination")
+        store.choose(client.availableLists[1])
+        XCTAssertTrue(client.savedBatches.isEmpty, "Choosing a list must not write reminders")
+
+        let reopened = SnackRemindersStore(client: client, defaults: defaults)
+        XCTAssertEqual(reopened.selectedList, client.availableLists[1])
+        client.availableLists[1] = .init(id: "groceries", title: "Weekly Groceries", account: "iCloud")
+        reopened.refreshLists()
+        XCTAssertEqual(reopened.selectedList?.title, "Weekly Groceries")
+        XCTAssertEqual(client.accessRequests, 1)
+        let added = await reopened.add([SnackSuggestions.library[0]])
+        XCTAssertTrue(added)
+        XCTAssertEqual(client.fetchedListIDs, ["groceries"])
+        XCTAssertEqual(client.savedBatches.first?.listID, "groceries")
+        XCTAssertEqual(client.savedBatches.first?.snacks.map(\.id), ["greek-yogurt"])
+        XCTAssertNotNil(reopened.statusMessage)
+        XCTAssertFalse(reopened.isBusy)
+    }
+
+    @MainActor
+    func testSnackRemindersSkipIncompleteTitleAndIdentityMatchesAndAllowRestocking() async {
+        let client = TestSnackRemindersClient()
+        let store = SnackRemindersStore(client: client, defaults: snackTestDefaults())
+        _ = await store.prepareListChoice()
+        store.choose(client.availableLists[1])
+        let yogurt = SnackSuggestions.library[0]
+        let cottage = SnackSuggestions.library[1]
+        let eggs = SnackSuggestions.library[2]
+        client.existing["groceries"] = [
+            .init(title: "  PLAIN   GREEK YOGURT \n", url: nil),
+            .init(title: "Renamed by user", url: cottage.reminderURL)
+        ]
+        let added = await store.add([yogurt, cottage, eggs, eggs])
+        XCTAssertTrue(added)
+        XCTAssertEqual(client.savedBatches.count, 1)
+        XCTAssertEqual(client.savedBatches[0].snacks.map(\.id), [eggs.id])
+        let repeated = await store.add([yogurt, cottage, eggs])
+        XCTAssertTrue(repeated)
+        XCTAssertEqual(client.savedBatches.count, 1)
+        XCTAssertEqual(store.statusMessage, "These snacks are already on Groceries.")
+
+        // Completed/deleted reminders no longer appear in the incomplete query.
+        client.existing["groceries"] = []
+        let restocked = await store.add([eggs])
+        XCTAssertTrue(restocked)
+        XCTAssertEqual(client.savedBatches.count, 2)
+    }
+
+    @MainActor
+    func testSnackRemindersMissingListDoesNotFallBackAndCanBeChanged() async {
+        let client = TestSnackRemindersClient()
+        let store = SnackRemindersStore(client: client, defaults: snackTestDefaults())
+        _ = await store.prepareListChoice()
+        store.choose(client.availableLists[1])
+        client.availableLists.removeLast() // Also models a list becoming read-only.
+        let added = await store.add([SnackSuggestions.library[0]])
+        XCTAssertFalse(added)
+        XCTAssertEqual(store.selectedList?.id, "groceries")
+        XCTAssertNotNil(store.errorMessage)
+        XCTAssertNil(store.statusMessage)
+        XCTAssertTrue(client.savedBatches.isEmpty)
+        XCTAssertTrue(client.fetchedListIDs.isEmpty)
+        _ = await store.prepareListChoice()
+        store.choose(client.availableLists[0])
+        let retried = await store.add([SnackSuggestions.library[0]])
+        XCTAssertTrue(retried)
+        XCTAssertNil(store.errorMessage)
+        XCTAssertEqual(client.savedBatches.first?.listID, "personal")
+    }
+
+    @MainActor
+    func testSnackRemindersDeniedEmptyAndFailedRequestsNeverReportSuccess() async {
+        let client = TestSnackRemindersClient()
+        let store = SnackRemindersStore(client: client, defaults: snackTestDefaults())
+        let empty = await store.add([])
+        XCTAssertFalse(empty)
+        XCTAssertEqual(client.accessRequests, 0)
+        client.accessError = SnackRemindersError.accessDenied
+        let denied = await store.prepareListChoice()
+        XCTAssertFalse(denied)
+        XCTAssertNotNil(store.errorMessage)
+        XCTAssertTrue(store.lists.isEmpty)
+        client.accessError = nil
+        _ = await store.prepareListChoice()
+        store.choose(client.availableLists[1])
+        client.fetchError = SnackRemindersError.fetchFailed
+        let fetchFailed = await store.add([SnackSuggestions.library[0]])
+        XCTAssertFalse(fetchFailed)
+        XCTAssertTrue(client.savedBatches.isEmpty)
+        XCTAssertNil(store.statusMessage)
+        client.fetchError = nil
+        client.saveError = CocoaError(.fileWriteUnknown)
+        let saveFailed = await store.add([SnackSuggestions.library[0]])
+        XCTAssertFalse(saveFailed)
+        XCTAssertNotNil(store.errorMessage)
+        XCTAssertNil(store.statusMessage)
+        XCTAssertFalse(store.isBusy)
+        client.saveError = nil
+        let retried = await store.add([SnackSuggestions.library[0]])
+        XCTAssertTrue(retried)
+        XCTAssertNil(store.errorMessage)
+        XCTAssertEqual(client.savedBatches.count, 1)
+    }
+
+    @MainActor
+    func testSnackRemindersIgnoreRepeatedAddWhileARequestIsInFlight() async {
+        let client = TestSnackRemindersClient()
+        let store = SnackRemindersStore(client: client, defaults: snackTestDefaults())
+        _ = await store.prepareListChoice()
+        store.choose(client.availableLists[1])
+        let snacks = [SnackSuggestions.library[0]]
+        client.onFetch = {
+            XCTAssertTrue(store.isBusy)
+            let repeated = await store.add(snacks)
+            XCTAssertFalse(repeated)
+            store.choose(client.availableLists[0])
+            XCTAssertEqual(store.selectedList?.id, "groceries")
+        }
+        let added = await store.add(snacks)
+        XCTAssertTrue(added)
+        XCTAssertEqual(client.savedBatches.count, 1)
+        XCTAssertEqual(client.fetchedListIDs, ["groceries"])
+        client.onFetch = nil
+    }
+
+    private func snackTestDefaults() -> UserDefaults {
+        let suite = "snack-tests-\(UUID().uuidString)"
+        addTeardownBlock { UserDefaults.standard.removePersistentDomain(forName: suite) }
+        return UserDefaults(suiteName: suite)!
+    }
+
     func testYumChaseBrandingPreservesInstallationAndWidgetIdentity() throws {
         let app = Bundle.main
         XCTAssertEqual(app.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String, "Yum Chase")
@@ -3286,5 +3473,45 @@ private final class TestDiaryStore: DiaryStore {
     }
     func clearPersonalData() {
         try! performTestMutation(scope: .all) { $0.clearPersonalData() }
+    }
+}
+
+@MainActor
+private final class TestSnackRemindersClient: SnackRemindersClient {
+    var hasAccess = false
+    var accessRequests = 0
+    var accessError: Error?
+    var fetchError: Error?
+    var saveError: Error?
+    var onFetch: (() async -> Void)?
+    var availableLists: [SnackReminderList] = [
+        .init(id: "personal", title: "Personal", account: "On My iPhone"),
+        .init(id: "groceries", title: "Groceries", account: "iCloud")
+    ]
+    var existing: [String: [ExistingSnackReminder]] = [:]
+    var fetchedListIDs: [String] = []
+    var savedBatches: [(listID: String, snacks: [SnackSuggestion])] = []
+
+    func requestAccess() async throws {
+        accessRequests += 1
+        if let accessError { throw accessError }
+        hasAccess = true
+    }
+
+    func writableLists() -> [SnackReminderList] { hasAccess ? availableLists : [] }
+
+    func incompleteReminders(in listID: String) async throws -> [ExistingSnackReminder] {
+        if let fetchError { throw fetchError }
+        fetchedListIDs.append(listID)
+        await onFetch?()
+        return existing[listID] ?? []
+    }
+
+    func save(_ snacks: [SnackSuggestion], to listID: String) throws {
+        if let saveError { throw saveError }
+        savedBatches.append((listID, snacks))
+        existing[listID, default: []].append(contentsOf: snacks.map {
+            ExistingSnackReminder(title: $0.name, url: $0.reminderURL)
+        })
     }
 }

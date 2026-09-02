@@ -1,5 +1,20 @@
 # Product requirements
 
+## Snack suggestions
+
+- Settings → Food & Meals includes Snack Suggestions, grouped by enabled focus
+  area with high-protein picks always included.
+- Almonds and other fiber sources appear under Fiber. Processed-meat and
+  red-meat focuses exclude those meats from every section, not only their own.
+- Ideas are generated from a curated on-device library with short reasons and
+  serving tips; they don't require a network connection or change the diary.
+- Users may select snacks and explicitly add them to an Apple Reminders list
+  chosen once and remembered. List changes remain available. Permissions are
+  requested on user action; selection alone never writes.
+- Duplicate incomplete items are skipped. Missing/read-only lists and denied
+  access fail visibly without writing to a different destination.
+- See [snack suggestions](snack-suggestions.md) for scope and acceptance checks.
+
 ## Primary user stories
 
 - As a calorie tracker, I want yesterday, today, and tomorrow immediately

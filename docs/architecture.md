@@ -150,8 +150,8 @@ day to that category. A meal-level explicit flag controls the saved meal;
 otherwise its historical component snapshot supplies the classification.
 
 The user's visible focus areas are lightweight `UserDefaults` preferences,
-separate from the diary document because they affect presentation rather than
-food or diary data. Alcohol, Fiber, processed-meat, and red-meat preferences
+separate from the diary document because they affect presentation and snack
+suggestions rather than stored food or diary data. Alcohol, Fiber, processed-meat, and red-meat preferences
 default on to retain the existing experience. Settings exposes the durable
 controls, while the Trends toolbar menu changes them in context. Both surfaces
 bind to the same keys. Diary also reads the alcohol key to conditionally include
@@ -160,6 +160,22 @@ annotations, Fiber bars, chart copy, meat series, legends, and week-detail group
 from those preferences. Alcohol calories remain in daily nutrition totals when
 its display focus is off, and the meat card is omitted when both meat focuses
 are off.
+
+`SnackSuggestions` filters a small curated on-device library before grouping it
+by enabled focus area. Protein is always included; processed/red-meat exclusions
+apply to every group. Stable snack IDs keep selection unique across sections.
+This does not read the diary, call a model service, or invent catalog nutrients.
+
+`SnackRemindersStore` uses an injectable `SnackRemindersClient`; the production
+adapter uses EventKit's iOS 17+ full Reminders access API. Authorization is requested
+only from an explicit list-choice or Add action. `UserDefaults` stores the chosen
+list's identifier and display metadata, not a copy of reminder contents. Each Add
+validates the saved destination, fetches only that list's incomplete reminders,
+skips normalized-title or stable-URL matches, and stages new reminders for a single
+commit. Failed saves reset pending EventKit changes. A missing/read-only list never
+falls back to another list. Reminder contents, list names, and focus choices aren't
+sent to analytics. See [snack suggestions](snack-suggestions.md) for the export
+contract and physical-device acceptance checks.
 
 `FirstTimeOnboarding` owns a versioned `UserDefaults` completion key. At launch,
 an empty diary with no completion value presents `FirstTimeOnboardingView` as a

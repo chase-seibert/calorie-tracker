@@ -1,5 +1,17 @@
 # Frustration Log
 
+## 2026-09-02: Concurrent UI tests fought over the default simulator
+
+The snack navigation UI test lost its Settings tap when a separate StrengthLog
+run foregrounded its app on the same iPhone 17 Pro simulator. The XCTest log
+explicitly switched to `com.cseibert.StrengthLog`; the failure was not a missing
+Settings row. Run UI tests on a dedicated simulator with the existing
+`SIM_DEVICE_NAME` override when another project is using the default device,
+and wait for the destination navigation bar before querying its rows.
+The fresh isolated simulator then stalled during XCTest runner startup; its
+eventual diagnostic reported an IPC server-died error. Do not count a successful
+app build as a UI-test pass, and remove task-created simulators after testing.
+
 ## 2026-09-02: AppKit contact sheets need a drawable bitmap format
 
 A 24-bit, three-sample RGB `NSBitmapImageRep` loaded but produced a nil
