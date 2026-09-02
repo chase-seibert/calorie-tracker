@@ -61,51 +61,54 @@ struct CustomFoodImportView: View {
     }
 
     private func logFood() {
-        guard canLog else { return }
-        let definition = food.normalized()
-        let loggedFood: Food
-        if saveForReuse {
-            loggedFood = diary.addCustomFood(
-                name: definition.name,
-                brand: "",
-                calories: definition.nutrition.calories,
-                carbs: definition.nutrition.carbohydratesGrams,
-                fat: definition.nutrition.fatGrams,
-                protein: definition.nutrition.proteinGrams,
-                fiber: definition.nutrition.fiberGrams,
-                servingGrams: definition.servingGrams,
-                servingDescription: "1 \(definition.servingDescription)",
-                containsProcessedMeat: definition.containsProcessedMeat ?? false,
-                containsRedMeat: definition.containsRedMeat ?? false
-            )
-            AppAnalytics.capture("custom_food.created", properties: ["origin": "file_import"])
-        } else {
-            loggedFood = definition.makeFood()
-        }
-
-        let previousEntryCount = diary.entries(on: Date()).count
-        diary.log(
-            loggedFood,
-            amount: 1,
-            unit: .serving,
-            portionID: loggedFood.availablePortions.first?.id,
-            on: Date()
-        )
-        if diary.entries(on: Date()).count > previousEntryCount {
-            AppAnalytics.capture(
-                "food_log.completed",
-                properties: FoodLogAnalytics.foodProperties(
-                    food: loggedFood,
-                    method: "file_import",
-                    mode: "import",
-                    unit: .serving,
-                    isFavorite: diary.isFavorite(loggedFood),
-                    foodKind: saveForReuse ? "imported" : "one_off",
-                    savedForReuse: saveForReuse
+        diary.run {
+            guard canLog else { return }
+            let definition = food.normalized()
+            let loggedFood: Food
+            if saveForReuse {
+                loggedFood = try await diary.addCustomFood(
+                    name: definition.name,
+                    brand: "",
+                    calories: definition.nutrition.calories,
+                    carbs: definition.nutrition.carbohydratesGrams,
+                    fat: definition.nutrition.fatGrams,
+                    protein: definition.nutrition.proteinGrams,
+                    fiber: definition.nutrition.fiberGrams,
+                    servingGrams: definition.servingGrams,
+                    servingDescription: "1 \(definition.servingDescription)",
+                    containsProcessedMeat: definition.containsProcessedMeat ?? false,
+                    containsRedMeat: definition.containsRedMeat ?? false
                 )
+                AppAnalytics.capture("custom_food.created", properties: ["origin": "file_import"])
+            } else {
+                loggedFood = definition.makeFood()
+            }
+
+            let previousEntryCount = diary.entries(on: Date()).count
+            try await diary.log(
+                loggedFood,
+                amount: 1,
+                unit: .serving,
+                portionID: loggedFood.availablePortions.first?.id,
+                on: Date()
             )
+            if diary.entries(on: Date()).count > previousEntryCount {
+                AppAnalytics.capture(
+                    "food_log.completed",
+                    properties: FoodLogAnalytics.foodProperties(
+                        food: loggedFood,
+                        method: "file_import",
+                        mode: "import",
+                        unit: .serving,
+                        isFavorite: diary.isFavorite(loggedFood),
+                        foodKind: saveForReuse ? "imported" : "one_off",
+                        savedForReuse: saveForReuse
+                    )
+                )
+            }
+            dismiss()
+
         }
-        dismiss()
     }
 }
 
@@ -209,54 +212,63 @@ struct CustomMealImportView: View {
     }
 
     private func logMeal() {
-        guard canLog else { return }
-        let importedMeal = reviewedFile.makeMeal()
-        let previousEntryCount = diary.entries(on: Date()).count
-        let loggedMeal: SavedMeal
-        if saveForReuse {
-            guard let savedMeal = diary.saveMeal(
-                name: importedMeal.name,
-                items: importedMeal.items,
-                origin: .imported
-            ) else {
-                return
+        diary.run {
+            guard canLog else { return }
+            let importedMeal = reviewedFile.makeMeal()
+            let previousEntryCount = diary.entries(on: Date()).count
+            let loggedMeal: SavedMeal
+            if saveForReuse {
+                guard
+                    let savedMeal = try await diary.saveMeal(
+                        name: importedMeal.name,
+                        items: importedMeal.items,
+                        origin: .imported
+                    )
+                else {
+                    return
+                }
+                loggedMeal = savedMeal
+                AppAnalytics.capture(
+                    "meal.created",
+                    properties: [
+                        "origin": "file_import",
+                        "item_count": String(importedMeal.items.count),
+                    ])
+                try await diary.logMeal(savedMeal, on: Date())
+            } else {
+                // Keep the imported meal snapshot in the meal store even when the user
+                // does not opt into the hand-created Saved Meals library. This lets the
+                // complete meal (including its component foods) appear in Recent and be
+                // logged again without recreating its ingredients.
+                guard
+                    let importedMealSnapshot = try await diary.saveMeal(
+                        name: importedMeal.name,
+                        items: importedMeal.items,
+                        origin: .imported
+                    )
+                else {
+                    return
+                }
+                loggedMeal = importedMealSnapshot
+                try await diary.logMeal(importedMealSnapshot, on: Date())
             }
-            loggedMeal = savedMeal
-            AppAnalytics.capture("meal.created", properties: [
-                "origin": "file_import",
-                "item_count": String(importedMeal.items.count)
-            ])
-            diary.logMeal(savedMeal, on: Date())
-        } else {
-            // Keep the imported meal snapshot in the meal store even when the user
-            // does not opt into the hand-created Saved Meals library. This lets the
-            // complete meal (including its component foods) appear in Recent and be
-            // logged again without recreating its ingredients.
-            guard let importedMealSnapshot = diary.saveMeal(
-                name: importedMeal.name,
-                items: importedMeal.items,
-                origin: .imported
-            ) else {
-                return
-            }
-            loggedMeal = importedMealSnapshot
-            diary.logMeal(importedMealSnapshot, on: Date())
-        }
-        if diary.entries(on: Date()).count > previousEntryCount {
-            AppAnalytics.capture(
-                "food_log.completed",
-                properties: FoodLogAnalytics.mealProperties(
-                    meal: loggedMeal,
-                    method: "file_import",
-                    mode: "import",
-                    isFavorite: saveForReuse && diary.isFavorite(loggedMeal),
-                    foodKind: "imported",
-                    includeLocalID: true,
-                    savedForReuse: saveForReuse
+            if diary.entries(on: Date()).count > previousEntryCount {
+                AppAnalytics.capture(
+                    "food_log.completed",
+                    properties: FoodLogAnalytics.mealProperties(
+                        meal: loggedMeal,
+                        method: "file_import",
+                        mode: "import",
+                        isFavorite: saveForReuse && diary.isFavorite(loggedMeal),
+                        foodKind: "imported",
+                        includeLocalID: true,
+                        savedForReuse: saveForReuse
+                    )
                 )
-            )
+            }
+            dismiss()
+
         }
-        dismiss()
     }
 }
 

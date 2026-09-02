@@ -1,5 +1,48 @@
 # Frustration Log
 
+## 2026-09-01: CoreDevice shared-container listing can omit the live diary
+
+On the owner's phone, appDataContainer listing worked but appGroupDataContainer
+showed only Library/Preferences; listing its known CalorieTracker subdirectory
+failed. The private JSON was dated August 29 even though the app had newer logs.
+Do not treat this listing as evidence that the shared diary is absent or migrate
+the stale private copy. The owner authorized an on-device backup/conversion;
+its private backup is retrievable independently of shared-container access.
+
+## 2026-09-01: Verification can leave SQLite sidecars behind
+
+Opening a converted snapshot for verification enables WAL. Before publishing a
+main file, the migrator switches its isolated candidate to DELETE journaling,
+explicitly closes it, and checks that no WAL/journal remains. Apple's SQLite
+still left a 32 KB SHM index: that non-authoritative index stays in staging and
+is not published. Requiring it to disappear incorrectly rejected a valid
+standalone database. Never switch journaling on a live shared store for export.
+
+## 2026-09-01: Asynchronous startup can race onboarding presentation
+
+After moving diary loading off the main actor, constructing `RootView` before
+preparing onboarding allowed its default `@AppStorage(false)` to present
+onboarding over an existing diary. Accessibility still found covered diary rows,
+so a drag test looked like a reorder failure. Inspect the recorded UI before
+changing drag code. Startup now gates the root view until the loaded diary has
+been checked, and fixture UI tests explicitly opt out of onboarding.
+
+## 2026-09-01: Swift data-write options are not freely composable
+
+Foundation traps rather than throwing when `Data.write` combines `.atomic`
+with `.withoutOverwriting`. The diary converter now uses an exclusive manifest
+write after validating the staged SQLite database. Never combine these options.
+If an attempt stops after publishing the database but before its manifest,
+preserve that output and rerun with a new destination; the converter refuses
+to overwrite either file.
+
+## 2026-09-01: Standalone Swift and test-report tools need explicit cache paths
+
+Standalone `swiftc` initially tried to write its module cache outside the
+workspace. `make diary-tool` uses `build/DiaryModuleCache` so storage checks run
+without simulator access. Reading an `.xcresult` can also create a report cache;
+use the host-authorized `xcresulttool` path if the restricted read fails.
+
 ## 2026-08-24: UniformTypeIdentifiers has no Markdown constant
 
 The current Xcode SDK does not expose `UTType.markdown`. For Markdown files

@@ -20,24 +20,60 @@ enum SharedDiaryStorage {
     static let widgetKind = "VitaChaseQuickLog"
     static let caloriesWidgetKind = "VitaChaseCaloriesLeft"
 
-    private static let lastLoggedSelectionIDKey = "quickLog.lastSelectionID"
-    private static let lastLoggedTitleKey = "quickLog.lastTitle"
-    private static let lastLoggedDateKey = "quickLog.lastDate"
+    static var hasSharedContainer: Bool {
+        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier) != nil
+    }
+
+    static var usesSimulatorFixture: Bool {
+        #if DEBUG && targetEnvironment(simulator)
+        return UserDefaults(suiteName: appGroupIdentifier)?.string(forKey: "debug.fixture.active")
+            .flatMap(UUID.init(uuidString:)) != nil
+        #else
+        return false
+        #endif
+    }
 
     static func defaultFileURL(fileManager: FileManager = .default) -> URL {
-        guard let groupRoot = fileManager.containerURL(
-            forSecurityApplicationGroupIdentifier: appGroupIdentifier
-        ) else {
-            return legacyFileURL(fileManager: fileManager)
+        let root = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier)
+            ?? fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        #if DEBUG && targetEnvironment(simulator)
+        if let name = UserDefaults(suiteName: appGroupIdentifier)?.string(forKey: "debug.fixture.active"),
+           UUID(uuidString: name) != nil {
+            return root.appendingPathComponent("CalorieTracker/Fixtures/\(name).sqlite")
         }
+        #endif
+        return root.appendingPathComponent("CalorieTracker", isDirectory: true)
+            .appendingPathComponent("Diary.sqlite")
+    }
 
-        let sharedURL = groupRoot
-            .appendingPathComponent("CalorieTracker", isDirectory: true)
-            .appendingPathComponent("Diary.json")
-#if !WIDGET_EXTENSION
-        migrateLegacyDiaryIfNeeded(to: sharedURL, fileManager: fileManager)
-#endif
-        return sharedURL
+    #if DEBUG && targetEnvironment(simulator)
+    /// Rotate to a new isolated database; never unlink a live database or its WAL.
+    static func selectFixture(_ variant: String?, reset: Bool = false) -> URL {
+        let defaults = UserDefaults(suiteName: appGroupIdentifier)
+        if let variant {
+            let key = "debug.fixture.\(variant)"
+            let name = reset ? UUID().uuidString : (defaults?.string(forKey: key) ?? UUID().uuidString)
+            defaults?.set(name, forKey: key)
+            defaults?.set(name, forKey: "debug.fixture.active")
+        } else {
+            defaults?.removeObject(forKey: "debug.fixture.active")
+        }
+        return defaultFileURL()
+    }
+    #endif
+
+    static var legacyDiaryURLs: [URL] {
+        var urls: [URL] = []
+        if let root = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier) {
+            urls.append(root.appendingPathComponent("CalorieTracker/Diary.json"))
+        }
+        urls.append(legacyFileURL(fileManager: .default))
+        return urls
+    }
+
+    static var migrationBackupDirectory: URL {
+        legacyFileURL(fileManager: .default).deletingLastPathComponent()
+            .appendingPathComponent("SQLiteMigrationBackups", isDirectory: true)
     }
 
     static func reloadWidget() {
@@ -47,26 +83,8 @@ enum SharedDiaryStorage {
 #endif
     }
 
-    static func recordQuickLog(selectionID: String, title: String, at date: Date) {
-        guard let defaults = UserDefaults(suiteName: appGroupIdentifier) else { return }
-        defaults.set(selectionID, forKey: lastLoggedSelectionIDKey)
-        defaults.set(title, forKey: lastLoggedTitleKey)
-        defaults.set(date.timeIntervalSince1970, forKey: lastLoggedDateKey)
-    }
-
     static func latestQuickLogReceipt() -> QuickLogReceipt? {
-        guard
-            let defaults = UserDefaults(suiteName: appGroupIdentifier),
-            let selectionID = defaults.string(forKey: lastLoggedSelectionIDKey),
-            let title = defaults.string(forKey: lastLoggedTitleKey)
-        else { return nil }
-        let timestamp = defaults.double(forKey: lastLoggedDateKey)
-        guard timestamp > 0 else { return nil }
-        return QuickLogReceipt(
-            selectionID: selectionID,
-            title: title,
-            loggedAt: Date(timeIntervalSince1970: timestamp)
-        )
+        try? DiaryRepository(fileURL: defaultFileURL()).receiptSync()
     }
 
     private static func legacyFileURL(fileManager: FileManager) -> URL {
@@ -75,24 +93,7 @@ enum SharedDiaryStorage {
             .appendingPathComponent("Diary.json")
     }
 
-#if !WIDGET_EXTENSION
-    private static func migrateLegacyDiaryIfNeeded(to sharedURL: URL, fileManager: FileManager) {
-        guard !fileManager.fileExists(atPath: sharedURL.path) else { return }
-        let legacyURL = legacyFileURL(fileManager: fileManager)
-        guard fileManager.fileExists(atPath: legacyURL.path) else { return }
 
-        do {
-            try fileManager.createDirectory(
-                at: sharedURL.deletingLastPathComponent(),
-                withIntermediateDirectories: true
-            )
-            try fileManager.copyItem(at: legacyURL, to: sharedURL)
-        } catch {
-            // DiaryStore falls back to an empty document only if both the migration
-            // and its normal load fail. Keep the legacy copy for recovery.
-        }
-    }
-#endif
 }
 
 struct QuickLogReceipt: Equatable, Sendable {
@@ -111,6 +112,7 @@ struct QuickLogSelection: Hashable, Identifiable, Sendable {
 struct QuickLogResult: Equatable, Sendable {
     let title: String
     let loggedItemCount: Int
+    var selectionID: String? = nil
 }
 
 enum QuickLogError: LocalizedError, Equatable {
@@ -404,7 +406,7 @@ struct QuickLogSnapshot: Sendable {
             switch item {
             case let .food(food):
                 let preference = document.rememberedQuantities[food.id]
-                    ?? QuantityPreference(amount: 1, unit: .ounces)
+                    ?? LoggingPreferences.defaultQuantity
                 return total + food.nutrients(
                     for: preference.amount,
                     unit: preference.unit,
@@ -521,157 +523,51 @@ struct QuickLogRepository: Sendable {
     let fileURL: URL
     let calendar: Calendar
 
-    init(
-        fileURL: URL = SharedDiaryStorage.defaultFileURL(),
-        calendar: Calendar = .current
-    ) {
+    init(fileURL: URL = SharedDiaryStorage.defaultFileURL(), calendar: Calendar = .current) {
         self.fileURL = fileURL
         self.calendar = calendar
     }
 
-    func snapshot() throws -> QuickLogSnapshot {
-        QuickLogSnapshot(document: try load(), calendar: calendar)
+    func snapshot(at date: Date = Date()) throws -> QuickLogSnapshot {
+        let repository = try DiaryRepository(fileURL: fileURL, calendar: calendar)
+        return QuickLogSnapshot(
+            document: try repository.snapshotSync(scope: .window(reference: date, selectedDay: date)).document,
+            calendar: calendar
+        )
     }
 
     func log(selectionID: String, at date: Date = Date()) throws -> QuickLogResult {
-        var document = try load()
-        let snapshot = QuickLogSnapshot(document: document, calendar: calendar)
-        guard let selection = snapshot.selection(id: selectionID) else {
-            throw QuickLogError.unknownItem
+        let repository = try DiaryRepository(fileURL: fileURL, calendar: calendar)
+        let result = try repository.performSync(scope: .window(reference: date, selectedDay: date)) { engine in
+            guard engine.canLogFood(on: date) else { throw QuickLogError.loggingDisabled }
+            guard let result = engine.logQuickSelection(selectionID, on: date) else { throw QuickLogError.unknownItem }
+            return result
         }
-        let day = calendar.startOfDay(for: date)
-        if document.dayStatuses.contains(where: {
-            calendar.isDate($0.date, inSameDayAs: day) && $0.kind == .cheat
-        }) {
-            throw QuickLogError.loggingDisabled
-        }
-
-        document.dayStatuses.removeAll {
-            calendar.isDate($0.date, inSameDayAs: day) && $0.source == .automatic
-        }
-        if document.trackingStartDate == nil {
-            document.trackingStartDate = day
-        }
-
-        var loggedCount = 0
-        for itemID in selection.itemIDs {
-            let currentSnapshot = QuickLogSnapshot(document: document, calendar: calendar)
-            guard let item = currentSnapshot.item(id: itemID) else { continue }
-            if itemID.hasPrefix("meal:"),
-               let mealID = UUID(uuidString: String(itemID.dropFirst("meal:".count))),
-               let meal = document.meals.first(where: { $0.id == mealID }) {
-                document.entries.append(makeMealEntry(meal, on: day, document: document, loggedAt: date))
-                loggedCount += 1
-                continue
-            }
-
-            guard itemID.hasPrefix("food:") else { continue }
-            let foodID = String(itemID.dropFirst("food:".count))
-            guard case let .food(food) = item else { continue }
-            let preference = document.rememberedQuantities[foodID]
-                ?? QuantityPreference(amount: 1, unit: .ounces)
-            let amount = max(preference.amount, 0.01)
-            document.entries.append(DiaryEntry(
-                id: UUID(),
-                date: day,
-                food: food,
-                amount: amount,
-                unit: preference.unit,
-                nutrients: food.nutrients(
-                    for: amount,
-                    unit: preference.unit,
-                    portionID: preference.portionID
-                ),
-                loggedAt: date,
-                portionID: preference.portionID,
-                displayOrder: nextDisplayOrder(on: day, document: document)
-            ))
-            document.rememberedQuantities[foodID] = preference
-            loggedCount += 1
-        }
-
-        guard loggedCount == selection.itemIDs.count else { throw QuickLogError.unknownItem }
-        try save(document)
-        SharedDiaryStorage.recordQuickLog(
-            selectionID: selection.id,
-            title: selection.title,
-            at: date
-        )
         SharedDiaryStorage.reloadWidget()
-        return QuickLogResult(title: selection.title, loggedItemCount: loggedCount)
+        return result
     }
 
     func caloriesRemaining(at date: Date = Date()) throws -> Int {
-        try snapshot().caloriesRemaining(at: date)
+        try snapshot(at: date).caloriesRemaining(at: date)
     }
+}
 
-    private func load() throws -> DiaryDocument {
-        guard let data = try? Data(contentsOf: fileURL) else {
-            throw QuickLogError.unavailable
+enum LoggingPreferences {
+    private static let key = "lastWeightUnit"
+    static var lastWeightUnit: LogUnit {
+        get {
+            let shared = UserDefaults(suiteName: SharedDiaryStorage.appGroupIdentifier)
+            let raw = shared?.string(forKey: key) ?? UserDefaults.standard.string(forKey: key)
+            return LogUnit(rawValue: raw ?? "") ?? .ounces
         }
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        guard let document = try? decoder.decode(DiaryDocument.self, from: data) else {
-            throw QuickLogError.unavailable
-        }
-        return document
-    }
-
-    private func save(_ document: DiaryDocument) throws {
-        do {
-            try FileManager.default.createDirectory(
-                at: fileURL.deletingLastPathComponent(),
-                withIntermediateDirectories: true
-            )
-            let encoder = JSONEncoder()
-            encoder.outputFormatting = [.sortedKeys]
-            encoder.dateEncodingStrategy = .iso8601
-            try encoder.encode(document).write(to: fileURL, options: .atomic)
-        } catch {
-            throw QuickLogError.saveFailed
+        set {
+            guard newValue == .grams || newValue == .ounces else { return }
+            UserDefaults(suiteName: SharedDiaryStorage.appGroupIdentifier)?.set(newValue.rawValue, forKey: key)
+            UserDefaults.standard.set(newValue.rawValue, forKey: key)
         }
     }
-
-    private func nextDisplayOrder(on date: Date, document: DiaryDocument) -> Int {
-        let firstOrder = document.entries
-            .filter { calendar.isDate($0.date, inSameDayAs: date) }
-            .compactMap(\.displayOrder)
-            .min() ?? 0
-        return firstOrder - 1
-    }
-
-    private func makeMealEntry(
-        _ meal: SavedMeal,
-        on date: Date,
-        document: DiaryDocument,
-        loggedAt: Date
-    ) -> DiaryEntry {
-        let mealFood = Food(
-            sourceID: "saved-meal-\(meal.id.uuidString)",
-            source: .custom,
-            name: meal.name,
-            brand: nil,
-            barcode: nil,
-            nutrients: meal.nutrients,
-            baseAmountGrams: 1,
-            servingGrams: 1,
-            servingDescription: "1 meal",
-            portions: [FoodPortion(id: "saved-meal", label: "meal", grams: 1)],
-            containsProcessedMeat: meal.resolvedContainsProcessedMeat,
-            containsRedMeat: meal.resolvedContainsRedMeat
-        )
-        return DiaryEntry(
-            id: UUID(),
-            date: date,
-            food: mealFood,
-            amount: 1,
-            unit: .serving,
-            nutrients: meal.nutrients,
-            loggedAt: loggedAt,
-            portionID: "saved-meal",
-            displayOrder: nextDisplayOrder(on: date, document: document),
-            savedMealID: meal.id,
-            mealItems: meal.items
-        )
+    static var defaultQuantity: QuantityPreference {
+        let unit = lastWeightUnit
+        return QuantityPreference(amount: unit == .grams ? 100 : 1, unit: unit)
     }
 }

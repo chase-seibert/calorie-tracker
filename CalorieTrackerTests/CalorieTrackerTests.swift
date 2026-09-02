@@ -3,6 +3,122 @@ import XCTest
 @testable import CalorieTracker
 
 final class CalorieTrackerTests: XCTestCase {
+    func testOnDeviceJSONMigrationPreservesBackupAndIsIdempotent() throws {
+        let destination = temporaryDiaryURL()
+        let directory = destination.deletingLastPathComponent()
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let shared = directory.appendingPathComponent("Shared.json")
+        let old = directory.appendingPathComponent("Old.json")
+        let backups = directory.appendingPathComponent("Backups")
+        var document = DiaryDocument()
+        document.dailyCalorieGoal = 2100
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let bytes = try encoder.encode(document)
+        try bytes.write(to: shared)
+        try encoder.encode(DiaryDocument()).write(to: old)
+        let backup = try XCTUnwrap(DiaryJSONMigration.convertIfNeeded(
+            destination: destination, sources: [shared, old], backupDirectory: backups))
+        XCTAssertEqual(try Data(contentsOf: shared), bytes)
+        XCTAssertEqual(try Data(contentsOf: backup), bytes)
+        XCTAssertEqual(try DiaryRepository(fileURL: destination).snapshotSync().document.dailyCalorieGoal, 2100)
+        XCTAssertNil(try DiaryJSONMigration.convertIfNeeded(
+            destination: destination, sources: [shared], backupDirectory: backups))
+        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: backups.path).count, 1)
+    }
+
+    func testOnDeviceJSONMigrationRefusesCorruptSourceWithoutUsingStaleFallback() throws {
+        let destination = temporaryDiaryURL()
+        let directory = destination.deletingLastPathComponent()
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let source = directory.appendingPathComponent("Shared.json")
+        let fallback = directory.appendingPathComponent("Old.json")
+        let backups = directory.appendingPathComponent("Backups")
+        let bytes = Data("damaged current diary".utf8)
+        try bytes.write(to: source)
+        try Data("{\"schemaVersion\":8,\"entries\":[]}".utf8).write(to: fallback)
+        XCTAssertThrowsError(try DiaryJSONMigration.convertIfNeeded(
+            destination: destination, sources: [source, fallback], backupDirectory: backups))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: destination.path))
+        XCTAssertEqual(try Data(contentsOf: source), bytes)
+        let backup = try XCTUnwrap(FileManager.default.contentsOfDirectory(at: backups, includingPropertiesForKeys: nil).first)
+        XCTAssertEqual(try Data(contentsOf: backup.appendingPathComponent("Diary.json")), bytes)
+    }
+
+    func testSQLStreakMatchesDomainAfterTimeZoneChange() async throws {
+        var origin = Calendar(identifier: .gregorian)
+        origin.timeZone = try XCTUnwrap(TimeZone(identifier: "America/Los_Angeles"))
+        var destination = Calendar(identifier: .gregorian)
+        destination.timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 0))
+        let reference = try XCTUnwrap(origin.date(from: DateComponents(year: 2026, month: 9, day: 1, hour: 12)))
+        let food = Food(sourceID: "timezone", source: .custom, name: "Food", brand: nil, barcode: nil,
+            nutrients: MacroNutrients(calories: 100, carbs: 10, fat: 2, protein: 5), baseAmountGrams: 100,
+            servingGrams: 100, servingDescription: "serving")
+        var document = DiaryDocument()
+        document.entries = [-1, 0].map { offset in
+            let day = origin.startOfDay(for: origin.date(byAdding: .day, value: offset, to: reference)!)
+            return DiaryEntry(id: UUID(), date: day, food: food, amount: 1, unit: .serving,
+                nutrients: food.nutrients, loggedAt: day)
+        }
+        document.trackingStartDate = document.entries.first?.date
+        var knownFiberFood = food
+        knownFiberFood.nutrients.fiber = 4
+        document.entries[0].mealItems = [
+            MealItem(id: UUID(), food: knownFiberFood, amount: 0.5, unit: .serving),
+            MealItem(id: UUID(), food: food, amount: 0.5, unit: .serving)
+        ]
+        let repository = try DiaryRepository(fileURL: temporaryDiaryURL(), calendar: destination)
+        try repository.importDocument(document)
+        let actual = try await repository.streak(referenceDate: reference)
+        let expected = DiaryEngine(document: document, calendar: destination).streak(referenceDate: reference)
+        XCTAssertEqual(actual, expected)
+        XCTAssertEqual(actual.dayCount, 2)
+        XCTAssertEqual(actual.averageNutrients.fiber, 1)
+        document.trackingStartDate = destination.startOfDay(for: reference)
+        let trackingStart = document.trackingStartDate
+        try repository.performSync(scope: .library) { $0.document.trackingStartDate = trackingStart }
+        let limited = try await repository.streak(referenceDate: reference)
+        XCTAssertEqual(limited, DiaryEngine(document: document, calendar: destination).streak(referenceDate: reference))
+        XCTAssertEqual(limited.dayCount, 1)
+    }
+
+    @MainActor
+    func testAsyncDiaryStoreCommitsAndLoadsAnOlderSelectedDay() async throws {
+        let url = temporaryDiaryURL()
+        let today = Calendar.current.startOfDay(for: Date())
+        let oldDay = try XCTUnwrap(Calendar.current.date(byAdding: .year, value: -3, to: today))
+        let food = Food(sourceID: "old-async", source: .custom, name: "Historic food", brand: nil,
+                        barcode: nil, nutrients: .zero, baseAmountGrams: 100, servingGrams: 100,
+                        servingDescription: "serving")
+        let store = DiaryStore(fileURL: url)
+        XCTAssertTrue(store.isLoading)
+        XCTAssertFalse(store.hasLoadedSnapshot)
+        await store.reloadFromDisk()
+        XCTAssertNil(store.lastSaveError)
+        try await store.log(food, amount: 1, unit: .serving, on: oldDay)
+        await store.selectDay(oldDay)
+        XCTAssertEqual(store.entries(on: oldDay).count, 1)
+        let reloaded = try DiaryRepository(fileURL: url).snapshotSync().document
+        XCTAssertEqual(reloaded.entries.count, 1)
+        XCTAssertTrue(store.hasLoadedSnapshot)
+    }
+
+    @MainActor
+    func testFailedDiaryLoadDoesNotPublishAnEmptyUsableStore() async throws {
+        let url = temporaryDiaryURL()
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        let original = Data("corrupt source must remain intact".utf8)
+        try original.write(to: url)
+        let store = DiaryStore(fileURL: url)
+        await store.reloadFromDisk()
+        XCTAssertNotNil(store.lastSaveError)
+        XCTAssertFalse(store.hasLoadedSnapshot)
+        XCTAssertFalse(store.isLoading)
+        XCTAssertEqual(try Data(contentsOf: url), original)
+    }
+
     func testWidgetLogFoodDeepLinkRoutesOnlyTheExpectedURL() throws {
         XCTAssertEqual(
             VitaChaseDeepLink(url: VitaChaseDeepLink.logFoodURL),
@@ -277,7 +393,7 @@ final class CalorieTrackerTests: XCTestCase {
             oldBreakfastEntry
         ]
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        let store = DiaryStore(
+        let store = TestDiaryStore(
             document: document,
             fileURL: folder.appendingPathComponent("diary.json"),
             calendar: calendar,
@@ -316,7 +432,7 @@ final class CalorieTrackerTests: XCTestCase {
         let proteinShake = food("magic-protein-shake", "Protein shake")
         let suggestion = MagicFoodSuggestion(items: [.food(cappuccino), .food(proteinShake)])
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        let store = DiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
+        let store = TestDiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
 
         let loggedItems = store.logMagicSuggestion(suggestion, on: Date())
 
@@ -380,7 +496,7 @@ final class CalorieTrackerTests: XCTestCase {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         var unloggedDocument = DiaryDocument()
         unloggedDocument.entries = history
-        let unloggedStore = DiaryStore(
+        let unloggedStore = TestDiaryStore(
             document: unloggedDocument,
             fileURL: folder.appendingPathComponent("unlogged-diary.json"),
             calendar: calendar,
@@ -396,7 +512,7 @@ final class CalorieTrackerTests: XCTestCase {
             entry(cappuccino, day: 8, hour: 8),
             entry(oneOff, day: 8, hour: 8)
         ]
-        let loggedStore = DiaryStore(
+        let loggedStore = TestDiaryStore(
             document: loggedDocument,
             fileURL: folder.appendingPathComponent("logged-diary.json"),
             calendar: calendar,
@@ -460,7 +576,7 @@ final class CalorieTrackerTests: XCTestCase {
         var document = DiaryDocument()
         document.entries = [entry(on: 5), entry(on: 6), entry(on: 8)]
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        let store = DiaryStore(
+        let store = TestDiaryStore(
             document: document,
             fileURL: folder.appendingPathComponent("diary.json"),
             calendar: calendar,
@@ -471,7 +587,7 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertTrue(excludedResult.suggestions.isEmpty)
         XCTAssertTrue(excludedResult.hasExcludedMatches)
 
-        let emptyStore = DiaryStore(
+        let emptyStore = TestDiaryStore(
             document: DiaryDocument(),
             fileURL: folder.appendingPathComponent("empty-diary.json"),
             calendar: calendar,
@@ -539,7 +655,7 @@ final class CalorieTrackerTests: XCTestCase {
             calendar: calendar
         )
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        let store = DiaryStore(
+        let store = TestDiaryStore(
             document: document,
             fileURL: folder.appendingPathComponent("diary.json"),
             calendar: calendar,
@@ -574,16 +690,16 @@ final class CalorieTrackerTests: XCTestCase {
     func testDailyCalorieGoalPersistsAndCanBeRemoved() {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let fileURL = folder.appendingPathComponent("diary.json")
-        let store = DiaryStore(fileURL: fileURL)
+        let store = TestDiaryStore(fileURL: fileURL)
 
         XCTAssertNil(store.dailyCalorieGoal)
         store.setDailyCalorieGoal(2_200)
         XCTAssertEqual(store.dailyCalorieGoal, 2_200)
-        XCTAssertEqual(DiaryStore(fileURL: fileURL).dailyCalorieGoal, 2_200)
+        XCTAssertEqual(TestDiaryStore(fileURL: fileURL).dailyCalorieGoal, 2_200)
 
         store.setDailyCalorieGoal(0)
         XCTAssertNil(store.dailyCalorieGoal)
-        XCTAssertNil(DiaryStore(fileURL: fileURL).dailyCalorieGoal)
+        XCTAssertNil(TestDiaryStore(fileURL: fileURL).dailyCalorieGoal)
     }
 
     func testDailyCalorieProgressIncludesOptionalGoal() {
@@ -610,7 +726,7 @@ final class CalorieTrackerTests: XCTestCase {
     @MainActor
     func testLoggingScalesNutrientsAndRemembersQuantity() throws {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        let store = DiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
+        let store = TestDiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
         let food = Food(
             sourceID: "banana",
             source: .usda,
@@ -640,7 +756,7 @@ final class CalorieTrackerTests: XCTestCase {
     @MainActor
     func testFiberDailyTotalUsesKnownEntriesWhenOtherFoodsLackFiberData() throws {
         let day = testDate(day: 1)
-        let store = DiaryStore(
+        let store = TestDiaryStore(
             document: DiaryDocument(),
             fileURL: temporaryDiaryURL(),
             calendar: testCalendar,
@@ -659,7 +775,7 @@ final class CalorieTrackerTests: XCTestCase {
     @MainActor
     func testFiberDailyTotalUsesKnownMealComponentsWhenMealFiberIsIncomplete() throws {
         let day = testDate(day: 1)
-        let store = DiaryStore(
+        let store = TestDiaryStore(
             document: DiaryDocument(),
             fileURL: temporaryDiaryURL(),
             calendar: testCalendar,
@@ -684,7 +800,7 @@ final class CalorieTrackerTests: XCTestCase {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let fileURL = folder.appendingPathComponent("diary.json")
         let day = Date()
-        let store = DiaryStore(fileURL: fileURL)
+        let store = TestDiaryStore(fileURL: fileURL)
 
         func food(_ name: String, calories: Double) -> Food {
             Food(
@@ -713,7 +829,7 @@ final class CalorieTrackerTests: XCTestCase {
 
         XCTAssertEqual(store.entries(on: day).map(\.food.name), ["Eggs"])
         XCTAssertEqual(store.totals(on: day).calories, 200)
-        XCTAssertEqual(DiaryStore(fileURL: fileURL).entries(on: day).map(\.food.name), ["Eggs"])
+        XCTAssertEqual(TestDiaryStore(fileURL: fileURL).entries(on: day).map(\.food.name), ["Eggs"])
     }
 
     @MainActor
@@ -733,7 +849,7 @@ final class CalorieTrackerTests: XCTestCase {
             servingDescription: "1 egg",
             portions: [FoodPortion(id: "one-egg", label: "egg", grams: 50)]
         )
-        let store = DiaryStore(fileURL: fileURL)
+        let store = TestDiaryStore(fileURL: fileURL)
         store.log(egg, amount: 100, unit: .grams, on: day)
         let originalEntry = try XCTUnwrap(store.entries(on: day).first)
 
@@ -754,7 +870,7 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(store.totals(on: day).calories, 150, accuracy: 0.001)
         XCTAssertEqual(store.preference(for: egg), QuantityPreference(amount: 2, unit: .serving, portionID: "one-egg"))
 
-        let reloaded = DiaryStore(fileURL: fileURL)
+        let reloaded = TestDiaryStore(fileURL: fileURL)
         XCTAssertEqual(reloaded.entries(on: day).first?.amount, 2)
         XCTAssertEqual(reloaded.entries(on: day).first?.unit, .serving)
         XCTAssertEqual(reloaded.totals(on: day).calories, 150, accuracy: 0.001)
@@ -776,7 +892,7 @@ final class CalorieTrackerTests: XCTestCase {
             servingGrams: nil,
             servingDescription: nil
         )
-        let store = DiaryStore(fileURL: fileURL)
+        let store = TestDiaryStore(fileURL: fileURL)
 
         store.log(food, amount: 100, unit: .grams, on: day)
         store.toggleFavorite(food)
@@ -787,7 +903,7 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(store.displayedFood(food).name, "My chicken")
         XCTAssertEqual(store.searchPersonalFoods("my chicken").first?.name, "My chicken")
 
-        let reloaded = DiaryStore(fileURL: fileURL)
+        let reloaded = TestDiaryStore(fileURL: fileURL)
         XCTAssertEqual(reloaded.entries(on: day).first?.food.name, "My chicken")
         XCTAssertEqual(reloaded.searchPersonalFoods("chicken").first?.name, "My chicken")
     }
@@ -795,7 +911,7 @@ final class CalorieTrackerTests: XCTestCase {
     @MainActor
     func testRenamingLoggedFoodPublishesAnImmediateChange() {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        let store = DiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
+        let store = TestDiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
         let food = Food(
             sourceID: "rename-publish",
             source: .custom,
@@ -834,11 +950,11 @@ final class CalorieTrackerTests: XCTestCase {
             portions: [FoodPortion(id: "large-egg", label: "large egg", grams: 61)]
         )
         let preference = QuantityPreference(amount: 1, unit: .serving, portionID: "large-egg")
-        let store = DiaryStore(fileURL: fileURL)
+        let store = TestDiaryStore(fileURL: fileURL)
 
         store.toggleFavorite(egg, preference: preference)
 
-        let reloaded = DiaryStore(fileURL: fileURL)
+        let reloaded = TestDiaryStore(fileURL: fileURL)
         XCTAssertTrue(reloaded.isFavorite(egg))
         XCTAssertEqual(reloaded.preference(for: egg), preference)
     }
@@ -858,7 +974,7 @@ final class CalorieTrackerTests: XCTestCase {
             servingGrams: nil,
             servingDescription: nil
         )
-        let store = DiaryStore(fileURL: fileURL)
+        let store = TestDiaryStore(fileURL: fileURL)
 
         store.saveMeal(
             name: "Zebra meal",
@@ -868,7 +984,7 @@ final class CalorieTrackerTests: XCTestCase {
         store.toggleFavorite(food)
         store.toggleFavorite(meal)
 
-        let reloaded = DiaryStore(fileURL: fileURL)
+        let reloaded = TestDiaryStore(fileURL: fileURL)
         XCTAssertTrue(reloaded.isFavorite(meal))
         XCTAssertEqual(reloaded.favoriteMeals.map(\.id), [meal.id])
         XCTAssertEqual(
@@ -885,7 +1001,7 @@ final class CalorieTrackerTests: XCTestCase {
     @MainActor
     func testSearchPromotesAlphabetizedFavoriteFoodsAndSavedMeals() throws {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        let store = DiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
+        let store = TestDiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
 
         func food(_ id: String, _ name: String) -> Food {
             Food(
@@ -932,7 +1048,7 @@ final class CalorieTrackerTests: XCTestCase {
     @MainActor
     func testCustomFoodsAndMealsRemainSeparatePersonalCatalogItems() {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        let store = DiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
+        let store = TestDiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
         let americano = store.addCustomFood(
             name: "Americano",
             brand: "",
@@ -965,7 +1081,7 @@ final class CalorieTrackerTests: XCTestCase {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let fileURL = folder.appendingPathComponent("diary.json")
         let day = Date()
-        let store = DiaryStore(fileURL: fileURL)
+        let store = TestDiaryStore(fileURL: fileURL)
 
         let food = store.addCustomFood(
             name: "Original oats",
@@ -1005,7 +1121,7 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(loggedFood.nutrients.calories, 150, accuracy: 0.001)
         XCTAssertEqual(loggedFood.nutrients.fiber, 5)
 
-        let reloaded = DiaryStore(fileURL: fileURL)
+        let reloaded = TestDiaryStore(fileURL: fileURL)
         XCTAssertEqual(reloaded.document.customFoods.first?.name, "Updated oats")
         XCTAssertEqual(reloaded.document.meals.first?.items.first?.food.name, "Updated oats")
     }
@@ -1015,7 +1131,7 @@ final class CalorieTrackerTests: XCTestCase {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let fileURL = folder.appendingPathComponent("diary.json")
         let day = Date()
-        let store = DiaryStore(fileURL: fileURL)
+        let store = TestDiaryStore(fileURL: fileURL)
 
         let toast = store.addCustomFood(
             name: "Toast",
@@ -1054,7 +1170,7 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(loggedMeal.nutrients.calories, 560, accuracy: 0.001)
         XCTAssertEqual(loggedMeal.mealItems?.first?.food.name, "Eggs")
 
-        let reloaded = DiaryStore(fileURL: fileURL)
+        let reloaded = TestDiaryStore(fileURL: fileURL)
         XCTAssertEqual(reloaded.document.meals.first?.name, "New breakfast")
         let reloadedMeal = try XCTUnwrap(reloaded.entries(on: day).first)
         XCTAssertEqual(reloadedMeal.nutrients.calories, 560, accuracy: 0.001)
@@ -1065,7 +1181,7 @@ final class CalorieTrackerTests: XCTestCase {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let fileURL = folder.appendingPathComponent("diary.json")
         let day = Date()
-        let store = DiaryStore(fileURL: fileURL)
+        let store = TestDiaryStore(fileURL: fileURL)
 
         func food(_ name: String) -> Food {
             Food(
@@ -1090,7 +1206,7 @@ final class CalorieTrackerTests: XCTestCase {
         store.moveEntry(cID, relativeTo: aID, placeAfterTarget: true, on: day)
 
         XCTAssertEqual(store.entries(on: day).map(\.food.name), ["B", "A", "C"])
-        let reloaded = DiaryStore(fileURL: fileURL)
+        let reloaded = TestDiaryStore(fileURL: fileURL)
         XCTAssertEqual(reloaded.entries(on: day).map(\.food.name), ["B", "A", "C"])
 
         reloaded.log(food("D"), amount: 100, unit: .grams, on: day)
@@ -1100,7 +1216,7 @@ final class CalorieTrackerTests: XCTestCase {
     @MainActor
     func testRepeatedMovesUpdateOrderAsAnEntryCrossesEachRow() throws {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        let store = DiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
+        let store = TestDiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
         let day = Date()
 
         func food(_ name: String) -> Food {
@@ -1138,7 +1254,7 @@ final class CalorieTrackerTests: XCTestCase {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let fileURL = folder.appendingPathComponent("diary.json")
         let day = Date()
-        let store = DiaryStore(fileURL: fileURL)
+        let store = TestDiaryStore(fileURL: fileURL)
 
         func food(_ name: String, calories: Double) -> Food {
             Food(
@@ -1170,7 +1286,7 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(store.document.meals.first?.items.count, 2)
         XCTAssertEqual(store.totals(on: day), totalsBefore)
 
-        let reloaded = DiaryStore(fileURL: fileURL)
+        let reloaded = TestDiaryStore(fileURL: fileURL)
         XCTAssertEqual(reloaded.entries(on: day).map(\.food.name), ["Coffee", "Breakfast"])
         XCTAssertEqual(reloaded.totals(on: day), totalsBefore)
 
@@ -1182,7 +1298,7 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(reloaded.totals(on: day), totalsBefore)
         XCTAssertEqual(reloaded.document.meals.count, 1)
 
-        let expandedReload = DiaryStore(fileURL: fileURL)
+        let expandedReload = TestDiaryStore(fileURL: fileURL)
         XCTAssertEqual(expandedReload.entries(on: day).map(\.food.name), ["Coffee", "Eggs", "Toast"])
         XCTAssertEqual(expandedReload.totals(on: day), totalsBefore)
     }
@@ -1192,7 +1308,7 @@ final class CalorieTrackerTests: XCTestCase {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let fileURL = folder.appendingPathComponent("diary.json")
         let day = Date()
-        let store = DiaryStore(fileURL: fileURL)
+        let store = TestDiaryStore(fileURL: fileURL)
 
         func food(_ name: String, calories: Double) -> Food {
             Food(
@@ -1229,7 +1345,7 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(mealEntry.nutrients.calories, 300)
         XCTAssertEqual(store.totals(on: day).calories, 305)
 
-        let reloaded = DiaryStore(fileURL: fileURL)
+        let reloaded = TestDiaryStore(fileURL: fileURL)
         XCTAssertEqual(reloaded.entries(on: day).map(\.food.name), ["Breakfast", "Coffee"])
         reloaded.breakApartMeal(entryID: mealEntry.id)
 
@@ -1342,7 +1458,7 @@ final class CalorieTrackerTests: XCTestCase {
         ]
         document.customFoods = [customPepperoni]
 
-        let store = DiaryStore(
+        let store = TestDiaryStore(
             document: document,
             fileURL: temporaryDiaryURL(),
             calendar: testCalendar,
@@ -1363,7 +1479,7 @@ final class CalorieTrackerTests: XCTestCase {
         let secondDay = testDate(day: 2)
         let fifthDay = testDate(day: 5)
         let referenceDay = testDate(day: 8)
-        let store = DiaryStore(
+        let store = TestDiaryStore(
             document: DiaryDocument(),
             fileURL: temporaryDiaryURL(),
             calendar: testCalendar,
@@ -1394,7 +1510,7 @@ final class CalorieTrackerTests: XCTestCase {
     @MainActor
     func testMeatDayDetailsListQualifyingFoodsAndExpandMeals() throws {
         let day = testDate(day: 1)
-        let store = DiaryStore(
+        let store = TestDiaryStore(
             document: DiaryDocument(),
             fileURL: temporaryDiaryURL(),
             calendar: testCalendar,
@@ -1424,7 +1540,7 @@ final class CalorieTrackerTests: XCTestCase {
 
     @MainActor
     func testCustomFoodAndMealMeatFlagsAreEditableOverrides() throws {
-        let store = DiaryStore(fileURL: temporaryDiaryURL())
+        let store = TestDiaryStore(fileURL: temporaryDiaryURL())
         let food = store.addCustomFood(
             name: "House plate",
             brand: "",
@@ -1463,7 +1579,12 @@ final class CalorieTrackerTests: XCTestCase {
     @MainActor
     func testNewFoodsUseLastSelectedWeightUnitAndStartWithOunces() {
         let previous = UserDefaults.standard.object(forKey: "lastWeightUnit")
+        let shared = UserDefaults(suiteName: SharedDiaryStorage.appGroupIdentifier)!
+        let previousShared = shared.object(forKey: "lastWeightUnit")
+        shared.removeObject(forKey: "lastWeightUnit")
         defer {
+            if let previousShared { shared.set(previousShared, forKey: "lastWeightUnit") }
+            else { shared.removeObject(forKey: "lastWeightUnit") }
             if let previous {
                 UserDefaults.standard.set(previous, forKey: "lastWeightUnit")
             } else {
@@ -1473,7 +1594,7 @@ final class CalorieTrackerTests: XCTestCase {
         UserDefaults.standard.removeObject(forKey: "lastWeightUnit")
 
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        let store = DiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
+        let store = TestDiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
         let food = Food(
             sourceID: "cheddar",
             source: .usda,
@@ -1498,7 +1619,7 @@ final class CalorieTrackerTests: XCTestCase {
     @MainActor
     func testQuickLogUsesDisplayedPreferenceAndFavoritesRemainAvailable() throws {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        let store = DiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
+        let store = TestDiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
         let peanutButter = Food(
             sourceID: "peanut-butter",
             source: .usda,
@@ -1538,7 +1659,7 @@ final class CalorieTrackerTests: XCTestCase {
     @MainActor
     func testRecentAndFrequentItemsMixSavedMealsWithFoods() throws {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        let store = DiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
+        let store = TestDiaryStore(fileURL: folder.appendingPathComponent("diary.json"))
         let toast = Food(
             sourceID: "mixed-toast",
             source: .custom,
@@ -1587,7 +1708,7 @@ final class CalorieTrackerTests: XCTestCase {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let fileURL = folder.appendingPathComponent("diary.json")
         let day = Date()
-        let store = DiaryStore(fileURL: fileURL)
+        let store = TestDiaryStore(fileURL: fileURL)
 
         func food(_ name: String, calories: Double) -> Food {
             Food(
@@ -1625,7 +1746,7 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(edited.amount, 0.5)
         XCTAssertEqual(edited.nutrients.calories, 150, accuracy: 0.001)
         XCTAssertEqual(edited.mealItems?.map(\.amount) ?? [], [50, 50])
-        let reloadedEntry = try XCTUnwrap(DiaryStore(fileURL: fileURL).entries(on: day).first)
+        let reloadedEntry = try XCTUnwrap(TestDiaryStore(fileURL: fileURL).entries(on: day).first)
         XCTAssertEqual(reloadedEntry.nutrients.calories, 150, accuracy: 0.001)
     }
 
@@ -1634,7 +1755,7 @@ final class CalorieTrackerTests: XCTestCase {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let fileURL = folder.appendingPathComponent("diary.json")
         let day = Date()
-        let store = DiaryStore(fileURL: fileURL)
+        let store = TestDiaryStore(fileURL: fileURL)
         func food(_ name: String, calories: Double) -> Food {
             Food(
                 sourceID: name.lowercased(),
@@ -1677,7 +1798,7 @@ final class CalorieTrackerTests: XCTestCase {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let fileURL = folder.appendingPathComponent("diary.json")
         let day = Date()
-        let store = DiaryStore(fileURL: fileURL)
+        let store = TestDiaryStore(fileURL: fileURL)
         let food = Food(
             sourceID: "meal-rename-food",
             source: .custom,
@@ -1700,7 +1821,7 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertTrue(store.renameMeal(mealID: meal.id, name: "New breakfast"))
         XCTAssertEqual(store.document.meals.first?.name, "New breakfast")
         XCTAssertEqual(store.entries(on: day).first?.food.name, "New breakfast")
-        XCTAssertEqual(DiaryStore(fileURL: fileURL).document.meals.first?.name, "New breakfast")
+        XCTAssertEqual(TestDiaryStore(fileURL: fileURL).document.meals.first?.name, "New breakfast")
     }
 }
 
@@ -1720,9 +1841,9 @@ extension CalorieTrackerTests {
         ]
         let fileURL = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
-            .appendingPathComponent("diary.json")
+            .appendingPathComponent("diary.sqlite")
 
-        let store = DiaryStore(
+        let store = TestDiaryStore(
             document: document,
             fileURL: fileURL,
             calendar: calendar,
@@ -1743,7 +1864,7 @@ extension CalorieTrackerTests {
         var document = DiaryDocument()
         document.trackingStartDate = days[0]
         document.entries = [testEntry(calories: 20, date: days[0], name: "Snack")]
-        let store = DiaryStore(
+        let store = TestDiaryStore(
             document: document,
             fileURL: temporaryDiaryURL(),
             calendar: testCalendar,
@@ -1761,7 +1882,7 @@ extension CalorieTrackerTests {
         let today = testDate(day: 2)
         var document = DiaryDocument()
         document.trackingStartDate = yesterday
-        let store = DiaryStore(
+        let store = TestDiaryStore(
             document: document,
             fileURL: temporaryDiaryURL(),
             calendar: testCalendar,
@@ -1779,7 +1900,7 @@ extension CalorieTrackerTests {
     func testAlcoholQuickEntryUsesDefaultCaloriesAndPersists() throws {
         let day = testDate(day: 1)
         let fileURL = temporaryDiaryURL()
-        let store = DiaryStore(fileURL: fileURL, calendar: testCalendar, referenceDate: day)
+        let store = TestDiaryStore(fileURL: fileURL, calendar: testCalendar, referenceDate: day)
         store.log(testFood(calories: 200, name: "Dinner"), amount: 1, unit: .serving, on: day)
 
         store.setAlcohol(drinks: 2, type: nil, on: day)
@@ -1791,7 +1912,7 @@ extension CalorieTrackerTests {
         XCTAssertEqual(store.totals(on: day).calories, 500, accuracy: 0.001)
         XCTAssertEqual(store.caloriesExcludingAlcohol(on: day), 200, accuracy: 0.001)
 
-        let reloaded = DiaryStore(fileURL: fileURL, calendar: testCalendar, referenceDate: day)
+        let reloaded = TestDiaryStore(fileURL: fileURL, calendar: testCalendar, referenceDate: day)
         let reloadedEntry = try XCTUnwrap(reloaded.alcoholEntry(on: day))
         XCTAssertEqual(reloaded.document.schemaVersion, 8)
         XCTAssertEqual(reloadedEntry.id, entry.id)
@@ -1806,7 +1927,7 @@ extension CalorieTrackerTests {
     @MainActor
     func testAlcoholQuickEntryKeepsOneTypeAndCanBeCleared() {
         let day = testDate(day: 1)
-        let store = DiaryStore(
+        let store = TestDiaryStore(
             document: DiaryDocument(),
             fileURL: temporaryDiaryURL(),
             calendar: testCalendar,
@@ -1835,7 +1956,7 @@ extension CalorieTrackerTests {
         let today = testDate(day: 2)
         var document = DiaryDocument()
         document.trackingStartDate = yesterday
-        let store = DiaryStore(
+        let store = TestDiaryStore(
             document: document,
             fileURL: temporaryDiaryURL(),
             calendar: testCalendar,
@@ -1863,7 +1984,7 @@ extension CalorieTrackerTests {
     func testCalorieAdjustmentWorksOnNormalDayAndPersists() throws {
         let day = testDate(day: 1)
         let fileURL = temporaryDiaryURL()
-        let store = DiaryStore(fileURL: fileURL, calendar: testCalendar, referenceDate: day)
+        let store = TestDiaryStore(fileURL: fileURL, calendar: testCalendar, referenceDate: day)
         store.log(testFood(calories: 450, name: "Breakfast"), amount: 1, unit: .serving, on: day)
 
         store.setCalorieAdjustment(1_000, on: day)
@@ -1878,7 +1999,7 @@ extension CalorieTrackerTests {
         XCTAssertEqual(store.calorieAdjustment(on: day), 1_500)
         XCTAssertEqual(store.totals(on: day).calories, 1_950, accuracy: 0.001)
         XCTAssertEqual(store.entries(on: day).filter(\.isCheatDayAdjustment).count, 1)
-        let reloaded = DiaryStore(fileURL: fileURL, calendar: testCalendar, referenceDate: day)
+        let reloaded = TestDiaryStore(fileURL: fileURL, calendar: testCalendar, referenceDate: day)
         XCTAssertEqual(reloaded.calorieAdjustment(on: day), 1_500)
 
         reloaded.setCalorieAdjustment(nil, on: day)
@@ -1891,7 +2012,7 @@ extension CalorieTrackerTests {
     @MainActor
     func testUndoingCheatDayPreservesIndependentCalorieAdjustment() throws {
         let day = testDate(day: 1)
-        let store = DiaryStore(
+        let store = TestDiaryStore(
             fileURL: temporaryDiaryURL(),
             calendar: testCalendar,
             referenceDate: day
@@ -1913,7 +2034,7 @@ extension CalorieTrackerTests {
     @MainActor
     func testUndoingCheatDayRemovesAdjustmentByDefault() {
         let day = testDate(day: 1)
-        let store = DiaryStore(
+        let store = TestDiaryStore(
             fileURL: temporaryDiaryURL(),
             calendar: testCalendar,
             referenceDate: day
@@ -1937,7 +2058,7 @@ extension CalorieTrackerTests {
             testEntry(calories: 1_800, date: days[0], name: "Toast"),
             testEntry(calories: 2_000, date: days[1], name: "Toast")
         ]
-        let store = DiaryStore(
+        let store = TestDiaryStore(
             document: document,
             fileURL: temporaryDiaryURL(),
             calendar: testCalendar,
@@ -1966,7 +2087,7 @@ extension CalorieTrackerTests {
             testEntry(calories: 100, date: days[0], name: "Eggs"),
             testEntry(calories: 100, date: days[1], name: "Apple")
         ]
-        let store = DiaryStore(
+        let store = TestDiaryStore(
             document: document,
             fileURL: temporaryDiaryURL(),
             calendar: testCalendar,
@@ -1996,7 +2117,7 @@ extension CalorieTrackerTests {
             type: .wine,
             loggedAt: days[1]
         )]
-        let store = DiaryStore(
+        let store = TestDiaryStore(
             document: document,
             fileURL: temporaryDiaryURL(),
             calendar: testCalendar,
@@ -2208,7 +2329,7 @@ extension CalorieTrackerTests {
     @MainActor
     func testOneOffImportedFoodLogsWithoutSavingCustomFood() throws {
         let fileURL = temporaryDiaryURL()
-        let store = DiaryStore(fileURL: fileURL)
+        let store = TestDiaryStore(fileURL: fileURL)
         let importedFood = CustomFoodDefinition(
             name: "Quinoa chicken bowl",
             servingDescription: "whole bowl",
@@ -2284,7 +2405,7 @@ extension CalorieTrackerTests {
     @MainActor
     func testOneOffImportedMealIsBreakableWithoutSavingMealOrFoods() throws {
         let fileURL = temporaryDiaryURL()
-        let store = DiaryStore(fileURL: fileURL)
+        let store = TestDiaryStore(fileURL: fileURL)
         let importedMeal = CustomMealFile(
             format: CustomMealFile.formatIdentifier,
             version: CustomMealFile.currentVersion,
@@ -2333,9 +2454,9 @@ extension CalorieTrackerTests {
     }
 
     @MainActor
-    func testLegacyOneOffImportedMealMigratesIntoRecentMealSnapshot() throws {
+    func testOneOffImportedMealRemainsDetachedAfterReload() throws {
         let fileURL = temporaryDiaryURL()
-        let store = DiaryStore(fileURL: fileURL)
+        let store = TestDiaryStore(fileURL: fileURL)
         let food = Food(
             sourceID: "legacy-imported-food",
             source: .custom,
@@ -2355,17 +2476,18 @@ extension CalorieTrackerTests {
         )
         store.logOneOffMeal(meal, on: Date())
 
-        let reloaded = DiaryStore(fileURL: fileURL)
+        let reloaded = TestDiaryStore(fileURL: fileURL)
         XCTAssertEqual(reloaded.customMeals.count, 0)
-        let imported = try XCTUnwrap(reloaded.importedMeals.first)
-        XCTAssertEqual(imported.name, "Imported rice")
-        XCTAssertEqual(imported.items.map(\.food.name), ["Rice"])
-        XCTAssertEqual(reloaded.recentItems, [.meal(imported)])
+        XCTAssertTrue(reloaded.importedMeals.isEmpty)
+        let entry = try XCTUnwrap(reloaded.entries(on: Date()).first)
+        XCTAssertNil(entry.savedMealID)
+        XCTAssertEqual(entry.food.name, "Imported rice")
+        XCTAssertEqual(entry.mealItems?.map(\.food.name), ["Rice"])
     }
 
     @MainActor
     func testImportedMealIsRetainedForRecentButExcludedFromCustomMeals() throws {
-        let store = DiaryStore(fileURL: temporaryDiaryURL())
+        let store = TestDiaryStore(fileURL: temporaryDiaryURL())
         let food = Food(
             sourceID: "imported-food",
             source: .custom,
@@ -2559,7 +2681,7 @@ extension CalorieTrackerTests {
             testCalendar.isDate($0.date, inSameDayAs: logDate)
         })
 
-        XCTAssertEqual(result, QuickLogResult(title: "Cappuccino", loggedItemCount: 1))
+        XCTAssertEqual(result, QuickLogResult(title: "Cappuccino", loggedItemCount: 1, selectionID: "food:custom:cappuccino"))
         XCTAssertEqual(loggedEntry.amount, 2)
         XCTAssertEqual(loggedEntry.nutrients.calories, 180)
     }
@@ -2604,15 +2726,11 @@ extension CalorieTrackerTests {
             at: fileURL.deletingLastPathComponent(),
             withIntermediateDirectories: true
         )
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        try encoder.encode(document).write(to: fileURL, options: .atomic)
+        try DiaryRepository(fileURL: fileURL).importDocument(document)
     }
 
     private func readDiary(from fileURL: URL) throws -> DiaryDocument {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode(DiaryDocument.self, from: Data(contentsOf: fileURL))
+        try DiaryRepository(fileURL: fileURL).snapshotSync().document
     }
 
     private func testFood(calories: Double, name: String) -> Food {
@@ -2642,5 +2760,165 @@ extension CalorieTrackerTests {
             loggedAt: date,
             portionID: "serving"
         )
+    }
+}
+
+@MainActor
+private final class TestDiaryStore: DiaryStore {
+    init(fileURL: URL? = nil, calendar: Calendar = .current, catalog: CatalogStore? = nil, healthKit: HealthKitStore? = nil, referenceDate: Date = Date()) {
+        super.init(fileURL: fileURL, calendar: calendar, catalog: catalog, healthKit: healthKit, referenceDate: referenceDate, usesWindow: false)
+        try! loadTestFixture(referenceDate: referenceDate)
+    }
+    init(document: DiaryDocument, fileURL: URL? = nil, calendar: Calendar = .current, catalog: CatalogStore? = nil, healthKit: HealthKitStore? = nil, referenceDate: Date = Date()) {
+        let url = fileURL ?? FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".sqlite")
+        super.init(fileURL: url, calendar: calendar, catalog: catalog, healthKit: healthKit, referenceDate: referenceDate, usesWindow: false)
+        try! DiaryRepository(fileURL: url, calendar: calendar).importDocument(DiaryEngine.backfilledFoodMetadata(in: document, catalog: catalog))
+        try! loadTestFixture(referenceDate: referenceDate)
+    }
+    func setAlcohol(drinks: Int, type: AlcoholType?, on date: Date) {
+        try! performTestMutation(scope: .day(date)) { $0.setAlcohol(drinks: drinks, type: type, on: date) }
+    }
+    func setDailyCalorieGoal(_ goal: Int?) {
+        try! performTestMutation(scope: .all) { $0.setDailyCalorieGoal(goal) }
+    }
+    func markCheatDay(on date: Date, adjustmentCalories: Int? = nil) {
+        try! performTestMutation(scope: .day(date)) { $0.markCheatDay(on: date, adjustmentCalories: adjustmentCalories) }
+    }
+    func setCalorieAdjustment(_ calories: Int?, on date: Date) {
+        try! performTestMutation(scope: .day(date)) { $0.setCalorieAdjustment(calories, on: date) }
+    }
+    func undoCheatDay(on date: Date, preservingCalorieAdjustment: Bool = false) {
+        try! performTestMutation(scope: .day(date)) { $0.undoCheatDay(on: date, preservingCalorieAdjustment: preservingCalorieAdjustment) }
+    }
+    func finalizePastDays(referenceDate: Date = Date()) {
+        try! performTestMutation(scope: .all) { $0.finalizePastDays(referenceDate: referenceDate) }
+    }
+#if DEBUG
+    func seedSpecialDaysForScreenshots(referenceDate: Date = Date()) {
+        try! performTestMutation(scope: .window(reference: referenceDate, selectedDay: nil)) { $0.seedSpecialDaysForScreenshots(referenceDate: referenceDate) }
+    }
+#endif
+    func log(_ food: Food, amount: Double, unit: LogUnit, portionID: String? = nil, on date: Date) {
+        try! performTestMutation(scope: .day(date)) { $0.log(food, amount: amount, unit: unit, portionID: portionID, on: date) }
+    }
+    func delete(entryID: UUID) {
+        try! performTestMutation(scope: .entries([entryID])) { $0.delete(entryID: entryID) }
+    }
+    func deleteEntries(entryIDs: Set<UUID>) {
+        try! performTestMutation(scope: .entries(entryIDs)) { $0.deleteEntries(entryIDs: entryIDs) }
+    }
+    func updateEntry(entryID: UUID,
+        amount: Double,
+        unit: LogUnit,
+        portionID: String? = nil) {
+        try! performTestMutation(scope: .entries([entryID])) { $0.updateEntry(entryID: entryID, amount: amount, unit: unit, portionID: portionID) }
+    }
+    func moveEntry(_ entryID: UUID,
+        relativeTo targetEntryID: UUID,
+        placeAfterTarget: Bool,
+        on date: Date) {
+        try! performTestMutation(scope: .day(date)) { $0.moveEntry(entryID, relativeTo: targetEntryID, placeAfterTarget: placeAfterTarget, on: date) }
+    }
+    func moveEntry(_ entryID: UUID, toIndex destinationIndex: Int, on date: Date) {
+        try! performTestMutation(scope: .day(date)) { $0.moveEntry(entryID, toIndex: destinationIndex, on: date) }
+    }
+    func rememberPreference(_ preference: QuantityPreference, for food: Food) {
+        try! performTestMutation(scope: .library) { $0.rememberPreference(preference, for: food) }
+    }
+    func quickLog(_ food: Food, on date: Date) {
+        try! performTestMutation(scope: .day(date)) { $0.quickLog(food, on: date) }
+    }
+    @discardableResult
+    func logMagicSuggestion(_ suggestion: MagicFoodSuggestion, on date: Date) -> [FoodPickerItem] {
+        try! performTestMutation(scope: .window(reference: date, selectedDay: date)) { $0.logMagicSuggestion(suggestion, on: date) }
+    }
+    @discardableResult
+    func logQuickSelection(_ selectionID: String, on date: Date = Date()) -> QuickLogResult? {
+        try! performTestMutation(scope: .window(reference: date, selectedDay: date)) { $0.logQuickSelection(selectionID, on: date) }
+    }
+    func toggleFavorite(_ food: Food, preference: QuantityPreference? = nil) {
+        try! performTestMutation(scope: .library) { $0.toggleFavorite(food, preference: preference) }
+    }
+    func toggleFavorite(_ meal: SavedMeal) {
+        try! performTestMutation(scope: .library) { $0.toggleFavorite(meal) }
+    }
+    @discardableResult
+    func addCustomFood(name: String,
+        brand: String,
+        calories: Double,
+        carbs: Double,
+        fat: Double,
+        protein: Double,
+        fiber: Double? = nil,
+        servingGrams: Double,
+        servingDescription: String = "1 serving",
+        containsProcessedMeat: Bool = false,
+        containsRedMeat: Bool = false) -> Food {
+        try! performTestMutation(scope: .library) { $0.addCustomFood(name: name, brand: brand, calories: calories, carbs: carbs, fat: fat, protein: protein, fiber: fiber, servingGrams: servingGrams, servingDescription: servingDescription, containsProcessedMeat: containsProcessedMeat, containsRedMeat: containsRedMeat) }
+    }
+    @discardableResult
+    func updateCustomFood(foodID: String,
+        name: String,
+        brand: String,
+        calories: Double,
+        carbs: Double,
+        fat: Double,
+        protein: Double,
+        fiber: Double? = nil,
+        servingGrams: Double,
+        containsProcessedMeat: Bool? = nil,
+        containsRedMeat: Bool? = nil) -> Bool {
+        try! performTestMutation(scope: .food(foodID)) { $0.updateCustomFood(foodID: foodID, name: name, brand: brand, calories: calories, carbs: carbs, fat: fat, protein: protein, fiber: fiber, servingGrams: servingGrams, containsProcessedMeat: containsProcessedMeat, containsRedMeat: containsRedMeat) }
+    }
+    @discardableResult
+    func saveMeal(name: String,
+        items: [MealItem],
+        containsProcessedMeat: Bool? = nil,
+        containsRedMeat: Bool? = nil,
+        origin: SavedMealOrigin = .custom) -> SavedMeal? {
+        try! performTestMutation(scope: .library) { $0.saveMeal(name: name, items: items, containsProcessedMeat: containsProcessedMeat, containsRedMeat: containsRedMeat, origin: origin) }
+    }
+    @discardableResult
+    func updateSavedMeal(mealID: UUID,
+        name: String,
+        items: [MealItem],
+        containsProcessedMeat: Bool? = nil,
+        containsRedMeat: Bool? = nil) -> Bool {
+        try! performTestMutation(scope: .meal(mealID)) { $0.updateSavedMeal(mealID: mealID, name: name, items: items, containsProcessedMeat: containsProcessedMeat, containsRedMeat: containsRedMeat) }
+    }
+    func saveMeal(name: String, replacing entryIDs: Set<UUID>, on date: Date) {
+        try! performTestMutation(scope: .day(date)) { $0.saveMeal(name: name, replacing: entryIDs, on: date) }
+    }
+    func breakApartMeal(entryID: UUID) {
+        try! performTestMutation(scope: .entries([entryID])) { $0.breakApartMeal(entryID: entryID) }
+    }
+    func deleteCustomFood(_ food: Food) {
+        try! performTestMutation(scope: .library) { $0.deleteCustomFood(food) }
+    }
+    func deleteMeal(_ meal: SavedMeal) {
+        try! performTestMutation(scope: .library) { $0.deleteMeal(meal) }
+    }
+    func logMeal(_ meal: SavedMeal, amount: Double = 1, on date: Date) {
+        try! performTestMutation(scope: .day(date)) { $0.logMeal(meal, amount: amount, on: date) }
+    }
+    func logOneOffMeal(_ meal: SavedMeal, amount: Double = 1, on date: Date) {
+        try! performTestMutation(scope: .day(date)) { $0.logOneOffMeal(meal, amount: amount, on: date) }
+    }
+    func updateMealEntry(entryID: UUID, amount: Double) {
+        try! performTestMutation(scope: .entries([entryID])) { $0.updateMealEntry(entryID: entryID, amount: amount) }
+    }
+    func updateMealEntry(entryID: UUID, amount: Double, items: [MealItem]) {
+        try! performTestMutation(scope: .entries([entryID])) { $0.updateMealEntry(entryID: entryID, amount: amount, items: items) }
+    }
+    @discardableResult
+    func renameMeal(mealID: UUID, name: String) -> Bool {
+        try! performTestMutation(scope: .meal(mealID)) { $0.renameMeal(mealID: mealID, name: name) }
+    }
+    @discardableResult
+    func renameFood(foodID: String, name: String) -> Bool {
+        try! performTestMutation(scope: .food(foodID)) { $0.renameFood(foodID: foodID, name: name) }
+    }
+    func clearPersonalData() {
+        try! performTestMutation(scope: .all) { $0.clearPersonalData() }
     }
 }

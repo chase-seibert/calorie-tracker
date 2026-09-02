@@ -168,24 +168,27 @@ struct FoodPickerView: View {
                     initialName: query.trimmingCharacters(in: .whitespacesAndNewlines),
                     analyticsOrigin: "search_miss",
                     onSaved: { food in
-                        markCurrentSearchLogged()
-                        let previousEntryCount = diary.entries(on: date).count
-                        diary.log(
-                            food,
-                            amount: 1,
-                            unit: .serving,
-                            portionID: "custom-serving",
-                            on: date
-                        )
-                        if diary.entries(on: date).count > previousEntryCount {
-                            captureFoodLog(
-                                food: food,
-                                method: "custom_food_creation",
+                        diary.run {
+                            markCurrentSearchLogged()
+                            let previousEntryCount = diary.entries(on: date).count
+                            try await diary.log(
+                                food,
+                                amount: 1,
                                 unit: .serving,
-                                foodKind: "custom"
+                                portionID: "custom-serving",
+                                on: date
                             )
+                            if diary.entries(on: date).count > previousEntryCount {
+                                captureFoodLog(
+                                    food: food,
+                                    method: "custom_food_creation",
+                                    unit: .serving,
+                                    foodKind: "custom"
+                                )
+                            }
+                            dismiss()
+
                         }
-                        dismiss()
                     }
                 )
             }
@@ -213,15 +216,19 @@ struct FoodPickerView: View {
                 try? await Task.sleep(for: .milliseconds(140))
                 guard !Task.isCancelled else { return }
                 let bundledResults = catalog.searchAll(normalizedQuery)
-                results = diary.searchItems(normalizedQuery, catalogFoods: bundledResults)
+                let matches = await diary.searchItemsIncludingHistory(normalizedQuery, catalogFoods: bundledResults)
+                guard !Task.isCancelled else { return }
+                results = matches
                 isSearching = false
                 searchAttempt.completed(query: normalizedQuery, resultCount: results.count)
             }
             .onDisappear { finishSearchAttempt() }
         }
-        .analyticsScreen("food_picker", properties: [
-            "initial_mode": mode?.analyticsValue ?? "search"
-        ])
+        .analyticsScreen(
+            "food_picker",
+            properties: [
+                "initial_mode": mode?.analyticsValue ?? "search"
+            ])
     }
 
     private var searchControls: some View {
@@ -258,54 +265,66 @@ struct FoodPickerView: View {
     }
 
     private func quickLog(_ food: Food) {
-        markCurrentSearchLogged()
-        let preference = diary.preference(for: food)
-        let previousEntryCount = diary.entries(on: date).count
-        diary.quickLog(food, on: date)
-        guard diary.entries(on: date).count > previousEntryCount else { return }
-        captureFoodLog(
-            food: food,
-            method: "quick_add",
-            unit: preference.unit
-        )
+        diary.run {
+            markCurrentSearchLogged()
+            let preference = diary.preference(for: food)
+            let previousEntryCount = diary.entries(on: date).count
+            try await diary.quickLog(food, on: date)
+            guard diary.entries(on: date).count > previousEntryCount else { return }
+            captureFoodLog(
+                food: food,
+                method: "quick_add",
+                unit: preference.unit
+            )
+
+        }
     }
 
     private func logMeal(_ meal: SavedMeal) {
-        markCurrentSearchLogged()
-        let previousEntryCount = diary.entries(on: date).count
-        diary.logMeal(meal, on: date)
-        guard diary.entries(on: date).count > previousEntryCount else { return }
-        captureMealLog(meal: meal, method: "quick_add", unit: .serving)
+        diary.run {
+            markCurrentSearchLogged()
+            let previousEntryCount = diary.entries(on: date).count
+            try await diary.logMeal(meal, on: date)
+            guard diary.entries(on: date).count > previousEntryCount else { return }
+            captureMealLog(meal: meal, method: "quick_add", unit: .serving)
+
+        }
     }
 
     private func deleteMeal(_ meal: SavedMeal) {
-        diary.deleteMeal(meal)
-        AppAnalytics.capture("meal.deleted", properties: ["origin": "food_picker"])
+        diary.run {
+            try await diary.deleteMeal(meal)
+            AppAnalytics.capture("meal.deleted", properties: ["origin": "food_picker"])
+
+        }
     }
 
     private func logMagicSuggestion(_ suggestion: MagicFoodSuggestion) {
-        let loggedItems = diary.logMagicSuggestion(suggestion, on: date)
-        guard !loggedItems.isEmpty else { return }
-        let groupID = UUID().uuidString
-        for item in loggedItems {
-            switch item {
-            case let .food(food):
-                captureFoodLog(
-                    food: food,
-                    method: "magic_suggestion",
-                    unit: diary.preference(for: food).unit,
-                    mode: "magic",
-                    groupID: groupID
-                )
-            case let .meal(meal):
-                captureMealLog(
-                    meal: meal,
-                    method: "magic_suggestion",
-                    unit: .serving,
-                    mode: "magic",
-                    groupID: groupID
-                )
+        diary.run {
+            let loggedItems = try await diary.logMagicSuggestion(suggestion, on: date)
+            guard !loggedItems.isEmpty else { return }
+            let groupID = UUID().uuidString
+            for item in loggedItems {
+                switch item {
+                case .food(let food):
+                    captureFoodLog(
+                        food: food,
+                        method: "magic_suggestion",
+                        unit: diary.preference(for: food).unit,
+                        mode: "magic",
+                        groupID: groupID
+                    )
+                case .meal(let meal):
+                    captureMealLog(
+                        meal: meal,
+                        method: "magic_suggestion",
+                        unit: .serving,
+                        mode: "magic",
+                        groupID: groupID
+                    )
+                }
             }
+
         }
     }
 
@@ -400,11 +419,14 @@ struct FoodPickerView: View {
             isSearching = false
             return
         }
-        results = diary.searchItems(
-            normalizedQuery,
-            catalogFoods: catalog.searchAll(normalizedQuery)
-        )
-        isSearching = false
+        Task {
+            let matches = await diary.searchItemsIncludingHistory(
+                normalizedQuery, catalogFoods: catalog.searchAll(normalizedQuery)
+            )
+            guard normalizedQuery == query.trimmingCharacters(in: .whitespacesAndNewlines) else { return }
+            results = matches
+            isSearching = false
+        }
     }
 
     private func refreshItems(for mode: Mode) {
@@ -647,7 +669,7 @@ private struct MagicFoodSuggestionRow: View {
     @ViewBuilder
     private func itemLabel(_ item: FoodPickerItem) -> some View {
         switch item {
-        case let .food(food):
+        case .food(let food):
             HStack(spacing: 9) {
                 SourceBadge(source: food.source)
                 VStack(alignment: .leading, spacing: 2) {
@@ -659,7 +681,7 @@ private struct MagicFoodSuggestionRow: View {
                         .foregroundStyle(AppTheme.muted)
                 }
             }
-        case let .meal(meal):
+        case .meal(let meal):
             HStack(spacing: 9) {
                 MealBadge()
                 VStack(alignment: .leading, spacing: 2) {
@@ -695,8 +717,8 @@ private struct MagicFoodSuggestionRow: View {
     private var accessibilityName: String {
         suggestion.items.map {
             switch $0 {
-            case let .food(food): food.name
-            case let .meal(meal): meal.name
+            case .food(let food): food.name
+            case .meal(let meal): meal.name
             }
         }.joined(separator: " and ")
     }
@@ -722,7 +744,7 @@ private struct FoodPickerList: View {
                 Section {
                     ForEach(items) { item in
                         switch item {
-                        case let .food(food):
+                        case .food(let food):
                             FoodResultRow(
                                 food: food,
                                 preference: diary.preference(for: food),
@@ -731,7 +753,7 @@ private struct FoodPickerList: View {
                             )
                             .contentShape(Rectangle())
                             .onTapGesture { onEditFood(food) }
-                        case let .meal(meal):
+                        case .meal(let meal):
                             MealListActionRow(
                                 meal: meal,
                                 onQuickLog: { onQuickLogMeal(meal) },
@@ -880,7 +902,7 @@ private struct SearchResultsList: View {
                 Section {
                     ForEach(results) { item in
                         switch item {
-                        case let .food(food):
+                        case .food(let food):
                             FoodResultRow(
                                 food: food,
                                 preference: diary.preference(for: food),
@@ -889,7 +911,7 @@ private struct SearchResultsList: View {
                             )
                             .contentShape(Rectangle())
                             .onTapGesture { onEditFood(food) }
-                        case let .meal(meal):
+                        case .meal(let meal):
                             MealListActionRow(
                                 meal: meal,
                                 onQuickLog: { onQuickLogMeal(meal) },
@@ -1000,7 +1022,7 @@ struct QuantityEditor: View {
     }
 
     private var selectedPortionID: String? {
-        guard case let .portion(id) = unitChoice else { return nil }
+        guard case .portion(let id) = unitChoice else { return nil }
         return id
     }
 
@@ -1130,34 +1152,44 @@ struct QuantityEditor: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 if isMealEditor,
-                   let mealID,
-                   let meal = diary.document.meals.first(where: { $0.id == mealID }) {
+                    let mealID,
+                    let meal = diary.document.meals.first(where: { $0.id == mealID })
+                {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button(
                             diary.isFavorite(meal) ? "Unfavorite" : "Favorite",
                             systemImage: diary.isFavorite(meal) ? "star.fill" : "star"
                         ) {
-                            let wasFavorite = diary.isFavorite(meal)
-                            diary.toggleFavorite(meal)
-                            AppAnalytics.capture(
-                                wasFavorite ? "favorite.removed" : "favorite.added",
-                                properties: ["item_type": "meal"]
-                            )
+                            diary.run {
+                                let wasFavorite = diary.isFavorite(meal)
+                                try await diary.toggleFavorite(meal)
+                                AppAnalytics.capture(
+                                    wasFavorite ? "favorite.removed" : "favorite.added",
+                                    properties: ["item_type": "meal"]
+                                )
+
+                            }
                         }
                         .labelStyle(.iconOnly)
                     }
                 } else if !isMealEditor {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button(diary.isFavorite(food) ? "Unfavorite" : "Favorite", systemImage: diary.isFavorite(food) ? "star.fill" : "star") {
-                            let wasFavorite = diary.isFavorite(food)
-                            diary.toggleFavorite(food, preference: currentPreference)
-                            AppAnalytics.capture(
-                                wasFavorite ? "favorite.removed" : "favorite.added",
-                                properties: [
-                                    "item_type": "food",
-                                    "source": food.source.rawValue
-                                ]
-                            )
+                        Button(
+                            diary.isFavorite(food) ? "Unfavorite" : "Favorite",
+                            systemImage: diary.isFavorite(food) ? "star.fill" : "star"
+                        ) {
+                            diary.run {
+                                let wasFavorite = diary.isFavorite(food)
+                                try await diary.toggleFavorite(food, preference: currentPreference)
+                                AppAnalytics.capture(
+                                    wasFavorite ? "favorite.removed" : "favorite.added",
+                                    properties: [
+                                        "item_type": "food",
+                                        "source": food.source.rawValue,
+                                    ]
+                                )
+
+                            }
                         }
                         .labelStyle(.iconOnly)
                     }
@@ -1177,18 +1209,25 @@ struct QuantityEditor: View {
                             footer: "This name is saved with the meal and used by logged meal entries.",
                             name: food.name
                         ) { name in
-                            guard let mealID, diary.renameMeal(mealID: mealID, name: name) else { return }
-                            food.name = diary.document.meals.first { $0.id == mealID }?.name ?? name
+                            diary.run {
+                                guard let mealID, try await diary.renameMeal(mealID: mealID, name: name) else { return }
+                                food.name = diary.document.meals.first { $0.id == mealID }?.name ?? name
+
+                            }
                         }
                     } else {
                         NameEditor(
                             title: "Rename food",
                             fieldTitle: "Food name",
-                            footer: "This name is saved when you leave this editor and will be used in the diary, favorites, and future searches.",
+                            footer:
+                                "This name is saved when you leave this editor and will be used in the diary, favorites, and future searches.",
                             name: food.name
                         ) { name in
-                            guard diary.renameFood(foodID: food.id, name: name) else { return }
-                            food = diary.displayedFood(food)
+                            diary.run {
+                                guard try await diary.renameFood(foodID: food.id, name: name) else { return }
+                                food = diary.displayedFood(food)
+
+                            }
                         }
                     }
                 }
@@ -1226,14 +1265,19 @@ struct QuantityEditor: View {
                 }
             }
             .onDisappear {
-                if entryID == nil, !isMealEditor, diary.isFavorite(food) {
-                    diary.rememberPreference(currentPreference, for: food)
+                diary.run {
+                    if entryID == nil, !isMealEditor, diary.isFavorite(food) {
+                        try await diary.rememberPreference(currentPreference, for: food)
+                    }
+
                 }
             }
-            .analyticsScreen("quantity_editor", properties: [
-                "item_type": isMealEditor ? "meal" : "food",
-                "operation": entryID == nil ? "create" : "edit"
-            ])
+            .analyticsScreen(
+                "quantity_editor",
+                properties: [
+                    "item_type": isMealEditor ? "meal" : "food",
+                    "operation": entryID == nil ? "create" : "edit",
+                ])
         }
     }
 
@@ -1260,7 +1304,7 @@ struct QuantityEditor: View {
         switch choice {
         case .ounces: "ounces"
         case .grams: "grams"
-        case let .portion(id):
+        case .portion(let id):
             food.portion(id: id)?.label ?? "serving"
         }
     }
@@ -1329,60 +1373,68 @@ struct QuantityEditor: View {
     }
 
     private func save() {
-        guard amount > 0 else { return }
-        if let entryID {
-            let previousEntry = diary.document.entries.first { $0.id == entryID }
-            if isMealEditor {
-                if mealItemsWereEdited {
-                    diary.updateMealEntry(entryID: entryID, amount: amount, items: mealItems)
+        diary.run {
+            guard amount > 0 else { return }
+            if let entryID {
+                let previousEntry = diary.document.entries.first { $0.id == entryID }
+                if isMealEditor {
+                    if mealItemsWereEdited {
+                        try await diary.updateMealEntry(entryID: entryID, amount: amount, items: mealItems)
+                    } else {
+                        try await diary.updateMealEntry(entryID: entryID, amount: amount)
+                    }
                 } else {
-                    diary.updateMealEntry(entryID: entryID, amount: amount)
+                    try await diary.updateEntry(
+                        entryID: entryID,
+                        amount: amount,
+                        unit: selectedUnit,
+                        portionID: selectedPortionID
+                    )
+                }
+                if diary.document.entries.first(where: { $0.id == entryID }) != previousEntry {
+                    AppAnalytics.capture(
+                        "diary_entry.updated",
+                        properties: [
+                            "item_type": isMealEditor ? "meal" : "food",
+                            "unit": selectedUnit.analyticsValue,
+                        ])
+                }
+            } else if let savedMeal {
+                let previousEntryCount = diary.entries(on: date).count
+                let currentMeal = diary.document.meals.first { $0.id == savedMeal.id } ?? savedMeal
+                try await diary.logMeal(currentMeal, amount: amount, on: date)
+                if diary.entries(on: date).count > previousEntryCount {
+                    onLogged(.serving)
                 }
             } else {
-                diary.updateEntry(
-                    entryID: entryID,
+                let previousEntryCount = diary.entries(on: date).count
+                try await diary.log(
+                    food,
                     amount: amount,
                     unit: selectedUnit,
-                    portionID: selectedPortionID
+                    portionID: selectedPortionID,
+                    on: date
                 )
+                if diary.entries(on: date).count > previousEntryCount {
+                    onLogged(selectedUnit)
+                }
             }
-            if diary.document.entries.first(where: { $0.id == entryID }) != previousEntry {
-                AppAnalytics.capture("diary_entry.updated", properties: [
-                    "item_type": isMealEditor ? "meal" : "food",
-                    "unit": selectedUnit.analyticsValue
-                ])
-            }
-        } else if let savedMeal {
-            let previousEntryCount = diary.entries(on: date).count
-            let currentMeal = diary.document.meals.first { $0.id == savedMeal.id } ?? savedMeal
-            diary.logMeal(currentMeal, amount: amount, on: date)
-            if diary.entries(on: date).count > previousEntryCount {
-                onLogged(.serving)
-            }
-        } else {
-            let previousEntryCount = diary.entries(on: date).count
-            diary.log(
-                food,
-                amount: amount,
-                unit: selectedUnit,
-                portionID: selectedPortionID,
-                on: date
-            )
-            if diary.entries(on: date).count > previousEntryCount {
-                onLogged(selectedUnit)
-            }
+            dismiss()
+
         }
-        dismiss()
     }
 
     private func breakApartMeal() {
-        guard let entryID else { return }
-        let previousEntryCount = diary.entries(on: date).count
-        diary.breakApartMeal(entryID: entryID)
-        if diary.entries(on: date).count > previousEntryCount {
-            AppAnalytics.capture("meal.broken_apart")
+        diary.run {
+            guard let entryID else { return }
+            let previousEntryCount = diary.entries(on: date).count
+            try await diary.breakApartMeal(entryID: entryID)
+            if diary.entries(on: date).count > previousEntryCount {
+                AppAnalytics.capture("meal.broken_apart")
+            }
+            dismiss()
+
         }
-        dismiss()
     }
 
     private static func mealFood(for meal: SavedMeal) -> Food {
@@ -1696,8 +1748,11 @@ private struct MealsList: View {
         )
         .swipeActions {
             Button("Delete", role: .destructive) {
-                diary.deleteMeal(meal)
-                AppAnalytics.capture("meal.deleted", properties: ["origin": "food_picker"])
+                diary.run {
+                    try await diary.deleteMeal(meal)
+                    AppAnalytics.capture("meal.deleted", properties: ["origin": "food_picker"])
+
+                }
             }
         }
     }

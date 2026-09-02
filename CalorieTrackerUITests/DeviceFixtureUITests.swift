@@ -10,7 +10,7 @@ final class DeviceFixtureUITests: XCTestCase {
     }
 
     func testDeviceFixtureShowsRelativeDays() {
-        app.launchArguments = ["--show-scrolled-diary"]
+        app.launchArguments = ["--show-scrolled-diary", "-onboarding.focus.v1.completed", "YES"]
         app.launchEnvironment = [
             "CALORIE_TRACKER_FIXTURE": "device",
             "CALORIE_TRACKER_FIXTURE_RESET": "1"

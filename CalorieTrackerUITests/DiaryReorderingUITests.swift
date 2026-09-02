@@ -45,7 +45,7 @@ final class DiaryReorderingUITests: XCTestCase {
     }
 
     private func launchApp(resetFixture: Bool) {
-        app.launchArguments = ["--show-scrolled-diary"]
+        app.launchArguments = ["--show-scrolled-diary", "-onboarding.focus.v1.completed", "YES"]
         app.launchEnvironment = [
             "CALORIE_TRACKER_UI_TEST_FIXTURE": "reorder",
             "CALORIE_TRACKER_UI_TEST_RESET": resetFixture ? "1" : "0"

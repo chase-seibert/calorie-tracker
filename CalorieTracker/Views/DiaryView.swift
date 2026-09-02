@@ -5,11 +5,11 @@ struct DiaryView: View {
     @EnvironmentObject private var diary: DiaryStore
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("trends.focus.alcohol") private var tracksAlcohol = true
-#if DEBUG
-    @AppStorage("experimental.alwaysShowQuickCalories") private var alwaysShowQuickCalories = false
-#else
-    private let alwaysShowQuickCalories = false
-#endif
+    #if DEBUG
+        @AppStorage("experimental.alwaysShowQuickCalories") private var alwaysShowQuickCalories = false
+    #else
+        private let alwaysShowQuickCalories = false
+    #endif
     let catalog: CatalogStore
     @Binding var foodPickerLaunch: FoodPickerLaunch?
 
@@ -307,6 +307,10 @@ struct DiaryView: View {
                 diaryEntriesHeight = CGFloat(diary.entries(on: date).count) * 78
                 cancelMealSelection()
             }
+            .task(id: date) {
+                guard !diary.isLoading else { return }
+                await diary.selectDay(date)
+            }
             .onChange(of: scenePhase) { _, phase in
                 guard phase == .active else { return }
                 refreshCurrentDay()
@@ -315,25 +319,29 @@ struct DiaryView: View {
                 refreshCurrentDay()
             }
             .task {
-#if DEBUG
-                guard !didSeedDebugScreenshot else { return }
-                didSeedDebugScreenshot = true
-                let arguments = ProcessInfo.processInfo.arguments
-                if arguments.contains("--seed-special-days") {
-                    diary.seedSpecialDaysForScreenshots()
+                diary.run {
+                    #if DEBUG
+                        guard !didSeedDebugScreenshot else { return }
+                        didSeedDebugScreenshot = true
+                        let arguments = ProcessInfo.processInfo.arguments
+                        if arguments.contains("--seed-special-days") {
+                            try await diary.seedSpecialDaysForScreenshots()
+                        }
+                        if arguments.contains("--seed-today-cheat") {
+                            try await diary.markCheatDay(on: Date(), adjustmentCalories: 1_000)
+                        }
+                        if arguments.contains("--show-cheat-day-dialog")
+                            || arguments.contains("--show-banner-cheat-popover")
+                            || arguments.contains("--show-log-food-cheat-popover")
+                        {
+                            try? await Task.sleep(for: .milliseconds(500))
+                            showingBottomCheatPopover = arguments.contains("--show-cheat-day-dialog")
+                            showingBannerCheatPopover = arguments.contains("--show-banner-cheat-popover")
+                            showingLogFoodCheatPopover = arguments.contains("--show-log-food-cheat-popover")
+                        }
+                    #endif
+
                 }
-                if arguments.contains("--seed-today-cheat") {
-                    diary.markCheatDay(on: Date(), adjustmentCalories: 1_000)
-                }
-                if arguments.contains("--show-cheat-day-dialog")
-                    || arguments.contains("--show-banner-cheat-popover")
-                    || arguments.contains("--show-log-food-cheat-popover") {
-                    try? await Task.sleep(for: .milliseconds(500))
-                    showingBottomCheatPopover = arguments.contains("--show-cheat-day-dialog")
-                    showingBannerCheatPopover = arguments.contains("--show-banner-cheat-popover")
-                    showingLogFoodCheatPopover = arguments.contains("--show-log-food-cheat-popover")
-                }
-#endif
             }
         }
         .analyticsScreen("diary")
@@ -378,18 +386,22 @@ struct DiaryView: View {
                     .padding(.bottom, 5)
             }
             if !isSelectingMealItems,
-               isCheatDay || alwaysShowQuickCalories || diary.calorieAdjustment(on: date) != nil {
+                isCheatDay || alwaysShowQuickCalories || diary.calorieAdjustment(on: date) != nil
+            {
                 CalorieAdjustmentPicker(
                     selectedCalories: diary.calorieAdjustment(on: date),
                     onSelect: { calories in
-                        withAnimation(.snappy) {
-                            diary.setCalorieAdjustment(calories, on: date)
+                        diary.run {
+                            do {
+                                try await diary.setCalorieAdjustment(calories, on: date)
+                            }
+                            AppAnalytics.capture(
+                                calories == nil
+                                    ? "calorie_adjustment.removed"
+                                    : "calorie_adjustment.set"
+                            )
+
                         }
-                        AppAnalytics.capture(
-                            calories == nil
-                                ? "calorie_adjustment.removed"
-                                : "calorie_adjustment.set"
-                        )
                     }
                 )
                 .padding(.horizontal, 16)
@@ -445,7 +457,10 @@ struct DiaryView: View {
                             entries: entries,
                             contentHeight: $diaryEntriesHeight,
                             onMove: { entryID, destinationIndex in
-                                diary.moveEntry(entryID, toIndex: destinationIndex, on: date)
+                                diary.run {
+                                    try await diary.moveEntry(entryID, toIndex: destinationIndex, on: date)
+
+                                }
                             },
                             onEdit: { entry in
                                 if isCheatDay {
@@ -455,16 +470,20 @@ struct DiaryView: View {
                                 }
                             },
                             onDelete: { entryID in
-                                let itemType = diary.document.entries.first { $0.id == entryID }?.isMeal == true
-                                    ? "meal"
-                                    : "food"
-                                withAnimation(.snappy) {
-                                    diary.delete(entryID: entryID)
+                                diary.run {
+                                    let itemType =
+                                        diary.document.entries.first { $0.id == entryID }?.isMeal == true
+                                        ? "meal"
+                                        : "food"
+                                    do {
+                                        try await diary.delete(entryID: entryID)
+                                    }
+                                    AppAnalytics.capture(
+                                        "diary_entry.deleted",
+                                        properties: ["item_type": itemType]
+                                    )
+
                                 }
-                                AppAnalytics.capture(
-                                    "diary_entry.deleted",
-                                    properties: ["item_type": itemType]
-                                )
                             }
                         )
                         .accessibilityElement(children: .contain)
@@ -487,30 +506,35 @@ struct DiaryView: View {
     }
 
     private func saveSelectedAsMeal() {
-        let itemCount = selectedEntryIDs.count
-        let previousMealCount = diary.document.meals.count
-        diary.saveMeal(
-            name: mealName,
-            replacing: selectedEntryIDs,
-            on: date
-        )
-        if diary.document.meals.count > previousMealCount {
-            guard let savedMeal = diary.document.meals.first else { return }
-            AppAnalytics.capture("meal.created", properties: [
-                "origin": "diary_selection",
-                "item_count": String(itemCount)
-            ])
-            AppAnalytics.capture(
-                "food_log.completed",
-                properties: FoodLogAnalytics.mealProperties(
-                    meal: savedMeal,
-                    method: "create_meal",
-                    mode: "diary",
-                    isFavorite: diary.isFavorite(savedMeal)
-                )
+        diary.run {
+            let itemCount = selectedEntryIDs.count
+            let previousMealCount = diary.document.meals.count
+            try await diary.saveMeal(
+                name: mealName,
+                replacing: selectedEntryIDs,
+                on: date
             )
+            if diary.document.meals.count > previousMealCount {
+                guard let savedMeal = diary.document.meals.first else { return }
+                AppAnalytics.capture(
+                    "meal.created",
+                    properties: [
+                        "origin": "diary_selection",
+                        "item_count": String(itemCount),
+                    ])
+                AppAnalytics.capture(
+                    "food_log.completed",
+                    properties: FoodLogAnalytics.mealProperties(
+                        meal: savedMeal,
+                        method: "create_meal",
+                        mode: "diary",
+                        isFavorite: diary.isFavorite(savedMeal)
+                    )
+                )
+            }
+            cancelMealSelection()
+
         }
-        cancelMealSelection()
     }
 
     private func cancelMealSelection() {
@@ -519,17 +543,22 @@ struct DiaryView: View {
     }
 
     private func deleteSelectedEntries() {
-        let deletedCount = selectedEntryIDs.count
-        withAnimation(.snappy) {
-            diary.deleteEntries(entryIDs: selectedEntryIDs)
+        diary.run {
+            let deletedCount = selectedEntryIDs.count
+            do {
+                try await diary.deleteEntries(entryIDs: selectedEntryIDs)
+            }
+            if deletedCount > 0 {
+                AppAnalytics.capture(
+                    "diary_entry.deleted",
+                    properties: [
+                        "item_type": "mixed",
+                        "item_count": String(deletedCount),
+                    ])
+            }
+            cancelMealSelection()
+
         }
-        if deletedCount > 0 {
-            AppAnalytics.capture("diary_entry.deleted", properties: [
-                "item_type": "mixed",
-                "item_count": String(deletedCount)
-            ])
-        }
-        cancelMealSelection()
     }
 
     private func beginLoggingFood() {
@@ -554,15 +583,18 @@ struct DiaryView: View {
     }
 
     private func confirmCheatDayAction() {
-        if isCheatDay {
-            diary.undoCheatDay(
-                on: date,
-                preservingCalorieAdjustment: alwaysShowQuickCalories
-            )
-            AppAnalytics.capture("cheat_day.cleared", properties: ["day": analyticsDayRelation])
-        } else {
-            diary.markCheatDay(on: date)
-            AppAnalytics.capture("cheat_day.marked", properties: ["day": analyticsDayRelation])
+        diary.run {
+            if isCheatDay {
+                try await diary.undoCheatDay(
+                    on: date,
+                    preservingCalorieAdjustment: alwaysShowQuickCalories
+                )
+                AppAnalytics.capture("cheat_day.cleared", properties: ["day": analyticsDayRelation])
+            } else {
+                try await diary.markCheatDay(on: date)
+                AppAnalytics.capture("cheat_day.marked", properties: ["day": analyticsDayRelation])
+            }
+
         }
     }
 
@@ -675,20 +707,25 @@ private struct AlcoholQuickEntryView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        diary.setAlcohol(drinks: drinks, type: selectedType, on: date)
-                        AppAnalytics.capture(
-                            drinks == 0 ? "alcohol.removed" : "alcohol.saved",
-                            properties: drinks == 0
-                                ? [:]
-                                : ["operation": hadExistingEntry ? "update" : "create"]
-                        )
-                        dismiss()
+                        diary.run {
+                            try await diary.setAlcohol(drinks: drinks, type: selectedType, on: date)
+                            AppAnalytics.capture(
+                                drinks == 0 ? "alcohol.removed" : "alcohol.saved",
+                                properties: drinks == 0
+                                    ? [:]
+                                    : ["operation": hadExistingEntry ? "update" : "create"]
+                            )
+                            dismiss()
+
+                        }
                     }
                 }
             }
-            .analyticsScreen("alcohol_editor", properties: [
-                "operation": hadExistingEntry ? "edit" : "create"
-            ])
+            .analyticsScreen(
+                "alcohol_editor",
+                properties: [
+                    "operation": hadExistingEntry ? "edit" : "create"
+                ])
         }
     }
 }
@@ -730,8 +767,8 @@ private struct CheatDayPopoverModifier: ViewModifier {
     }
 }
 
-private extension View {
-    func cheatDayPopover(
+extension View {
+    fileprivate func cheatDayPopover(
         isPresented: Binding<Bool>,
         date: Date,
         isCheatDay: Bool,
@@ -849,7 +886,7 @@ enum FoodPickerLaunch: Identifiable {
         switch self {
         case .search:
             "search"
-        case let .mode(mode):
+        case .mode(let mode):
             "mode-\(mode.rawValue)"
         }
     }
@@ -858,7 +895,7 @@ enum FoodPickerLaunch: Identifiable {
         switch self {
         case .search:
             nil
-        case let .mode(mode):
+        case .mode(let mode):
             mode
         }
     }

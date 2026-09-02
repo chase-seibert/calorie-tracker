@@ -10,6 +10,7 @@ enum DiaryFixtureLoader {
         calendar: Calendar = .current,
         reset: Bool
     ) -> DiaryStore {
+        #if DEBUG && targetEnvironment(simulator)
         guard
             let fixtureURL = Bundle.main.url(
                 forResource: fixtureName,
@@ -21,7 +22,7 @@ enum DiaryFixtureLoader {
             return DiaryStore(catalog: catalog, healthKit: healthKit)
         }
 
-        let fileURL = SharedDiaryStorage.defaultFileURL()
+        let fileURL = SharedDiaryStorage.selectFixture("device", reset: reset)
 
         if !reset, FileManager.default.fileExists(atPath: fileURL.path) {
             return DiaryStore(
@@ -32,7 +33,6 @@ enum DiaryFixtureLoader {
             )
         }
 
-        try? FileManager.default.removeItem(at: fileURL)
         let document = rebasedDocument(
             fixture.document,
             from: fixture.capturedReferenceDate,
@@ -46,6 +46,9 @@ enum DiaryFixtureLoader {
             catalog: catalog,
             healthKit: healthKit
         )
+        #else
+        return DiaryStore(catalog: catalog, healthKit: healthKit)
+        #endif
     }
 
     private static func decode(data: Data) -> DiaryFixture? {

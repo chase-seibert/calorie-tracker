@@ -141,6 +141,7 @@ private struct SettingsValueLabel: View {
 private struct CalorieGoalSettingsView: View {
     @EnvironmentObject private var diary: DiaryStore
     @FocusState private var calorieGoalIsFocused: Bool
+    @State private var goalDraft = ""
 
     var body: some View {
         Form {
@@ -148,7 +149,7 @@ private struct CalorieGoalSettingsView: View {
                 HStack {
                     Text("Calories per day")
                     Spacer()
-                    TextField("Not set", text: calorieGoalText)
+                    TextField("Not set", text: $goalDraft)
                         .focused($calorieGoalIsFocused)
                         .keyboardType(.numberPad)
                         .multilineTextAlignment(.trailing)
@@ -162,7 +163,11 @@ private struct CalorieGoalSettingsView: View {
 
                 if diary.dailyCalorieGoal != nil {
                     Button("Remove Goal", role: .destructive) {
-                        diary.setDailyCalorieGoal(nil)
+                        goalDraft = ""
+                        diary.run {
+                            try await diary.setDailyCalorieGoal(nil)
+
+                        }
                     }
                 }
             } header: {
@@ -180,20 +185,19 @@ private struct CalorieGoalSettingsView: View {
                 Spacer()
                 Button("Save") {
                     calorieGoalIsFocused = false
+                    saveGoal()
                 }
             }
         }
         .analyticsScreen("settings_calorie_goal")
+        .onAppear { goalDraft = diary.dailyCalorieGoal.map(String.init) ?? "" }
+        .onDisappear { saveGoal() }
     }
 
-    private var calorieGoalText: Binding<String> {
-        Binding(
-            get: { diary.dailyCalorieGoal.map(String.init) ?? "" },
-            set: { value in
-                let digits = value.filter(\.isNumber)
-                diary.setDailyCalorieGoal(Int(digits))
-            }
-        )
+    private func saveGoal() {
+        let value = Int(goalDraft.filter(\.isNumber))
+        guard value != diary.dailyCalorieGoal else { return }
+        diary.run { try await diary.setDailyCalorieGoal(value) }
     }
 }
 
@@ -270,12 +274,14 @@ private struct AppleHealthSettingsView: View {
 
         AppAnalytics.capture("health.sync_requested", properties: ["source": "manual"])
         healthKit.clearLastError()
-        diary.syncAllHealthData()
+        await diary.syncAllHealthData()
         await healthKit.waitForPendingOperations()
-        AppAnalytics.capture("health.sync_completed", properties: [
-            "source": "manual",
-            "result": healthKit.lastError == nil ? "success" : "failure"
-        ])
+        AppAnalytics.capture(
+            "health.sync_completed",
+            properties: [
+                "source": "manual",
+                "result": healthKit.lastError == nil ? "success" : "failure",
+            ])
 
         let remainingDuration = minimumSyncSpinnerDuration - Date().timeIntervalSince(startedAt)
         if remainingDuration > 0 {
@@ -289,19 +295,23 @@ private struct AppleHealthSettingsView: View {
         AppAnalytics.capture("health.authorization_requested")
         healthKit.clearLastError()
         await healthKit.requestAuthorizationAndSync(entries: [])
-        AppAnalytics.capture("health.authorization_completed", properties: [
-            "result": healthKit.authorizationState.analyticsValue
-        ])
+        AppAnalytics.capture(
+            "health.authorization_completed",
+            properties: [
+                "result": healthKit.authorizationState.analyticsValue
+            ])
         guard healthKit.authorizationState == .authorized else { return }
 
         AppAnalytics.capture("health.sync_requested", properties: ["source": "authorization"])
         healthKit.clearLastError()
-        diary.syncAllHealthData()
+        await diary.syncAllHealthData()
         await healthKit.waitForPendingOperations()
-        AppAnalytics.capture("health.sync_completed", properties: [
-            "source": "authorization",
-            "result": healthKit.lastError == nil ? "success" : "failure"
-        ])
+        AppAnalytics.capture(
+            "health.sync_completed",
+            properties: [
+                "source": "authorization",
+                "result": healthKit.lastError == nil ? "success" : "failure",
+            ])
     }
 }
 
@@ -368,7 +378,7 @@ private struct PrivacyAnalyticsView: View {
 }
 
 #if DEBUG
-private struct DeveloperDiagnosticsView: View {
+    private struct DeveloperDiagnosticsView: View {
     @AppStorage(FirstTimeOnboarding.completedKey) private var completedFocusOnboarding = false
     @AppStorage("trends.focus.alcohol") private var tracksAlcohol = true
     @AppStorage("trends.focus.fiber") private var tracksFiber = true
@@ -421,7 +431,7 @@ private struct DeveloperDiagnosticsView: View {
     }
 }
 
-private struct ExperimentalFeaturesView: View {
+    private struct ExperimentalFeaturesView: View {
     @AppStorage("experimental.alwaysShowQuickCalories") private var alwaysShowQuickCalories = false
 
     var body: some View {
@@ -440,7 +450,7 @@ private struct ExperimentalFeaturesView: View {
     }
 }
 
-private struct AnalyticsDiagnosticsView: View {
+    private struct AnalyticsDiagnosticsView: View {
     @State private var snapshot: AnalyticsDiagnosticsSnapshot?
     @State private var isUploading = false
     @State private var showingClearConfirmation = false
@@ -602,7 +612,7 @@ private struct AnalyticsDiagnosticsView: View {
     }
 }
 
-private struct AnalyticsEventPayloadView: View {
+    private struct AnalyticsEventPayloadView: View {
     let event: AnalyticsDiagnosticEvent
 
     var body: some View {
@@ -767,7 +777,7 @@ private struct PersonalCatalogView: View {
             switch self {
             case .add:
                 return "add"
-            case let .edit(meal):
+            case .edit(let meal):
                 return meal.id.uuidString
             }
         }
@@ -776,7 +786,7 @@ private struct PersonalCatalogView: View {
             switch self {
             case .add:
                 return nil
-            case let .edit(meal):
+            case .edit(let meal):
                 return meal
             }
         }
@@ -806,11 +816,14 @@ private struct PersonalCatalogView: View {
                                     showingFoodEditor = true
                                 }
                                 Button("Delete", systemImage: "trash", role: .destructive) {
-                                    diary.deleteCustomFood(food)
-                                    AppAnalytics.capture(
-                                        "custom_food.deleted",
-                                        properties: ["origin": "custom_catalog"]
-                                    )
+                                    diary.run {
+                                        try await diary.deleteCustomFood(food)
+                                        AppAnalytics.capture(
+                                            "custom_food.deleted",
+                                            properties: ["origin": "custom_catalog"]
+                                        )
+
+                                    }
                                 }
                             }
                     }
@@ -836,13 +849,16 @@ private struct PersonalCatalogView: View {
                                     mealEditorPresentation = .edit(meal)
                                 }
                                 Button("Delete", systemImage: "trash", role: .destructive) {
-                                    diary.deleteMeal(meal)
-                                    AppAnalytics.capture(
-                                        "meal.deleted",
-                                        properties: ["origin": "custom_catalog"]
-                                    )
+                                    diary.run {
+                                        try await diary.deleteMeal(meal)
+                                        AppAnalytics.capture(
+                                            "meal.deleted",
+                                            properties: ["origin": "custom_catalog"]
+                                        )
+
+                                    }
                                 }
-                        }
+                            }
                     }
                 }
             }
@@ -1048,44 +1064,51 @@ struct CustomFoodEditorView: View {
     }
 
     private func save() {
-        guard canSave else { return }
-        let savedFood: Food?
-        if let food {
-            guard diary.updateCustomFood(
-                foodID: food.id,
-                name: name,
-                brand: brand,
-                calories: calories,
-                carbs: carbs,
-                fat: fat,
-                protein: protein,
-                fiber: fiber,
-                servingGrams: servingGrams,
-                containsProcessedMeat: containsProcessedMeat,
-                containsRedMeat: containsRedMeat
-            ) else { return }
-            savedFood = diary.document.customFoods.first { $0.id == food.id }
-        } else {
-            savedFood = diary.addCustomFood(
-                name: name,
-                brand: brand,
-                calories: calories,
-                carbs: carbs,
-                fat: fat,
-                protein: protein,
-                fiber: fiber,
-                servingGrams: servingGrams,
-                containsProcessedMeat: containsProcessedMeat,
-                containsRedMeat: containsRedMeat
-            )
+        diary.run {
+            guard canSave else { return }
+            let savedFood: Food?
+            if let food {
+                guard
+                    try await diary.updateCustomFood(
+                        foodID: food.id,
+                        name: name,
+                        brand: brand,
+                        calories: calories,
+                        carbs: carbs,
+                        fat: fat,
+                        protein: protein,
+                        fiber: fiber,
+                        servingGrams: servingGrams,
+                        containsProcessedMeat: containsProcessedMeat,
+                        containsRedMeat: containsRedMeat
+                    )
+                else { return }
+                savedFood = diary.document.customFoods.first { $0.id == food.id }
+            } else {
+                savedFood = try await diary.addCustomFood(
+                    name: name,
+                    brand: brand,
+                    calories: calories,
+                    carbs: carbs,
+                    fat: fat,
+                    protein: protein,
+                    fiber: fiber,
+                    servingGrams: servingGrams,
+                    containsProcessedMeat: containsProcessedMeat,
+                    containsRedMeat: containsRedMeat
+                )
+            }
+            if let savedFood {
+                AppAnalytics.capture(
+                    food == nil ? "custom_food.created" : "custom_food.updated",
+                    properties: [
+                        "origin": analyticsOrigin
+                    ])
+                onSaved?(savedFood)
+            }
+            dismiss()
+
         }
-        if let savedFood {
-            AppAnalytics.capture(food == nil ? "custom_food.created" : "custom_food.updated", properties: [
-                "origin": analyticsOrigin
-            ])
-            onSaved?(savedFood)
-        }
-        dismiss()
     }
 
     private func focus(_ field: Field) {
@@ -1218,32 +1241,43 @@ private struct SavedMealEditorView: View {
     }
 
     private func save() {
-        guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, !items.isEmpty else { return }
-        if let meal {
-            guard diary.updateSavedMeal(
-                mealID: meal.id,
-                name: name,
-                items: items,
-                containsProcessedMeat: containsProcessedMeat,
-                containsRedMeat: containsRedMeat
-            ) else { return }
-            AppAnalytics.capture("meal.updated", properties: [
-                "origin": "custom_catalog",
-                "item_count": String(items.count)
-            ])
-        } else {
-            guard diary.saveMeal(
-                name: name,
-                items: items,
-                containsProcessedMeat: containsProcessedMeat,
-                containsRedMeat: containsRedMeat
-            ) != nil else { return }
-            AppAnalytics.capture("meal.created", properties: [
-                "origin": "custom_catalog",
-                "item_count": String(items.count)
-            ])
+        diary.run {
+            guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, !items.isEmpty else { return }
+            if let meal {
+                guard
+                    try await diary.updateSavedMeal(
+                        mealID: meal.id,
+                        name: name,
+                        items: items,
+                        containsProcessedMeat: containsProcessedMeat,
+                        containsRedMeat: containsRedMeat
+                    )
+                else { return }
+                AppAnalytics.capture(
+                    "meal.updated",
+                    properties: [
+                        "origin": "custom_catalog",
+                        "item_count": String(items.count),
+                    ])
+            } else {
+                guard
+                    try await diary.saveMeal(
+                        name: name,
+                        items: items,
+                        containsProcessedMeat: containsProcessedMeat,
+                        containsRedMeat: containsRedMeat
+                    ) != nil
+                else { return }
+                AppAnalytics.capture(
+                    "meal.created",
+                    properties: [
+                        "origin": "custom_catalog",
+                        "item_count": String(items.count),
+                    ])
+            }
+            dismiss()
+
         }
-        dismiss()
     }
 }
 
@@ -1314,7 +1348,7 @@ private struct MealFoodPickerView: View {
                     normalizedQuery,
                     catalogFoods: catalog.searchAll(normalizedQuery)
                 ).compactMap { item in
-                    if case let .food(food) = item { return food }
+                    if case .food(let food) = item { return food }
                     return nil
                 }
                 isSearching = false

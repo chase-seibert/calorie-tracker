@@ -1,5 +1,15 @@
 # Setup and installation
 
+## Existing phone diary: one-time SQLite conversion
+
+Install the update without uninstalling the old app. On first foreground launch,
+the app preserves the original JSON, creates a byte-verified private backup,
+and publishes SQLite only after full record and integrity verification. Failures
+stop with an error, never an empty writable diary. Follow the phone checklist in
+[`sqlite-storage.md`](sqlite-storage.md); retain the old build by using a separate
+`DERIVED_DATA` directory for this update. `make diary-convert` remains available
+for manual conversion; `make storage-test` includes on-device conversion checks.
+
 ## Simulator
 
 Run `make sim-launch`. The target boots the default iPhone 17 Pro simulator,

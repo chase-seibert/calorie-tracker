@@ -349,6 +349,9 @@ struct DiaryEntry: Codable, Hashable, Identifiable, Sendable {
     var savedMealID: UUID? = nil
     var mealItems: [MealItem]? = nil
     var kind: DiaryEntryKind? = nil
+    // Nil means derive from the historical ingredient snapshot, not a cached meal flag.
+    var processedMeatOverride: Bool? = nil
+    var redMeatOverride: Bool? = nil
 
     var isMeal: Bool {
         savedMealID != nil || !(mealItems?.isEmpty ?? true)

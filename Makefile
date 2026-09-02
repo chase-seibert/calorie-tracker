@@ -54,6 +54,29 @@ ui-test-fixture: simulator-ready
 
 build: sim-build
 
+DIARY_TOOL_SOURCES := CalorieTracker/Models/Domain.swift CalorieTracker/Data/DiaryEngine.swift CalorieTracker/Data/DiaryRepository.swift CalorieTracker/Data/QuickLogStore.swift CalorieTracker/Data/CatalogStore.swift scripts/DiaryTool.swift
+
+.PHONY: diary-tool storage-test storage-benchmark diary-convert diary-validate
+diary-tool: build/diary-tool
+
+build/diary-tool: $(DIARY_TOOL_SOURCES)
+	mkdir -p build/DiaryModuleCache
+	xcrun swiftc -O -swift-version 6 -module-cache-path build/DiaryModuleCache $(DIARY_TOOL_SOURCES) -o $@
+
+storage-test: diary-tool
+	build/diary-tool self-test
+
+storage-benchmark: diary-tool
+	build/diary-tool benchmark
+
+diary-convert: diary-tool
+	@test -n "$(INPUT)" -a -n "$(OUTPUT)" || (echo 'Set INPUT=backup.json OUTPUT=converted.sqlite'; exit 1)
+	build/diary-tool convert "$(INPUT)" "$(OUTPUT)"
+
+diary-validate: diary-tool
+	@test -n "$(INPUT)" || (echo 'Set INPUT=converted.sqlite'; exit 1)
+	build/diary-tool validate "$(INPUT)"
+
 clean:
 	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -derivedDataPath $(DERIVED_DATA) clean
 

@@ -7,21 +7,25 @@ The SwiftUI app has two local data layers:
 1. A read-only, bundled SQLite catalog containing normalized food records and an
    FTS5 search index. `CatalogStore` performs source-filtered search and barcode
    lookup without loading the catalog into memory.
-2. A small writable JSON document in the VitaChase App Group container managed by `DiaryStore`.
-   It holds diary entries, day statuses, the streak tracking start date,
-   favorites, meals, remembered quantities, custom foods, and stable-ID custom
-   food names. It also stores at most one aggregate alcohol entry per day, with
-   a count and optional type. Writes are atomic.
+2. A writable `Diary.sqlite` in the VitaChase App Group container, managed by
+   `DiaryRepository`. It stores entries and ingredient snapshots, day statuses,
+   tracking settings, favorites, meals, quantities, personal foods, custom names,
+   daily alcohol aggregates, quick-log receipts, and a durable HealthKit queue.
+   `DiaryStore` is an asynchronous, bounded presentation cache.
 
 This split keeps a large catalog immutable and fast while making the personal
-data schema easy to evolve and back up.
+data transactional across the app and extensions. See
+[`sqlite-storage.md`](sqlite-storage.md) for the schema boundary, on-device state
+inventory, one-off migration, backup rules, and performance measurements.
 
 The main app and `VitaChaseWidgets` extension share App Group
-`group.com.cseibert.CalorieTracker`. The first main-app launch copies a legacy
-Application Support diary into the group container without deleting the old
-file. `QuickLogSnapshot` provides extension-safe Recent resolution, arbitrary-
+`group.com.cseibert.CalorieTracker`. On first foreground launch, a legacy JSON
+diary is backed up and verified before an atomic, no-replace SQLite publication.
+Original JSON is never changed or deleted; subsequent launches use only SQLite.
+Widgets cannot initialize or migrate a missing live database.
+`QuickLogSnapshot` provides extension-safe Recent resolution, arbitrary-
 timestamp Magic calculation, and calorie-goal progress. `QuickLogRepository`
-performs atomic background writes for App Intents and widget buttons. Normal
+uses the same SQLite transactions for App Intents and widget buttons. Normal
 `DiaryStore` saves reload the widget timeline, while the app reloads the shared
 document whenever it becomes active so background intent writes appear in the
 diary.
@@ -33,7 +37,7 @@ conjunction of exact Recent names resolves to a composite selection; an unknown
 name resolves to no entity. `CaloriesRemainingIntent` reports the signed
 difference between the goal and today's food plus alcohol calories and converts
 read failures into useful spoken guidance. The Quick Log widget reuses the log
-intent, stores a short-lived receipt in App Group defaults, and schedules
+intent, commits a short-lived receipt in SQLite alongside the log, and schedules
 timeline entries at the next 5 AM, 11 AM, and 3 PM Magic band boundaries. A
 separate Calories Left widget reloads on diary writes and at local midnight.
 Dynamic Home Screen quick actions contain the current Magic stable IDs; UIKit
@@ -74,7 +78,8 @@ estimated calories from the food-calorie series. Alcohol calories remain in the
 diary total and therefore continue to affect calorie goals and automatic day
 classification.
 
-On launch, `DiaryStore` finalizes every elapsed day since tracking began. Empty
+On launch, the repository finalizes newly elapsed days since its last durable
+finalization checkpoint. A goal edit deliberately recalculates history. Empty
 days become gap days. When a calorie goal exists, nonempty days below 75% or
 above 130% of the goal become automatic cheat days. Manual cheat-day labels are
 authoritative. Logging into an automatic gap removes the label. A calorie-only
@@ -246,7 +251,8 @@ single format, deduplicates them, and builds an external-content FTS5 index.
 
 Debug builds running in the iOS Simulator load the checked-in
 `CalorieTracker/Resources/Fixtures/DeviceDiaryFixture.json` instead of the
-normal persistent diary. The fixture is written to the App Group container so
+normal persistent diary. Each reset uses a new UUID-named SQLite database under
+the App Group's `CalorieTracker/Fixtures/` directory so
 the widget and App Intents can read it. It is a date-relative snapshot of
 the device diary: its captured current day is rebased to the simulator's current
 day at launch. The loader also normalizes repeated breakfast, lunch, and dinner

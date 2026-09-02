@@ -22,6 +22,13 @@ workflow is missing.
 - `make catalog`: build the checked-in compact local catalog from source data.
 - `make catalog-refresh`: download current source snapshots and rebuild the catalog.
 - `make phone-deploy`: build, install, and launch on Chase's iPhone.
+- `make storage-test`: run SQLite repository safety checks on the Mac, without CoreSimulator.
+- `make storage-benchmark`: measure synthetic 1-, 3-, and 10-year diary histories.
+- `make diary-convert INPUT=... OUTPUT=...`: explicitly convert a backed-up JSON diary; never overwrites outputs.
+
+Before deploying the SQLite build to an existing JSON diary, follow
+`docs/sqlite-storage.md`. Do not copy a live SQLite main file without its WAL
+or delete the old diary as a recovery mechanism.
 
 Run `make test` with host-side execution permission. Codex's restricted
 sandbox cannot connect to CoreSimulator even when the local simulator service

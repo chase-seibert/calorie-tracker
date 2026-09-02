@@ -6,6 +6,8 @@ struct CalorieTrackerApp: App {
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var diary: DiaryStore
     @StateObject private var healthKit: HealthKitStore
+    @State private var hasPreparedLaunch = false
+    @State private var pendingOpenURL: URL?
     private let catalog: CatalogStore
     private let analytics = AnalyticsService.shared
 
@@ -17,7 +19,6 @@ struct CalorieTrackerApp: App {
             healthKit: healthKit,
             catalog: catalog
         )
-        FirstTimeOnboarding.prepareForLaunch(document: diary.document)
         self.catalog = catalog
         _healthKit = StateObject(wrappedValue: healthKit)
         _diary = StateObject(wrappedValue: diary)
@@ -25,30 +26,39 @@ struct CalorieTrackerApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView(catalog: catalog)
+            Group {
+                if hasPreparedLaunch {
+                    RootView(catalog: catalog, pendingOpenURL: $pendingOpenURL)
+                } else {
+                    ProgressView("Opening diary…")
+                }
+            }
                 .environmentObject(diary)
                 .environmentObject(healthKit)
                 .tint(AppTheme.coral)
+                // Capture cold-launch imports/deep links while the diary is still opening.
+                .onOpenURL { pendingOpenURL = $0 }
                 .task {
+                    defer { hasPreparedLaunch = true }
+                    await diary.reloadFromDisk()
+                    guard diary.lastSaveError == nil else { return }
+                    // Share the existing app preference with widget/Siri on the first SQLite launch.
+                    LoggingPreferences.lastWeightUnit = LoggingPreferences.lastWeightUnit
+                    FirstTimeOnboarding.prepareForLaunch(document: diary.document)
+                    hasPreparedLaunch = true
                     HomeScreenQuickActions.update(document: diary.document)
                     await analytics.start()
                     await analytics.recordAppLaunch()
-                    guard healthKit.authorizationState == .authorized else { return }
-                    await analytics.capture(type: "health.sync_requested", properties: ["source": "app_launch"])
-                    healthKit.clearLastError()
-                    diary.syncAllHealthData()
-                    await healthKit.waitForPendingOperations()
-                    await analytics.capture(type: "health.sync_completed", properties: [
-                        "source": "app_launch",
-                        "result": healthKit.lastError == nil ? "success" : "failure"
-                    ])
                 }
                 .onChange(of: scenePhase) { _, phase in
                     switch phase {
                     case .active:
-                        diary.reloadFromDisk()
-                        VitaChaseAppShortcuts.updateAppShortcutParameters()
-                        Task { await analytics.appBecameActive() }
+                        guard !diary.isLoading else { return }
+                        Task {
+                            await diary.reloadFromDisk()
+                            VitaChaseAppShortcuts.updateAppShortcutParameters()
+                            await analytics.appBecameActive()
+                        }
                     case .inactive, .background:
                         HomeScreenQuickActions.update(document: diary.document)
                     @unknown default:
@@ -88,21 +98,14 @@ enum FirstTimeOnboarding {
 private enum LaunchConfiguration {
     @MainActor
     static func makeDiaryStore(healthKit: HealthKitStore, catalog: CatalogStore) -> DiaryStore {
-#if DEBUG
+#if DEBUG && targetEnvironment(simulator)
         let environment = ProcessInfo.processInfo.environment
         if environment["CALORIE_TRACKER_UI_TEST_FIXTURE"] == "reorder" {
-            let fixtureURL = FileManager.default.temporaryDirectory
-                .appendingPathComponent("CalorieTrackerUITests", isDirectory: true)
-                .appendingPathComponent("ReorderDiary.json")
-            if environment["CALORIE_TRACKER_UI_TEST_RESET"] == "1" {
-                try? FileManager.default.removeItem(at: fixtureURL)
+            let fixtureURL = SharedDiaryStorage.selectFixture("reorder", reset: environment["CALORIE_TRACKER_UI_TEST_RESET"] == "1")
+            if FileManager.default.fileExists(atPath: fixtureURL.path) {
+                return DiaryStore(fileURL: fixtureURL, catalog: catalog, healthKit: healthKit)
             }
-
-            let store = DiaryStore(fileURL: fixtureURL, catalog: catalog, healthKit: healthKit)
-            if store.entries(on: Date()).isEmpty {
-                seedReorderFixture(in: store)
-            }
-            return store
+            return DiaryStore(document: reorderFixture(), fileURL: fixtureURL, catalog: catalog, healthKit: healthKit)
         }
 
         #if targetEnvironment(simulator)
@@ -118,13 +121,15 @@ private enum LaunchConfiguration {
                 reset: environment["CALORIE_TRACKER_FIXTURE_RESET"] == "1" || usesDefaultSimulatorFixture
             )
         }
+        _ = SharedDiaryStorage.selectFixture(nil)
 #endif
         return DiaryStore(catalog: catalog, healthKit: healthKit)
     }
 
 #if DEBUG
     @MainActor
-    private static func seedReorderFixture(in store: DiaryStore) {
+    private static func reorderFixture() -> DiaryDocument {
+        let store = DiaryEngine(document: DiaryDocument())
         let foods = [
             fixtureFood(id: "reorder-delta", name: "Reorder Delta", calories: 40),
             fixtureFood(id: "reorder-gamma", name: "Reorder Gamma", calories: 30),
@@ -134,6 +139,7 @@ private enum LaunchConfiguration {
         for food in foods {
             store.log(food, amount: 1, unit: .serving, portionID: "fixture-serving", on: Date())
         }
+        return store.document
     }
 
     private static func fixtureFood(id: String, name: String, calories: Double) -> Food {

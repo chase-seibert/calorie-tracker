@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-09-01
+
+- Moved diary/history, personal library, favorites, quantities, day status, and
+  alcohol state to shared transactional SQLite storage for app, Siri, and widgets.
+- Added asynchronous bounded reads, explicit storage error recovery, and durable
+  revision-checked HealthKit synchronization with deletion tracking.
+- Added a verified one-off JSON converter, WAL-aware backups, storage safety
+  checks, multi-year benchmarks, and isolated simulator databases.
+- Kept small settings in UserDefaults and analytics in its existing private
+  store. Added a first-launch on-device cutover with a byte-identical JSON
+  backup, verified record round trip, and atomic no-replace database publication.
+
 - Added a shareable last-90-days Markdown report that ranks foods by total
   whole-ounce weight and expands logged meals into their component foods.
 - Added time-of-day Magic logging with up to four personalized food or food-set

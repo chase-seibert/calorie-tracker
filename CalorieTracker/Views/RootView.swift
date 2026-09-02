@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RootView: View {
     let catalog: CatalogStore
+    @Binding var pendingOpenURL: URL?
     @EnvironmentObject private var diary: DiaryStore
     @ObservedObject private var quickActionRouter = HomeScreenQuickActionRouter.shared
     @AppStorage(FirstTimeOnboarding.completedKey) private var completedFocusOnboarding = false
@@ -13,19 +14,55 @@ struct RootView: View {
     var body: some View {
         DiaryView(catalog: catalog, foodPickerLaunch: $foodPickerLaunch)
             .id(homeViewID)
-            .onOpenURL(perform: handleOpenURL)
+            .disabled(diary.isLoading || diary.isSaving || !diary.hasLoadedSnapshot)
+            .overlay {
+                if diary.isLoading {
+                    ProgressView("Opening diary…").padding().background(
+                        .regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+                } else if !diary.hasLoadedSnapshot {
+                    ContentUnavailableView {
+                        Label("Diary unavailable", systemImage: "externaldrive.badge.exclamationmark")
+                    } description: {
+                        Text(
+                            "Your existing data has not been replaced. Retry opening it after resolving the storage issue."
+                        )
+                    } actions: {
+                        Button("Retry") { Task { await diary.reloadFromDisk() } }
+                    }.background(AppTheme.background)
+                }
+            }
+            .alert(
+                "Diary unavailable",
+                isPresented: Binding(
+                    get: { diary.lastSaveError != nil },
+                    set: { if !$0 { diary.dismissSaveError() } }
+                )
+            ) {
+                Button("Retry") { Task { await diary.reloadFromDisk() } }
+                Button("OK", role: .cancel) { diary.dismissSaveError() }
+            } message: {
+                Text(diary.lastSaveError ?? "Your diary could not be opened.")
+            }
+            .task(id: diary.hasLoadedSnapshot ? pendingOpenURL : nil) {
+                guard diary.hasLoadedSnapshot, let url = pendingOpenURL else { return }
+                pendingOpenURL = nil
+                handleOpenURL(url)
+            }
             .sheet(item: $importRequest) { request in
                 switch request.file {
-                case let .food(file):
+                case .food(let file):
                     CustomFoodImportView(file: file)
-                case let .meal(file):
+                case .meal(let file):
                     CustomMealImportView(file: file)
                 }
             }
-            .alert("Couldn’t Import File", isPresented: Binding(
-                get: { importError != nil },
-                set: { if !$0 { importError = nil } }
-            )) {
+            .alert(
+                "Couldn’t Import File",
+                isPresented: Binding(
+                    get: { importError != nil },
+                    set: { if !$0 { importError = nil } }
+                )
+            ) {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(importError ?? "Unknown error")
@@ -36,10 +73,15 @@ struct RootView: View {
             .onReceive(NotificationCenter.default.publisher(for: FirstTimeOnboarding.resetNotification)) { _ in
                 homeViewID = UUID()
             }
-            .fullScreenCover(isPresented: Binding(
-                get: { !completedFocusOnboarding },
-                set: { _ in }
-            )) {
+            .fullScreenCover(
+                isPresented: Binding(
+                    get: {
+                        !completedFocusOnboarding && !diary.isLoading && diary.hasLoadedSnapshot
+                            && diary.lastSaveError == nil
+                    },
+                    set: { _ in }
+                )
+            ) {
                 FirstTimeOnboardingView()
                     .interactiveDismissDisabled()
             }
@@ -72,11 +114,16 @@ struct RootView: View {
     }
 
     private func handleQuickAction(_ request: HomeScreenQuickActionRequest) {
-        defer { quickActionRouter.consume(request) }
-        guard let result = diary.logQuickSelection(request.selectionID) else { return }
-        AppAnalytics.capture("diary.quick_action_logged", properties: [
-            "item_count": String(result.loggedItemCount)
-        ])
+        diary.run {
+            defer { quickActionRouter.consume(request) }
+            guard let result = try await diary.logQuickSelection(request.selectionID) else { return }
+            AppAnalytics.capture(
+                "diary.quick_action_logged",
+                properties: [
+                    "item_count": String(result.loggedItemCount)
+                ])
+
+        }
     }
 }
 
@@ -213,12 +260,15 @@ private struct CalorieGoalOnboardingStep: View {
     }
 
     private func continueFromGoal() {
-        let digits = goalText.filter(\.isNumber)
-        if let value = Int(digits), value > 0 {
-            diary.setDailyCalorieGoal(value)
+        diary.run {
+            let digits = goalText.filter(\.isNumber)
+            if let value = Int(digits), value > 0 {
+                try await diary.setDailyCalorieGoal(value)
+            }
+            goalIsFocused = false
+            onContinue()
+
         }
-        goalIsFocused = false
-        onContinue()
     }
 }
 
@@ -270,9 +320,13 @@ private struct AppleHealthOnboardingStep: View {
     }
 
     private func connect() async {
-        connecting = true; healthKit.clearLastError()
+        connecting = true
+        healthKit.clearLastError()
         await healthKit.requestAuthorizationAndSync(entries: [])
-        if healthKit.authorizationState == .authorized { diary.syncAllHealthData(); await healthKit.waitForPendingOperations() }
+        if healthKit.authorizationState == .authorized {
+            await diary.syncAllHealthData()
+            await healthKit.waitForPendingOperations()
+        }
         connecting = false
     }
 }
@@ -292,7 +346,10 @@ private struct TrackingConceptsOnboardingStep: View {
     private func conceptRow(_ icon: String, _ title: String, _ text: String) -> some View {
         HStack(alignment: .top, spacing: 14) {
             Image(systemName: icon).foregroundStyle(AppTheme.coral).frame(width: 28)
-            VStack(alignment: .leading, spacing: 3) { Text(title).font(.headline); Text(text).font(.subheadline).foregroundStyle(.secondary) }
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title).font(.headline)
+                Text(text).font(.subheadline).foregroundStyle(.secondary)
+            }
         }
         .padding(14).background(AppTheme.card, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
@@ -312,8 +369,12 @@ private struct MagicOnboardingStep: View {
 
     private func magicStep(_ number: Int, _ title: String, _ text: String) -> some View {
         HStack(alignment: .top, spacing: 12) {
-            Text(number.formatted()).font(.headline).foregroundStyle(.white).frame(width: 30, height: 30).background(AppTheme.coral, in: Circle())
-            VStack(alignment: .leading, spacing: 3) { Text(title).font(.headline); Text(text).font(.subheadline).foregroundStyle(.secondary) }
+            Text(number.formatted()).font(.headline).foregroundStyle(.white).frame(width: 30, height: 30).background(
+                AppTheme.coral, in: Circle())
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title).font(.headline)
+                Text(text).font(.subheadline).foregroundStyle(.secondary)
+            }
         }
     }
 }

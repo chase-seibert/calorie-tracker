@@ -66,6 +66,27 @@ final class HealthKitStore: ObservableObject {
         await pendingOperation?.value
     }
 
+    /// Only acknowledge the durable job after every HealthKit operation has completed successfully.
+    func apply(_ work: HealthSyncWork) async -> Bool {
+        guard authorizationState == .authorized else { return false }
+        let operation = enqueue { [weak self] in
+            guard let self else { return }
+            lastError = nil
+            for entry in work.knownEntries { await deleteSamples(for: entry) }
+            for type in writableQuantityTypes {
+                await deleteSample(of: type, syncIdentifier: dayOverrideIdentifier(for: work.day, type: type))
+            }
+            guard lastError == nil else { return }
+            if work.zeroNutrition {
+                await save(zeroSamples(on: work.day, types: writableQuantityTypes))
+            } else {
+                for entry in work.desiredEntries { await replaceSamples(for: entry) }
+            }
+        }
+        await operation.value
+        return lastError == nil && authorizationState == .authorized
+    }
+
     @discardableResult
     func sync(entries: [DiaryEntry]) -> Task<Void, Never> {
         guard isAvailable else { return Task {} }
@@ -250,12 +271,10 @@ final class HealthKitStore: ObservableObject {
                 value: syncIdentifier
             )
             healthStore.deleteObjects(of: type, predicate: predicate) { success, _, error in
-                if let error, !success {
-                    Task { @MainActor [weak self] in
-                        self?.lastError = error.localizedDescription
-                    }
+                Task { @MainActor [weak self] in
+                    if !success { self?.lastError = error?.localizedDescription ?? "Apple Health could not delete nutrition samples." }
+                    continuation.resume()
                 }
-                continuation.resume()
             }
         }
     }
@@ -263,12 +282,10 @@ final class HealthKitStore: ObservableObject {
     private func save(_ samples: [HKQuantitySample]) async {
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
             healthStore.save(samples) { success, error in
-                if let error, !success {
-                    Task { @MainActor [weak self] in
-                        self?.lastError = error.localizedDescription
-                    }
+                Task { @MainActor [weak self] in
+                    if !success { self?.lastError = error?.localizedDescription ?? "Apple Health could not save nutrition samples." }
+                    continuation.resume()
                 }
-                continuation.resume()
             }
         }
     }
