@@ -27,6 +27,14 @@ struct TrendsView: View {
         }
     }
 
+    private var trendDateRange: ClosedRange<Date> {
+        guard let firstDate = points.first?.date, let lastDate = points.last?.date else {
+            let today = Calendar.current.startOfDay(for: Date())
+            return today...today
+        }
+        return firstDate...lastDate
+    }
+
     private var cheatDayCount: Int { points.count { $0.status == .cheat } }
 
     private var gapDayCount: Int { points.count { $0.status == .gap } }
@@ -170,6 +178,7 @@ struct TrendsView: View {
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 4]))
                 }
             }
+            .chartXScale(domain: trendDateRange)
             .chartYScale(domain: 0...7)
             .chartYAxis {
                 AxisMarks(values: [0, 1, 2, 3, 4, 5, 6, 7])
@@ -301,6 +310,7 @@ struct TrendsView: View {
                         .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
                 }
             }
+            .chartXScale(domain: trendDateRange)
             .chartXAxis {
                 AxisMarks(values: .automatic(desiredCount: 5)) { value in
                     AxisGridLine().foregroundStyle(.clear)
@@ -335,6 +345,7 @@ struct TrendsView: View {
                     }
                 }
             }
+            .chartXScale(domain: trendDateRange)
             .chartYScale(domain: 0...Double(maximumAlcoholDrinks))
             .chartYAxis {
                 AxisMarks(values: .automatic(desiredCount: 4))
@@ -403,6 +414,7 @@ struct TrendsView: View {
                         .interpolationMethod(.catmullRom)
                 }
             }
+            .chartXScale(domain: trendDateRange)
             .chartForegroundStyleScale([
                 "Carbs": AppTheme.carbs,
                 "Fat": AppTheme.fat,
@@ -446,6 +458,7 @@ struct TrendsView: View {
                     .foregroundStyle(AppTheme.fiber.opacity(0.8))
                     .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
             }
+            .chartXScale(domain: trendDateRange)
             .chartXAxis {
                 AxisMarks(values: .automatic(desiredCount: 5)) { value in
                     AxisGridLine().foregroundStyle(.clear)
