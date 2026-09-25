@@ -1239,6 +1239,47 @@ final class CalorieTrackerTests: XCTestCase {
         }
     }
 
+    func testRichSimulatorFixtureCoversThirtyDaysAndLibraryData() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try XCTUnwrap(TimeZone(identifier: "America/Los_Angeles"))
+        let referenceDate = calendar.date(from: DateComponents(
+            year: 2026,
+            month: 8,
+            day: 20,
+            hour: 5
+        ))!
+        let document = DiaryFixtureLoader.makeRichDemoDocument(
+            DiaryDocument(),
+            referenceDate: referenceDate,
+            calendar: calendar
+        )
+        let trackedDays = Set(document.entries.compactMap { entry -> Date? in
+            let day = calendar.startOfDay(for: entry.date)
+            let offset = calendar.dateComponents(
+                [.day],
+                from: calendar.startOfDay(for: referenceDate),
+                to: day
+            ).day ?? 1
+            return (-29 ... 0).contains(offset) ? day : nil
+        })
+        let engine = DiaryEngine(document: document, calendar: calendar)
+        let meatDays = (-29 ... 0).compactMap {
+            calendar.date(byAdding: .day, value: $0, to: referenceDate)
+        }.map { engine.meatPresence(on: $0) }
+
+        XCTAssertEqual(trackedDays.count, 30)
+        XCTAssertEqual(document.alcoholEntries.count, 9)
+        XCTAssertEqual(document.customFoods.count, 15)
+        XCTAssertEqual(document.meals.count, 5)
+        XCTAssertEqual(document.meals.filter(\.isImported).count, 3)
+        XCTAssertFalse(document.dayStatuses.contains { $0.kind == .gap })
+        XCTAssertTrue(meatDays.contains { $0.containsProcessedMeat })
+        XCTAssertTrue(meatDays.contains { $0.containsRedMeat })
+        XCTAssertGreaterThan(engine.totals(on: referenceDate).calories, 2_000)
+        XCTAssertGreaterThan(engine.totals(on: referenceDate).fiber ?? 0, 0)
+        XCTAssertNoThrow(try DiaryRepository.validateDocument(document))
+    }
+
     @MainActor
     func testDailyCalorieGoalPersistsAndCanBeRemoved() {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
