@@ -2,8 +2,8 @@
 
 ## Snack suggestions
 
-- Settings → Food & Meals includes Snack Suggestions, grouped by enabled focus
-  area with high-protein picks always included.
+- Settings → Food & Meals includes one deduplicated Snack Suggestions list,
+  filtered by enabled focus areas with high-protein picks always included.
 - Almonds and other fiber sources appear under Fiber. Processed-meat and
   red-meat focuses exclude those meats from every section, not only their own.
 - Ideas are generated from a curated on-device library with short reasons and

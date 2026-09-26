@@ -1,24 +1,25 @@
 # Snack suggestions and Apple Reminders
 
-Open **Settings → Food & Meals → Snack Suggestions**. Ideas come from a small
-curated library bundled with the app, not an online generative model or your diary.
+Open **Settings → Food & Meals → Snack Suggestions**. Ideas come from a curated
+library bundled with the app, not an online generative model or your diary.
 
 ## Focus behavior
 
-- **High Protein** is always present: plain Greek yogurt, cottage cheese,
-  hard-boiled eggs, edamame, and baked tofu.
-- **Fiber** includes almonds, chickpeas, hummus and vegetables, apple with peanut
-  butter, popcorn, and edamame.
-- **Processed Meat** and **Red Meat** show alternatives when their focuses are
-  enabled. Their exclusions apply before grouping, including the protein section.
-  The initial library contains no processed or red meat even with both focuses off.
+- **High Protein** is always included in the filter: examples include plain
+  Greek yogurt, skyr, eggs, edamame, tofu, beans, lentils, seeds, and fish.
+- **Fiber**, **Processed Meat**, **Red Meat**, and **Alcohol** add eligible
+  suggestions when their focuses are enabled. Their exclusions apply to the
+  full filtered list, not just one category.
+- Each eligible snack appears once. Small focus badges show every enabled area
+  it supports, so a snack can match several focuses without being repeated.
 - **Alcohol** shows snack pairings for an alcohol-free break, not foods that
-  compensate for alcohol. Disabling a focus removes its section immediately.
+  compensate for alcohol. Disabling a focus removes snacks that only match it.
 
 Rows explain the connection and suggest a portion, without claiming precise
 nutrition for an unspecified brand or recipe. Portions are starting ideas, not
 prescriptions. The app doesn't know allergies or other dietary restrictions.
-Selecting the same snack in different sections selects one shared item.
+Selecting a snack selects that one shared item, regardless of how many focus
+areas it matches.
 
 ### Nutrition references
 
@@ -28,7 +29,7 @@ and protein-food examples from
 [USDA MyPlate](https://www.myplate.gov/web/web/eat-healthy/protein-foods).
 Fiber choices are supported by
 [NIH MedlinePlus](https://medlineplus.gov/ency/patientinstructions/000193.htm),
-including nuts, legumes, fruit, and whole grains. Reviewed September 2, 2026.
+including nuts, legumes, fruit, and whole grains. Reviewed September 25, 2026.
 Maintain the explicit meat flags and per-focus explanations when adding ideas;
 do not infer that an unclassified food is suitable for an enabled exclusion.
 
@@ -50,11 +51,12 @@ The exporter:
 
 - Only creates new reminders in the explicitly selected list; it never creates
   lists, edits existing reminders, or marks items complete.
-- Exports the snack name, serving tip, and an app link to Log Food. It adds no
-  dates, alarms, diary entries, personal nutrition data, or focus preferences.
+- Exports only the snack name and an app link to Log Food. It adds no notes,
+  serving tips, dates, alarms, diary entries, personal nutrition data, or focus
+  preferences.
 - Reads only the chosen list's incomplete reminders when checking duplicates.
   Exact normalized titles (case/spacing/diacritics) or stable app links match;
-  synonymous descriptions aren't inferred. Cross-section selections are unique.
+  synonymous descriptions aren't inferred. Selections are unique.
   Completed or deleted items may be added again for the next shopping trip.
 - Stages the batch and commits once. A failed save discards pending changes and
   shows an error; no success is reported. A fetch failure stops the write.

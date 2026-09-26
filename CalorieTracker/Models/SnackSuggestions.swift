@@ -32,6 +32,16 @@ enum SnackFocusArea: String, CaseIterable, Identifiable, Sendable {
         }
     }
 
+    var badgeTitle: String {
+        switch self {
+        case .protein: "Protein"
+        case .fiber: "Fiber"
+        case .processedMeat: "Processed-meat alternative"
+        case .redMeat: "Red-meat alternative"
+        case .alcohol: "Alcohol-free pairing"
+        }
+    }
+
     var explanation: String {
         switch self {
         case .protein: "Protein-forward options, whatever your focus areas."
@@ -53,12 +63,6 @@ struct SnackSuggestion: Identifiable, Equatable, Sendable {
 
     // Opens the existing Log Food route; the query preserves identity after a title edit.
     var reminderURL: URL { URL(string: "vitachase://log-food?snack=\(id)")! }
-}
-
-struct SnackSuggestionGroup: Identifiable, Equatable, Sendable {
-    let area: SnackFocusArea
-    let snacks: [SnackSuggestion]
-    var id: SnackFocusArea { area }
 }
 
 enum SnackSuggestions {
@@ -107,28 +111,86 @@ enum SnackSuggestions {
         .init(id: "popcorn", name: "Air-popped popcorn",
               servingTip: "Try a small bowl (about 3 cups), seasoned with herbs.",
               reasons: [.fiber: "Popcorn is a whole-grain way to add fiber.",
-                        .alcohol: "An easy movie-night snack with an alcohol-free drink."])
+                        .alcohol: "An easy movie-night snack with an alcohol-free drink."]),
+        .init(id: "skyr", name: "Plain skyr",
+              servingTip: "Try one single-serving container; choose no added sugar.",
+              reasons: [.protein: "Skyr is a thick, protein-forward cultured dairy option.",
+                        .processedMeat: "A convenient protein alternative to deli meat."]),
+        .init(id: "pumpkin-seeds", name: "Pumpkin seeds",
+              servingTip: "Try ¼ cup; choose unsalted or lightly salted.",
+              reasons: [.protein: "Pepitas provide plant protein in a portionable snack.",
+                        .fiber: "Pumpkin seeds add fiber along with plant protein.",
+                        .alcohol: "A crunchy, portionable pairing for sparkling water."]),
+        .init(id: "roasted-soy-nuts", name: "Roasted soy nuts",
+              servingTip: "Try ¼ cup; compare sodium labels.",
+              reasons: [.protein: "Roasted soybeans are a substantial plant-protein snack.",
+                        .fiber: "Whole soybeans provide fiber as well as protein.",
+                        .processedMeat: "A crunchy protein swap for meat sticks.",
+                        .redMeat: "A plant-based alternative to a red-meat snack."]),
+        .init(id: "salmon-cucumber-bites", name: "Salmon & cucumber bites",
+              servingTip: "Try 2–3 oz salmon with cucumber; check smoked salmon sodium.",
+              reasons: [.protein: "Salmon provides protein in a light, savory snack.",
+                        .redMeat: "A fish-based alternative to a red-meat snack."]),
+        .init(id: "black-bean-salsa-cups", name: "Black bean salsa cups",
+              servingTip: "Try ½ cup beans with salsa and bell pepper strips.",
+              reasons: [.protein: "Black beans provide plant protein and make a filling snack.",
+                        .fiber: "Beans and vegetables contribute meaningful fiber.",
+                        .redMeat: "A bean-based alternative to a meat-centered snack.",
+                        .alcohol: "A colorful snack plate for an alcohol-free break."]),
+        .init(id: "lentil-salad-cup", name: "Lentil salad cup",
+              servingTip: "Try ½ cup lentils with lemon, herbs, and chopped vegetables.",
+              reasons: [.protein: "Lentils provide plant protein in a make-ahead snack.",
+                        .fiber: "Lentils are a concentrated source of fiber.",
+                        .redMeat: "A hearty plant-based alternative to red meat."]),
+        .init(id: "pear-walnuts", name: "Pear & walnuts",
+              servingTip: "Try one small pear with 1 oz walnuts.",
+              reasons: [.fiber: "Pear skin and walnuts contribute fiber.",
+                        .alcohol: "A simple sweet-and-savory pairing for sparkling water."]),
+        .init(id: "chia-pudding", name: "Chia pudding",
+              servingTip: "Try ½ cup made with milk or an unsweetened alternative.",
+              reasons: [.fiber: "Chia seeds add fiber and work well in a make-ahead snack."]),
+        .init(id: "berries-yogurt", name: "Berries & plain yogurt",
+              servingTip: "Try 1 cup berries with ½ cup plain yogurt.",
+              reasons: [.protein: "Plain yogurt adds protein to a fruit snack.",
+                        .fiber: "Berries contribute fiber and natural sweetness."]),
+        .init(id: "avocado-toast", name: "Whole-grain toast & avocado",
+              servingTip: "Try one slice with ¼ avocado; add tomato or herbs.",
+              reasons: [.fiber: "Whole grains and avocado contribute fiber.",
+                        .alcohol: "A satisfying savory pairing for an alcohol-free drink."]),
+        .init(id: "carrots-tahini", name: "Carrots & tahini",
+              servingTip: "Try 1 cup carrots with 2 tablespoons tahini dip.",
+              reasons: [.fiber: "Carrots and sesame provide fiber in a crunchy snack.",
+                        .redMeat: "A vegetable-and-seed alternative to a meat snack.",
+                        .alcohol: "A dip-and-crunch pairing for an alcohol-free break."]),
+        .init(id: "frozen-grapes-pistachios", name: "Frozen grapes & pistachios",
+              servingTip: "Try 1 cup grapes with 1 oz unsalted pistachios.",
+              reasons: [.fiber: "Fruit and pistachios contribute fiber.",
+                        .alcohol: "A snackable sweet-and-salty pairing for sparkling water."]),
+        .init(id: "overnight-oats-berries", name: "Overnight oats with berries",
+              servingTip: "Try ½ cup oats with berries and plain yogurt or milk.",
+              reasons: [.fiber: "Oats and berries provide a whole-grain fiber base.",
+                        .alcohol: "A make-ahead snack for an alcohol-free evening routine."])
     ]
 
-    static func groups(
+    /// Returns each eligible snack once, preserving the curated library order.
+    /// Protein is always enabled; other focus areas act as filters.
+    static func snacks(
         for preferences: SnackFocusPreferences,
         candidates: [SnackSuggestion] = library
-    ) -> [SnackSuggestionGroup] {
-        // Apply exclusions before grouping, including the always-visible protein section.
+    ) -> [SnackSuggestion] {
+        let enabledAreas = SnackFocusArea.allCases.filter(preferences.includes)
         let allowed = candidates.filter {
             !(preferences.processedMeat && $0.containsProcessedMeat)
                 && !(preferences.redMeat && $0.containsRedMeat)
         }
-        return SnackFocusArea.allCases.filter(preferences.includes).compactMap { area in
-            let snacks = allowed.filter { $0.reasons[area] != nil }
-            return snacks.isEmpty ? nil : SnackSuggestionGroup(area: area, snacks: snacks)
+        return allowed.filter { snack in
+            enabledAreas.contains { snack.reasons[$0] != nil }
         }
     }
 
     static func selectedSnacks(
-        in groups: [SnackSuggestionGroup], ids: Set<String>
+        in snacks: [SnackSuggestion], ids: Set<String>
     ) -> [SnackSuggestion] {
-        var seen = Set<String>()
-        return groups.flatMap(\.snacks).filter { ids.contains($0.id) && seen.insert($0.id).inserted }
+        snacks.filter { ids.contains($0.id) }
     }
 }

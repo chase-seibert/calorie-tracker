@@ -71,7 +71,7 @@ final class DeviceFixtureUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Snack Suggestions"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.staticTexts["0 selected"].exists)
         app.buttons["Select All"].tap()
-        XCTAssertTrue(app.staticTexts["5 selected"].exists, "Only always-included protein picks should be selected")
+        XCTAssertTrue(app.staticTexts["12 selected"].exists, "Only always-included protein picks should be selected")
         app.buttons["Clear"].tap()
         XCTAssertTrue(app.staticTexts["0 selected"].exists)
         XCTAssertFalse(app.alerts.firstMatch.exists, "Browsing and selection must not request permission")

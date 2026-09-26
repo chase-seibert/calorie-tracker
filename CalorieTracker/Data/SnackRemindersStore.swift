@@ -13,7 +13,7 @@ struct ExistingSnackReminder: Sendable {
     let url: URL?
 }
 
-enum SnackRemindersError: LocalizedError {
+enum SnackRemindersError: LocalizedError, Sendable {
     case accessDenied, listUnavailable, fetchFailed
 
     var errorDescription: String? {
@@ -61,15 +61,29 @@ final class EventKitSnackRemindersClient: SnackRemindersClient {
             withDueDateStarting: nil, ending: nil, calendars: [calendar]
         )
         return try await withCheckedThrowingContinuation { continuation in
-            store.fetchReminders(matching: predicate) { reminders in
-                guard let reminders else {
-                    continuation.resume(throwing: SnackRemindersError.fetchFailed)
-                    return
+            Self.fetchRemindersNonisolated(store: store, predicate: predicate) { result in
+                Task { @MainActor in
+                    continuation.resume(with: result)
                 }
-                continuation.resume(returning: reminders.map {
-                    ExistingSnackReminder(title: $0.title ?? "", url: $0.url)
-                })
             }
+        }
+    }
+
+    /// EventKit invokes this callback on its own search queue. Keep the
+    /// callback nonisolated, then hop back before resuming the caller.
+    nonisolated private static func fetchRemindersNonisolated(
+        store: EKEventStore,
+        predicate: NSPredicate,
+        completion: @escaping @Sendable (Result<[ExistingSnackReminder], SnackRemindersError>) -> Void
+    ) {
+        store.fetchReminders(matching: predicate) { reminders in
+            guard let reminders else {
+                completion(.failure(.fetchFailed))
+                return
+            }
+            completion(.success(reminders.map {
+                ExistingSnackReminder(title: $0.title ?? "", url: $0.url)
+            }))
         }
     }
 
@@ -80,7 +94,6 @@ final class EventKitSnackRemindersClient: SnackRemindersClient {
                 let reminder = EKReminder(eventStore: store)
                 reminder.calendar = calendar
                 reminder.title = snack.name
-                reminder.notes = "Snack idea from Yum Chase.\n\(snack.servingTip)"
                 reminder.url = snack.reminderURL
                 // No alarms, dates, diary data, or private focus-area preferences are exported.
                 try store.save(reminder, commit: false)

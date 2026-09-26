@@ -161,10 +161,11 @@ from those preferences. Alcohol calories remain in daily nutrition totals when
 its display focus is off, and the meat card is omitted when both meat focuses
 are off.
 
-`SnackSuggestions` filters a small curated on-device library before grouping it
-by enabled focus area. Protein is always included; processed/red-meat exclusions
-apply to every group. Stable snack IDs keep selection unique across sections.
-This does not read the diary, call a model service, or invent catalog nutrients.
+`SnackSuggestions` filters a curated on-device library into one deduplicated list
+using the enabled focus areas. Protein is always included; processed/red-meat
+exclusions apply to every suggestion. Each row can carry multiple focus badges,
+and stable snack IDs keep selection unique. This does not read the diary, call a
+model service, or invent catalog nutrients.
 
 `SnackRemindersStore` uses an injectable `SnackRemindersClient`; the production
 adapter uses EventKit's iOS 17+ full Reminders access API. Authorization is requested

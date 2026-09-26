@@ -3,17 +3,22 @@ import XCTest
 @testable import CalorieTracker
 
 final class CalorieTrackerTests: XCTestCase {
-    func testSnackGroupsFollowAllFocusCombinationsAndAlwaysIncludeProtein() {
+    func testSnackSuggestionsFilterAllFocusCombinationsAndAlwaysIncludeProtein() {
+        XCTAssertEqual(Set(SnackSuggestions.library.map(\.id)).count, SnackSuggestions.library.count)
         for mask in 0..<16 {
             let preferences = SnackFocusPreferences(fiber: mask & 1 != 0, processedMeat: mask & 2 != 0,
                                                     redMeat: mask & 4 != 0, alcohol: mask & 8 != 0)
-            let groups = SnackSuggestions.groups(for: preferences)
-            XCTAssertEqual(groups.map(\.area), SnackFocusArea.allCases.filter(preferences.includes))
-            XCTAssertEqual(groups.first?.area, .protein)
-            XCTAssertFalse(groups.first!.snacks.isEmpty)
-            XCTAssertTrue(groups.flatMap(\.snacks).allSatisfy { !$0.containsProcessedMeat && !$0.containsRedMeat })
+            let snacks = SnackSuggestions.snacks(for: preferences)
+            let enabledAreas = SnackFocusArea.allCases.filter(preferences.includes)
+            XCTAssertFalse(snacks.isEmpty)
+            XCTAssertTrue(snacks.contains { $0.reasons[.protein] != nil })
+            XCTAssertTrue(snacks.allSatisfy { snack in
+                enabledAreas.contains { snack.reasons[$0] != nil }
+                    && !snack.containsProcessedMeat
+                    && !snack.containsRedMeat
+            })
             if preferences.fiber {
-                XCTAssertTrue(groups.first { $0.area == .fiber }!.snacks.contains { $0.id == "almonds" })
+                XCTAssertTrue(snacks.contains { $0.id == "almonds" })
             }
         }
     }
@@ -32,19 +37,19 @@ final class CalorieTrackerTests: XCTestCase {
             (false, true, ["plant", "processed"]),
             (true, true, ["plant"])
         ] {
-            let groups = SnackSuggestions.groups(for: .init(fiber: true, processedMeat: processed, redMeat: red, alcohol: true), candidates: candidates)
-            for group in groups { XCTAssertEqual(group.snacks.map(\.id), allowed) }
+            let snacks = SnackSuggestions.snacks(for: .init(fiber: true, processedMeat: processed, redMeat: red, alcohol: true), candidates: candidates)
+            XCTAssertEqual(snacks.map(\.id), allowed)
         }
     }
 
-    func testSnackSelectionDeduplicatesAcrossGroupsAndDropsHiddenChoices() {
-        let all = SnackSuggestions.groups(for: .init(fiber: true, processedMeat: true, redMeat: true, alcohol: true))
+    func testSnackSelectionPreservesUniqueFilteredListAndDropsHiddenChoices() {
+        let all = SnackSuggestions.snacks(for: .init(fiber: true, processedMeat: true, redMeat: true, alcohol: true))
         let ids = Set(SnackSuggestions.library.map(\.id))
         let selected = SnackSuggestions.selectedSnacks(in: all, ids: ids)
         XCTAssertEqual(selected.count, ids.count)
         XCTAssertEqual(Set(selected.map(\.id)), ids)
-        let protein = SnackSuggestions.groups(for: .init(fiber: false, processedMeat: false, redMeat: false, alcohol: false))
-        XCTAssertEqual(SnackSuggestions.selectedSnacks(in: protein, ids: ids).map(\.id), protein[0].snacks.map(\.id))
+        let protein = SnackSuggestions.snacks(for: .init(fiber: false, processedMeat: false, redMeat: false, alcohol: false))
+        XCTAssertEqual(SnackSuggestions.selectedSnacks(in: protein, ids: ids).map(\.id), protein.map(\.id))
         XCTAssertTrue(SnackSuggestions.selectedSnacks(in: all, ids: []).isEmpty)
         for snack in selected { XCTAssertEqual(VitaChaseDeepLink(url: snack.reminderURL), .logFood) }
     }
