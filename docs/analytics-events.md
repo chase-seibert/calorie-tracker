@@ -30,7 +30,12 @@ platform, version, and audience). Event properties are strings.
 | `import.opened` / `import.failed` | An import file is parsed or rejected | Successful opens include `item_type` |
 | `food_search.no_match` | A completed text search returns no results | `query`, `result_count` |
 | `food_search.nothing_selected` | A completed search with results ends without a diary log | `query`, `result_count` |
+| `food_search.result_selected` | A user taps or quick-adds a search result | `query`, `selected_item_id`, `selected_rank`, `result_ids_above` |
 | `barcode_search.no_match` | A camera or manual barcode lookup returns no result | `barcode`, `input_source` |
+| `siri.quick_log.resolution_attempted` | Siri asks Yum Chase to resolve a spoken recent-food or meal query | `query`, `result_count` |
+| `siri.quick_log.started` | Siri invokes the recent-food or meal logging intent | `selection_hash` |
+| `siri.quick_log.completed` | Siri successfully logs the resolved item | `selection_hash`, `logged_item_count` |
+| `siri.quick_log.failed` | Siri logging fails after Yum Chase receives the intent | `selection_hash`, `failure` |
 
 Tracked `screen` values currently include `diary`, `settings`, `trends`,
 `settings_snack_suggestions`,
@@ -50,6 +55,12 @@ successful searches send the normalized query, and barcode misses send the
 normalized barcode, to improve the catalog and search ranking. Queries are
 bounded to 200 characters.
 
+Siri quick-log events use the normalized, bounded query only at the resolution
+stage where Siri provides it. Resolved item identifiers are represented by a
+short hash, not a food or meal name. Failure values are stable categories such
+as `unknown_item`, `logging_disabled`, or `database_or_unavailable`; error text
+is not sent.
+
 For `food_log.completed`, catalog foods include `source`, `source_id`, and a
 12-hex-character `catalog_version` content fingerprint. Custom and imported
 items use `local_item_id` instead of a user-authored name. Food events also
@@ -58,6 +69,12 @@ include the one-based `selection_rank` and `query`. Magic suggestions emit one
 completion per successfully logged food or meal with a shared `group_id`.
 Meals remain one event and include `item_count`, rather than emitting their
 constituent foods as additional completions.
+
+`food_search.result_selected` uses globally stable catalog source IDs for
+catalog foods. User-created foods and saved meals use explicitly local IDs;
+they are not treated as cross-install identities. `result_ids_above` contains
+the ranked IDs shown above the selected result, bounded by the analytics event
+property limit.
 
 In Debug builds, selecting an event in analytics diagnostics displays its
 canonical payload and properties. That additional payload history is not

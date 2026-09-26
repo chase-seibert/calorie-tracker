@@ -69,6 +69,7 @@ struct FoodPickerView: View {
                             onEditFood: { selectedFood = $0 },
                             onQuickLogMeal: logMeal,
                             onEditMeal: { selectedMeal = $0 },
+                            onSearchResultSelected: captureSearchResultSelection,
                             onAddCustomFood: {
                                 finishSearchAttempt(recordNothingSelected: false)
                                 showingCustomFoodEditor = true
@@ -390,6 +391,31 @@ struct FoodPickerView: View {
 
     private func selectionRank(for item: FoodPickerItem) -> Int? {
         results.firstIndex(where: { $0.id == item.id }).map { $0 + 1 }
+    }
+
+    private func captureSearchResultSelection(_ item: FoodPickerItem) {
+        let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedQuery.isEmpty, let rank = selectionRank(for: item) else { return }
+        let aboveIDs = results.prefix(rank - 1).map(analyticsSearchItemID)
+        AppAnalytics.capture(
+            "food_search.result_selected",
+            properties: [
+                "query": String(normalizedQuery.prefix(200)),
+                "selected_item_id": analyticsSearchItemID(item),
+                "selected_rank": String(rank),
+                "result_ids_above": String(aboveIDs.joined(separator: ",").prefix(240))
+            ]
+        )
+    }
+
+    private func analyticsSearchItemID(_ item: FoodPickerItem) -> String {
+        switch item {
+        case let .food(food):
+            let namespace = food.source == .custom ? "local" : food.source.rawValue
+            return "food:\(namespace):\(food.sourceID)"
+        case let .meal(meal):
+            return "meal:local:\(meal.id.uuidString)"
+        }
     }
 
     private func markCurrentSearchLogged() {
@@ -880,6 +906,7 @@ private struct SearchResultsList: View {
     let onEditFood: (Food) -> Void
     let onQuickLogMeal: (SavedMeal) -> Void
     let onEditMeal: (SavedMeal) -> Void
+    let onSearchResultSelected: (FoodPickerItem) -> Void
     let onAddCustomFood: () -> Void
 
     var body: some View {
@@ -907,15 +934,27 @@ private struct SearchResultsList: View {
                                 food: food,
                                 preference: diary.preference(for: food),
                                 actionTitle: "Quick add",
-                                action: { onQuickLogFood(food) }
+                                action: {
+                                    onSearchResultSelected(.food(food))
+                                    onQuickLogFood(food)
+                                }
                             )
                             .contentShape(Rectangle())
-                            .onTapGesture { onEditFood(food) }
+                            .onTapGesture {
+                                onSearchResultSelected(.food(food))
+                                onEditFood(food)
+                            }
                         case .meal(let meal):
                             MealListActionRow(
                                 meal: meal,
-                                onQuickLog: { onQuickLogMeal(meal) },
-                                onEdit: { onEditMeal(meal) }
+                                onQuickLog: {
+                                    onSearchResultSelected(.meal(meal))
+                                    onQuickLogMeal(meal)
+                                },
+                                onEdit: {
+                                    onSearchResultSelected(.meal(meal))
+                                    onEditMeal(meal)
+                                }
                             )
                         }
                     }

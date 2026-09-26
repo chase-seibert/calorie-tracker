@@ -173,6 +173,17 @@ overwrite the simulator's normal diary or the checked-in fixture. The transfer
 contains the private diary database only; it does not include the bundled food
 catalog, UserDefaults preferences, analytics files, or HealthKit data.
 
+Debug builds also write a rotating JSON-lines diagnostic file for Siri quick-log
+operations at `CalorieTracker/Diagnostics/siri-quick-log.jsonl` in the shared App
+Group. It records resolution queries when Siri supplies them, short hashed item
+identifiers, outcomes, and categorized failures; it does not record food names
+or raw error text. The file is capped at 256 KiB with one rotated file. To copy
+these diagnostics from the connected phone, run:
+
+```sh
+make phone-siri-logs
+```
+
 ## Verification and scale
 
 ```sh

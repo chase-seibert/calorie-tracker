@@ -21,7 +21,7 @@ OFF_PAGES ?= 10
 DEBUG_CATALOG_DIR := data/work/catalogs
 DEBUG_REPORT_DIR := data/work/catalog-reports
 
-.PHONY: setup format lint simulator-ready test ui-test-reorder ui-test-fixture build clean catalog catalog-refresh catalog-grouped-report catalog-family-report catalog-debug-off-search-10000 catalog-debug-gap catalog-debug-report catalog-debug sim-compile sim-build sim-runtime-build sim-launch sim-import-fixture phone-build phone-install phone-launch phone-deploy phone-wifi-check phone-wifi-deploy
+.PHONY: setup format lint simulator-ready test ui-test-reorder ui-test-fixture build clean catalog catalog-refresh catalog-grouped-report catalog-family-report catalog-debug-off-search-10000 catalog-debug-gap catalog-debug-report catalog-debug sim-compile sim-build sim-runtime-build sim-launch sim-import-fixture phone-build phone-install phone-launch phone-deploy phone-siri-logs phone-wifi-check phone-wifi-deploy
 
 setup: catalog
 
@@ -237,6 +237,25 @@ phone-launch:
 	xcrun devicectl device process launch --device $(DEVICE_ID) --terminate-existing $(BUNDLE_ID)
 
 phone-deploy: phone-build phone-install phone-launch
+
+PHONE_SIRI_LOG_OUTPUT ?= /tmp/YumChase-siri-quick-log.jsonl
+
+phone-siri-logs:
+	@set -eu; \
+		mkdir -p "$$(dirname "$(PHONE_SIRI_LOG_OUTPUT)")"; \
+		xcrun devicectl device copy from \
+		  --device $(DEVICE_ID) \
+		  --domain-type appGroupDataContainer \
+		  --domain-identifier $(SIMULATOR_GROUP_ID) \
+		  --source CalorieTracker/Diagnostics/siri-quick-log.jsonl \
+		  --destination "$(PHONE_SIRI_LOG_OUTPUT)"; \
+		xcrun devicectl device copy from \
+		  --device $(DEVICE_ID) \
+		  --domain-type appGroupDataContainer \
+		  --domain-identifier $(SIMULATOR_GROUP_ID) \
+		  --source CalorieTracker/Diagnostics/siri-quick-log.jsonl.1 \
+		  --destination "$(PHONE_SIRI_LOG_OUTPUT).1" >/dev/null 2>&1 || true; \
+		echo "Copied Yum Chase Siri diagnostics to $(PHONE_SIRI_LOG_OUTPUT)."
 
 phone-wifi-check:
 	@set -eu; \
