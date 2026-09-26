@@ -7,12 +7,14 @@ struct TrendsView: View {
     @AppStorage("trends.focus.fiber") private var tracksFiber = true
     @AppStorage("trends.focus.processedMeat") private var tracksProcessedMeat = true
     @AppStorage("trends.focus.redMeat") private var tracksRedMeat = true
-    @State private var selectedMeatWeek: WeeklyMeatDays?
+    @State private var selectedMeatWeek: WeeklyMeatServings?
+    @State private var classificationReviewCount = 0
 
     private let trendDays = 30
     private let fiberGramsPerThousandCalories = 14.0
-    private let recommendedRedMeatDaysPerWeek = 2.0
-    private let recommendedProcessedMeatDaysPerWeek = 0.0
+    private let recommendedAlcoholDrinksPerDay = 2.0
+    private let recommendedRedMeatServingsPerWeek = 3.0
+    private let recommendedProcessedMeatServingsPerWeek = 0.0
 
     private var points: [TrendPoint] {
         diary.totalsByDay(numberOfDays: trendDays).map { total in
@@ -39,8 +41,15 @@ struct TrendsView: View {
 
     private var gapDayCount: Int { points.count { $0.status == .gap } }
 
-    private var weeklyMeatPoints: [WeeklyMeatDays] {
-        diary.weeklyMeatDays(numberOfDays: trendDays)
+    private var weeklyMeatPoints: [WeeklyMeatServings] {
+        diary.weeklyMeatServings(numberOfDays: trendDays)
+    }
+
+    private var maximumMeatServings: Double {
+        max(
+            recommendedRedMeatServingsPerWeek,
+            weeklyMeatPoints.flatMap { [$0.processedMeatServings, $0.redMeatServings] }.max() ?? 0
+        ).rounded(.up)
     }
 
     private var recommendedFiberGrams: Double {
@@ -98,6 +107,9 @@ struct TrendsView: View {
             .presentationDetents([.medium, .large])
         }
         .analyticsScreen("trends")
+        .task(id: diary.hasLoadedSnapshot) {
+            await loadClassificationReviewCount()
+        }
     }
 
     private var statusCounts: some View {
@@ -135,11 +147,11 @@ struct TrendsView: View {
     private var meatDaysChart: some View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Meat days per week").font(.title3.weight(.bold))
-                Text("A day counts once per category, regardless of quantity")
+                Text("Meat servings per week").font(.title3.weight(.bold))
+                Text("Servings per week")
                     .font(.caption)
                     .foregroundStyle(AppTheme.muted)
-                Text("Guidance: up to 2 red-meat days; little or no processed meat")
+                Text("Red meat reference: up to 3 servings; processed meat: very little, if any.")
                     .font(.caption)
                     .foregroundStyle(AppTheme.muted)
             }
@@ -148,40 +160,40 @@ struct TrendsView: View {
                     if tracksProcessedMeat {
                         BarMark(
                             x: .value("Week", point.weekStart, unit: .weekOfYear),
-                            y: .value("Days", point.processedMeatDays)
+                            y: .value("Servings", point.processedMeatServings)
                         )
                         .position(by: .value("Meat type", "Processed meat"))
                         .foregroundStyle(AppTheme.processedMeat)
                         .accessibilityLabel("Processed meat, week of \(point.weekStart.formatted(date: .abbreviated, time: .omitted))")
-                        .accessibilityValue("\(point.processedMeatDays) days")
+                        .accessibilityValue("\(point.processedMeatServings.cleanAmount) servings")
                     }
 
                     if tracksRedMeat {
                         BarMark(
                             x: .value("Week", point.weekStart, unit: .weekOfYear),
-                            y: .value("Days", point.redMeatDays)
+                            y: .value("Servings", point.redMeatServings)
                         )
                         .position(by: .value("Meat type", "Red meat"))
                         .foregroundStyle(AppTheme.redMeat)
                         .accessibilityLabel("Red meat, week of \(point.weekStart.formatted(date: .abbreviated, time: .omitted))")
-                        .accessibilityValue("\(point.redMeatDays) days")
+                        .accessibilityValue("\(point.redMeatServings.cleanAmount) servings")
                     }
                 }
                 if tracksProcessedMeat {
-                    RuleMark(y: .value("Processed meat target", recommendedProcessedMeatDaysPerWeek))
+                    RuleMark(y: .value("Processed meat target", recommendedProcessedMeatServingsPerWeek))
                         .foregroundStyle(AppTheme.processedMeat.opacity(0.7))
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 4]))
                 }
                 if tracksRedMeat {
-                    RuleMark(y: .value("Red meat target", recommendedRedMeatDaysPerWeek))
-                        .foregroundStyle(AppTheme.redMeat.opacity(0.7))
-                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 4]))
+                    RuleMark(y: .value("Red meat maximum", recommendedRedMeatServingsPerWeek))
+                        .foregroundStyle(AppTheme.redMeat.opacity(0.85))
+                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [2, 3]))
                 }
             }
             .chartXScale(domain: trendDateRange)
-            .chartYScale(domain: 0...7)
+            .chartYScale(domain: 0...maximumMeatServings)
             .chartYAxis {
-                AxisMarks(values: [0, 1, 2, 3, 4, 5, 6, 7])
+                AxisMarks(values: .automatic(desiredCount: 4))
             }
             .chartXAxis {
                 AxisMarks(values: .automatic(desiredCount: 4)) { value in
@@ -220,10 +232,7 @@ struct TrendsView: View {
             Text("Tap a week to see the foods included")
                 .font(.caption2)
                 .foregroundStyle(AppTheme.muted)
-            let unknownCount = diary.unknownMeatEntryCount(processed: tracksProcessedMeat, red: tracksRedMeat)
-            if unknownCount > 0 {
-                Text("\(unknownCount) entries have unknown meat classifications. This chart counts confirmed presence only.")
-                    .font(.caption).foregroundStyle(.secondary)
+            if classificationReviewCount > 0 {
                 NavigationLink("Review Classifications") { ReviewClassificationsView() }
                     .font(.caption)
             }
@@ -258,14 +267,19 @@ struct TrendsView: View {
               xPosition <= plotRect.width,
               let selectedDate: Date = proxy.value(atX: xPosition),
               let week = weeklyMeatPoints.min(by: {
-                  abs($0.weekStart.timeIntervalSince(selectedDate))
-                      < abs($1.weekStart.timeIntervalSince(selectedDate))
+                  guard let left = proxy.position(forX: $0.weekStart),
+                        let right = proxy.position(forX: $1.weekStart)
+                  else {
+                      return abs($0.weekStart.timeIntervalSince(selectedDate))
+                          < abs($1.weekStart.timeIntervalSince(selectedDate))
+                  }
+                  return abs(left - xPosition) < abs(right - xPosition)
               })
         else { return }
         selectedMeatWeek = week
     }
 
-    private func meatDays(in week: WeeklyMeatDays) -> [MeatDayFoods] {
+    private func meatDays(in week: WeeklyMeatServings) -> [MeatDayFoods] {
         diary.meatDayFoods(numberOfDays: trendDays).filter {
             $0.date >= week.weekStart
                 && $0.date <= week.weekEnd
@@ -328,7 +342,7 @@ struct TrendsView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Alcohol")
                     .font(.title3.weight(.bold))
-                Text("Daily drinks · each wine glass is one drink")
+                Text("Daily drinks · no more than 2 drinks in one day")
                     .font(.caption)
                     .foregroundStyle(AppTheme.muted)
             }
@@ -344,9 +358,12 @@ struct TrendsView: View {
                         .accessibilityValue("\(point.alcoholDrinks) drink\(point.alcoholDrinks == 1 ? "" : "s")")
                     }
                 }
+                RuleMark(y: .value("Daily drinks guidance", recommendedAlcoholDrinksPerDay))
+                    .foregroundStyle(Color.orange.opacity(0.85))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [2, 3]))
             }
             .chartXScale(domain: trendDateRange)
-            .chartYScale(domain: 0...Double(maximumAlcoholDrinks))
+            .chartYScale(domain: 0...Double(max(3, maximumAlcoholDrinks)))
             .chartYAxis {
                 AxisMarks(values: .automatic(desiredCount: 4))
             }
@@ -357,18 +374,6 @@ struct TrendsView: View {
                 }
             }
             .frame(height: 190)
-
-            HStack(spacing: 6) {
-                Image(systemName: "wineglass.fill")
-                    .foregroundStyle(AppTheme.coral)
-                Circle()
-                    .fill(AppTheme.coral)
-                    .frame(width: 8, height: 8)
-                Text("Drinks")
-                    .font(.caption)
-                    .foregroundStyle(AppTheme.muted)
-            }
-            .accessibilityElement(children: .combine)
         }
         .padding(18)
         .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 22))
@@ -376,6 +381,15 @@ struct TrendsView: View {
 
     private var maximumAlcoholDrinks: Int {
         max(points.map(\.alcoholDrinks).max() ?? 0, 1)
+    }
+
+    private func loadClassificationReviewCount() async {
+        guard diary.hasLoadedSnapshot else { return }
+        do {
+            classificationReviewCount = try await diary.foodResolutionReview().count
+        } catch {
+            classificationReviewCount = 0
+        }
     }
 
     private var macroChart: some View {
@@ -476,7 +490,7 @@ struct TrendsView: View {
 private struct MeatWeekFoodsView: View {
     @Environment(\.dismiss) private var dismiss
 
-    let week: WeeklyMeatDays
+    let week: WeeklyMeatServings
     let days: [MeatDayFoods]
     let showsProcessedMeat: Bool
     let showsRedMeat: Bool

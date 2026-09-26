@@ -143,11 +143,12 @@ history. See `docs/food-resolution.md` for matching and transaction boundaries.
 Saved meals have optional explicit overrides and otherwise derive both flags from
 their component foods.
 
-Meat trends are presence-based rather than quantity-based. `DiaryStore` reduces
-each day to two booleans, then groups the fixed 30-day Trends window by the
-device's calendar week. Multiple matching foods on one day still contribute one
-day to that category. A meal-level explicit flag controls the saved meal;
-otherwise its historical component snapshot supplies the classification.
+Meat trends convert confirmed classified quantities into serving equivalents,
+then group the fixed 30-day Trends window by the device's calendar week.
+Meal ingredients are counted from their historical snapshots; an explicit
+meal-level classification falls back to the logged meal quantity when no
+matching ingredient flag is available. The UI overlays portion-based reference
+guidance separately from the logged serving totals.
 
 The user's visible focus areas are lightweight `UserDefaults` preferences,
 separate from the diary document because they affect presentation and snack

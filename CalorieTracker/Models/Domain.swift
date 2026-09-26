@@ -463,6 +463,15 @@ struct WeeklyMeatDays: Identifiable, Equatable, Sendable {
     var id: Date { weekStart }
 }
 
+struct WeeklyMeatServings: Identifiable, Equatable, Sendable {
+    let weekStart: Date
+    let weekEnd: Date
+    let processedMeatServings: Double
+    let redMeatServings: Double
+
+    var id: Date { weekStart }
+}
+
 struct MeatDayFoods: Identifiable, Equatable, Sendable {
     let date: Date
     let processedMeatFoods: [String]

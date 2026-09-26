@@ -97,6 +97,37 @@ final class DiaryEngine {
         }
     }
 
+    func weeklyMeatServings(
+        numberOfDays: Int = 30,
+        referenceDate: Date = Date()
+    ) -> [WeeklyMeatServings] {
+        guard numberOfDays > 0 else { return [] }
+        let today = calendar.startOfDay(for: referenceDate)
+        var counts: [Date: (processed: Double, red: Double)] = [:]
+
+        for offset in (0..<numberOfDays).reversed() {
+            guard let day = calendar.date(byAdding: .day, value: -offset, to: today),
+                let week = calendar.dateInterval(of: .weekOfYear, for: day)
+            else { continue }
+            let servings = meatServings(on: day)
+            var count = counts[week.start] ?? (0, 0)
+            count.processed += servings.processed
+            count.red += servings.red
+            counts[week.start] = count
+        }
+
+        return counts.keys.sorted().map { weekStart in
+            let weekEnd = calendar.date(byAdding: .day, value: 6, to: weekStart) ?? weekStart
+            let count = counts[weekStart] ?? (0, 0)
+            return WeeklyMeatServings(
+                weekStart: weekStart,
+                weekEnd: weekEnd,
+                processedMeatServings: count.processed,
+                redMeatServings: count.red
+            )
+        }
+    }
+
     func meatDayFoods(
         numberOfDays: Int = 30,
         referenceDate: Date = Date()
@@ -109,6 +140,71 @@ final class DiaryEngine {
             }
             return meatFoods(on: day)
         }
+    }
+
+    private func meatServings(on date: Date) -> (processed: Double, red: Double) {
+        var processed = 0.0
+        var red = 0.0
+
+        for entry in entries(on: date) where !entry.isCheatDayAdjustment {
+            if let items = entry.mealItems, !items.isEmpty {
+                var matchedProcessed = false
+                var matchedRed = false
+                for item in items {
+                    let classification = Self.classification(for: item.food)
+                    let servings = servingEquivalent(
+                        amount: item.amount,
+                        unit: item.unit,
+                        food: item.food,
+                        portionID: item.portionID
+                    )
+                    if classification.containsProcessedMeat {
+                        processed += servings
+                        matchedProcessed = true
+                    }
+                    if classification.containsRedMeat {
+                        red += servings
+                        matchedRed = true
+                    }
+                }
+
+                // Preserve an explicit meal-level classification when its historical
+                // ingredients do not carry a matching flag.
+                let classification = entryMeatClassification(entry)
+                let fallbackServings = max(entry.amount, 0.01)
+                if classification.containsProcessedMeat && !matchedProcessed {
+                    processed += fallbackServings
+                }
+                if classification.containsRedMeat && !matchedRed {
+                    red += fallbackServings
+                }
+            } else {
+                let classification = Self.classification(for: entry.food)
+                let servings = servingEquivalent(
+                    amount: entry.amount,
+                    unit: entry.unit,
+                    food: entry.food,
+                    portionID: entry.portionID
+                )
+                if classification.containsProcessedMeat { processed += servings }
+                if classification.containsRedMeat { red += servings }
+            }
+        }
+
+        return (processed, red)
+    }
+
+    private func servingEquivalent(
+        amount: Double,
+        unit: LogUnit,
+        food: Food,
+        portionID: String?
+    ) -> Double {
+        let grams = unit.grams(for: amount, food: food, portionID: portionID)
+        let servingGrams = food.portion(id: portionID)?.grams
+            ?? food.servingGrams
+            ?? food.baseAmountGrams
+        return grams / max(servingGrams, 0.001)
     }
 
     func alcoholEntry(on date: Date) -> AlcoholEntry? {

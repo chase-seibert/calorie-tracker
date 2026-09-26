@@ -222,6 +222,13 @@ class DiaryStore: ObservableObject {
         engine.weeklyMeatDays(numberOfDays: numberOfDays, referenceDate: referenceDate)
     }
 
+    func weeklyMeatServings(
+        numberOfDays: Int = 30,
+        referenceDate: Date = Date()
+    ) -> [WeeklyMeatServings] {
+        engine.weeklyMeatServings(numberOfDays: numberOfDays, referenceDate: referenceDate)
+    }
+
     func meatDayFoods(
         numberOfDays: Int = 30,
         referenceDate: Date = Date()

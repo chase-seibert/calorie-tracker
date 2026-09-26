@@ -88,9 +88,8 @@
 - As someone tracking alcohol without itemizing every drink, I want a fast daily
   drink count with an optional single type, estimated calories, and drink-count
   trends.
-- As someone limiting meat-related health risks, I want Trends to show how many
-  days in each week contained processed meat and how many contained unprocessed
-  red meat, regardless of quantity.
+- As someone limiting meat-related health risks, I want Trends to show logged
+  meat servings per week for processed meat and unprocessed red meat.
 - As someone with specific nutrition priorities, I want to choose which focused
   food metrics appear in Trends so the app emphasizes only what I care about.
 - As a new user, I want to choose my nutrition focus areas before I start
@@ -144,9 +143,9 @@
 - Foods carry independent processed-meat and unprocessed-red-meat presence flags.
   Processed meat includes cured, salted, smoked, fermented, dried, or otherwise
   preserved meat from red meat or poultry. Red meat means unprocessed mammalian
-  meat. A mixed food may carry both flags. Trends groups diary days by the
-  device calendar week and counts each category at most once per day. Tapping a
-  week shows the qualifying foods grouped by day and category. Custom food,
+  meat. A mixed food may carry both flags. Trends groups logged meat servings by
+  the device calendar week. Tapping a week shows the qualifying foods grouped
+  by day and category. Custom food,
   saved-meal, and import review editors expose both flags.
 - Foods may also carry dietary Fiber grams. Catalog, custom-food, and import
   values scale with logged quantity and aggregate through meals. Individual
@@ -184,8 +183,9 @@
   30-day window; those statuses do not add vertical markers to individual charts.
 - Trends overlays a dashed calorie-target line when a daily goal is configured,
   a fiber recommendation based on 14 grams per 1,000 goal calories (28 grams
-  when no goal is configured), and weekly meat guidance of no more than two
-  red-meat days and little or no processed meat. The macro trend is a stacked
+  when no goal is configured), a dashed two-drink daily alcohol reference, and a
+  dashed red-meat reference at three servings per week. The meat chart uses
+  servings per week rather than presence-based day counts. The macro trend is a stacked
   area chart for carbohydrates, fat, and protein.
 - Light and dark appearances use adaptive backgrounds, elevated cards, primary
   and secondary text, control fills, source badges, macro colors, and action

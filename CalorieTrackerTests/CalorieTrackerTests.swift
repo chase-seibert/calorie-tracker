@@ -2102,6 +2102,10 @@ final class CalorieTrackerTests: XCTestCase {
         let weeks = store.weeklyMeatDays(numberOfDays: 8, referenceDate: referenceDay)
         XCTAssertEqual(weeks.map(\.processedMeatDays).reduce(0, +), 2)
         XCTAssertEqual(weeks.map(\.redMeatDays).reduce(0, +), 2)
+
+        let servingWeeks = store.weeklyMeatServings(numberOfDays: 8, referenceDate: referenceDay)
+        XCTAssertEqual(servingWeeks.map(\.processedMeatServings).reduce(0, +), 3, accuracy: 0.001)
+        XCTAssertEqual(servingWeeks.map(\.redMeatServings).reduce(0, +), 2, accuracy: 0.001)
         XCTAssertEqual(store.meatPresence(on: firstDay).containsProcessedMeat, true)
         XCTAssertEqual(store.meatPresence(on: firstDay).containsRedMeat, false)
     }

@@ -28,8 +28,9 @@ project names and persistent identifiers remain unchanged for compatibility.
 - **Trends**, opened by tapping the diary summary, shows the last 30 days in a
   food-calorie chart with an optional daily target line, a separate daily alcohol
   drink chart, an optional daily Fiber chart with its recommendation line, and a
-  stacked daily macro area chart. The meat chart includes weekly guidance lines
-  for red and processed meat. Compact, semantically tinted cheat-day and gap-day
+  stacked daily macro area chart. The alcohol chart uses a fixed 0–3 minimum
+  scale and a dashed two-drink daily reference; the meat chart shows servings
+  per week with guidance lines for red and processed meat. Compact, semantically tinted cheat-day and gap-day
   count pills sit beneath the “Last 30 Days” title instead of repeating status
   markers across the charts. Its toolbar contains focused health-metric controls
   and the food-weight report.
@@ -99,8 +100,8 @@ correction of matching historical food snapshots. Users can approve individual
 suggestions or confirm Approve All, which shows the suggestion count and applies
 the entire reviewed batch atomically after one verified backup. A stale suggestion
 rejects the batch without partial changes. It currently covers processed and red
-meat, preserving explicit meal overrides. Unknown entries are identified
-in Trends rather than described as confirmed meat-free days.
+  meat, preserving explicit meal overrides. Unknown entries remain excluded from
+  the confirmed serving totals until they are explicitly classified.
 
 Settings also links to AI Food & Meal Import instructions and one copyable,
 tool-neutral prompt. The prompt tells an assistant to create a `.calfood`
