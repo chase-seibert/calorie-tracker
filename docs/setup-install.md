@@ -24,6 +24,20 @@ Siri intents, and icon quick actions exercise the same fixture.
 Set `CALORIE_TRACKER_DISABLE_SIMULATOR_FIXTURE=1` in the scheme environment when
 you explicitly need an empty, persistent simulator diary.
 
+To use a standalone SQLite export from the phone as the simulator's diary,
+run:
+
+```sh
+make sim-import-fixture INPUT=/private/path/YumChase-Database.sqlite
+```
+
+The target validates the file, installs the Debug app, copies the database into
+a new isolated App Group fixture, selects that fixture, and launches the app.
+It leaves the normal simulator diary untouched. Re-running `make sim-launch`
+with its default fixture settings will select and reset the generated demo
+fixture again, so use `make sim-import-fixture` whenever you want to switch
+back to an exported phone snapshot.
+
 Run `make test` for unit tests and `make lint` for Xcode static analysis. `make
 test` requires CoreSimulator and the configured simulator to be available; it
 now reports that prerequisite immediately instead of waiting for Xcode's

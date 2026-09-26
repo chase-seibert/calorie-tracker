@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import UniformTypeIdentifiers
 
 struct SettingsView: View {
     @EnvironmentObject private var diary: DiaryStore
@@ -394,12 +395,24 @@ private struct PrivacyAnalyticsView: View {
 
 #if DEBUG
     private struct DeveloperDiagnosticsView: View {
+    @EnvironmentObject private var diary: DiaryStore
     @AppStorage(FirstTimeOnboarding.completedKey) private var completedFocusOnboarding = false
     @AppStorage("trends.focus.alcohol") private var tracksAlcohol = true
     @AppStorage("trends.focus.fiber") private var tracksFiber = true
     @AppStorage("trends.focus.processedMeat") private var tracksProcessedMeat = true
     @AppStorage("trends.focus.redMeat") private var tracksRedMeat = true
     @State private var showingOnboardingResetConfirmation = false
+    @State private var showingDatabaseExporter = false
+    @State private var showingDatabaseImporter = false
+    @State private var showingDatabaseImportConfirmation = false
+    @State private var showingDatabaseRollbackConfirmation = false
+    @State private var databaseDocument: DiaryDatabaseFileDocument?
+    @State private var pendingDatabaseImportURL: URL?
+    @State private var pendingDatabaseRollback: DiaryDatabaseBackup?
+    @State private var databaseBackups = [DiaryDatabaseBackup]()
+    @State private var databaseTransferMessage: String?
+    @State private var databaseTransferError: String?
+    @State private var isTransferringDatabase = false
 
     var body: some View {
         List {
@@ -424,6 +437,9 @@ private struct PrivacyAnalyticsView: View {
                     showingOnboardingResetConfirmation = true
                 }
             }
+
+            databaseTransferSection
+            databaseBackupSection
         }
         .scrollContentBackground(.hidden)
         .background(AppTheme.background)
@@ -443,6 +459,196 @@ private struct PrivacyAnalyticsView: View {
         } message: {
             Text("This restores the default focus selections, returns to Home, and presents onboarding again. Your logged foods, custom foods, and saved meals are not deleted.")
         }
+        .fileExporter(
+            isPresented: $showingDatabaseExporter,
+            document: databaseDocument,
+            contentType: .yumChaseSQLiteDatabase,
+            defaultFilename: "YumChase-Database"
+        ) { result in
+            switch result {
+            case .success:
+                databaseTransferMessage = "SQLite database exported successfully."
+            case let .failure(error):
+                databaseTransferError = error.localizedDescription
+            }
+        }
+        .fileImporter(
+            isPresented: $showingDatabaseImporter,
+            allowedContentTypes: [.yumChaseSQLiteDatabase],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case let .success(urls):
+                pendingDatabaseImportURL = urls.first
+                showingDatabaseImportConfirmation = pendingDatabaseImportURL != nil
+            case let .failure(error):
+                databaseTransferError = error.localizedDescription
+            }
+        }
+        .confirmationDialog(
+            "Import this SQLite database?",
+            isPresented: $showingDatabaseImportConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Import", role: .destructive) {
+                guard let url = pendingDatabaseImportURL else { return }
+                importDatabase(from: url)
+            }
+            Button("Cancel", role: .cancel) {
+                pendingDatabaseImportURL = nil
+            }
+        } message: {
+            Text("This replaces the current diary with the selected standalone SQLite export. A verified backup of the current diary is created first.")
+        }
+        .confirmationDialog(
+            "Restore this SQLite backup?",
+            isPresented: $showingDatabaseRollbackConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Restore", role: .destructive) {
+                guard let backup = pendingDatabaseRollback else { return }
+                pendingDatabaseRollback = nil
+                importDatabase(from: backup.url, successMessage: "SQLite database restored")
+            }
+            Button("Cancel", role: .cancel) {
+                pendingDatabaseRollback = nil
+            }
+        } message: {
+            Text("This switches the diary back to the selected snapshot. A verified backup of the current diary is created first.")
+        }
+        .alert("Database transfer failed", isPresented: Binding(
+            get: { databaseTransferError != nil },
+            set: { if !$0 { databaseTransferError = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(databaseTransferError ?? "Unknown database transfer error.")
+        }
+        .task {
+            refreshDatabaseBackups()
+        }
+    }
+
+    private var databaseTransferSection: some View {
+        Section {
+            Button {
+                exportDatabase()
+            } label: {
+                Label("Export SQLite Database", systemImage: "square.and.arrow.up")
+            }
+            .disabled(diary.isSaving || isTransferringDatabase)
+
+            Button {
+                showingDatabaseImporter = true
+            } label: {
+                Label("Import SQLite Database", systemImage: "square.and.arrow.down")
+            }
+            .disabled(diary.isSaving || isTransferringDatabase)
+
+            if isTransferringDatabase {
+                ProgressView("Transferring database…")
+            }
+            if let message = databaseTransferMessage {
+                Text(message)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        } header: {
+            Text("SQLite Database")
+        } footer: {
+            Text("Exports use SQLite's online backup API and include committed WAL content. Import replaces the current diary after creating a verified backup.")
+        }
+    }
+
+    private var databaseBackupSection: some View {
+        Section {
+            if databaseBackups.isEmpty {
+                Text("No recent database backups.")
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(databaseBackups) { backup in
+                    Button {
+                        pendingDatabaseRollback = backup
+                        showingDatabaseRollbackConfirmation = true
+                    } label: {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(backup.createdAt.formatted(date: .abbreviated, time: .shortened))
+                            Text(backup.url.lastPathComponent)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .disabled(diary.isSaving || isTransferringDatabase)
+                }
+            }
+        } header: {
+            Text("Previous Backups")
+        } footer: {
+            Text("The app keeps up to eight import backups for 30 days. Tap a backup to restore it; the current database is backed up first.")
+        }
+    }
+
+    private func exportDatabase() {
+        databaseTransferMessage = nil
+        databaseTransferError = nil
+        isTransferringDatabase = true
+        Task {
+            defer { isTransferringDatabase = false }
+            do {
+                databaseDocument = DiaryDatabaseFileDocument(data: try await diary.exportDatabase())
+                showingDatabaseExporter = true
+            } catch {
+                databaseTransferError = error.localizedDescription
+            }
+        }
+    }
+
+    private func refreshDatabaseBackups() {
+        databaseBackups = diary.databaseBackups()
+    }
+
+    private func importDatabase(from url: URL, successMessage: String = "SQLite database imported") {
+        pendingDatabaseImportURL = nil
+        databaseTransferMessage = nil
+        databaseTransferError = nil
+        isTransferringDatabase = true
+        Task {
+            defer { isTransferringDatabase = false }
+            do {
+                let backup = try await diary.importDatabase(from: url)
+                databaseTransferMessage = "\(successMessage). Current data was backed up as \(backup.lastPathComponent)."
+                refreshDatabaseBackups()
+            } catch {
+                databaseTransferError = error.localizedDescription
+            }
+        }
+    }
+}
+
+private extension UTType {
+    static var yumChaseSQLiteDatabase: UTType {
+        UTType(filenameExtension: "sqlite") ?? .data
+    }
+}
+
+private struct DiaryDatabaseFileDocument: FileDocument {
+    static var readableContentTypes: [UTType] { [.yumChaseSQLiteDatabase] }
+
+    let data: Data
+
+    init(data: Data) {
+        self.data = data
+    }
+
+    init(configuration: ReadConfiguration) throws {
+        guard let data = configuration.file.regularFileContents else {
+            throw DiaryDatabaseError.invalidData("The selected file is not a regular SQLite export.")
+        }
+        self.data = data
+    }
+
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        FileWrapper(regularFileWithContents: data)
     }
 }
 

@@ -11,6 +11,7 @@ GENERIC_SIM_DESTINATION := generic/platform=iOS Simulator
 SIMULATOR_DESTINATION_TIMEOUT ?= 15
 SIMULATOR_FIXTURE ?= device
 SIMULATOR_FIXTURE_RESET ?= 1
+SIMULATOR_GROUP_ID := group.com.cseibert.CalorieTracker
 
 DEVICE_ID ?= 00008150-000E41422E40401C
 DEVELOPMENT_TEAM ?= 96NAC4VTEN
@@ -20,7 +21,7 @@ OFF_PAGES ?= 10
 DEBUG_CATALOG_DIR := data/work/catalogs
 DEBUG_REPORT_DIR := data/work/catalog-reports
 
-.PHONY: setup format lint simulator-ready test ui-test-reorder ui-test-fixture build clean catalog catalog-refresh catalog-grouped-report catalog-family-report catalog-debug-off-search-10000 catalog-debug-gap catalog-debug-report catalog-debug sim-compile sim-build sim-runtime-build sim-launch phone-build phone-install phone-launch phone-deploy phone-wifi-check phone-wifi-deploy
+.PHONY: setup format lint simulator-ready test ui-test-reorder ui-test-fixture build clean catalog catalog-refresh catalog-grouped-report catalog-family-report catalog-debug-off-search-10000 catalog-debug-gap catalog-debug-report catalog-debug sim-compile sim-build sim-runtime-build sim-launch sim-import-fixture phone-build phone-install phone-launch phone-deploy phone-wifi-check phone-wifi-deploy
 
 setup: catalog
 
@@ -169,6 +170,51 @@ sim-launch: sim-runtime-build
 	xcrun simctl spawn "$$UDID" launchctl setenv CALORIE_TRACKER_FIXTURE_RESET "$(SIMULATOR_FIXTURE_RESET)"; \
 	xcrun simctl install "$$UDID" "$(DERIVED_DATA)/Build/Products/Debug-iphonesimulator/$(APP_NAME).app"; \
 	xcrun simctl launch "$$UDID" $(BUNDLE_ID)
+
+sim-import-fixture: simulator-ready diary-tool
+	@test -n "$(INPUT)" || (echo 'Set INPUT=/private/path/phone-export.sqlite'; exit 1)
+	@test -f "$(INPUT)" || (echo "SQLite export not found: $(INPUT)"; exit 1)
+	@test ! -e "$(INPUT)-wal" -a ! -e "$(INPUT)-journal" || (echo 'Choose a standalone SQLite export without a WAL or journal sidecar.'; exit 1)
+	@set -eu; \
+	STAGING_DIR=$$(mktemp -d "$${TMPDIR:-/tmp}/yum-chase-fixture.XXXXXX"); \
+	trap 'rm -r "$$STAGING_DIR"' EXIT; \
+	cp "$(INPUT)" "$$STAGING_DIR/input.sqlite"; \
+	$(MAKE) diary-validate INPUT="$$STAGING_DIR/input.sqlite"; \
+	$(MAKE) sim-runtime-build; \
+	UDID=$$(xcrun simctl list devices available | awk -F '[()]' -v name="$(SIM_DEVICE_NAME)" '{ display=$$1; sub(/^[[:space:]]+/, "", display); sub(/[[:space:]]+$$/, "", display); if (display == name && $$0 !~ /unavailable/) { print $$2; exit } }'); \
+	if [ -z "$$UDID" ]; then \
+		echo "No available simulator named $(SIM_DEVICE_NAME)."; \
+		xcrun simctl list devices available; \
+		exit 1; \
+	fi; \
+	xcrun simctl boot "$$UDID" >/dev/null 2>&1 || true; \
+	xcrun simctl bootstatus "$$UDID" -b; \
+	xcrun simctl terminate "$$UDID" $(BUNDLE_ID) >/dev/null 2>&1 || true; \
+	xcrun simctl install "$$UDID" "$(DERIVED_DATA)/Build/Products/Debug-iphonesimulator/$(APP_NAME).app"; \
+	xcrun simctl spawn "$$UDID" launchctl setenv CALORIE_TRACKER_FIXTURE none; \
+	xcrun simctl spawn "$$UDID" launchctl setenv CALORIE_TRACKER_DISABLE_SIMULATOR_FIXTURE 1; \
+	xcrun simctl launch "$$UDID" $(BUNDLE_ID) >/dev/null; \
+	GROUP_ROOT=; \
+	for _ in $$(seq 1 20); do \
+		GROUP_ROOT=$$(xcrun simctl get_app_container "$$UDID" "$(BUNDLE_ID)" groups 2>/dev/null | awk -v group="$(SIMULATOR_GROUP_ID)" '$$1 == group { print $$2; exit }'); \
+		[ -n "$$GROUP_ROOT" ] && break; \
+		sleep 1; \
+	done; \
+	xcrun simctl terminate "$$UDID" $(BUNDLE_ID) >/dev/null 2>&1 || true; \
+	[ -n "$$GROUP_ROOT" ] || { echo 'The simulator App Group container was not created.'; exit 1; }; \
+	FIXTURE_ID=$$(uuidgen | tr '[:upper:]' '[:lower:]'); \
+	FIXTURE_DIR="$$GROUP_ROOT/CalorieTracker/Fixtures"; \
+	mkdir -p "$$FIXTURE_DIR"; \
+	cp "$$STAGING_DIR/input.sqlite" "$$FIXTURE_DIR/$$FIXTURE_ID.sqlite"; \
+	xcrun simctl spawn "$$UDID" defaults write "$(SIMULATOR_GROUP_ID)" debug.fixture.device "$$FIXTURE_ID"; \
+	xcrun simctl spawn "$$UDID" launchctl setenv CALORIE_TRACKER_FIXTURE device; \
+	xcrun simctl spawn "$$UDID" launchctl setenv CALORIE_TRACKER_DISABLE_SIMULATOR_FIXTURE 1; \
+	xcrun simctl spawn "$$UDID" launchctl setenv CALORIE_TRACKER_FIXTURE_RESET 0; \
+	if [ -d "/Applications/Xcode.app/Contents/Developer/Applications/Simulator.app" ]; then \
+		open -a Simulator --args -CurrentDeviceUDID "$$UDID" || true; \
+	fi; \
+	xcrun simctl launch "$$UDID" $(BUNDLE_ID); \
+	echo "Imported $(INPUT) as simulator fixture $$FIXTURE_ID for $(SIM_DEVICE_NAME)."
 
 phone-build:
 	xcodebuild \

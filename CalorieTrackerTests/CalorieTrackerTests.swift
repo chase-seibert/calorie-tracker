@@ -389,6 +389,39 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(try DiaryJSONMigration.canonicalData(before), try DiaryJSONMigration.canonicalData(restored.snapshotSync().document))
     }
 
+    #if DEBUG
+    @MainActor
+    func testDeveloperDatabaseExportAndImportRoundTrip() async throws {
+        let day = testDate(day: 1)
+        let sourceEntry = testEntry(calories: 321, date: day, name: "Exported food")
+        var sourceDocument = DiaryDocument()
+        sourceDocument.entries = [sourceEntry]
+        let source = TestDiaryStore(document: sourceDocument, fileURL: temporaryDiaryURL(),
+                                    calendar: testCalendar, referenceDate: day)
+
+        let destinationEntry = testEntry(calories: 99, date: day, name: "Destination food")
+        var destinationDocument = DiaryDocument()
+        destinationDocument.entries = [destinationEntry]
+        let destination = TestDiaryStore(document: destinationDocument, fileURL: temporaryDiaryURL(),
+                                         calendar: testCalendar, referenceDate: day)
+
+        let data = try await source.exportDatabase()
+        XCTAssertEqual(Data(data.prefix(16)), Data("SQLite format 3\0".utf8))
+        let sourceFile = temporaryDiaryURL()
+        try FileManager.default.createDirectory(at: sourceFile.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try data.write(to: sourceFile)
+
+        let backup = try await destination.importDatabase(from: sourceFile)
+        XCTAssertEqual(destination.document.entries.map(\.food.name), ["Exported food"])
+        XCTAssertEqual(destination.databaseBackups().count, 1)
+
+        let rollbackBackup = try await destination.importDatabase(from: backup)
+        XCTAssertEqual(destination.document.entries.map(\.food.name), ["Destination food"])
+        XCTAssertEqual(destination.databaseBackups().count, 2)
+        XCTAssertNotEqual(backup.path, rollbackBackup.path)
+    }
+    #endif
+
     @MainActor
     func testApproveAllClassificationsCreatesOneBackupAndPreservesMealOverrides() async throws {
         let url = temporaryDiaryURL()

@@ -1,6 +1,16 @@
 import Combine
 import Foundation
 
+#if DEBUG
+struct DiaryDatabaseBackup: Identifiable, Sendable {
+    let url: URL
+    let createdAt: Date
+    let byteCount: Int64
+
+    var id: String { url.path }
+}
+#endif
+
 /// Main-actor presentation cache. Mutations execute against current SQLite state off the main thread.
 @MainActor
 class DiaryStore: ObservableObject {
@@ -197,6 +207,139 @@ class DiaryStore: ObservableObject {
             return result
         }
 
+    #endif
+
+    #if DEBUG
+        private static let databaseBackupLimit = 8
+        private static let databaseBackupRetention: TimeInterval = 30 * 24 * 60 * 60
+
+        func databaseBackups() -> [DiaryDatabaseBackup] {
+            let root = fileURL.deletingLastPathComponent()
+                .appendingPathComponent("SQLiteTransfers", isDirectory: true)
+            guard let urls = try? FileManager.default.contentsOfDirectory(
+                at: root,
+                includingPropertiesForKeys: [.contentModificationDateKey, .fileSizeKey],
+                options: [.skipsHiddenFiles]
+            ) else { return [] }
+            return urls.compactMap { url in
+                guard url.lastPathComponent.hasPrefix("BeforeImport-"), url.pathExtension == "sqlite",
+                    let values = try? url.resourceValues(forKeys: [.contentModificationDateKey, .fileSizeKey]),
+                    let createdAt = values.contentModificationDate
+                else { return nil }
+                return DiaryDatabaseBackup(url: url, createdAt: createdAt, byteCount: Int64(values.fileSize ?? 0))
+            }
+            .sorted { $0.createdAt > $1.createdAt }
+        }
+
+        private func pruneDatabaseBackups() throws {
+            let backups = databaseBackups()
+            let cutoff = Date().addingTimeInterval(-Self.databaseBackupRetention)
+            for backup in backups.enumerated() where backup.offset >= Self.databaseBackupLimit || backup.element.createdAt < cutoff {
+                try FileManager.default.removeItem(at: backup.element.url)
+            }
+        }
+
+        func exportDatabase() async throws -> Data {
+            let repository = try await open()
+            let calendar = calendar
+            let directory = fileURL.deletingLastPathComponent()
+                .appendingPathComponent("SQLiteTransfers", isDirectory: true)
+                .appendingPathComponent("Exports", isDirectory: true)
+            let destination = directory.appendingPathComponent(UUID().uuidString + ".sqlite")
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            defer { try? FileManager.default.removeItem(at: directory) }
+
+            let data = try await Task.detached {
+                try repository.backup(to: destination)
+                let validation = try DiaryRepository(fileURL: destination, calendar: calendar, catalog: nil)
+                try validation.validate()
+                try validation.closeStagingSnapshot()
+                return try Data(contentsOf: destination)
+            }.value
+            return data
+        }
+
+        func importDatabase(from sourceURL: URL) async throws -> URL {
+            guard !isSaving else {
+                throw DiaryDatabaseError.unavailable("Finish the current save before importing a database.")
+            }
+            let repository = try await open()
+            let calendar = calendar
+            let manager = FileManager.default
+            let transferRoot = fileURL.deletingLastPathComponent()
+                .appendingPathComponent("SQLiteTransfers", isDirectory: true)
+            let importDirectory = transferRoot.appendingPathComponent("Import-" + UUID().uuidString, isDirectory: true)
+            let candidate = importDirectory.appendingPathComponent("Incoming.sqlite")
+            let backup = transferRoot.appendingPathComponent("BeforeImport-" + UUID().uuidString + ".sqlite")
+            try manager.createDirectory(at: importDirectory, withIntermediateDirectories: true)
+            try manager.createDirectory(at: transferRoot, withIntermediateDirectories: true)
+            defer { try? manager.removeItem(at: importDirectory) }
+
+            let isManagedBackup = sourceURL.deletingLastPathComponent().standardizedFileURL == transferRoot.standardizedFileURL
+                && sourceURL.lastPathComponent.hasPrefix("BeforeImport-")
+                && sourceURL.pathExtension == "sqlite"
+            let accessing = !isManagedBackup && sourceURL.startAccessingSecurityScopedResource()
+            defer { if accessing { sourceURL.stopAccessingSecurityScopedResource() } }
+            for suffix in ["-wal", "-shm", "-journal"] where !isManagedBackup && manager.fileExists(atPath: sourceURL.path + suffix) {
+                throw DiaryDatabaseError.invalidData("Choose a standalone SQLite export, not a live database with sidecar files.")
+            }
+            try manager.copyItem(at: sourceURL, to: candidate)
+
+            try await Task.detached {
+                let incoming = try DiaryRepository(fileURL: candidate, calendar: calendar, catalog: nil)
+                try incoming.validate()
+                try incoming.closeStagingSnapshot()
+            }.value
+
+            healthTask?.cancel()
+            await healthTask?.value
+            healthTask = nil
+
+            try await Task.detached {
+                try repository.backup(to: backup)
+                let validation = try DiaryRepository(fileURL: backup, calendar: calendar, catalog: nil)
+                try validation.validate()
+                try validation.closeStagingSnapshot()
+            }.value
+
+            refreshGeneration += 1
+            try repository.close()
+            self.repository = nil
+            try replaceLiveDatabase(with: candidate)
+            initialDocument = nil
+            document = DiaryDocument()
+            engine = DiaryEngine(document: document, calendar: calendar, catalog: catalog)
+            currentStreak = .empty
+            hasLoadedSnapshot = false
+            isLoading = true
+            lastSaveError = nil
+            await reloadFromDisk(referenceDate: Date())
+            guard hasLoadedSnapshot else {
+                throw DiaryDatabaseError.unavailable(lastSaveError ?? "The imported database could not be opened.")
+            }
+            try? pruneDatabaseBackups()
+            return backup
+        }
+
+        private func replaceLiveDatabase(with candidate: URL) throws {
+            let manager = FileManager.default
+            let liveURL = fileURL
+            let sidecarArchive = liveURL.deletingLastPathComponent()
+                .appendingPathComponent("SQLiteTransfers", isDirectory: true)
+                .appendingPathComponent("ArchivedSidecars-" + UUID().uuidString, isDirectory: true)
+            try manager.createDirectory(at: sidecarArchive, withIntermediateDirectories: true)
+            for suffix in ["-wal", "-shm", "-journal"] {
+                let sidecar = URL(fileURLWithPath: liveURL.path + suffix)
+                if manager.fileExists(atPath: sidecar.path) {
+                    try manager.moveItem(at: sidecar, to: sidecarArchive.appendingPathComponent(sidecar.lastPathComponent))
+                }
+            }
+            if manager.fileExists(atPath: liveURL.path) {
+                _ = try manager.replaceItemAt(liveURL, withItemAt: candidate, backupItemName: nil, options: [])
+            } else {
+                try manager.moveItem(at: candidate, to: liveURL)
+            }
+        }
     #endif
 
     func entries(on date: Date) -> [DiaryEntry] {

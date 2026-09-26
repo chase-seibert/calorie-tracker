@@ -145,6 +145,34 @@ For future backups of a live SQLite store, use `DiaryRepository.backup(to:)`.
 Copying only `Diary.sqlite` while it is open can omit committed changes in
 `Diary.sqlite-wal`. Never mix a main file and sidecars from different snapshots.
 
+## Developer Diagnostics database transfer
+
+Debug builds expose **Settings → Developer Diagnostics → SQLite Database** with
+standalone export and import actions. Export uses `DiaryRepository.backup(to:)`,
+SQLite's online backup API, so committed changes in the live WAL are included;
+it does not serialize the diary into a second row-oriented format. The resulting
+`.sqlite` file can be moved from the phone through Files, AirDrop, or another
+file-transfer method and then imported into the simulator.
+
+Import accepts only a standalone export, not a live database accompanied by
+`-wal`, `-shm`, or `-journal` sidecars. It validates the incoming database,
+creates and validates a `BeforeImport-<UUID>.sqlite` backup of the current
+database, closes the live connection, replaces the database, and reloads the
+store. Existing sidecars are archived rather than mixed with the imported file.
+The pre-import backup remains in the app's `SQLiteTransfers` directory for
+recovery and appears under **Previous Backups**. Selecting one restores that
+snapshot using the same validated replacement flow, creating another backup
+of the current database first. The app retains the eight newest import backups
+for up to 30 days and prunes older snapshots.
+
+For the desktop simulator path, use
+`make sim-import-fixture INPUT=/private/path/YumChase-Database.sqlite`. The
+target validates the standalone file, copies it into a new UUID-named App Group
+fixture, selects it for the Debug simulator, and launches the app. It does not
+overwrite the simulator's normal diary or the checked-in fixture. The transfer
+contains the private diary database only; it does not include the bundled food
+catalog, UserDefaults preferences, analytics files, or HealthKit data.
+
 ## Verification and scale
 
 ```sh

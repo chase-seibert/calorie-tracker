@@ -847,8 +847,18 @@ final class DiaryRepository: @unchecked Sendable {
         }
     }
 
+    /// Closes this connection after all queued work has completed. The owner must discard
+    /// the repository before replacing its database file.
+    func close() throws {
+        try queue.sync {
+            guard let db else { return }
+            guard sqlite3_close_v2(db) == SQLITE_OK else { throw databaseError() }
+            self.db = nil
+        }
+    }
+
     /// Only for the migrator's private candidate, never for an active/shared repository.
-    fileprivate func closeStagingSnapshot() throws {
+    func closeStagingSnapshot() throws {
         try queue.sync {
             guard try rows("PRAGMA journal_mode = DELETE").first?.values.first?.string == "delete" else {
                 throw DiaryDatabaseError.invalidData("Could not seal the standalone conversion snapshot.")

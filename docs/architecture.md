@@ -291,6 +291,12 @@ Xcode, set `CALORIE_TRACKER_DISABLE_SIMULATOR_FIXTURE=1` for the same result.
 UI tests can opt into the same data with `CALORIE_TRACKER_FIXTURE=device` and
 `CALORIE_TRACKER_FIXTURE_RESET=1`.
 
+`make sim-import-fixture INPUT=/private/path/YumChase-Database.sqlite` is the
+explicit imported-snapshot path. It validates the standalone SQLite file,
+copies it to a new UUID-named fixture, selects that fixture through the shared
+App Group defaults, and launches the Debug app without changing the normal
+diary or the checked-in fixture.
+
 ## UI testing
 
 The UI-test target launches against an isolated temporary diary when the
