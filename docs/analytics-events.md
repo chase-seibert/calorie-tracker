@@ -12,8 +12,8 @@ platform, version, and audience). Event properties are strings.
 | `screen.viewed` | A tracked screen appears | `screen`; selected screens also include `operation`, `origin`, `item_type`, or `initial_mode` |
 | `food_picker.opened` | The log-food picker first appears | `initial_mode` |
 | `food_picker.mode_selected` | Magic, Recent, Frequent, Favorites, Meals, or Scan is selected | `mode` |
-| `food_log.completed` | A food, meal, imported item, or Magic item is successfully added to the diary | `item_type`, `food_kind`, `method`, `mode`, `unit`, `is_favorite`; identity and context fields described below |
-| `food_log.unit_selected` | The user changes the unit in the quantity editor | `unit`, `operation` |
+| `food_log.completed` | A food, meal, imported item, or Magic item is successfully added to the diary | `item_type`, `food_kind`, `method`, `mode`, `unit`, `is_favorite`; identity, portion, and default-comparison fields described below |
+| `food_log.unit_selected` | The user selects a unit or named portion in the quantity editor | `item_type`, identity, `operation`, `from_unit`, `from_portion_id`, `selected_unit`, `selected_portion_id`, `default_unit`, `default_portion_id`, `selection_changed`, `changed_from_default` |
 | `diary_entry.updated` | An existing food or meal quantity is successfully changed | `item_type`, `unit` |
 | `diary_entry.deleted` | One or more diary entries are removed | `item_type`; batch removal also includes `item_count` |
 | `favorite.added` / `favorite.removed` | A food or meal favorite is toggled | `item_type`; foods also include `source` |
@@ -64,11 +64,19 @@ is not sent.
 For `food_log.completed`, catalog foods include `source`, `source_id`, and a
 12-hex-character `catalog_version` content fingerprint. Custom and imported
 items use `local_item_id` instead of a user-authored name. Food events also
-include `has_brand`, `has_barcode`, and `has_portions`; search-originated logs
-include the one-based `selection_rank` and `query`. Magic suggestions emit one
-completion per successfully logged food or meal with a shared `group_id`.
+include `has_brand`, `has_barcode`, and `has_portions`. When available, the
+selected named portion is represented by `portion_id`; quantity-editor logs
+also include the initial default unit and portion plus `unit_changed_from_default`.
+Search-originated logs include the one-based `selection_rank` and `query`.
+Magic suggestions emit one completion per successfully logged food or meal with
+a shared `group_id`.
 Meals remain one event and include `item_count`, rather than emitting their
 constituent foods as additional completions.
+
+`food_log.unit_selected` includes the item identity and both the previous and
+selected portion IDs, so future analysis can distinguish a remembered default
+from a deliberate override. Portion IDs are identifiers only; user-authored
+portion labels are not sent.
 
 `food_search.result_selected` uses globally stable catalog source IDs for
 catalog foods. User-created foods and saved meals use explicitly local IDs;

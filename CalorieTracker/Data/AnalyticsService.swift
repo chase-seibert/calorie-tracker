@@ -647,6 +647,9 @@ enum FoodLogAnalytics {
         isFavorite: Bool,
         catalogVersion: String? = nil,
         foodKind: String? = nil,
+        portionID: String? = nil,
+        defaultUnit: LogUnit? = nil,
+        defaultPortionID: String? = nil,
         selectionRank: Int? = nil,
         query: String? = nil,
         groupID: String? = nil,
@@ -668,6 +671,18 @@ enum FoodLogAnalytics {
         properties["has_brand"] = String(food.displayBrand != nil)
         properties["has_barcode"] = String(!(food.barcode?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true))
         properties["has_portions"] = String(!food.availablePortions.isEmpty)
+        if let portionID, !portionID.isEmpty {
+            properties["portion_id"] = portionID
+        }
+        if let defaultUnit {
+            properties["default_unit"] = defaultUnit.analyticsValue
+            properties["unit_changed_from_default"] = String(
+                defaultUnit != unit || defaultPortionID != portionID
+            )
+        }
+        if let defaultPortionID, !defaultPortionID.isEmpty {
+            properties["default_portion_id"] = defaultPortionID
+        }
 
         if food.source == .custom {
             properties["local_item_id"] = food.sourceID
@@ -679,6 +694,48 @@ enum FoodLogAnalytics {
         }
         if let savedForReuse {
             properties["saved_for_reuse"] = String(savedForReuse)
+        }
+        return properties
+    }
+
+    static func unitSelectionProperties(
+        food: Food,
+        operation: String,
+        fromUnit: LogUnit,
+        fromPortionID: String?,
+        selectedUnit: LogUnit,
+        selectedPortionID: String?,
+        defaultUnit: LogUnit,
+        defaultPortionID: String?
+    ) -> [String: String] {
+        var properties = [
+            "item_type": "food",
+            "food_kind": food.source == .custom ? "custom" : "catalog",
+            "operation": operation,
+            "from_unit": fromUnit.analyticsValue,
+            "selected_unit": selectedUnit.analyticsValue,
+            "default_unit": defaultUnit.analyticsValue,
+            "selection_changed": String(
+                fromUnit != selectedUnit || fromPortionID != selectedPortionID
+            ),
+            "changed_from_default": String(
+                defaultUnit != selectedUnit || defaultPortionID != selectedPortionID
+            )
+        ]
+        properties["source"] = food.source.rawValue
+        if food.source == .custom {
+            properties["local_item_id"] = food.sourceID
+        } else {
+            properties["source_id"] = food.sourceID
+        }
+        if let fromPortionID, !fromPortionID.isEmpty {
+            properties["from_portion_id"] = fromPortionID
+        }
+        if let selectedPortionID, !selectedPortionID.isEmpty {
+            properties["selected_portion_id"] = selectedPortionID
+        }
+        if let defaultPortionID, !defaultPortionID.isEmpty {
+            properties["default_portion_id"] = defaultPortionID
         }
         return properties
     }

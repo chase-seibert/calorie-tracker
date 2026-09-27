@@ -146,20 +146,23 @@ struct FoodPickerView: View {
                 }
             }
             .sheet(item: $selectedFood) { food in
-                QuantityEditor(food: food, date: date) { unit in
+                QuantityEditor(food: food, date: date) { preference, defaultPreference in
                     markCurrentSearchLogged()
                     captureFoodLog(
                         food: food,
                         method: "quantity_editor",
-                        unit: unit
+                        unit: preference.unit,
+                        portionID: preference.portionID,
+                        defaultUnit: defaultPreference?.unit,
+                        defaultPortionID: defaultPreference?.portionID
                     )
                 }
                     .presentationDetents([.medium, .large])
             }
             .sheet(item: $selectedMeal) { meal in
-                QuantityEditor(meal: meal, date: date) { unit in
+                QuantityEditor(meal: meal, date: date) { preference, _ in
                     markCurrentSearchLogged()
-                    captureMealLog(meal: meal, method: "quantity_editor", unit: unit)
+                    captureMealLog(meal: meal, method: "quantity_editor", unit: preference.unit)
                 }
                     .presentationDetents([.medium, .large])
             }
@@ -184,6 +187,7 @@ struct FoodPickerView: View {
                                     food: food,
                                     method: "custom_food_creation",
                                     unit: .serving,
+                                    portionID: "custom-serving",
                                     foodKind: "custom"
                                 )
                             }
@@ -275,7 +279,8 @@ struct FoodPickerView: View {
             captureFoodLog(
                 food: food,
                 method: "quick_add",
-                unit: preference.unit
+                unit: preference.unit,
+                portionID: preference.portionID
             )
 
         }
@@ -312,6 +317,7 @@ struct FoodPickerView: View {
                         food: food,
                         method: "magic_suggestion",
                         unit: diary.preference(for: food).unit,
+                        portionID: diary.preference(for: food).portionID,
                         mode: "magic",
                         groupID: groupID
                     )
@@ -333,6 +339,9 @@ struct FoodPickerView: View {
         food: Food,
         method: String,
         unit: LogUnit,
+        portionID: String? = nil,
+        defaultUnit: LogUnit? = nil,
+        defaultPortionID: String? = nil,
         foodKind: String? = nil,
         mode: String? = nil,
         groupID: String? = nil
@@ -348,6 +357,9 @@ struct FoodPickerView: View {
                 isFavorite: diary.isFavorite(food),
                 catalogVersion: catalog.catalogVersion,
                 foodKind: foodKind,
+                portionID: portionID,
+                defaultUnit: defaultUnit,
+                defaultPortionID: defaultPortionID,
                 selectionRank: resolvedMode == "search" ? selectionRank(for: .food(food)) : nil,
                 query: resolvedMode == "search" ? successfulSearchQuery : nil,
                 groupID: groupID
@@ -983,16 +995,21 @@ struct QuantityEditor: View {
     private let mealID: UUID?
     private let savedMeal: SavedMeal?
     private let isMealEditor: Bool
-    private let onLogged: (LogUnit) -> Void
+    private let onLogged: (QuantityPreference, QuantityPreference?) -> Void
 
     @State private var amount: Double
     @State private var unitChoice: QuantityUnitChoice
+    @State private var initialUnitChoice: QuantityUnitChoice
     @State private var mealItems: [MealItem]
     @State private var mealItemsWereEdited = false
     @State private var showingNameEditor = false
     @FocusState private var amountIsFocused: Bool
 
-    init(food: Food, date: Date, onLogged: @escaping (LogUnit) -> Void = { _ in }) {
+    init(
+        food: Food,
+        date: Date,
+        onLogged: @escaping (QuantityPreference, QuantityPreference?) -> Void = { _, _ in }
+    ) {
         _food = State(initialValue: food)
         self.date = date
         entryID = nil
@@ -1002,10 +1019,15 @@ struct QuantityEditor: View {
         self.onLogged = onLogged
         _amount = State(initialValue: 1)
         _unitChoice = State(initialValue: .ounces)
+        _initialUnitChoice = State(initialValue: .ounces)
         _mealItems = State(initialValue: [])
     }
 
-    init(meal: SavedMeal, date: Date, onLogged: @escaping (LogUnit) -> Void = { _ in }) {
+    init(
+        meal: SavedMeal,
+        date: Date,
+        onLogged: @escaping (QuantityPreference, QuantityPreference?) -> Void = { _, _ in }
+    ) {
         _food = State(initialValue: Self.mealFood(for: meal))
         self.date = date
         entryID = nil
@@ -1015,6 +1037,7 @@ struct QuantityEditor: View {
         self.onLogged = onLogged
         _amount = State(initialValue: 1)
         _unitChoice = State(initialValue: .portion("saved-meal"))
+        _initialUnitChoice = State(initialValue: .portion("saved-meal"))
         _mealItems = State(initialValue: meal.items)
     }
 
@@ -1025,23 +1048,28 @@ struct QuantityEditor: View {
         mealID = entry.savedMealID
         savedMeal = nil
         isMealEditor = entry.isMeal
-        onLogged = { _ in }
+        onLogged = { _, _ in }
         _amount = State(initialValue: entry.amount)
         _mealItems = State(initialValue: entry.mealItems ?? [])
         if entry.isMeal {
             _unitChoice = State(initialValue: .portion(entry.portionID ?? "saved-meal"))
+            _initialUnitChoice = State(initialValue: .portion(entry.portionID ?? "saved-meal"))
             return
         }
         switch entry.unit {
         case .ounces:
             _unitChoice = State(initialValue: .ounces)
+            _initialUnitChoice = State(initialValue: .ounces)
         case .grams:
             _unitChoice = State(initialValue: .grams)
+            _initialUnitChoice = State(initialValue: .grams)
         case .serving:
             if let portion = entry.food.portion(id: entry.portionID) {
                 _unitChoice = State(initialValue: .portion(portion.id))
+                _initialUnitChoice = State(initialValue: .portion(portion.id))
             } else {
                 _unitChoice = State(initialValue: .ounces)
+                _initialUnitChoice = State(initialValue: .ounces)
             }
         }
     }
@@ -1071,6 +1099,18 @@ struct QuantityEditor: View {
 
     private var currentPreference: QuantityPreference {
         QuantityPreference(amount: amount, unit: selectedUnit, portionID: selectedPortionID)
+    }
+
+    private var initialPreference: QuantityPreference? {
+        guard !isMealEditor else { return nil }
+        switch initialUnitChoice {
+        case .ounces:
+            return QuantityPreference(amount: 1, unit: .ounces)
+        case .grams:
+            return QuantityPreference(amount: 100, unit: .grams)
+        case .portion(let id):
+            return QuantityPreference(amount: 1, unit: .serving, portionID: id)
+        }
     }
 
     var body: some View {
@@ -1288,6 +1328,7 @@ struct QuantityEditor: View {
                         unitChoice = .ounces
                     }
                 }
+                initialUnitChoice = unitChoice
             }
             .onChange(of: amount) { oldAmount, newAmount in
                 guard entryID != nil, oldAmount > 0, newAmount > 0, oldAmount != newAmount else { return }
@@ -1324,6 +1365,7 @@ struct QuantityEditor: View {
         Binding(
             get: { unitChoice },
             set: { choice in
+                let previousChoice = unitChoice
                 unitChoice = choice
                 let unit: LogUnit = switch choice {
                 case .ounces: .ounces
@@ -1331,12 +1373,36 @@ struct QuantityEditor: View {
                 case .portion: .serving
                 }
                 diary.rememberLastWeightUnit(unit)
-                AppAnalytics.capture("food_log.unit_selected", properties: [
-                    "unit": unit.analyticsValue,
-                    "operation": entryID == nil ? "create" : "edit"
-                ])
+                let previousUnit = self.unit(for: previousChoice)
+                let previousPortionID = self.portionID(for: previousChoice)
+                AppAnalytics.capture(
+                    "food_log.unit_selected",
+                    properties: FoodLogAnalytics.unitSelectionProperties(
+                        food: food,
+                        operation: entryID == nil ? "create" : "edit",
+                        fromUnit: previousUnit,
+                        fromPortionID: previousPortionID,
+                        selectedUnit: unit,
+                        selectedPortionID: self.portionID(for: choice),
+                        defaultUnit: self.unit(for: initialUnitChoice),
+                        defaultPortionID: self.portionID(for: initialUnitChoice)
+                    )
+                )
             }
         )
+    }
+
+    private func unit(for choice: QuantityUnitChoice) -> LogUnit {
+        switch choice {
+        case .ounces: .ounces
+        case .grams: .grams
+        case .portion: .serving
+        }
+    }
+
+    private func portionID(for choice: QuantityUnitChoice) -> String? {
+        guard case .portion(let id) = choice else { return nil }
+        return id
     }
 
     private func label(for choice: QuantityUnitChoice) -> String {
@@ -1443,7 +1509,7 @@ struct QuantityEditor: View {
                 let currentMeal = diary.document.meals.first { $0.id == savedMeal.id } ?? savedMeal
                 try await diary.logMeal(currentMeal, amount: amount, on: date)
                 if diary.entries(on: date).count > previousEntryCount {
-                    onLogged(.serving)
+                    onLogged(currentPreference, initialPreference)
                 }
             } else {
                 let previousEntryCount = diary.entries(on: date).count
@@ -1455,7 +1521,7 @@ struct QuantityEditor: View {
                     on: date
                 )
                 if diary.entries(on: date).count > previousEntryCount {
-                    onLogged(selectedUnit)
+                    onLogged(currentPreference, initialPreference)
                 }
             }
             dismiss()

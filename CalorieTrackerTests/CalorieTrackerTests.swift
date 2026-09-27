@@ -838,6 +838,69 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertNil(properties["barcode"])
     }
 
+    func testFoodLogAnalyticsRecordsSelectedPortionAndDefaultComparison() {
+        let food = Food(
+            sourceID: "171705",
+            source: .usda,
+            name: "Banana, raw",
+            brand: nil,
+            barcode: nil,
+            nutrients: MacroNutrients(calories: 89, carbs: 23, fat: 0.3, protein: 1.1),
+            baseAmountGrams: 100,
+            servingGrams: 118,
+            servingDescription: "1 medium",
+            portions: [FoodPortion(id: "medium", label: "medium", grams: 118)]
+        )
+
+        let properties = FoodLogAnalytics.foodProperties(
+            food: food,
+            method: "quantity_editor",
+            mode: "search",
+            unit: .serving,
+            isFavorite: false,
+            portionID: "medium",
+            defaultUnit: .ounces,
+            defaultPortionID: nil
+        )
+
+        XCTAssertEqual(properties["portion_id"], "medium")
+        XCTAssertEqual(properties["default_unit"], "ounces")
+        XCTAssertEqual(properties["unit_changed_from_default"], "true")
+    }
+
+    func testFoodLogAnalyticsUnitSelectionIncludesIdentityAndBothPortions() {
+        let food = Food(
+            sourceID: "local-food-001",
+            source: .custom,
+            name: "Private custom name",
+            brand: nil,
+            barcode: nil,
+            nutrients: .zero,
+            baseAmountGrams: 100,
+            servingGrams: 100,
+            servingDescription: "1 bowl",
+            portions: [FoodPortion(id: "custom-serving", label: "bowl", grams: 100)]
+        )
+
+        let properties = FoodLogAnalytics.unitSelectionProperties(
+            food: food,
+            operation: "create",
+            fromUnit: .ounces,
+            fromPortionID: nil,
+            selectedUnit: .serving,
+            selectedPortionID: "custom-serving",
+            defaultUnit: .ounces,
+            defaultPortionID: nil
+        )
+
+        XCTAssertEqual(properties["local_item_id"], "local-food-001")
+        XCTAssertEqual(properties["from_unit"], "ounces")
+        XCTAssertEqual(properties["selected_unit"], "serving")
+        XCTAssertEqual(properties["selected_portion_id"], "custom-serving")
+        XCTAssertEqual(properties["changed_from_default"], "true")
+        XCTAssertNil(properties["name"])
+    }
+
     func testFoodLogAnalyticsUsesLocalIdentityForCustomFood() {
         let food = Food(
             sourceID: "local-food-001",
