@@ -2316,6 +2316,65 @@ final class CalorieTrackerTests: XCTestCase {
     }
 
     @MainActor
+    func testNewFoodsPreferNaturalPortionsBeforeGlobalWeightUnit() {
+        let previous = UserDefaults.standard.object(forKey: "lastWeightUnit")
+        let shared = UserDefaults(suiteName: SharedDiaryStorage.appGroupIdentifier)!
+        let previousShared = shared.object(forKey: "lastWeightUnit")
+        defer {
+            if let previousShared { shared.set(previousShared, forKey: "lastWeightUnit") }
+            else { shared.removeObject(forKey: "lastWeightUnit") }
+            if let previous { UserDefaults.standard.set(previous, forKey: "lastWeightUnit") }
+            else { UserDefaults.standard.removeObject(forKey: "lastWeightUnit") }
+        }
+        UserDefaults.standard.removeObject(forKey: "lastWeightUnit")
+        shared.removeObject(forKey: "lastWeightUnit")
+
+        func food(_ name: String, portions: [FoodPortion]) -> Food {
+            Food(
+                sourceID: name.lowercased().replacingOccurrences(of: " ", with: "-"),
+                source: .usda,
+                name: name,
+                brand: nil,
+                barcode: nil,
+                nutrients: .zero,
+                baseAmountGrams: 100,
+                servingGrams: portions.first?.grams,
+                servingDescription: portions.first.map { "1 \($0.label)" },
+                portions: portions
+            )
+        }
+
+        let beer = food("Beer", portions: [
+            FoodPortion(id: "fl-oz", label: "fl oz", grams: 30),
+            FoodPortion(id: "can-12", label: "can or bottle (12 fl oz)", grams: 360),
+            FoodPortion(id: "can-16", label: "can or bottle (16 fl oz)", grams: 480)
+        ])
+        let butter = food("Butter, salted", portions: [
+            FoodPortion(id: "pat", label: "pat", grams: 5),
+            FoodPortion(id: "tablespoon", label: "tablespoon", grams: 14)
+        ])
+        let rice = food("Rice, white, cooked", portions: [
+            FoodPortion(id: "cup-cooked", label: "cup, cooked", grams: 163),
+            FoodPortion(id: "serving", label: "serving", grams: 122)
+        ])
+        let chicken = food("Fried chicken, thigh", portions: [
+            FoodPortion(id: "thigh", label: "thigh, with skin", grams: 135),
+            FoodPortion(id: "serving", label: "serving", grams: 135)
+        ])
+
+        let store = TestDiaryStore(fileURL: temporaryDiaryURL())
+        store.rememberLastWeightUnit(.grams)
+
+        XCTAssertEqual(store.preference(for: beer), QuantityPreference(amount: 1, unit: .serving, portionID: "can-12"))
+        XCTAssertEqual(store.preference(for: butter), QuantityPreference(amount: 1, unit: .serving, portionID: "tablespoon"))
+        XCTAssertEqual(store.preference(for: rice), QuantityPreference(amount: 1, unit: .serving, portionID: "cup-cooked"))
+        XCTAssertEqual(store.preference(for: chicken), QuantityPreference(amount: 1, unit: .serving, portionID: "thigh"))
+
+        store.rememberPreference(QuantityPreference(amount: 2, unit: .grams), for: butter)
+        XCTAssertEqual(store.preference(for: butter), QuantityPreference(amount: 2, unit: .grams))
+    }
+
+    @MainActor
     func testQuickLogUsesDisplayedPreferenceAndFavoritesRemainAvailable() throws {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let store = TestDiaryStore(fileURL: folder.appendingPathComponent("diary.json"))

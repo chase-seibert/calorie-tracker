@@ -516,6 +516,9 @@ final class DiaryEngine {
         if let remembered = document.rememberedQuantities[food.id] {
             return remembered
         }
+        if let naturalPortion = NaturalFoodPortionHeuristics.preferredPortion(for: food) {
+            return QuantityPreference(amount: 1, unit: .serving, portionID: naturalPortion.id)
+        }
         let rawUnit = LoggingPreferences.lastWeightUnit.rawValue
         let unit = LogUnit(rawValue: rawUnit) ?? .ounces
         return QuantityPreference(amount: unit == .ounces ? 1 : 100, unit: unit)

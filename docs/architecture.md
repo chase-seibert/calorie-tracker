@@ -127,8 +127,14 @@ diary entries and future personal search results.
 The last explicitly selected weight unit is a lightweight `UserDefaults`
 preference. It starts as ounces and changes only when the user selects ounces or
 grams in a food quantity editor; natural portions do not replace it. A food's
-remembered quantity remains authoritative, while foods without one begin at one
-ounce or 100 grams according to this global fallback.
+remembered quantity remains authoritative. For foods without one, the app first
+uses a high-confidence catalog portion: tablespoon for butter, a can or bottle
+for beer and soft drinks, a cooked cup for rice, and a cut-sized piece for
+chicken. It then considers discrete portions such as pieces, slices, bars, eggs,
+packages, and containers, followed by the catalog's serving portion. Foods with
+no suitable portion use the global one-ounce or 100-gram fallback. Technical
+portions such as RACC, NFS, and yield measurements are never selected by these
+defaults.
 
 Catalog foods also carry two compiled presence flags: processed meat and
 unprocessed red meat. The catalog builder derives them from USDA food categories,

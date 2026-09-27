@@ -332,6 +332,111 @@ enum LogUnit: String, Codable, CaseIterable, Identifiable, Sendable {
     }
 }
 
+enum NaturalFoodPortionHeuristics {
+    static func preferredPortion(for food: Food) -> FoodPortion? {
+        let portions = food.availablePortions
+        guard !portions.isEmpty else { return nil }
+        let name = normalized(food.name)
+
+        if name.contains("butter"), !name.contains("buttermilk"), !name.contains("butterbur") {
+            return first(portions, matching: ["tablespoon", "tbsp"])
+                ?? first(portions, matching: ["pat"])
+        }
+
+        if isBeverage(name) {
+            return beveragePortion(from: portions)
+        }
+
+        if name.contains("rice") {
+            let cookedCups = portions.filter { label in
+                let value = normalized(label.label)
+                return value.contains("cup")
+                    && !value.contains("dry")
+                    && !value.contains("yield")
+            }
+            if let cookedCup = cookedCups.first(where: { normalized($0.label).contains("cooked") }) {
+                return cookedCup
+            }
+            if let cup = cookedCups.first { return cup }
+        }
+
+        if name.contains("chicken") || name.contains("poultry") {
+            if let piece = first(
+                portions,
+                matching: ["wing", "drumstick", "thigh", "breast", "tender", "nugget", "piece"]
+            ) {
+                return piece
+            }
+        }
+
+        if isWholeProduce(name),
+           let producePortion = first(
+               portions,
+               matching: ["item", "piece", "medium", "large", "small", "whole", "peeled"]
+           ) {
+            return producePortion
+        }
+
+        if let discrete = first(
+            portions,
+            matching: [
+                "item", "piece", "slice", "bar", "egg", "stick", "packet",
+                "package", "container", "fillet", "pat"
+            ]
+        ) {
+            return discrete
+        }
+
+        return first(portions, matching: ["serving"])
+    }
+
+    private static func beveragePortion(from portions: [FoodPortion]) -> FoodPortion? {
+        let candidates = portions.filter { portion in
+            let label = normalized(portion.label)
+            return label.contains("can") || label.contains("bottle") || label.contains("container")
+        }
+        return candidates.sorted { left, right in
+            beverageScore(left) > beverageScore(right)
+        }.first ?? first(portions, matching: ["serving"])
+    }
+
+    private static func beverageScore(_ portion: FoodPortion) -> Int {
+        let label = normalized(portion.label)
+        var score = 0
+        if label.hasPrefix("can") { score += 40 }
+        if label.contains("can or bottle") { score += 30 }
+        if label.hasPrefix("bottle") { score += 20 }
+        if label.contains("12 fl oz") || label.contains("12 oz") { score += 12 }
+        if label.contains("16 fl oz") || label.contains("16 oz") { score += 8 }
+        if label.contains("20 fl oz") || label.contains("20 oz") { score += 4 }
+        return score
+    }
+
+    private static func isBeverage(_ name: String) -> Bool {
+        ["beer", "soda", "soft drink", "cola", "root beer", "carbonated"].contains {
+            name.contains($0)
+        }
+    }
+
+    private static func isWholeProduce(_ name: String) -> Bool {
+        [
+            "apple", "banana", "orange", "pear", "peach", "plum", "avocado",
+            "potato", "onion", "tomato", "pepper"
+        ].contains { name.contains($0) }
+    }
+
+    private static func first(_ portions: [FoodPortion], matching terms: [String]) -> FoodPortion? {
+        portions.first { portion in
+            let label = normalized(portion.label)
+            return terms.contains { label == $0 || label.contains($0) }
+        }
+    }
+
+    private static func normalized(_ value: String) -> String {
+        value.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
 struct QuantityPreference: Codable, Hashable, Sendable {
     var amount: Double
     var unit: LogUnit
