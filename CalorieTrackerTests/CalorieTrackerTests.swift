@@ -3219,47 +3219,6 @@ extension CalorieTrackerTests {
         XCTAssertEqual(report.items.map(\.wholeOunces), [2])
     }
 
-    func testCustomFoodFileLoadsAndCreatesOneServingFood() throws {
-        let fileURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-            .appendingPathExtension("calfood")
-        let json = """
-        {
-          "format": "calorie-tracker-food",
-          "version": 1,
-          "name": "  Buffalo chicken salad  ",
-          "servingDescription": "whole bowl",
-          "servingGrams": 510,
-          "nutrition": {
-            "calories": 750,
-            "carbohydratesGrams": 32,
-            "fatGrams": 40,
-            "proteinGrams": 60,
-            "fiberGrams": 8
-          },
-          "notes": "  Dressing is the biggest uncertainty.  "
-        }
-        """
-        try Data(json.utf8).write(to: fileURL)
-
-        let importedFile = try CustomImportFile.load(from: fileURL)
-        guard case let .food(file) = importedFile else {
-            return XCTFail("Expected a food file")
-        }
-        let food = file.food.makeFood(sourceID: "import-test")
-
-        XCTAssertEqual(file.name, "Buffalo chicken salad")
-        XCTAssertEqual(file.notes, "Dressing is the biggest uncertainty.")
-        XCTAssertEqual(food.nutrients.calories, 750)
-        XCTAssertEqual(food.nutrients.carbs, 32)
-        XCTAssertEqual(food.nutrients.fat, 40)
-        XCTAssertEqual(food.nutrients.protein, 60)
-        XCTAssertEqual(food.nutrients.fiber, 8)
-        XCTAssertEqual(food.servingGrams, 510)
-        XCTAssertEqual(food.availablePortions.first?.label, "whole bowl")
-        XCTAssertEqual(food.nutrients(for: 1, unit: .serving, portionID: "imported-serving"), food.nutrients)
-    }
-
     @MainActor
     func testOneOffImportedFoodLogsWithoutSavingCustomFood() throws {
         let fileURL = temporaryDiaryURL()
@@ -3323,10 +3282,7 @@ extension CalorieTrackerTests {
         """
         try Data(json.utf8).write(to: fileURL)
 
-        let importedFile = try CustomImportFile.load(from: fileURL)
-        guard case let .meal(file) = importedFile else {
-            return XCTFail("Expected a meal file")
-        }
+        let file = try CustomImportFile.load(from: fileURL)
         let meal = file.makeMeal()
 
         XCTAssertEqual(meal.name, "Chicken and rice")
@@ -3448,15 +3404,39 @@ extension CalorieTrackerTests {
         XCTAssertEqual(store.recentItems, [.meal(importedMeal)])
     }
 
-    func testFoodAndMealFormatsRequireTheirMatchingExtensions() throws {
+    func testMealFormatRequiresCalmealExtension() throws {
         let fileURL = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
-            .appendingPathExtension("calmeal")
+            .appendingPathExtension("json")
+        let json = """
+        {
+          "format": "calorie-tracker-meal",
+          "version": 1,
+          "name": "Meal with wrong extension",
+          "foods": [{
+            "name": "Rice",
+            "servingDescription": "cup",
+            "servingGrams": 100,
+            "nutrition": { "calories": 100, "carbohydratesGrams": 10, "fatGrams": 2, "proteinGrams": 5 }
+          }]
+        }
+        """
+        try Data(json.utf8).write(to: fileURL)
+
+        XCTAssertThrowsError(try CustomImportFile.load(from: fileURL)) { error in
+            XCTAssertEqual(error as? CustomImportError, .extensionMismatch(expected: "calmeal"))
+        }
+    }
+
+    func testFormerCalfoodAttachmentIsRejectedAsUnsupported() throws {
+        let fileURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension("calfood")
         let json = """
         {
           "format": "calorie-tracker-food",
           "version": 1,
-          "name": "Food with wrong extension",
+          "name": "Former food",
           "servingDescription": "serving",
           "servingGrams": 100,
           "nutrition": {
@@ -3470,27 +3450,24 @@ extension CalorieTrackerTests {
         try Data(json.utf8).write(to: fileURL)
 
         XCTAssertThrowsError(try CustomImportFile.load(from: fileURL)) { error in
-            XCTAssertEqual(error as? CustomImportError, .extensionMismatch(expected: "calfood"))
+            XCTAssertEqual(error as? CustomImportError, .wrongFormat)
+            XCTAssertTrue(error.localizedDescription.contains(".calmeal"))
         }
     }
 
-    func testCustomFoodFileRejectsUnsupportedVersion() throws {
+    func testCustomMealFileRejectsUnsupportedVersion() throws {
         let fileURL = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
-            .appendingPathExtension("calfood")
+            .appendingPathExtension("calmeal")
         let json = """
         {
-          "format": "calorie-tracker-food",
+          "format": "calorie-tracker-meal",
           "version": 99,
-          "name": "Future food",
-          "servingDescription": "serving",
-          "servingGrams": 100,
-          "nutrition": {
-            "calories": 100,
-            "carbohydratesGrams": 10,
-            "fatGrams": 2,
-            "proteinGrams": 5
-          }
+          "name": "Future meal",
+          "foods": [{
+            "name": "Rice", "servingDescription": "cup", "servingGrams": 100,
+            "nutrition": { "calories": 100, "carbohydratesGrams": 10, "fatGrams": 2, "proteinGrams": 5 }
+          }]
         }
         """
         try Data(json.utf8).write(to: fileURL)
@@ -3498,6 +3475,48 @@ extension CalorieTrackerTests {
         XCTAssertThrowsError(try CustomImportFile.load(from: fileURL)) { error in
             XCTAssertEqual(error as? CustomImportError, .unsupportedVersion(99))
         }
+    }
+
+    func testSingleComponentMealLoadsAndCalculatesItsTotal() throws {
+        let fileURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension("calmeal")
+        let json = """
+        {
+          "format": "calorie-tracker-meal", "version": 1, "name": "Butter toast",
+          "foods": [{
+            "name": "Toast with butter", "servingDescription": "slice", "servingGrams": 45,
+            "nutrition": { "calories": 190, "carbohydratesGrams": 22, "fatGrams": 10, "proteinGrams": 5 }
+          }]
+        }
+        """
+        try Data(json.utf8).write(to: fileURL)
+
+        let meal = try CustomImportFile.load(from: fileURL).makeMeal()
+        XCTAssertEqual(meal.items.count, 1)
+        XCTAssertEqual(meal.items[0].food.name, "Toast with butter")
+        XCTAssertEqual(meal.nutrients, MacroNutrients(calories: 190, carbs: 22, fat: 10, protein: 5))
+    }
+
+    func testAssistantPromptRequestsCalorieMaterialAddedFatsAndAvoidsDoubleCounting() {
+        let prompt = CustomImportFile.assistantPrompt.lowercased()
+        XCTAssertTrue(prompt.contains("only supported import format"))
+        XCTAssertTrue(prompt.contains("butter or oil"))
+        XCTAssertTrue(prompt.contains("dressing or sauce"))
+        XCTAssertTrue(prompt.contains("never count it again"))
+        XCTAssertTrue(prompt.contains("collision-resistant uuid"))
+    }
+
+    func testAttachmentFilenameIsReadableUniqueAndKeepsCalmealExtension() {
+        let first = CustomImportFile.attachmentFilename(for: "Crème brûlée!!")
+        let second = CustomImportFile.attachmentFilename(for: "Crème brûlée!!")
+        let nonLatin = CustomImportFile.attachmentFilename(for: "東京 ラーメン")
+
+        XCTAssertTrue(first.hasPrefix("creme-brulee-"))
+        XCTAssertTrue(first.hasSuffix(".calmeal"))
+        XCTAssertNotEqual(first, second)
+        XCTAssertTrue(nonLatin.hasPrefix("東京-ラーメン-"))
+        XCTAssertTrue(nonLatin.hasSuffix(".calmeal"))
     }
 
     func testQuickLogRecentNameResolutionUsesMostRecentExactMatch() {

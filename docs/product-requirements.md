@@ -190,15 +190,18 @@
 - Light and dark appearances use adaptive backgrounds, elevated cards, primary
   and secondary text, control fills, source badges, macro colors, and action
   colors across Diary, Log Food, quantity editing, Settings, and Trends.
-- Yum Chase owns two versioned JSON formats: `.calfood` represents one
-  aggregate food and `.calmeal` represents a named list of food snapshots.
-  Opening either presents an editable review sheet before anything is saved.
-  Log records one serving on the current day; saving to Custom foods or Saved
-  meals is an explicit, off-by-default choice. Imported meals retain their
+- Yum Chase supports one versioned JSON import format: `.calmeal`, a named meal
+  with one or more food components (including one component for a simple food).
+  Opening it presents an editable review sheet before anything is saved. The
+  assistant prompt estimates plausible added butter, oils, dressings, and sauces
+  as distinct components when calorically material, with uncertainty and
+  double-counting guidance. Each generated attachment uses a fresh meal-name
+  slug and unique suffix. Log records one serving on the current day; saving to
+  Saved meals is an explicit, off-by-default choice. Imported meals retain their
   component snapshots for Recent and remain breakable into their foods without
   entering the hand-created Saved Meals catalog. Invalid, mismatched-extension,
-  oversized, and
-  unsupported-version files show an error and do not mutate the diary.
+  oversized, and unsupported-version files show an error and do not mutate the
+  diary. Former `.calfood` attachments are rejected as unsupported.
 - The icon-only Magic pill uses breakfast from 5–11 AM, lunch from 11 AM–3 PM,
   and dinner for the remaining hours in the device's local time. Repeated sets
   are promoted only when their members reliably co-occur; otherwise the most

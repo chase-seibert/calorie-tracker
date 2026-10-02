@@ -114,7 +114,7 @@ logging” can itself support a large consumer proposition.
 
 The strategic implication is not that every tracker needs to become an AI
 camera. It is that manual search cannot be the only obvious first-run path. This
-app's review-first `.calfood` and `.calmeal` import is a privacy-compatible bridge,
+app's review-first `.calmeal` import is a privacy-compatible bridge,
 but it is less discoverable than integrated photo entry and should be tested
 with real users before being treated as sufficient.
 

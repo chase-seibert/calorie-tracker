@@ -112,20 +112,21 @@ servings, and the bundled read-only catalog unchanged. Returning both tags to
 Automatic restores catalog resolution.
 
 Settings also links to AI Food & Meal Import instructions and one copyable,
-tool-neutral prompt. The prompt tells an assistant to create a `.calfood`
-attachment by default, representing the full pictured portion as one aggregate
-food. Only an explicit request for separate foods produces a `.calmeal`, which
-contains a named list of complete per-food serving and nutrition snapshots.
+tool-neutral prompt. It always requests a named `.calmeal` with one or more
+food components, including one component for a simple food. The prompt asks the
+assistant to estimate plausible cooking butter, oils, dressings, and sauces when
+calorically material, identify uncertainty, avoid double counting, and create a
+fresh meal-name slug plus unique suffix for each filename.
 
-Opening either attachment presents a native review sheet. Food imports expose
-editable name, serving description, serving weight, calories, carbohydrates,
-fat, protein, and notes. Meal imports expose the same fields for every food and
-show a calculated meal total. The primary Log action adds one serving to today.
-Saving to Custom foods or Saved meals is off by default. An imported meal is
-stored as an imported meal snapshot with its component foods, so it can appear
-in Recent, be logged again, inspected, rescaled, or broken apart without being
-added to the hand-created Saved Meals catalog. Files contain only structured
-estimates; no conversation URL or assistant account is shared.
+Opening a `.calmeal` presents the native meal review sheet. It exposes editable
+name, serving description, serving weight, calories, carbohydrates, fat, protein,
+and notes for every component and shows a calculated meal total. The primary Log
+action adds one serving to today. Saving to Saved meals is off by default. An
+imported meal is stored as an imported meal snapshot with its component foods,
+so it can appear in Recent, be logged again, inspected, rescaled, or broken
+apart without being added to the hand-created Saved Meals catalog. Former
+`.calfood` files are unsupported. Files contain only structured estimates; no
+conversation URL or assistant account is shared.
 
 The Trends toolbar links to a food-weight report that previews the last 90
 calendar days as foods sorted by exact total weight, displayed as whole ounces.

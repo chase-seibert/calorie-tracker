@@ -133,87 +133,6 @@ struct ReviewClassificationsView: View {
     }
 }
 
-struct CustomFoodImportView: View {
-    @EnvironmentObject private var diary: DiaryStore
-    @Environment(\.dismiss) private var dismiss
-
-    @State private var food: CustomFoodDefinition
-    @State private var saveForReuse = false
-
-    init(file: CustomFoodFile) {
-        _food = State(initialValue: file.food)
-    }
-
-    var body: some View {
-        NavigationStack {
-            Form {
-                Section("Food") {
-                    ImportedFoodFields(food: $food)
-                }
-
-                Section {
-                    Toggle("Save to Custom foods", isOn: $saveForReuse)
-                } footer: {
-                    Text(saveForReuse
-                        ? "The food will be logged today and remain available for reuse."
-                        : "The food will be logged today as a one-off and won’t clutter your Custom catalog.")
-                }
-
-            }
-            .scrollContentBackground(.hidden)
-            .background(AppTheme.background)
-            .navigationTitle("Review Imported Food")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Log", action: logFood)
-                        .disabled(!canLog)
-                }
-            }
-            .analyticsScreen("food_import_review")
-        }
-    }
-
-    private var canLog: Bool {
-        (try? food.validate()) != nil
-    }
-
-    private func logFood() {
-        diary.run {
-            guard canLog else { return }
-            let previousEntryCount = diary.entries(on: Date()).count
-            let loggedFood = try await diary.logImportedFood(
-                food.normalized().makeFood(),
-                saveForReuse: saveForReuse,
-                on: Date(),
-                allowCheatDay: true
-            )
-            if saveForReuse {
-                AppAnalytics.capture("custom_food.created", properties: ["origin": "file_import"])
-            }
-            if diary.entries(on: Date()).count > previousEntryCount {
-                AppAnalytics.capture(
-                    "food_log.completed",
-                    properties: FoodLogAnalytics.foodProperties(
-                        food: loggedFood,
-                        method: "file_import",
-                        mode: "import",
-                        unit: .serving,
-                        isFavorite: diary.isFavorite(loggedFood),
-                        foodKind: saveForReuse ? "imported" : "one_off",
-                        savedForReuse: saveForReuse
-                    )
-                )
-            }
-            dismiss()
-
-        }
-    }
-}
-
 struct CustomMealImportView: View {
     @EnvironmentObject private var diary: DiaryStore
     @Environment(\.dismiss) private var dismiss
@@ -349,12 +268,12 @@ struct CustomImportGuideView: View {
         List {
             Section {
                 step(1, "Send a food photo and any useful context to ChatGPT or another assistant.")
-                step(2, "Paste the prompt below. It creates a .calfood by default, or a .calmeal only when you explicitly request separate foods.")
+                step(2, "Paste the prompt below. It always creates one named .calmeal with one or more food components.")
                 step(3, "Open or share the attachment to Yum Chase, review the estimate, and tap Log.")
             } header: {
                 Text("How it works")
             } footer: {
-                Text("Only the small food or meal file is handed to Yum Chase. The app does not receive a chat link or access your conversation.")
+                Text("Only the small .calmeal file is handed to Yum Chase. The app does not receive a chat link or access your conversation.")
             }
 
             Section("Format prompt") {

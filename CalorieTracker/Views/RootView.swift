@@ -49,12 +49,7 @@ struct RootView: View {
                 handleOpenURL(url)
             }
             .sheet(item: $importRequest) { request in
-                switch request.file {
-                case .food(let file):
-                    CustomFoodImportView(file: file)
-                case .meal(let file):
-                    CustomMealImportView(file: file)
-                }
+                CustomMealImportView(file: request.file)
             }
             .alert(
                 "Couldn’t Import File",
@@ -101,11 +96,7 @@ struct RootView: View {
             let importedFile = try CustomImportFile.load(from: url)
             importRequest = ImportRequest(file: importedFile)
             importError = nil
-            let itemType: String = switch importedFile {
-            case .food: "food"
-            case .meal: "meal"
-            }
-            AppAnalytics.capture("import.opened", properties: ["item_type": itemType])
+            AppAnalytics.capture("import.opened", properties: ["item_type": "meal"])
         } catch {
             importRequest = nil
             importError = error.localizedDescription
@@ -129,7 +120,7 @@ struct RootView: View {
 
 private struct ImportRequest: Identifiable {
     let id = UUID()
-    let file: CustomImportFile
+    let file: CustomMealFile
 }
 
 private struct FirstTimeOnboardingView: View {
@@ -278,7 +269,7 @@ private struct HistoryImportOnboardingStep: View {
     let onContinue: () -> Void
 
     var body: some View {
-        OnboardingPage(icon: "arrow.down.doc", title: "Import history from another app", message: "If another app can export your foods or meals, Yum Chase can import them from a small .calfood or .calmeal file. Your data stays on this device.", analyticsName: "onboarding_history_import", onBack: onBack, onContinue: onContinue) {
+        OnboardingPage(icon: "arrow.down.doc", title: "Import food and meal estimates", message: "Import AI generated food and meal estimates as a .calmeal file. Your data stays on this device.", analyticsName: "onboarding_history_import", onBack: onBack, onContinue: onContinue) {
             HStack {
                 Spacer()
                 Button { showingImportGuide = true } label: { Label("Open import guide", systemImage: "book.pages") }

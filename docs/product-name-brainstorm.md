@@ -16,7 +16,7 @@ the rounded-corner mask.
 
 The Xcode project, targets, executable, source folders, bundle identifiers, App
 Group, widget kinds, existing `vitachase://` links, storage directories, HealthKit
-identifiers, and `.calfood`/`.calmeal` formats remain unchanged. This is a branding
+identifiers, and the `.calmeal` import format remains unchanged. This is a branding
 update, not a data migration or a new app installation. Physical-device deployment
 is a separate step; update the existing app without uninstalling it.
 

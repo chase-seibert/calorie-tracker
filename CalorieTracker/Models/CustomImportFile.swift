@@ -99,58 +99,6 @@ struct CustomFoodDefinition: Codable, Equatable, Sendable {
     }
 }
 
-struct CustomFoodFile: Codable, Equatable, Sendable {
-    static let formatIdentifier = "calorie-tracker-food"
-    static let currentVersion = 1
-
-    var format: String
-    var version: Int
-    var name: String
-    var servingDescription: String
-    var servingGrams: Double
-    var nutrition: CustomFoodDefinition.Nutrition
-    var notes: String?
-    var containsProcessedMeat: Bool? = nil
-    var containsRedMeat: Bool? = nil
-
-    var food: CustomFoodDefinition {
-        CustomFoodDefinition(
-            name: name,
-            servingDescription: servingDescription,
-            servingGrams: servingGrams,
-            nutrition: nutrition,
-            notes: notes,
-            containsProcessedMeat: containsProcessedMeat,
-            containsRedMeat: containsRedMeat
-        )
-    }
-
-    func validate() throws {
-        guard format == Self.formatIdentifier else {
-            throw CustomImportError.wrongFormat
-        }
-        guard version == Self.currentVersion else {
-            throw CustomImportError.unsupportedVersion(version)
-        }
-        try food.validate()
-    }
-
-    func normalized() -> CustomFoodFile {
-        let normalizedFood = food.normalized()
-        return CustomFoodFile(
-            format: format,
-            version: version,
-            name: normalizedFood.name,
-            servingDescription: normalizedFood.servingDescription,
-            servingGrams: normalizedFood.servingGrams,
-            nutrition: normalizedFood.nutrition,
-            notes: normalizedFood.notes,
-            containsProcessedMeat: normalizedFood.containsProcessedMeat,
-            containsRedMeat: normalizedFood.containsRedMeat
-        )
-    }
-}
-
 struct CustomMealFile: Codable, Equatable, Sendable {
     static let formatIdentifier = "calorie-tracker-meal"
     static let currentVersion = 1
@@ -211,47 +159,49 @@ struct CustomMealFile: Codable, Equatable, Sendable {
     }
 }
 
-enum CustomImportFile: Equatable, Sendable {
-    case food(CustomFoodFile)
-    case meal(CustomMealFile)
-
+enum CustomImportFile {
     static let maximumFileSize = 256 * 1_024
 
-    static let assistantPrompt = """
-    Analyze the pictured food manually and create exactly one downloadable Yum Chase JSON attachment.
-
-    DEFAULT DECISION RULE:
-    - Unless I explicitly ask for a meal file or ask you to separate the dish into a list of foods, create a .calfood file representing the entire pictured portion as one food.
-    - Only create a .calmeal file when I explicitly ask for a meal file or a list of separate foods.
-    - Never create both files.
-
-    Default .calfood format (name the attachment food.calfood):
-    {
-      "format": "calorie-tracker-food",
-      "version": 1,
-      "name": "Concise food name",
-      "servingDescription": "whole bowl",
-      "servingGrams": 500,
-      "nutrition": {
-        "calories": 750,
-        "carbohydratesGrams": 32,
-        "fatGrams": 40,
-        "proteinGrams": 60,
-        "fiberGrams": 8
-      },
-      "containsProcessedMeat": false,
-      "containsRedMeat": false,
-      "notes": "Short explanation of the estimate and biggest uncertainty"
+    static func attachmentFilename(
+        for mealName: String,
+        uniqueSuffix: String = UUID().uuidString.lowercased()
+    ) -> String {
+        let folded = mealName
+            .folding(options: [.diacriticInsensitive, .widthInsensitive], locale: Locale(identifier: "en_US_POSIX"))
+            .lowercased()
+        var slug = ""
+        var needsSeparator = false
+        for scalar in folded.unicodeScalars {
+            if CharacterSet.alphanumerics.contains(scalar) {
+                if needsSeparator, !slug.isEmpty { slug.append("-") }
+                slug.unicodeScalars.append(scalar)
+                needsSeparator = false
+            } else {
+                needsSeparator = true
+            }
+        }
+        let safeSlug = slug.isEmpty ? "meal" : slug
+        let safeSuffix = uniqueSuffix.unicodeScalars
+            .filter { CharacterSet.alphanumerics.contains($0) }
+            .map { String($0) }
+            .joined()
+        let suffix = safeSuffix.isEmpty ? UUID().uuidString.lowercased() : safeSuffix
+        return "\(safeSlug)-\(suffix).calmeal"
     }
 
-    Explicitly requested .calmeal format (name the attachment meal.calmeal):
+    static let assistantPrompt = """
+    Analyze the pictured food manually and create exactly one downloadable Yum Chase `.calmeal` JSON attachment. `.calmeal` is the only supported import format. Always represent the whole serving as one named meal with one or more food components; even a simple single food must be one meal containing one component. Never create a food-only file or multiple files.
+
+    Generate a fresh filename for every attachment from a normalized readable meal-name slug and a new collision-resistant UUID suffix, for example `chicken-and-rice-<fresh-uuid>.calmeal`. Lowercase the slug, replace runs of spaces or punctuation with hyphens, preserve readable letters and digits, and retain the `.calmeal` extension. Do not reuse a filename from an earlier estimate.
+
+    Use this version 1 format:
     {
       "format": "calorie-tracker-meal",
       "version": 1,
       "name": "Concise meal name",
       "foods": [
         {
-          "name": "First food",
+          "name": "First food or dish component",
           "servingDescription": "portion eaten",
           "servingGrams": 170,
           "nutrition": {
@@ -263,7 +213,7 @@ enum CustomImportFile: Equatable, Sendable {
           },
           "containsProcessedMeat": false,
           "containsRedMeat": false,
-          "notes": "Optional food-specific estimate note"
+          "notes": "Optional component-specific estimate note"
         },
         {
           "name": "Second food",
@@ -281,10 +231,10 @@ enum CustomImportFile: Equatable, Sendable {
       "notes": "Short explanation of the overall estimate and biggest uncertainty"
     }
 
-    Replace every example value with your estimate. Use numbers, not ranges. Estimate each serving weight even if uncertain. For a meal file, list meaningful constituent foods and include oils, dressings, or sauces when calorically material; do not add top-level nutrition because the app calculates totals from the foods. Set containsProcessedMeat to true for actual bacon, ham, sausage, or other processed meat; meatless substitutes are different foods. Red meat means unprocessed mammalian meat. Set each meat flag only when known; omit an uncertain flag instead of copying the example false. The app can resolve missing flags without replacing your nutrition estimate. Return the selected .calfood or .calmeal as a downloadable UTF-8 JSON attachment, not only as a code block.
+    Replace every example value with your estimate. Use numbers, not ranges. Estimate each serving weight even if uncertain. Split a meal into meaningful components and include one component even for a simple food. For dishes plausibly cooked with butter or oil or served with dressing or sauce, estimate the likely added amount and include a distinct component when it contributes material calories; do not add arbitrary fats when preparation does not support them. State uncertainty in the affected component's notes or meal notes. Make clear whether the component estimate already includes a fat or condiment, and never count it again in another component. Component nutrition must include only that component; do not add top-level nutrition because the app calculates meal totals from components. Set containsProcessedMeat to true for actual bacon, ham, sausage, or other processed meat; meatless substitutes are different foods. Red meat means unprocessed mammalian meat. Set each meat flag only when known; omit an uncertain flag instead of copying the example false. The app can resolve missing flags without replacing your nutrition estimate. Return the `.calmeal` as a downloadable UTF-8 JSON attachment, not only as a code block.
     """
 
-    static func load(from url: URL) throws -> CustomImportFile {
+    static func load(from url: URL) throws -> CustomMealFile {
         let data = try readData(from: url)
 
         struct Header: Decodable {
@@ -300,37 +250,20 @@ enum CustomImportFile: Equatable, Sendable {
             throw CustomImportError.invalidJSON
         }
 
-        let pathExtension = url.pathExtension.lowercased()
-        switch header.format {
-        case CustomFoodFile.formatIdentifier:
-            guard pathExtension == "calfood" else {
-                throw CustomImportError.extensionMismatch(expected: "calfood")
-            }
-            let file: CustomFoodFile
-            do {
-                file = try decoder.decode(CustomFoodFile.self, from: data)
-            } catch {
-                throw CustomImportError.invalidJSON
-            }
-            try file.validate()
-            return .food(file.normalized())
-
-        case CustomMealFile.formatIdentifier:
-            guard pathExtension == "calmeal" else {
-                throw CustomImportError.extensionMismatch(expected: "calmeal")
-            }
-            let file: CustomMealFile
-            do {
-                file = try decoder.decode(CustomMealFile.self, from: data)
-            } catch {
-                throw CustomImportError.invalidJSON
-            }
-            try file.validate()
-            return .meal(file.normalized())
-
-        default:
+        guard header.format == CustomMealFile.formatIdentifier else {
             throw CustomImportError.wrongFormat
         }
+        guard url.pathExtension.lowercased() == "calmeal" else {
+            throw CustomImportError.extensionMismatch(expected: "calmeal")
+        }
+        let file: CustomMealFile
+        do {
+            file = try decoder.decode(CustomMealFile.self, from: data)
+        } catch {
+            throw CustomImportError.invalidJSON
+        }
+        try file.validate()
+        return file.normalized()
     }
 
     private static func readData(from url: URL) throws -> Data {
@@ -372,7 +305,7 @@ enum CustomImportError: LocalizedError, Equatable {
         case .invalidJSON:
             "The file isn’t valid Yum Chase JSON."
         case .wrongFormat:
-            "This file is not a supported Yum Chase food or meal."
+            "This file is not a supported Yum Chase meal. Import a named meal as a .calmeal file."
         case let .unsupportedVersion(version):
             "Import file version \(version) isn’t supported by this version of the app."
         case let .extensionMismatch(expected):
