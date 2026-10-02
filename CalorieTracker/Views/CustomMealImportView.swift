@@ -159,7 +159,6 @@ struct CustomFoodImportView: View {
                         : "The food will be logged today as a one-off and won’t clutter your Custom catalog.")
                 }
 
-                loggingUnavailableSection
             }
             .scrollContentBackground(.hidden)
             .background(AppTheme.background)
@@ -178,25 +177,20 @@ struct CustomFoodImportView: View {
         }
     }
 
-    @ViewBuilder
-    private var loggingUnavailableSection: some View {
-        if !diary.canLogFood(on: Date()) {
-            Section {
-                Label("Food can’t be logged while today is marked as a cheat day.", systemImage: "exclamationmark.triangle")
-                    .foregroundStyle(.secondary)
-            }
-        }
-    }
-
     private var canLog: Bool {
-        (try? food.validate()) != nil && diary.canLogFood(on: Date())
+        (try? food.validate()) != nil
     }
 
     private func logFood() {
         diary.run {
             guard canLog else { return }
             let previousEntryCount = diary.entries(on: Date()).count
-            let loggedFood = try await diary.logImportedFood(food.normalized().makeFood(), saveForReuse: saveForReuse, on: Date())
+            let loggedFood = try await diary.logImportedFood(
+                food.normalized().makeFood(),
+                saveForReuse: saveForReuse,
+                on: Date(),
+                allowCheatDay: true
+            )
             if saveForReuse {
                 AppAnalytics.capture("custom_food.created", properties: ["origin": "file_import"])
             }
@@ -270,12 +264,6 @@ struct CustomMealImportView: View {
                         : "The meal will be logged today as a one-off. Its foods can still be inspected or broken apart from the diary entry.")
                 }
 
-                if !diary.canLogFood(on: Date()) {
-                    Section {
-                        Label("Food can’t be logged while today is marked as a cheat day.", systemImage: "exclamationmark.triangle")
-                            .foregroundStyle(.secondary)
-                    }
-                }
             }
             .scrollContentBackground(.hidden)
             .background(AppTheme.background)
@@ -309,7 +297,7 @@ struct CustomMealImportView: View {
     }
 
     private var canLog: Bool {
-        (try? reviewedFile.validate()) != nil && diary.canLogFood(on: Date())
+        (try? reviewedFile.validate()) != nil
     }
 
     private func nutrientTotal(_ title: String, _ value: Double, suffix: String = "") -> some View {
@@ -324,7 +312,11 @@ struct CustomMealImportView: View {
             guard canLog else { return }
             let importedMeal = reviewedFile.makeMeal()
             let previousEntryCount = diary.entries(on: Date()).count
-            let loggedMeal = try await diary.logImportedMeal(importedMeal, on: Date())
+            let loggedMeal = try await diary.logImportedMeal(
+                importedMeal,
+                on: Date(),
+                allowCheatDay: true
+            )
             if saveForReuse {
                 AppAnalytics.capture("meal.created", properties: [
                     "origin": "file_import", "item_count": String(importedMeal.items.count)

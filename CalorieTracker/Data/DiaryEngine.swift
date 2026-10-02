@@ -215,8 +215,13 @@ final class DiaryEngine {
         alcoholEntry(on: date)?.drinks ?? 0
     }
 
-    func setAlcohol(drinks: Int, type: AlcoholType?, on date: Date) {
-        guard canLogFood(on: date) else { return }
+    func setAlcohol(
+        drinks: Int,
+        type: AlcoholType?,
+        on date: Date,
+        allowCheatDay: Bool = false
+    ) {
+        guard allowCheatDay || canLogFood(on: date) else { return }
         let day = calendar.startOfDay(for: date)
         let previousEntry = alcoholEntry(on: day)
         let normalizedDrinks = max(drinks, 0)
@@ -410,8 +415,15 @@ final class DiaryEngine {
         }
     #endif
 
-    func log(_ food: Food, amount: Double, unit: LogUnit, portionID: String? = nil, on date: Date) {
-        guard canLogFood(on: date) else { return }
+    func log(
+        _ food: Food,
+        amount: Double,
+        unit: LogUnit,
+        portionID: String? = nil,
+        on date: Date,
+        allowCheatDay: Bool = false
+    ) {
+        guard allowCheatDay || canLogFood(on: date) else { return }
         clearAutomaticStatus(on: date)
         let clampedAmount = max(amount, 0.01)
         let current = document.customFoods.first { $0.id == food.id }
@@ -453,13 +465,14 @@ final class DiaryEngine {
         entryID: UUID,
         amount: Double,
         unit: LogUnit,
-        portionID: String? = nil
+        portionID: String? = nil,
+        allowCheatDay: Bool = false
     ) {
         guard
             let index = document.entries.firstIndex(where: { $0.id == entryID }),
             !document.entries[index].isMeal,
             !document.entries[index].isCheatDayAdjustment,
-            canLogFood(on: document.entries[index].date)
+            allowCheatDay || canLogFood(on: document.entries[index].date)
         else { return }
 
         let clampedAmount = max(amount, 0.01)
@@ -537,14 +550,15 @@ final class DiaryEngine {
         )
     }
 
-    func quickLog(_ food: Food, on date: Date) {
+    func quickLog(_ food: Food, on date: Date, allowCheatDay: Bool = false) {
         let preference = preference(for: food)
         log(
             food,
             amount: preference.amount,
             unit: preference.unit,
             portionID: preference.portionID,
-            on: date
+            on: date,
+            allowCheatDay: allowCheatDay
         )
     }
 
@@ -1045,9 +1059,14 @@ final class DiaryEngine {
         removeFavoriteOrder(for: "meal:\(meal.id.uuidString)")
     }
 
-    func logMeal(_ meal: SavedMeal, amount: Double = 1, on date: Date) {
+    func logMeal(
+        _ meal: SavedMeal,
+        amount: Double = 1,
+        on date: Date,
+        allowCheatDay: Bool = false
+    ) {
         let meal = document.meals.first { $0.id == meal.id } ?? meal
-        guard !meal.items.isEmpty, amount > 0, canLogFood(on: date) else { return }
+        guard !meal.items.isEmpty, amount > 0, allowCheatDay || canLogFood(on: date) else { return }
         clearAutomaticStatus(on: date)
         let entry = makeMealEntry(
             for: meal,
@@ -1073,12 +1092,12 @@ final class DiaryEngine {
         document.entries.append(entry)
     }
 
-    func updateMealEntry(entryID: UUID, amount: Double) {
+    func updateMealEntry(entryID: UUID, amount: Double, allowCheatDay: Bool = false) {
         guard
             let index = document.entries.firstIndex(where: { $0.id == entryID }),
             document.entries[index].isMeal,
             amount > 0,
-            canLogFood(on: document.entries[index].date)
+            allowCheatDay || canLogFood(on: document.entries[index].date)
         else { return }
 
         let entry = document.entries[index]
@@ -1123,7 +1142,12 @@ final class DiaryEngine {
     /// Updates the ingredients for one logged meal without changing the saved meal template.
     /// The logged entry becomes a snapshot so later edits to the saved meal do not overwrite
     /// this intentional per-entry adjustment.
-    func updateMealEntry(entryID: UUID, amount: Double, items: [MealItem]) {
+    func updateMealEntry(
+        entryID: UUID,
+        amount: Double,
+        items: [MealItem],
+        allowCheatDay: Bool = false
+    ) {
         let items = resolvedItems(items)
         guard
             let index = document.entries.firstIndex(where: { $0.id == entryID }),
@@ -1131,7 +1155,7 @@ final class DiaryEngine {
             amount > 0,
             !items.isEmpty,
             items.allSatisfy({ $0.amount.isFinite && $0.amount > 0 }),
-            canLogFood(on: document.entries[index].date)
+            allowCheatDay || canLogFood(on: document.entries[index].date)
         else { return }
 
         let clampedAmount = max(amount, 0.01)
@@ -1866,22 +1890,34 @@ final class DiaryEngine {
         }
     }
 
-    func logImportedFood(_ food: Food, saveForReuse: Bool, on date: Date) throws -> Food {
-        guard canLogFood(on: date) else { throw DiaryDatabaseError.invalidData("Food logging is disabled for this day.") }
+    func logImportedFood(
+        _ food: Food,
+        saveForReuse: Bool,
+        on date: Date,
+        allowCheatDay: Bool = false
+    ) throws -> Food {
+        guard allowCheatDay || canLogFood(on: date) else { throw DiaryDatabaseError.invalidData("Food logging is disabled for this day.") }
         let food = FoodResolver(catalog: catalog).resolve(food)
         if saveForReuse { document.customFoods.insert(food, at: 0) }
-        log(food, amount: 1, unit: .serving, portionID: food.availablePortions.first?.id, on: date)
+        log(
+            food,
+            amount: 1,
+            unit: .serving,
+            portionID: food.availablePortions.first?.id,
+            on: date,
+            allowCheatDay: allowCheatDay
+        )
         return food
     }
 
-    func logImportedMeal(_ meal: SavedMeal, on date: Date) throws -> SavedMeal {
-        guard canLogFood(on: date), !meal.items.isEmpty else {
+    func logImportedMeal(_ meal: SavedMeal, on date: Date, allowCheatDay: Bool = false) throws -> SavedMeal {
+        guard (allowCheatDay || canLogFood(on: date)), !meal.items.isEmpty else {
             throw DiaryDatabaseError.invalidData("The meal cannot be logged on this day.")
         }
         var resolved = meal
         resolved.items = resolvedItems(meal.items)
         document.meals.insert(resolved, at: 0)
-        logMeal(resolved, on: date)
+        logMeal(resolved, on: date, allowCheatDay: allowCheatDay)
         return resolved
     }
 

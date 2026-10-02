@@ -19,6 +19,12 @@ enum SharedDiaryStorage {
     static let appGroupIdentifier = "group.com.cseibert.CalorieTracker"
     static let widgetKind = "VitaChaseQuickLog"
     static let caloriesWidgetKind = "VitaChaseCaloriesLeft"
+    private static let diagnosticsFileNames = [
+        "diary-performance.jsonl",
+        "diary-performance.jsonl.1",
+        "siri-quick-log.jsonl",
+        "siri-quick-log.jsonl.1"
+    ]
 
     static var hasSharedContainer: Bool {
         FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier) != nil
@@ -44,6 +50,34 @@ enum SharedDiaryStorage {
         #endif
         return root.appendingPathComponent("CalorieTracker", isDirectory: true)
             .appendingPathComponent("Diary.sqlite")
+    }
+
+    static func diagnosticsDirectoryURL(fileManager: FileManager = .default) -> URL {
+        let root = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier)
+            ?? fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        return root.appendingPathComponent("Library/Diagnostics", isDirectory: true)
+    }
+
+    static func migrateLegacyDiagnostics(fileManager: FileManager = .default) {
+        let destination = diagnosticsDirectoryURL(fileManager: fileManager)
+        let legacy = defaultFileURL(fileManager: fileManager)
+            .deletingLastPathComponent()
+            .appendingPathComponent("Diagnostics", isDirectory: true)
+        guard destination.standardizedFileURL != legacy.standardizedFileURL,
+              fileManager.fileExists(atPath: legacy.path) else { return }
+
+        do {
+            try fileManager.createDirectory(at: destination, withIntermediateDirectories: true)
+            for name in diagnosticsFileNames {
+                let source = legacy.appendingPathComponent(name)
+                let target = destination.appendingPathComponent(name)
+                guard fileManager.fileExists(atPath: source.path),
+                      !fileManager.fileExists(atPath: target.path) else { continue }
+                try fileManager.copyItem(at: source, to: target)
+            }
+        } catch {
+            // Diagnostics migration must never interrupt diary actions.
+        }
     }
 
     #if DEBUG && targetEnvironment(simulator)

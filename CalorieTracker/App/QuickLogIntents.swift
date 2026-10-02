@@ -7,8 +7,8 @@ private enum SiriQuickLogDiagnostics {
     private static let fileName = "siri-quick-log.jsonl"
 
     static func record(_ event: String, properties: [String: String] = [:]) {
-        let root = SharedDiaryStorage.defaultFileURL().deletingLastPathComponent()
-            .appendingPathComponent("Diagnostics", isDirectory: true)
+        SharedDiaryStorage.migrateLegacyDiagnostics()
+        let root = SharedDiaryStorage.diagnosticsDirectoryURL()
         let file = root.appendingPathComponent(fileName)
         let entry: [String: Any] = [
             "event": event,

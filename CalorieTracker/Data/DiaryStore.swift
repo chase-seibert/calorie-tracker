@@ -11,6 +11,92 @@ struct DiaryDatabaseBackup: Identifiable, Sendable {
 }
 #endif
 
+enum DiaryPerformanceDiagnostics {
+    private static let maximumLogBytes = 512 * 1024
+    private static let fileName = "diary-performance.jsonl"
+
+    static func newOperationID() -> String {
+        UUID().uuidString
+    }
+
+    static func monotonicTimestamp() -> UInt64 {
+        DispatchTime.now().uptimeNanoseconds
+    }
+
+    static func elapsedMilliseconds(since timestamp: UInt64) -> Double {
+        Double(DispatchTime.now().uptimeNanoseconds - timestamp) / 1_000_000
+    }
+
+    static func record(
+        _ event: String,
+        operationID: String? = nil,
+        properties: [String: String] = [:]
+    ) {
+        SharedDiaryStorage.migrateLegacyDiagnostics()
+        let root = SharedDiaryStorage.diagnosticsDirectoryURL()
+        let file = root.appendingPathComponent(fileName)
+        var boundedProperties = properties.mapValues { String($0.prefix(256)) }
+        if let operationID {
+            boundedProperties["operation_id"] = String(operationID.prefix(128))
+        }
+        let entry: [String: Any] = [
+            "event": event,
+            "occurred_at": ISO8601DateFormatter().string(from: Date()),
+            "properties": boundedProperties
+        ]
+        guard JSONSerialization.isValidJSONObject(entry),
+              let data = try? JSONSerialization.data(withJSONObject: entry, options: [.sortedKeys]) else { return }
+
+        let manager = FileManager.default
+        do {
+            try manager.createDirectory(at: root, withIntermediateDirectories: true)
+            try manager.setAttributes([.posixPermissions: 0o700], ofItemAtPath: root.path)
+            if let attributes = try? manager.attributesOfItem(atPath: file.path),
+               let size = attributes[.size] as? NSNumber, size.intValue >= maximumLogBytes {
+                let rotated = root.appendingPathComponent(fileName + ".1")
+                try? manager.removeItem(at: rotated)
+                try manager.moveItem(at: file, to: rotated)
+            }
+            if !manager.fileExists(atPath: file.path) {
+                try Data().write(to: file, options: .atomic)
+            }
+            let handle = try FileHandle(forWritingTo: file)
+            defer { try? handle.close() }
+            try handle.seekToEnd()
+            try handle.write(contentsOf: data + Data([0x0A]))
+            try? manager.setAttributes(
+                [.posixPermissions: 0o600, .protectionKey: FileProtectionType.completeUntilFirstUserAuthentication],
+                ofItemAtPath: file.path
+            )
+        } catch {
+            // Diagnostics must never interrupt diary actions.
+        }
+    }
+}
+
+private struct TimedDiaryOperation: Sendable {
+    let name: String
+    let id: String
+    let startedAt: UInt64
+
+    init(name: String, id: String? = nil) {
+        self.name = name
+        self.id = id ?? DiaryPerformanceDiagnostics.newOperationID()
+        startedAt = DispatchTime.now().uptimeNanoseconds
+    }
+
+    func record(_ event: String, properties: [String: String] = [:]) {
+        var properties = properties
+        properties["operation"] = name
+        properties["elapsed_ms"] = String(format: "%.1f", elapsedMilliseconds)
+        DiaryPerformanceDiagnostics.record(event, operationID: id, properties: properties)
+    }
+
+    var elapsedMilliseconds: Double {
+        Double(DispatchTime.now().uptimeNanoseconds - startedAt) / 1_000_000
+    }
+}
+
 /// Main-actor presentation cache. Mutations execute against current SQLite state off the main thread.
 @MainActor
 class DiaryStore: ObservableObject {
@@ -39,6 +125,7 @@ class DiaryStore: ObservableObject {
         fileURL: URL? = nil, calendar: Calendar = .current, catalog: CatalogStore? = nil,
         healthKit: HealthKitStore? = nil, referenceDate: Date = Date(), usesWindow: Bool = true
     ) {
+        SharedDiaryStorage.migrateLegacyDiagnostics()
         self.fileURL = fileURL ?? SharedDiaryStorage.defaultFileURL()
         self.calendar = calendar
         self.catalog = catalog
@@ -109,16 +196,36 @@ class DiaryStore: ObservableObject {
         }
     }
 
-    private func refresh(_ repository: DiaryRepository, referenceDate: Date) async throws {
+    private func refresh(
+        _ repository: DiaryRepository,
+        referenceDate: Date,
+        operation: TimedDiaryOperation? = nil
+    ) async throws {
+        operation?.record("refresh_started")
         refreshGeneration += 1
         let generation = refreshGeneration
+        operation?.record("snapshot_started")
         let snapshot = try await repository.snapshot(scope: scope(at: referenceDate))
-        guard generation == refreshGeneration else { return }
+        operation?.record("snapshot_finished", properties: [
+            "entry_count": String(snapshot.document.entries.count),
+            "meal_count": String(snapshot.document.meals.count)
+        ])
+        guard generation == refreshGeneration else {
+            operation?.record("refresh_discarded_as_stale")
+            return
+        }
         publish(snapshot.document)
+        operation?.record("snapshot_published")
+        operation?.record("streak_started")
         let streak = try await repository.streak(referenceDate: referenceDate)
-        guard generation == refreshGeneration else { return }
+        operation?.record("streak_finished")
+        guard generation == refreshGeneration else {
+            operation?.record("streak_discarded_as_stale")
+            return
+        }
         currentStreak = streak
         isLoading = false
+        operation?.record("refresh_finished")
     }
 
     private func publish(_ document: DiaryDocument) {
@@ -128,20 +235,67 @@ class DiaryStore: ObservableObject {
     }
 
     /// UI actions await commit before dismissal or success analytics. Errors stay visible at the root.
-    func run(_ action: @escaping @MainActor () async throws -> Void) {
+    func run(
+        operation: String? = nil,
+        operationID: String? = nil,
+        _ action: @escaping @MainActor () async throws -> Void
+    ) {
         let previous = actionTask
         pendingActions += 1
         isSaving = true
+        let queuedAt = DispatchTime.now().uptimeNanoseconds
+        if let operation {
+            DiaryPerformanceDiagnostics.record(
+                "action_queued",
+                operationID: operationID,
+                properties: [
+                    "operation": operation,
+                    "pending_actions": String(pendingActions),
+                    "queued_behind_previous": String(previous != nil)
+                ]
+            )
+        }
         actionTask = Task {
             await previous?.value
+            if let operation {
+                DiaryPerformanceDiagnostics.record(
+                    "action_started",
+                    operationID: operationID,
+                    properties: [
+                        "operation": operation,
+                        "queue_wait_ms": String(format: "%.1f", Double(DispatchTime.now().uptimeNanoseconds - queuedAt) / 1_000_000)
+                    ]
+                )
+            }
             defer {
                 pendingActions -= 1
                 isSaving = pendingActions > 0
             }
             do {
                 try await action()
+                if let operation {
+                    DiaryPerformanceDiagnostics.record(
+                        "action_completed",
+                        operationID: operationID,
+                        properties: [
+                            "operation": operation,
+                            "total_action_ms": String(format: "%.1f", Double(DispatchTime.now().uptimeNanoseconds - queuedAt) / 1_000_000)
+                        ]
+                    )
+                }
                 lastSaveError = nil
             } catch {
+                if let operation {
+                    DiaryPerformanceDiagnostics.record(
+                        "action_failed",
+                        operationID: operationID,
+                        properties: [
+                            "operation": operation,
+                            "total_action_ms": String(format: "%.1f", Double(DispatchTime.now().uptimeNanoseconds - queuedAt) / 1_000_000),
+                            "error_type": String(describing: type(of: error))
+                        ]
+                    )
+                }
                 lastSaveError = error.localizedDescription
             }
         }
@@ -149,16 +303,33 @@ class DiaryStore: ObservableObject {
 
     func dismissSaveError() { lastSaveError = nil }
 
-    private func perform<T: Sendable>(scope: DiaryScope, _ action: @escaping @Sendable (DiaryEngine) throws -> T)
-        async throws -> T
-    {
-        let repository = try await open()
-        let result = try await repository.perform(scope: scope, action)
-        SharedDiaryStorage.reloadWidget()
-        startHealthSync()
-        do { try await refresh(repository, referenceDate: Date()) }
-        catch { throw DiaryDatabaseError.savedButRefreshFailed(error.localizedDescription) }
-        return result
+    private func perform<T: Sendable>(
+        scope: DiaryScope,
+        operation: TimedDiaryOperation? = nil,
+        _ action: @escaping @Sendable (DiaryEngine) throws -> T
+    ) async throws -> T {
+        do {
+            operation?.record("store_open_started")
+            let repository = try await open()
+            operation?.record("store_open_finished")
+            operation?.record("database_mutation_started")
+            let result = try await repository.perform(scope: scope, action)
+            operation?.record("database_mutation_finished")
+            SharedDiaryStorage.reloadWidget()
+            operation?.record("widget_reload_requested")
+            startHealthSync(operation: operation)
+            do {
+                try await refresh(repository, referenceDate: Date(), operation: operation)
+            } catch {
+                operation?.record("refresh_failed", properties: ["error_type": String(describing: type(of: error))])
+                throw DiaryDatabaseError.savedButRefreshFailed(error.localizedDescription)
+            }
+            operation?.record("store_action_completed")
+            return result
+        } catch {
+            operation?.record("store_action_failed", properties: ["error_type": String(describing: type(of: error))])
+            throw error
+        }
     }
 
     func syncAllHealthData() async {
@@ -169,18 +340,43 @@ class DiaryStore: ObservableObject {
         } catch { lastSaveError = error.localizedDescription }
     }
 
-    func startHealthSync() {
-        guard healthTask == nil, let repository, let healthKit,
-            healthKit.authorizationState == .authorized
-        else { return }
+    private func startHealthSync(operation: TimedDiaryOperation? = nil) {
+        guard healthTask == nil else {
+            operation?.record("health_sync_already_running")
+            return
+        }
+        guard let repository else {
+            operation?.record("health_sync_skipped", properties: ["reason": "repository_unavailable"])
+            return
+        }
+        guard let healthKit else {
+            operation?.record("health_sync_skipped", properties: ["reason": "healthkit_unavailable"])
+            return
+        }
+        guard healthKit.authorizationState == .authorized else {
+            operation?.record("health_sync_skipped", properties: ["reason": "not_authorized"])
+            return
+        }
+        operation?.record("health_sync_scheduled")
         healthTask = Task {
-            defer { healthTask = nil }
+            operation?.record("health_sync_started")
+            var workIndex = 0
+            defer {
+                healthTask = nil
+                operation?.record("health_sync_finished", properties: ["work_count": String(workIndex)])
+            }
             do {
                 while !Task.isCancelled, let work = try await repository.nextHealthWork() {
+                    workIndex += 1
+                    operation?.record("health_sync_work_started", properties: ["work_index": String(workIndex)])
                     guard await healthKit.apply(work) else { return }
                     try await repository.acknowledgeHealthWork(work)
+                    operation?.record("health_sync_work_finished", properties: ["work_index": String(workIndex)])
                 }
-            } catch { lastSaveError = error.localizedDescription }
+            } catch {
+                operation?.record("health_sync_failed", properties: ["error_type": String(describing: type(of: error))])
+                lastSaveError = error.localizedDescription
+            }
         }
     }
 
@@ -387,8 +583,15 @@ class DiaryStore: ObservableObject {
         engine.alcoholDrinkCount(on: date)
     }
 
-    func setAlcohol(drinks: Int, type: AlcoholType?, on date: Date) async throws {
-        try await perform(scope: .day(date)) { $0.setAlcohol(drinks: drinks, type: type, on: date) }
+    func setAlcohol(
+        drinks: Int,
+        type: AlcoholType?,
+        on date: Date,
+        allowCheatDay: Bool = false
+    ) async throws {
+        try await perform(scope: .day(date)) {
+            $0.setAlcohol(drinks: drinks, type: type, on: date, allowCheatDay: allowCheatDay)
+        }
     }
 
     func foodWeightReport(referenceDate: Date = Date()) -> FoodWeightReport {
@@ -411,16 +614,30 @@ class DiaryStore: ObservableObject {
         try await perform(scope: .all) { $0.setDailyCalorieGoal(goal) }
     }
 
-    func markCheatDay(on date: Date, adjustmentCalories: Int? = nil) async throws {
-        try await perform(scope: .day(date)) { $0.markCheatDay(on: date, adjustmentCalories: adjustmentCalories) }
+    func markCheatDay(
+        on date: Date,
+        adjustmentCalories: Int? = nil,
+        diagnosticsID: String? = nil
+    ) async throws {
+        try await perform(
+            scope: .day(date),
+            operation: TimedDiaryOperation(name: "cheat_day_mark", id: diagnosticsID)
+        ) { $0.markCheatDay(on: date, adjustmentCalories: adjustmentCalories) }
     }
 
     func setCalorieAdjustment(_ calories: Int?, on date: Date) async throws {
         try await perform(scope: .day(date)) { $0.setCalorieAdjustment(calories, on: date) }
     }
 
-    func undoCheatDay(on date: Date, preservingCalorieAdjustment: Bool = false) async throws {
-        try await perform(scope: .day(date)) {
+    func undoCheatDay(
+        on date: Date,
+        preservingCalorieAdjustment: Bool = false,
+        diagnosticsID: String? = nil
+    ) async throws {
+        try await perform(
+            scope: .day(date),
+            operation: TimedDiaryOperation(name: "cheat_day_clear", id: diagnosticsID)
+        ) {
             $0.undoCheatDay(on: date, preservingCalorieAdjustment: preservingCalorieAdjustment)
         }
     }
@@ -441,9 +658,23 @@ class DiaryStore: ObservableObject {
         }
 
     #endif
-    func log(_ food: Food, amount: Double, unit: LogUnit, portionID: String? = nil, on date: Date) async throws {
+    func log(
+        _ food: Food,
+        amount: Double,
+        unit: LogUnit,
+        portionID: String? = nil,
+        on date: Date,
+        allowCheatDay: Bool = false
+    ) async throws {
         try await perform(scope: .day(date)) {
-            $0.log(food, amount: amount, unit: unit, portionID: portionID, on: date)
+            $0.log(
+                food,
+                amount: amount,
+                unit: unit,
+                portionID: portionID,
+                on: date,
+                allowCheatDay: allowCheatDay
+            )
         }
     }
 
@@ -459,10 +690,17 @@ class DiaryStore: ObservableObject {
         entryID: UUID,
         amount: Double,
         unit: LogUnit,
-        portionID: String? = nil
+        portionID: String? = nil,
+        allowCheatDay: Bool = false
     ) async throws {
         try await perform(scope: .entries([entryID])) {
-            $0.updateEntry(entryID: entryID, amount: amount, unit: unit, portionID: portionID)
+            $0.updateEntry(
+                entryID: entryID,
+                amount: amount,
+                unit: unit,
+                portionID: portionID,
+                allowCheatDay: allowCheatDay
+            )
         }
     }
 
@@ -493,8 +731,8 @@ class DiaryStore: ObservableObject {
         try await perform(scope: .library) { $0.rememberPreference(preference, for: food) }
     }
 
-    func quickLog(_ food: Food, on date: Date) async throws {
-        try await perform(scope: .day(date)) { $0.quickLog(food, on: date) }
+    func quickLog(_ food: Food, on date: Date, allowCheatDay: Bool = false) async throws {
+        try await perform(scope: .day(date)) { $0.quickLog(food, on: date, allowCheatDay: allowCheatDay) }
     }
 
     @discardableResult
@@ -635,16 +873,37 @@ class DiaryStore: ObservableObject {
         try await perform(scope: .library) { $0.deleteMeal(meal) }
     }
 
-    func logMeal(_ meal: SavedMeal, amount: Double = 1, on date: Date) async throws {
-        try await perform(scope: .day(date)) { $0.logMeal(meal, amount: amount, on: date) }
+    func logMeal(
+        _ meal: SavedMeal,
+        amount: Double = 1,
+        on date: Date,
+        allowCheatDay: Bool = false
+    ) async throws {
+        try await perform(scope: .day(date)) {
+            $0.logMeal(meal, amount: amount, on: date, allowCheatDay: allowCheatDay)
+        }
     }
 
-    func logImportedFood(_ food: Food, saveForReuse: Bool, on date: Date) async throws -> Food {
-        try await perform(scope: .day(date)) { try $0.logImportedFood(food, saveForReuse: saveForReuse, on: date) }
+    func logImportedFood(
+        _ food: Food,
+        saveForReuse: Bool,
+        on date: Date,
+        allowCheatDay: Bool = false
+    ) async throws -> Food {
+        try await perform(scope: .day(date)) {
+            try $0.logImportedFood(
+                food,
+                saveForReuse: saveForReuse,
+                on: date,
+                allowCheatDay: allowCheatDay
+            )
+        }
     }
 
-    func logImportedMeal(_ meal: SavedMeal, on date: Date) async throws -> SavedMeal {
-        try await perform(scope: .day(date)) { try $0.logImportedMeal(meal, on: date) }
+    func logImportedMeal(_ meal: SavedMeal, on date: Date, allowCheatDay: Bool = false) async throws -> SavedMeal {
+        try await perform(scope: .day(date)) {
+            try $0.logImportedMeal(meal, on: date, allowCheatDay: allowCheatDay)
+        }
     }
 
     func suggestedMeatClassification(name: String) async -> Food {
@@ -693,13 +952,25 @@ class DiaryStore: ObservableObject {
         try await perform(scope: .day(date)) { $0.logOneOffMeal(meal, amount: amount, on: date) }
     }
 
-    func updateMealEntry(entryID: UUID, amount: Double) async throws {
-        try await perform(scope: .entries([entryID])) { $0.updateMealEntry(entryID: entryID, amount: amount) }
+    func updateMealEntry(entryID: UUID, amount: Double, allowCheatDay: Bool = false) async throws {
+        try await perform(scope: .entries([entryID])) {
+            $0.updateMealEntry(entryID: entryID, amount: amount, allowCheatDay: allowCheatDay)
+        }
     }
 
-    func updateMealEntry(entryID: UUID, amount: Double, items: [MealItem]) async throws {
+    func updateMealEntry(
+        entryID: UUID,
+        amount: Double,
+        items: [MealItem],
+        allowCheatDay: Bool = false
+    ) async throws {
         try await perform(scope: .entries([entryID])) {
-            $0.updateMealEntry(entryID: entryID, amount: amount, items: items)
+            $0.updateMealEntry(
+                entryID: entryID,
+                amount: amount,
+                items: items,
+                allowCheatDay: allowCheatDay
+            )
         }
     }
 

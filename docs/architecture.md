@@ -87,6 +87,10 @@ adjustment remains a separate diary entry. Its standard UI is limited to cheat
 days; a DEBUG-only `UserDefaults` experiment can show the quick-calorie controls
 on every day and preserve the adjustment when cheat status is removed.
 
+Manual food and alcohol actions remain available on cheat days, including entries
+from the food picker, saved meals, quantity editing, and file imports. Automated
+quick-log and Siri actions continue to respect the cheat-day logging guard.
+
 Cheat days without a calorie adjustment preserve their local food entries
 but replace this app's HealthKit samples for that date with zero-valued nutrition
 samples. Cheat days with an adjustment sync their logged entries plus the
@@ -249,6 +253,17 @@ prepared, uploading, retry-scheduled, uploaded, rejected, expired, or stopped
 state. Selecting an event opens its canonical event payload, including event
 properties. Request headers, signatures, and configuration secrets are never
 shown.
+
+Cheat-day mark and clear actions also append bounded, file-protected timing
+records to `Library/Diagnostics/diary-performance.jsonl` in the shared app
+group. The standard app-group location also allows `devicectl` to export the
+file from a connected phone. Those records identify the
+confirmation, action queue, SQLite mutation, widget request, HealthKit work,
+snapshot refresh, streak calculation, popover appearance and dismissal, saving
+state changes, the published cheat-day state, and any failure without including
+diary content or exact dates. The UI records share an operation ID with the
+store timings, so a future reproduction can distinguish an input-recognition
+delay, a popover-dismissal delay, and a slow SwiftUI update.
 
 The broader product event catalog is documented in
 [`analytics-events.md`](analytics-events.md). Feature-usage events carry only

@@ -2655,6 +2655,33 @@ extension CalorieTrackerTests {
     }
 
     @MainActor
+    func testExplicitFoodAndAlcoholLoggingWorksOnCheatDay() {
+        let day = testDate(day: 1)
+        let store = TestDiaryStore(
+            document: DiaryDocument(),
+            fileURL: temporaryDiaryURL(),
+            calendar: testCalendar,
+            referenceDate: day
+        )
+        let food = testFood(calories: 250, name: "Manual dinner")
+        store.markCheatDay(on: day)
+
+        store.log(
+            food,
+            amount: 1,
+            unit: .serving,
+            portionID: "serving",
+            on: day,
+            allowCheatDay: true
+        )
+        store.setAlcohol(drinks: 1, type: .beer, on: day, allowCheatDay: true)
+
+        XCTAssertEqual(store.entries(on: day).filter { !$0.isCheatDayAdjustment }.count, 1)
+        XCTAssertEqual(store.alcoholDrinkCount(on: day), 1)
+        XCTAssertEqual(store.status(on: day)?.kind, .cheat)
+    }
+
+    @MainActor
     func testAlcoholQuickEntryUsesDefaultCaloriesAndPersists() throws {
         let day = testDate(day: 1)
         let fileURL = temporaryDiaryURL()
@@ -3533,8 +3560,15 @@ private final class TestDiaryStore: DiaryStore {
         try! DiaryRepository(fileURL: url, calendar: calendar).importDocument(DiaryEngine.backfilledFoodMetadata(in: document, catalog: catalog))
         try! loadTestFixture(referenceDate: referenceDate)
     }
-    func setAlcohol(drinks: Int, type: AlcoholType?, on date: Date) {
-        try! performTestMutation(scope: .day(date)) { $0.setAlcohol(drinks: drinks, type: type, on: date) }
+    func setAlcohol(
+        drinks: Int,
+        type: AlcoholType?,
+        on date: Date,
+        allowCheatDay: Bool = false
+    ) {
+        try! performTestMutation(scope: .day(date)) {
+            $0.setAlcohol(drinks: drinks, type: type, on: date, allowCheatDay: allowCheatDay)
+        }
     }
     func setDailyCalorieGoal(_ goal: Int?) {
         try! performTestMutation(scope: .all) { $0.setDailyCalorieGoal(goal) }
@@ -3556,8 +3590,24 @@ private final class TestDiaryStore: DiaryStore {
         try! performTestMutation(scope: .window(reference: referenceDate, selectedDay: nil)) { $0.seedSpecialDaysForScreenshots(referenceDate: referenceDate) }
     }
 #endif
-    func log(_ food: Food, amount: Double, unit: LogUnit, portionID: String? = nil, on date: Date) {
-        try! performTestMutation(scope: .day(date)) { $0.log(food, amount: amount, unit: unit, portionID: portionID, on: date) }
+    func log(
+        _ food: Food,
+        amount: Double,
+        unit: LogUnit,
+        portionID: String? = nil,
+        on date: Date,
+        allowCheatDay: Bool = false
+    ) {
+        try! performTestMutation(scope: .day(date)) {
+            $0.log(
+                food,
+                amount: amount,
+                unit: unit,
+                portionID: portionID,
+                on: date,
+                allowCheatDay: allowCheatDay
+            )
+        }
     }
     func delete(entryID: UUID) {
         try! performTestMutation(scope: .entries([entryID])) { $0.delete(entryID: entryID) }

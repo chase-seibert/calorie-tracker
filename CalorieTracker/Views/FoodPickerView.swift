@@ -180,7 +180,8 @@ struct FoodPickerView: View {
                                 amount: 1,
                                 unit: .serving,
                                 portionID: "custom-serving",
-                                on: date
+                                on: date,
+                                allowCheatDay: true
                             )
                             if diary.entries(on: date).count > previousEntryCount {
                                 captureFoodLog(
@@ -274,7 +275,7 @@ struct FoodPickerView: View {
             markCurrentSearchLogged()
             let preference = diary.preference(for: food)
             let previousEntryCount = diary.entries(on: date).count
-            try await diary.quickLog(food, on: date)
+            try await diary.quickLog(food, on: date, allowCheatDay: true)
             guard diary.entries(on: date).count > previousEntryCount else { return }
             captureFoodLog(
                 food: food,
@@ -290,7 +291,7 @@ struct FoodPickerView: View {
         diary.run {
             markCurrentSearchLogged()
             let previousEntryCount = diary.entries(on: date).count
-            try await diary.logMeal(meal, on: date)
+            try await diary.logMeal(meal, on: date, allowCheatDay: true)
             guard diary.entries(on: date).count > previousEntryCount else { return }
             captureMealLog(meal: meal, method: "quick_add", unit: .serving)
 
@@ -1484,16 +1485,26 @@ struct QuantityEditor: View {
                 let previousEntry = diary.document.entries.first { $0.id == entryID }
                 if isMealEditor {
                     if mealItemsWereEdited {
-                        try await diary.updateMealEntry(entryID: entryID, amount: amount, items: mealItems)
+                        try await diary.updateMealEntry(
+                            entryID: entryID,
+                            amount: amount,
+                            items: mealItems,
+                            allowCheatDay: true
+                        )
                     } else {
-                        try await diary.updateMealEntry(entryID: entryID, amount: amount)
+                        try await diary.updateMealEntry(
+                            entryID: entryID,
+                            amount: amount,
+                            allowCheatDay: true
+                        )
                     }
                 } else {
                     try await diary.updateEntry(
                         entryID: entryID,
                         amount: amount,
                         unit: selectedUnit,
-                        portionID: selectedPortionID
+                        portionID: selectedPortionID,
+                        allowCheatDay: true
                     )
                 }
                 if diary.document.entries.first(where: { $0.id == entryID }) != previousEntry {
@@ -1507,7 +1518,12 @@ struct QuantityEditor: View {
             } else if let savedMeal {
                 let previousEntryCount = diary.entries(on: date).count
                 let currentMeal = diary.document.meals.first { $0.id == savedMeal.id } ?? savedMeal
-                try await diary.logMeal(currentMeal, amount: amount, on: date)
+                try await diary.logMeal(
+                    currentMeal,
+                    amount: amount,
+                    on: date,
+                    allowCheatDay: true
+                )
                 if diary.entries(on: date).count > previousEntryCount {
                     onLogged(currentPreference, initialPreference)
                 }
@@ -1518,7 +1534,8 @@ struct QuantityEditor: View {
                     amount: amount,
                     unit: selectedUnit,
                     portionID: selectedPortionID,
-                    on: date
+                    on: date,
+                    allowCheatDay: true
                 )
                 if diary.entries(on: date).count > previousEntryCount {
                     onLogged(currentPreference, initialPreference)

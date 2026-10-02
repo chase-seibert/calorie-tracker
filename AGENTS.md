@@ -30,6 +30,11 @@ Before deploying the SQLite build to an existing JSON diary, follow
 `docs/sqlite-storage.md`. Do not copy a live SQLite main file without its WAL
 or delete the old diary as a recovery mechanism.
 
+## StageChase task tracking
+
+Follow [How to Work with StageChase](docs/how-to-work-with-stagechase.md) when
+using the StageChase MCP for this repository's tasks.
+
 Run `make test` with host-side execution permission. Codex's restricted
 sandbox cannot connect to CoreSimulator even when the local simulator service
 is healthy. Do not wait for a sandboxed test command to recover. If host-side
@@ -45,3 +50,4 @@ tests as unverified.
 - `docs/setup-install.md`
 - `docs/data-sources.md`
 - `docs/custom-import-files.md`
+- `docs/how-to-work-with-stagechase.md`

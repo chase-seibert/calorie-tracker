@@ -31,6 +31,8 @@ struct DiaryView: View {
     @State private var showingLogFoodCheatPopover = false
     @State private var showingLoggedEntriesCheatPopover = false
     @State private var didSeedDebugScreenshot = false
+    @State private var activeCheatDayDiagnosticsID: String?
+    @State private var activeCheatDayStartedAt: UInt64?
 
     private var date: Date {
         Calendar.current.date(byAdding: .day, value: dayOffset, to: currentDay) ?? currentDay
@@ -64,7 +66,9 @@ struct DiaryView: View {
                                     date: date,
                                     isCheatDay: isCheatDay,
                                     arrowEdge: .top,
-                                    onConfirm: confirmCheatDayAction
+                                    onConfirm: { diagnosticsID in
+                                        confirmCheatDayAction(diagnosticsID: diagnosticsID)
+                                    }
                                 )
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 7)
@@ -233,7 +237,9 @@ struct DiaryView: View {
                             date: date,
                             isCheatDay: isCheatDay,
                             arrowEdge: .bottom,
-                            onConfirm: confirmCheatDayAction
+                            onConfirm: { diagnosticsID in
+                                confirmCheatDayAction(diagnosticsID: diagnosticsID)
+                            }
                         )
 
                         if tracksAlcohol {
@@ -269,7 +275,9 @@ struct DiaryView: View {
                             date: date,
                             isCheatDay: isCheatDay,
                             arrowEdge: .bottom,
-                            onConfirm: confirmCheatDayAction
+                            onConfirm: { diagnosticsID in
+                                confirmCheatDayAction(diagnosticsID: diagnosticsID)
+                            }
                         )
                     }
                     .padding(.horizontal, 16)
@@ -345,6 +353,36 @@ struct DiaryView: View {
             }
         }
         .analyticsScreen("diary")
+        .onChange(of: isCheatDay) { _, newValue in
+            guard let operationID = activeCheatDayDiagnosticsID else { return }
+            var properties = ["is_cheat_day": String(newValue)]
+            if let startedAt = activeCheatDayStartedAt {
+                properties["ui_elapsed_ms"] = String(
+                    format: "%.1f",
+                    DiaryPerformanceDiagnostics.elapsedMilliseconds(since: startedAt)
+                )
+            }
+            DiaryPerformanceDiagnostics.record(
+                "cheat_day_ui_state_changed",
+                operationID: operationID,
+                properties: properties
+            )
+        }
+        .onChange(of: diary.isSaving) { _, isSaving in
+            guard let operationID = activeCheatDayDiagnosticsID else { return }
+            var properties = ["is_saving": String(isSaving)]
+            if let startedAt = activeCheatDayStartedAt {
+                properties["ui_elapsed_ms"] = String(
+                    format: "%.1f",
+                    DiaryPerformanceDiagnostics.elapsedMilliseconds(since: startedAt)
+                )
+            }
+            DiaryPerformanceDiagnostics.record(
+                "cheat_day_ui_saving_state_changed",
+                operationID: operationID,
+                properties: properties
+            )
+        }
     }
 
     private func refreshCurrentDay() {
@@ -497,7 +535,9 @@ struct DiaryView: View {
                             date: date,
                             isCheatDay: isCheatDay,
                             arrowEdge: .top,
-                            onConfirm: confirmCheatDayAction
+                            onConfirm: { diagnosticsID in
+                                confirmCheatDayAction(diagnosticsID: diagnosticsID)
+                            }
                         )
                     }
                 }
@@ -582,16 +622,26 @@ struct DiaryView: View {
         return drinks == 1 ? "1 drink" : "\(drinks) drinks"
     }
 
-    private func confirmCheatDayAction() {
-        diary.run {
+    private func confirmCheatDayAction(diagnosticsID: String? = nil) {
+        let operationName = isCheatDay ? "cheat_day_clear" : "cheat_day_mark"
+        let operationID = diagnosticsID ?? DiaryPerformanceDiagnostics.newOperationID()
+        activeCheatDayDiagnosticsID = operationID
+        activeCheatDayStartedAt = DiaryPerformanceDiagnostics.monotonicTimestamp()
+        DiaryPerformanceDiagnostics.record(
+            "confirmation_received",
+            operationID: operationID,
+            properties: ["action": isCheatDay ? "clear" : "mark"]
+        )
+        diary.run(operation: operationName, operationID: operationID) {
             if isCheatDay {
                 try await diary.undoCheatDay(
                     on: date,
-                    preservingCalorieAdjustment: alwaysShowQuickCalories
+                    preservingCalorieAdjustment: alwaysShowQuickCalories,
+                    diagnosticsID: operationID
                 )
                 AppAnalytics.capture("cheat_day.cleared", properties: ["day": analyticsDayRelation])
             } else {
-                try await diary.markCheatDay(on: date)
+                try await diary.markCheatDay(on: date, diagnosticsID: operationID)
                 AppAnalytics.capture("cheat_day.marked", properties: ["day": analyticsDayRelation])
             }
 
@@ -708,7 +758,12 @@ private struct AlcoholQuickEntryView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         diary.run {
-                            try await diary.setAlcohol(drinks: drinks, type: selectedType, on: date)
+                            try await diary.setAlcohol(
+                                drinks: drinks,
+                                type: selectedType,
+                                on: date,
+                                allowCheatDay: true
+                            )
                             AppAnalytics.capture(
                                 drinks == 0 ? "alcohol.removed" : "alcohol.saved",
                                 properties: drinks == 0
@@ -746,7 +801,8 @@ private struct CheatDayPopoverModifier: ViewModifier {
     let date: Date
     let isCheatDay: Bool
     let arrowEdge: Edge
-    let onConfirm: () -> Void
+    let onConfirm: (String) -> Void
+    @State private var diagnosticsID: String?
 
     private var attachmentAnchor: PopoverAttachmentAnchor {
         arrowEdge == .top ? .point(.bottom) : .point(.top)
@@ -758,9 +814,36 @@ private struct CheatDayPopoverModifier: ViewModifier {
             attachmentAnchor: attachmentAnchor,
             arrowEdge: arrowEdge
         ) {
-            CheatDayActionPopover(date: date, isCheatDay: isCheatDay) {
-                onConfirm()
+            CheatDayActionPopover(
+                date: date,
+                isCheatDay: isCheatDay,
+                diagnosticsID: diagnosticsID
+            ) { operationID in
+                DiaryPerformanceDiagnostics.record(
+                    "cheat_day_popover_dismiss_requested",
+                    operationID: operationID,
+                    properties: ["action": isCheatDay ? "clear" : "mark"]
+                )
+                onConfirm(operationID)
                 isPresented = false
+            }
+            .onAppear {
+                let operationID = DiaryPerformanceDiagnostics.newOperationID()
+                diagnosticsID = operationID
+                DiaryPerformanceDiagnostics.record(
+                    "cheat_day_popover_appeared",
+                    operationID: operationID,
+                    properties: ["action": isCheatDay ? "clear" : "mark"]
+                )
+            }
+            .onDisappear {
+                guard let operationID = diagnosticsID else { return }
+                DiaryPerformanceDiagnostics.record(
+                    "cheat_day_popover_disappeared",
+                    operationID: operationID,
+                    properties: ["action": isCheatDay ? "clear" : "mark"]
+                )
+                diagnosticsID = nil
             }
             .presentationCompactAdaptation(.popover)
         }
@@ -773,7 +856,7 @@ extension View {
         date: Date,
         isCheatDay: Bool,
         arrowEdge: Edge,
-        onConfirm: @escaping () -> Void
+        onConfirm: @escaping (String) -> Void
     ) -> some View {
         modifier(CheatDayPopoverModifier(
             isPresented: isPresented,
@@ -788,7 +871,8 @@ extension View {
 private struct CheatDayActionPopover: View {
     let date: Date
     let isCheatDay: Bool
-    let onConfirm: () -> Void
+    let diagnosticsID: String?
+    let onConfirm: (String) -> Void
 
     private var relativeDayName: String {
         if Calendar.current.isDateInToday(date) { return "Today" }
@@ -810,7 +894,15 @@ private struct CheatDayActionPopover: View {
                 .font(.subheadline)
                 .foregroundStyle(AppTheme.muted)
                 .fixedSize(horizontal: false, vertical: true)
-            Button(isCheatDay ? "Undo Cheat Day" : "Yes", action: onConfirm)
+            Button(isCheatDay ? "Undo Cheat Day" : "Yes") {
+                let operationID = diagnosticsID ?? DiaryPerformanceDiagnostics.newOperationID()
+                DiaryPerformanceDiagnostics.record(
+                    "confirmation_button_invoked",
+                    operationID: operationID,
+                    properties: ["action": isCheatDay ? "clear" : "mark"]
+                )
+                onConfirm(operationID)
+            }
                 .font(.headline)
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
