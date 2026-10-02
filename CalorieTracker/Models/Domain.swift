@@ -459,6 +459,8 @@ struct DiaryEntry: Codable, Hashable, Identifiable, Sendable {
     // Nil means derive from the historical ingredient snapshot, not a cached meal flag.
     var processedMeatOverride: Bool? = nil
     var redMeatOverride: Bool? = nil
+    // Optional chart-only correction; nil derives servings from the logged quantity.
+    var meatServingsOverride: Double? = nil
 
     var isMeal: Bool {
         savedMealID != nil || !(mealItems?.isEmpty ?? true)
@@ -475,6 +477,7 @@ struct MealItem: Codable, Hashable, Identifiable, Sendable {
     var amount: Double
     var unit: LogUnit
     var portionID: String? = nil
+    var meatServingsOverride: Double? = nil
 }
 
 enum SavedMealOrigin: String, Codable, Hashable, Sendable {
@@ -579,10 +582,39 @@ struct WeeklyMeatServings: Identifiable, Equatable, Sendable {
 
 struct MeatDayFoods: Identifiable, Equatable, Sendable {
     let date: Date
-    let processedMeatFoods: [String]
-    let redMeatFoods: [String]
+    let processedMeatItems: [MeatDayFood]
+    let redMeatItems: [MeatDayFood]
+
+    var processedMeatFoods: [String] { processedMeatItems.map(\.title) }
+    var redMeatFoods: [String] { redMeatItems.map(\.title) }
 
     var id: Date { date }
+}
+
+struct MeatDayFoodContribution: Identifiable, Equatable, Sendable {
+    let entryID: UUID
+    let mealItemID: UUID?
+    let amount: Double
+    let unit: LogUnit
+    let portionID: String?
+    let calculatedServings: Double
+    let servings: Double
+    let hasManualServingOverride: Bool
+    let isMealFallback: Bool
+
+    var id: String { "\(entryID.uuidString)|\(mealItemID?.uuidString ?? "entry")" }
+}
+
+struct MeatDayFood: Identifiable, Equatable, Sendable {
+    let title: String
+    let food: Food?
+    let contributions: [MeatDayFoodContribution]
+    let isMealFallback: Bool
+
+    var id: String { "\(title)|\(food?.id ?? "meal-level")|\(isMealFallback)" }
+    var calculatedServings: Double { contributions.reduce(0) { $0 + $1.calculatedServings } }
+    var servings: Double { contributions.reduce(0) { $0 + $1.servings } }
+    var hasManualServingOverride: Bool { contributions.contains { $0.hasManualServingOverride } }
 }
 
 enum FoodPickerItem: Identifiable, Hashable, Sendable {
@@ -651,7 +683,7 @@ struct MagicFoodSuggestionResult: Sendable {
 }
 
 struct DiaryDocument: Codable, Sendable {
-    var schemaVersion = 8
+    var schemaVersion = 9
     var dailyCalorieGoal: Int? = nil
     var trackingStartDate: Date? = nil
     var dayStatuses: [DayStatus] = []
@@ -664,6 +696,7 @@ struct DiaryDocument: Codable, Sendable {
     var customFoods: [Food] = []
     var customFoodNames: [String: String] = [:]
     var alcoholEntries: [AlcoholEntry] = []
+    var corpusFoodMeatOverrides: [FoodCatalogIdentity: FoodMeatOverrides] = [:]
 
     init() {}
 
@@ -681,6 +714,7 @@ struct DiaryDocument: Codable, Sendable {
         case customFoods
         case customFoodNames
         case alcoholEntries
+        case corpusFoodMeatOverrides
     }
 
     init(from decoder: Decoder) throws {
@@ -704,6 +738,10 @@ struct DiaryDocument: Codable, Sendable {
             forKey: .customFoodNames
         ) ?? [:]
         alcoholEntries = try container.decodeIfPresent([AlcoholEntry].self, forKey: .alcoholEntries) ?? []
+        corpusFoodMeatOverrides = try container.decodeIfPresent(
+            [FoodCatalogIdentity: FoodMeatOverrides].self,
+            forKey: .corpusFoodMeatOverrides
+        ) ?? [:]
     }
 }
 

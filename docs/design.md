@@ -100,8 +100,16 @@ correction of matching historical food snapshots. Users can approve individual
 suggestions or confirm Approve All, which shows the suggestion count and applies
 the entire reviewed batch atomically after one verified backup. A stale suggestion
 rejects the batch without partial changes. It currently covers processed and red
-  meat, preserving explicit meal overrides. Unknown entries remain excluded from
-  the confirmed serving totals until they are explicitly classified.
+meat, preserving explicit meal overrides. Unknown entries remain excluded from
+the confirmed serving totals until they are explicitly classified.
+
+USDA and Open Food Facts classifications can also be corrected from food detail,
+logged-food detail, and the weekly meat-chart detail. These edits are stored as
+diary-owned overrides keyed by catalog source and source ID, with separate
+Automatic/Yes/No choices for processed and red meat. Applying a correction
+updates matching history after a verified SQLite backup while leaving nutrition,
+servings, and the bundled read-only catalog unchanged. Returning both tags to
+Automatic restores catalog resolution.
 
 Settings also links to AI Food & Meal Import instructions and one copyable,
 tool-neutral prompt. The prompt tells an assistant to create a `.calfood`

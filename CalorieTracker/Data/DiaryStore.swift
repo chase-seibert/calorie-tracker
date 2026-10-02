@@ -575,6 +575,18 @@ class DiaryStore: ObservableObject {
         engine.meatDayFoods(numberOfDays: numberOfDays, referenceDate: referenceDate)
     }
 
+    func updateMeatServingsOverride(contributions: [MeatDayFoodContribution], servings: Double?) async throws {
+        let entryIDs = Set(contributions.map(\.entryID))
+        guard !entryIDs.isEmpty else { return }
+        try await perform(scope: .entries(entryIDs)) {
+            $0.updateMeatServingsOverride(contributions: contributions, servings: servings)
+        }
+    }
+
+    func corpusFoodMeatOverrides(for food: Food) -> FoodMeatOverrides {
+        engine.corpusFoodMeatOverrides(for: food)
+    }
+
     func alcoholEntry(on date: Date) -> AlcoholEntry? {
         engine.alcoholEntry(on: date)
     }
@@ -915,6 +927,13 @@ class DiaryStore: ObservableObject {
         }.value
     }
 
+    func suggestedMeatClassification(for food: Food) async -> Food {
+        let catalog = catalog
+        return await Task.detached {
+            FoodResolver(catalog: catalog).suggestion(for: food)
+        }.value
+    }
+
     func unknownMeatEntryCount(processed: Bool, red: Bool) -> Int {
         engine.unknownMeatEntryCount(processed: processed, red: red)
     }
@@ -933,6 +952,24 @@ class DiaryStore: ObservableObject {
     func applyFoodResolutionReviews(_ reviews: [FoodResolutionReview]) async throws {
         guard !reviews.isEmpty else { return }
         let repository = try await open()
+        _ = try await createClassificationBackup(for: repository)
+        try await perform(scope: .foods(Set(reviews.map { $0.food.id }))) {
+            try $0.applyFoodResolutionReviews(reviews)
+        }
+    }
+
+    func updateCorpusFoodMeatTags(originalFood: Food, overrides: FoodMeatOverrides) async throws {
+        guard FoodCatalogIdentity(food: originalFood) != nil else {
+            throw DiaryDatabaseError.invalidData("Only USDA and Open Food Facts foods can be corrected here.")
+        }
+        let repository = try await open()
+        _ = try await createClassificationBackup(for: repository)
+        try await perform(scope: .foods([originalFood.id])) {
+            try $0.updateCorpusFoodMeatTags(originalFood: originalFood, overrides: overrides)
+        }
+    }
+
+    private func createClassificationBackup(for repository: DiaryRepository) async throws -> URL {
         let backup = repository.fileURL.deletingLastPathComponent()
             .appendingPathComponent("ClassificationBackups", isDirectory: true)
             .appendingPathComponent(UUID().uuidString + ".sqlite")
@@ -943,9 +980,7 @@ class DiaryStore: ObservableObject {
             try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: backup.path)
             try DiaryRepository(fileURL: backup, catalog: nil).validate()
         }.value
-        try await perform(scope: .foods(Set(reviews.map { $0.food.id }))) {
-            try $0.applyFoodResolutionReviews(reviews)
-        }
+        return backup
     }
 
     func logOneOffMeal(_ meal: SavedMeal, amount: Double = 1, on date: Date) async throws {

@@ -488,12 +488,33 @@ struct TrendsView: View {
 }
 
 private struct MeatWeekFoodsView: View {
+    @EnvironmentObject private var diary: DiaryStore
     @Environment(\.dismiss) private var dismiss
 
     let week: WeeklyMeatServings
-    let days: [MeatDayFoods]
+    @State private var days: [MeatDayFoods]
     let showsProcessedMeat: Bool
     let showsRedMeat: Bool
+    @State private var activeEditor: MeatDetailEditor?
+
+    private enum MeatDetailEditor: Identifiable {
+        case tags(Food)
+        case servings(MeatDayFood)
+
+        var id: String {
+            switch self {
+            case let .tags(food): "tags:\(food.id)"
+            case let .servings(item): "servings:\(item.id)"
+            }
+        }
+    }
+
+    init(week: WeeklyMeatServings, days: [MeatDayFoods], showsProcessedMeat: Bool, showsRedMeat: Bool) {
+        self.week = week
+        _days = State(initialValue: days)
+        self.showsProcessedMeat = showsProcessedMeat
+        self.showsRedMeat = showsRedMeat
+    }
 
     var body: some View {
         NavigationStack {
@@ -513,16 +534,20 @@ private struct MeatWeekFoodsView: View {
                                     meatFoodGroup(
                                         icon: "🥓",
                                         title: "Processed meat",
-                                        foods: day.processedMeatFoods,
-                                        color: AppTheme.processedMeat
+                                        foods: day.processedMeatItems,
+                                        color: AppTheme.processedMeat,
+                                        onAdjustServings: { activeEditor = .servings($0) },
+                                        onEditTags: { activeEditor = .tags($0) }
                                     )
                                 }
                                 if showsRedMeat, !day.redMeatFoods.isEmpty {
                                     meatFoodGroup(
                                         icon: "🥩",
                                         title: "Red meat",
-                                        foods: day.redMeatFoods,
-                                        color: AppTheme.redMeat
+                                        foods: day.redMeatItems,
+                                        color: AppTheme.redMeat,
+                                        onAdjustServings: { activeEditor = .servings($0) },
+                                        onEditTags: { activeEditor = .tags($0) }
                                     )
                                 }
                             }
@@ -534,16 +559,41 @@ private struct MeatWeekFoodsView: View {
             }
             .navigationTitle("Focus foods")
             .safeAreaInset(edge: .top, spacing: 0) {
-                Text(weekRangeTitle)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(AppTheme.muted)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
-                    .background(.bar)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(weekRangeTitle)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(AppTheme.muted)
+                    Text("Foods appear under categories whose meat tag is Yes. Weekly totals add each logged item: ounces convert to grams, then grams are divided by the portion weight (or default serving weight). Serving-unit logs count directly. Meal-level tags without a matching ingredient use the logged meal count.")
+                        .font(.caption)
+                        .foregroundStyle(AppTheme.muted)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(.bar)
             }
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
+                }
+            }
+            .sheet(item: $activeEditor, onDismiss: refreshDays) { editor in
+                switch editor {
+                case let .tags(food):
+                    NavigationStack {
+                        CorpusFoodMeatTagEditor(food: food, onSaved: refreshDays)
+                            .padding()
+                            .navigationTitle(food.name)
+                            .toolbar {
+                                ToolbarItem(placement: .confirmationAction) {
+                                    Button("Done") { activeEditor = nil }
+                                }
+                            }
+                    }
+                    .presentationDetents([.medium])
+                case let .servings(item):
+                    MeatServingsAdjustmentView(item: item)
                 }
             }
         }
@@ -552,8 +602,10 @@ private struct MeatWeekFoodsView: View {
     private func meatFoodGroup(
         icon: String,
         title: String,
-        foods: [String],
-        color: Color
+        foods: [MeatDayFood],
+        color: Color,
+        onAdjustServings: @escaping (MeatDayFood) -> Void,
+        onEditTags: @escaping (Food) -> Void
     ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 7) {
@@ -564,18 +616,195 @@ private struct MeatWeekFoodsView: View {
                 Text(title)
                     .font(.headline)
             }
-            ForEach(foods, id: \.self) { food in
-                Text(food)
-                    .font(.subheadline)
-                    .foregroundStyle(AppTheme.muted)
+            ForEach(foods) { item in
+                MeatDayFoodRow(
+                    item: item,
+                    onAdjustServings: { onAdjustServings(item) },
+                    onEditTags: {
+                        guard let food = item.food, FoodCatalogIdentity(food: food) != nil else { return }
+                        onEditTags(food)
+                    }
+                )
             }
         }
         .padding(.vertical, 3)
-        .accessibilityElement(children: .combine)
     }
 
     private var weekRangeTitle: String {
         "\(week.weekStart.formatted(date: .abbreviated, time: .omitted))–\(week.weekEnd.formatted(date: .abbreviated, time: .omitted))"
+    }
+
+    private func refreshDays() {
+        days = diary.meatDayFoods(numberOfDays: 30).filter {
+            $0.date >= week.weekStart && $0.date <= week.weekEnd
+                && ((showsProcessedMeat && !$0.processedMeatFoods.isEmpty)
+                    || (showsRedMeat && !$0.redMeatFoods.isEmpty))
+        }
+    }
+}
+
+private struct MeatDayFoodRow: View {
+    let item: MeatDayFood
+    let onAdjustServings: () -> Void
+    let onEditTags: () -> Void
+
+    private func calculationDescription(for contribution: MeatDayFoodContribution) -> String {
+        if contribution.isMealFallback {
+            return "Meal-level meat tag; counted from the logged meal quantity."
+        }
+        guard let food = item.food else { return "Serving amount unavailable." }
+        let portion = food.portion(id: contribution.portionID)
+        let portionLabel = portion?.label ?? food.servingDescription ?? "serving"
+        if contribution.unit == .serving {
+            let grams = portion?.grams ?? food.servingGrams ?? food.baseAmountGrams
+            return "Logged \(contribution.amount.cleanAmount) serving(s) of \(portionLabel) (\(grams.cleanAmount) g each) = \(contribution.calculatedServings.cleanAmount) servings."
+        }
+        let grams = contribution.unit.grams(for: contribution.amount, food: food, portionID: contribution.portionID)
+        let servingGrams = portion?.grams ?? food.servingGrams ?? food.baseAmountGrams
+        return "Logged \(contribution.amount.cleanAmount) \(contribution.unit.title) = \(grams.cleanAmount) g ÷ \(servingGrams.cleanAmount) g per \(portionLabel) = \(contribution.calculatedServings.cleanAmount) servings."
+    }
+
+    private var calculationDescription: String {
+        item.contributions.map(calculationDescription(for:)).joined(separator: "\n")
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(item.title)
+                    .font(.subheadline.weight(.medium))
+                Spacer(minLength: 8)
+                Text("\(item.servings.cleanAmount) servings")
+                    .font(.subheadline.weight(.semibold))
+                    .monospacedDigit()
+            }
+            Text(calculationDescription)
+                .font(.caption)
+                .foregroundStyle(AppTheme.muted)
+                .fixedSize(horizontal: false, vertical: true)
+            if item.hasManualServingOverride {
+                Text("Manual chart count · calculated value was \(item.calculatedServings.cleanAmount)")
+                    .font(.caption2)
+                    .foregroundStyle(AppTheme.coral)
+            }
+            HStack(spacing: 18) {
+                Button("Adjust servings", systemImage: "slider.horizontal.3", action: onAdjustServings)
+                    .font(.caption.weight(.medium))
+                if item.food.map({ FoodCatalogIdentity(food: $0) != nil }) == true {
+                    Button("Edit tags", systemImage: "tag", action: onEditTags)
+                        .font(.caption.weight(.medium))
+                }
+            }
+            .buttonStyle(.borderless)
+        }
+        .padding(.vertical, 5)
+        .accessibilityElement(children: .contain)
+    }
+}
+
+private struct MeatServingsAdjustmentView: View {
+    @EnvironmentObject private var diary: DiaryStore
+    @Environment(\.dismiss) private var dismiss
+
+    let item: MeatDayFood
+    @State private var servings: Double
+    @State private var errorMessage: String?
+    @State private var isSaving = false
+
+    init(item: MeatDayFood) {
+        self.item = item
+        _servings = State(initialValue: item.servings)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Logged amount") {
+                    Text(loggedAmountDescription)
+                }
+                Section("Calculation") {
+                    Text(calculationDescription)
+                    LabeledContent("Calculated servings", value: item.calculatedServings.cleanAmount)
+                }
+                Section("Counted servings") {
+                    TextField("Servings", value: $servings, format: .number.precision(.fractionLength(0...2)))
+                        .keyboardType(.decimalPad)
+                    Text("This changes the meat chart count only. It does not change the food log or nutrition.")
+                        .font(.caption)
+                        .foregroundStyle(AppTheme.muted)
+                    if item.hasManualServingOverride {
+                        Button("Restore calculated count (\(item.calculatedServings.cleanAmount))") {
+                            save(override: nil)
+                        }
+                        .disabled(isSaving)
+                    }
+                }
+                if let errorMessage {
+                    Section {
+                        Text(errorMessage).foregroundStyle(.red)
+                    }
+                }
+            }
+            .navigationTitle("Adjust servings")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") { save(override: servings) }
+                        .disabled(isSaving || !servings.isFinite || servings < 0)
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+    }
+
+    private var loggedAmountDescription: String {
+        item.contributions.map { contribution in
+            if item.isMealFallback {
+                return "\(contribution.amount.cleanAmount) logged meal serving(s)"
+            }
+            guard let food = item.food else { return "Logged quantity unavailable." }
+            let portionLabel = food.portion(id: contribution.portionID)?.label ?? food.servingDescription ?? "serving"
+            return "\(contribution.amount.cleanAmount) \(contribution.unit.title) of \(food.name) · \(portionLabel)"
+        }.joined(separator: "\n")
+    }
+
+    private var calculationDescription: String {
+        let lines = item.contributions.map { contribution in
+            if contribution.isMealFallback {
+                return "The meal has a meat classification but no matching classified ingredient, so the logged meal serving count is used."
+            }
+            guard let food = item.food else { return "Serving amount unavailable." }
+            let portion = food.portion(id: contribution.portionID)
+            let portionLabel = portion?.label ?? food.servingDescription ?? "serving"
+            if contribution.unit == .serving {
+                return "The log uses servings, so \(contribution.amount.cleanAmount) \(portionLabel) serving(s) count as \(contribution.calculatedServings.cleanAmount) servings."
+            }
+            let grams = contribution.unit.grams(for: contribution.amount, food: food, portionID: contribution.portionID)
+            let servingGrams = portion?.grams ?? food.servingGrams ?? food.baseAmountGrams
+            return "\(contribution.amount.cleanAmount) \(contribution.unit.title) converts to \(grams.cleanAmount) g. Divide by \(servingGrams.cleanAmount) g per \(portionLabel) to get \(contribution.calculatedServings.cleanAmount) servings."
+        }
+        return lines.joined(separator: "\n")
+    }
+
+    private func save(override: Double?) {
+        guard !isSaving else { return }
+        isSaving = true
+        errorMessage = nil
+        diary.run(operation: "meat_servings_override.update") {
+            do {
+                try await diary.updateMeatServingsOverride(
+                    contributions: item.contributions,
+                    servings: override
+                )
+                dismiss()
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isSaving = false
+        }
     }
 }
 

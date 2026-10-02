@@ -987,6 +987,92 @@ private enum QuantityUnitChoice: Hashable {
     case portion(String)
 }
 
+struct CorpusFoodMeatTagEditor: View {
+    @EnvironmentObject private var diary: DiaryStore
+    let food: Food
+    var onSaved: (() -> Void)? = nil
+
+    @State private var processed: Bool?
+    @State private var red: Bool?
+    @State private var savedOverrides = FoodMeatOverrides(processed: nil, red: nil)
+    @State private var automaticFood: Food?
+    @State private var isSaving = false
+    @State private var errorMessage: String?
+
+    private var currentOverrides: FoodMeatOverrides {
+        FoodMeatOverrides(processed: processed, red: red)
+    }
+
+    var body: some View {
+        GroupBox("Meat classification") {
+            VStack(alignment: .leading, spacing: 12) {
+                tagPicker("Processed meat", choice: $processed, automatic: automaticFood?.containsProcessedMeat)
+                tagPicker("Red meat", choice: $red, automatic: automaticFood?.containsRedMeat)
+                if let errorMessage {
+                    Text(errorMessage).font(.caption).foregroundStyle(.red)
+                }
+                Button {
+                    save()
+                } label: {
+                    if isSaving { ProgressView().frame(maxWidth: .infinity) }
+                    else { Text("Save meat tags").frame(maxWidth: .infinity) }
+                }
+                .buttonStyle(.bordered)
+                .disabled(isSaving || currentOverrides == savedOverrides)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .task(id: food.id) {
+            let current = diary.corpusFoodMeatOverrides(for: food)
+            savedOverrides = current
+            processed = current.processed
+            red = current.red
+            automaticFood = await diary.suggestedMeatClassification(for: food)
+        }
+    }
+
+    private func tagPicker(_ title: String, choice: Binding<Bool?>, automatic: Bool?) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                Spacer()
+                Picker(title, selection: choice) {
+                    Text("Automatic").tag(nil as Bool?)
+                    Text("Yes").tag(true as Bool?)
+                    Text("No").tag(false as Bool?)
+                }
+                .pickerStyle(.menu)
+                .labelsHidden()
+                .accessibilityLabel(title)
+            }
+            if let automatic {
+                Text("Catalog default: \(automatic ? "Yes" : "No")")
+                    .font(.caption).foregroundStyle(.secondary)
+            } else if choice.wrappedValue == nil {
+                Text("Catalog default: Unknown")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private func save() {
+        guard !isSaving else { return }
+        isSaving = true
+        errorMessage = nil
+        diary.run(operation: "corpus_meat_tags.update") {
+            do {
+                try await diary.updateCorpusFoodMeatTags(originalFood: food, overrides: currentOverrides)
+                savedOverrides = currentOverrides
+                onSaved?()
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isSaving = false
+        }
+    }
+}
+
 struct QuantityEditor: View {
     @EnvironmentObject private var diary: DiaryStore
     @Environment(\.dismiss) private var dismiss
@@ -1004,6 +1090,7 @@ struct QuantityEditor: View {
     @State private var mealItems: [MealItem]
     @State private var mealItemsWereEdited = false
     @State private var showingNameEditor = false
+    @State private var showingMeatClassification = false
     @FocusState private var amountIsFocused: Bool
 
     init(
@@ -1193,6 +1280,16 @@ struct QuantityEditor: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(amount <= 0)
+
+                    if !isMealEditor, FoodCatalogIdentity(food: food) != nil {
+                        DisclosureGroup(isExpanded: $showingMeatClassification) {
+                            CorpusFoodMeatTagEditor(food: food)
+                        } label: {
+                            Text("Edit meat tags")
+                                .font(.subheadline.weight(.medium))
+                        }
+                        .accessibilityHint("Shows separate processed meat and red meat choices")
+                    }
 
                     if isMealEditor, !mealItems.isEmpty {
                         VStack(alignment: .leading, spacing: 10) {

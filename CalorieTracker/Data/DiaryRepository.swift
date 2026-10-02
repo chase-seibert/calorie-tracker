@@ -90,12 +90,13 @@ enum DiaryJSONMigration {
         }
 
         let root = try JSONSerialization.jsonObject(with: bytes) as? [String: Any]
-        guard let version = root?["schemaVersion"] as? Int, (1...8).contains(version),
+        guard let version = root?["schemaVersion"] as? Int, (1...9).contains(version),
             root?["entries"] is [Any], root?["fixtureVersion"] == nil
         else { throw DiaryDatabaseError.invalidData("Unrecognized or unsupported JSON diary. Original and backup retained.") }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        let document = try decoder.decode(DiaryDocument.self, from: bytes)
+        var document = try decoder.decode(DiaryDocument.self, from: bytes)
+        document.schemaVersion = max(document.schemaVersion, DiaryDocument().schemaVersion)
         try DiaryRepository.validateDocument(document)
         let expected = try canonicalData(document)
 
@@ -205,12 +206,30 @@ private struct DiarySettings: Codable, Equatable {
     var dailyCalorieGoal: Int?
     var trackingStartDate: Date?
     var favoriteItemOrder: [String]
+    var corpusFoodMeatOverrides: [FoodCatalogIdentity: FoodMeatOverrides]
 
     init(_ document: DiaryDocument) {
-        schemaVersion = document.schemaVersion
+        schemaVersion = max(document.schemaVersion, DiaryDocument().schemaVersion)
         dailyCalorieGoal = document.dailyCalorieGoal
         trackingStartDate = document.trackingStartDate
         favoriteItemOrder = document.favoriteItemOrder
+        corpusFoodMeatOverrides = document.corpusFoodMeatOverrides
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case schemaVersion, dailyCalorieGoal, trackingStartDate, favoriteItemOrder, corpusFoodMeatOverrides
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        schemaVersion = try container.decode(Int.self, forKey: .schemaVersion)
+        dailyCalorieGoal = try container.decodeIfPresent(Int.self, forKey: .dailyCalorieGoal)
+        trackingStartDate = try container.decodeIfPresent(Date.self, forKey: .trackingStartDate)
+        favoriteItemOrder = try container.decodeIfPresent([String].self, forKey: .favoriteItemOrder) ?? []
+        corpusFoodMeatOverrides = try container.decodeIfPresent(
+            [FoodCatalogIdentity: FoodMeatOverrides].self,
+            forKey: .corpusFoodMeatOverrides
+        ) ?? [:]
     }
 }
 
@@ -281,6 +300,13 @@ final class DiaryRepository: @unchecked Sendable {
                 try putSettings(DiaryDocument())
             } else if version != Self.schemaVersion {
                 throw DiaryDatabaseError.unsupportedVersion(version)
+            }
+            if let row = try rows("SELECT payload FROM diary_settings WHERE id = 1").first {
+                var settings: DiarySettings = try decode(row)
+                if settings.schemaVersion < DiaryDocument().schemaVersion {
+                    settings.schemaVersion = DiaryDocument().schemaVersion
+                    try execute("INSERT OR REPLACE INTO diary_settings(id, payload) VALUES(1, ?)", [try encoded(settings)])
+                }
             }
         }
         try execute("PRAGMA journal_mode = WAL")
@@ -409,6 +435,7 @@ final class DiaryRepository: @unchecked Sendable {
             document.dailyCalorieGoal = settings.dailyCalorieGoal
             document.trackingStartDate = settings.trackingStartDate
             document.favoriteItemOrder = settings.favoriteItemOrder
+            document.corpusFoodMeatOverrides = settings.corpusFoodMeatOverrides
         }
         document.customFoods = try objects("SELECT payload FROM personal_foods ORDER BY position")
         document.meals = try objects("SELECT payload FROM meals ORDER BY position")

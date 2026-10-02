@@ -26,6 +26,14 @@ workflow is missing.
 - `make storage-benchmark`: measure synthetic 1-, 3-, and 10-year diary histories.
 - `make diary-convert INPUT=... OUTPUT=...`: explicitly convert a backed-up JSON diary; never overwrites outputs.
 
+## Task completion on iPhone
+
+When completing a task in this repository, always attempt `make phone-deploy`
+before reporting completion. Confirm whether the app launched on the phone, and
+report any device, signing, or launch blocker precisely. Install over the
+existing app without uninstalling it; follow `docs/sqlite-storage.md` when
+deploying a build that may migrate an existing diary.
+
 Before deploying the SQLite build to an existing JSON diary, follow
 `docs/sqlite-storage.md`. Do not copy a live SQLite main file without its WAL
 or delete the old diary as a recovery mechanism.

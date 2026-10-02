@@ -43,6 +43,32 @@ The boolean SQL columns mean **confirmed presence**, not known absence. Unknown
 per-food values remain nullable in payloads. Trends reports entries with unknown
 flags for the selected focus areas; chart rendering does not perform inference.
 
+## Corpus tag overrides
+
+Users can edit processed and red meat tags for USDA and Open Food Facts foods.
+Each field stores an independent optional choice: `nil` follows current
+catalog/name resolution, while `true` and `false` are explicit Yes and No
+choices. Overrides are keyed by `(FoodSource, sourceID)` in the diary settings
+payload and are applied after normal resolution. They never change catalog
+nutrition, serving data, portions, or identity. Returning both fields to
+Automatic removes the local override.
+
+The additive override field keeps the SQLite table layout and `PRAGMA
+user_version` unchanged. The diary document schema advances to version 9; old
+diaries decode the missing override field as an empty dictionary, and the
+repository advances its settings schema version when opening an older diary.
+The bundled catalog remains read-only.
+
+The focused editor is available from food quantity detail, including
+logged-food detail, and from USDA/OFF foods shown in tapped weekly meat-chart
+detail. A correction saves the identity override and updates matching saved
+food, meal ingredient, and diary snapshots in one repository transaction. It
+creates and validates the existing WAL-aware SQLite backup first, then checks
+that the opened snapshot still exists inside the transaction. Same-name foods
+with another source ID and personal foods are untouched. Meal-level overrides,
+nutrients, quantities, and portions remain unchanged; the chart's meal detail
+continues to group matching ingredients under the meal name.
+
 ## Matching and review
 
 Catalog matching accepts existing source identity or barcode first. Name search

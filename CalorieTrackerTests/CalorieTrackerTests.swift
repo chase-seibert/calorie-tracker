@@ -389,6 +389,152 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(try DiaryJSONMigration.canonicalData(before), try DiaryJSONMigration.canonicalData(restored.snapshotSync().document))
     }
 
+    func testCorpusMeatTagOverridesAreIndependentIdentitySafeAndPersistent() throws {
+        let unreferencedFood = try XCTUnwrap(resolutionCatalog.food(sourceID: "2707465", source: .usda))
+        let searchEngine = DiaryEngine(document: DiaryDocument(), catalog: resolutionCatalog)
+        try searchEngine.updateCorpusFoodMeatTags(
+            originalFood: unreferencedFood,
+            overrides: FoodMeatOverrides(processed: true, red: nil)
+        )
+        XCTAssertEqual(searchEngine.displayedFood(unreferencedFood).containsProcessedMeat, true,
+                       "Search results can be corrected before the food has been logged or saved.")
+        XCTAssertEqual(searchEngine.displayedFood(unreferencedFood).containsRedMeat, false,
+                       "An Automatic tag continues to use catalog classification.")
+        let encodedOverrides = try JSONEncoder().encode(searchEngine.document)
+        let decodedOverrides = try JSONDecoder().decode(DiaryDocument.self, from: encodedOverrides)
+        XCTAssertEqual(decodedOverrides.corpusFoodMeatOverrides, searchEngine.document.corpusFoodMeatOverrides)
+
+        let url = temporaryDiaryURL()
+        let firstDay = testDate(day: 1)
+        let secondDay = testDate(day: 2)
+        let repository = try DiaryRepository(fileURL: url, calendar: testCalendar, catalog: resolutionCatalog)
+        let bacon = try XCTUnwrap(resolutionCatalog.food(sourceID: "2705889", source: .usda))
+        let sameNameOtherIdentity = Food(
+            sourceID: "off-same-name",
+            source: .openFoodFacts,
+            name: bacon.name,
+            brand: bacon.brand,
+            barcode: nil,
+            nutrients: MacroNutrients(calories: 12, carbs: 1, fat: 2, protein: 3, fiber: 4),
+            baseAmountGrams: 100,
+            servingGrams: 100,
+            servingDescription: "100 g",
+            containsProcessedMeat: false,
+            containsRedMeat: true
+        )
+        let ingredient = MealItem(id: UUID(), food: bacon, amount: 1, unit: .serving)
+        let meal = SavedMeal(id: UUID(), name: "Bacon plate", items: [ingredient])
+        var initial = DiaryDocument()
+        initial.favorites = [bacon, sameNameOtherIdentity]
+        initial.meals = [meal]
+        try repository.importDocument(initial)
+        try repository.performSync(scope: .day(firstDay)) { engine in
+            engine.log(bacon, amount: 1, unit: .serving, on: firstDay)
+            engine.logMeal(meal, on: firstDay)
+        }
+        try repository.performSync(scope: .day(secondDay)) { engine in
+            engine.log(bacon, amount: 2, unit: .serving, on: secondDay)
+            engine.log(sameNameOtherIdentity, amount: 1, unit: .serving, on: secondDay)
+        }
+
+        let before = try repository.snapshotSync().document
+        let original = try XCTUnwrap(before.entries.first { $0.food.sourceID == bacon.sourceID }?.food)
+        let nutritionByID = Dictionary(uniqueKeysWithValues: before.entries.map { ($0.id, $0.nutrients) })
+        try repository.performSync(scope: .foods([bacon.id])) {
+            try $0.updateCorpusFoodMeatTags(
+                originalFood: original,
+                overrides: FoodMeatOverrides(processed: false, red: true)
+            )
+        }
+
+        let corrected = try repository.snapshotSync().document
+        XCTAssertEqual(corrected.corpusFoodMeatOverrides[FoodCatalogIdentity(food: bacon)!],
+                       FoodMeatOverrides(processed: false, red: true))
+        XCTAssertTrue(corrected.entries.filter { $0.food.sourceID == bacon.sourceID }
+            .allSatisfy { $0.food.containsProcessedMeat == false && $0.food.containsRedMeat == true })
+        XCTAssertEqual(corrected.entries.first { $0.isMeal }?.mealItems?.first?.food.containsProcessedMeat, false)
+        XCTAssertEqual(corrected.entries.first { $0.isMeal }?.mealItems?.first?.food.containsRedMeat, true)
+        XCTAssertEqual(corrected.entries.map { nutritionByID[$0.id] }, before.entries.map(\.nutrients))
+        let otherSnapshot = try XCTUnwrap(corrected.entries.first { $0.food.sourceID == sameNameOtherIdentity.sourceID })
+        XCTAssertEqual(otherSnapshot.food.containsProcessedMeat, false)
+        XCTAssertEqual(otherSnapshot.food.containsRedMeat, true)
+        XCTAssertEqual(corrected.favorites.first { $0.sourceID == sameNameOtherIdentity.sourceID }, sameNameOtherIdentity)
+        let chartFood = try XCTUnwrap(DiaryEngine(document: corrected, calendar: testCalendar)
+            .meatDayFoods(numberOfDays: 1, referenceDate: firstDay).first?.redMeatItems
+            .first { $0.food?.sourceID == bacon.sourceID })
+        XCTAssertEqual(chartFood.food?.id, bacon.id)
+
+        let reopened = try DiaryRepository(fileURL: url, calendar: testCalendar, catalog: resolutionCatalog)
+        let persisted = try reopened.snapshotSync().document
+        XCTAssertEqual(persisted.corpusFoodMeatOverrides[FoodCatalogIdentity(food: bacon)!]?.processed, false)
+        try reopened.performSync(scope: .foods([bacon.id])) {
+            try $0.updateCorpusFoodMeatTags(
+                originalFood: try XCTUnwrap(persisted.entries.first { $0.food.sourceID == bacon.sourceID }?.food),
+                overrides: FoodMeatOverrides(processed: nil, red: true)
+            )
+        }
+        let automaticProcessed = try reopened.snapshotSync().document
+        let automaticallyClassified = try XCTUnwrap(automaticProcessed.entries.first { $0.food.sourceID == bacon.sourceID })
+        XCTAssertEqual(automaticallyClassified.food.containsProcessedMeat, true)
+        XCTAssertEqual(automaticallyClassified.food.containsRedMeat, true)
+
+        try reopened.performSync(scope: .foods([bacon.id])) {
+            try $0.updateCorpusFoodMeatTags(
+                originalFood: automaticallyClassified.food,
+                overrides: FoodMeatOverrides(processed: nil, red: nil)
+            )
+        }
+        let reset = try reopened.snapshotSync().document
+        let restoredDefaults = try XCTUnwrap(reset.entries.first { $0.food.sourceID == bacon.sourceID })
+        XCTAssertEqual(restoredDefaults.food.containsProcessedMeat, true)
+        XCTAssertEqual(restoredDefaults.food.containsRedMeat, false)
+        XCTAssertEqual(reset.corpusFoodMeatOverrides[FoodCatalogIdentity(food: bacon)!], nil)
+        XCTAssertEqual(restoredDefaults.nutrients, nutritionByID[restoredDefaults.id])
+    }
+
+    @MainActor
+    func testCorpusTagCorrectionCreatesVerifiedBackupAndRejectsStaleSnapshot() async throws {
+        let url = temporaryDiaryURL()
+        let day = testDate(day: 1)
+        let bacon = try XCTUnwrap(resolutionCatalog.food(sourceID: "2705889", source: .usda))
+        var entry = testEntry(calories: bacon.nutrients.calories, date: day, name: bacon.name)
+        entry.food = bacon
+        entry.nutrients = bacon.nutrients
+        var document = DiaryDocument()
+        document.entries = [entry]
+        let store = DiaryStore(document: document, fileURL: url, calendar: testCalendar,
+                               catalog: resolutionCatalog, usesWindow: false)
+        await store.reloadFromDisk(referenceDate: day)
+        let repository = try XCTUnwrap(store.repository)
+        let before = try repository.snapshotSync().document
+
+        try await store.updateCorpusFoodMeatTags(
+            originalFood: bacon,
+            overrides: FoodMeatOverrides(processed: false, red: true)
+        )
+        let after = try repository.snapshotSync().document
+        XCTAssertEqual(after.entries.first?.food.containsProcessedMeat, false)
+        XCTAssertEqual(after.entries.first?.nutrients, before.entries.first?.nutrients)
+        let backupDirectory = url.deletingLastPathComponent().appendingPathComponent("ClassificationBackups")
+        let backups = try FileManager.default.contentsOfDirectory(at: backupDirectory, includingPropertiesForKeys: nil)
+            .filter { $0.pathExtension == "sqlite" }
+        XCTAssertEqual(backups.count, 1)
+        let backup = try DiaryRepository(fileURL: XCTUnwrap(backups.first), calendar: testCalendar)
+        try backup.validate()
+        XCTAssertEqual(try DiaryJSONMigration.canonicalData(before),
+                       try DiaryJSONMigration.canonicalData(backup.snapshotSync().document))
+
+        do {
+            try await store.updateCorpusFoodMeatTags(
+                originalFood: bacon,
+                overrides: FoodMeatOverrides(processed: true, red: false)
+            )
+            XCTFail("A stale food snapshot must be rejected.")
+        } catch { }
+        XCTAssertEqual(try DiaryJSONMigration.canonicalData(after),
+                       try DiaryJSONMigration.canonicalData(repository.snapshotSync().document))
+    }
+
     #if DEBUG
     @MainActor
     func testDeveloperDatabaseExportAndImportRoundTrip() async throws {
@@ -603,6 +749,7 @@ final class CalorieTrackerTests: XCTestCase {
         let old = directory.appendingPathComponent("Old.json")
         let backups = directory.appendingPathComponent("Backups")
         var document = DiaryDocument()
+        document.schemaVersion = 8
         document.dailyCalorieGoal = 2100
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
@@ -613,7 +760,9 @@ final class CalorieTrackerTests: XCTestCase {
             destination: destination, sources: [shared, old], backupDirectory: backups))
         XCTAssertEqual(try Data(contentsOf: shared), bytes)
         XCTAssertEqual(try Data(contentsOf: backup), bytes)
-        XCTAssertEqual(try DiaryRepository(fileURL: destination).snapshotSync().document.dailyCalorieGoal, 2100)
+        let migrated = try DiaryRepository(fileURL: destination).snapshotSync().document
+        XCTAssertEqual(migrated.dailyCalorieGoal, 2100)
+        XCTAssertEqual(migrated.schemaVersion, 9)
         XCTAssertNil(try DiaryJSONMigration.convertIfNeeded(
             destination: destination, sources: [shared], backupDirectory: backups))
         XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: backups.path).count, 1)
@@ -2699,7 +2848,7 @@ extension CalorieTrackerTests {
 
         let reloaded = TestDiaryStore(fileURL: fileURL, calendar: testCalendar, referenceDate: day)
         let reloadedEntry = try XCTUnwrap(reloaded.alcoholEntry(on: day))
-        XCTAssertEqual(reloaded.document.schemaVersion, 8)
+        XCTAssertEqual(reloaded.document.schemaVersion, 9)
         XCTAssertEqual(reloadedEntry.id, entry.id)
         XCTAssertEqual(reloadedEntry.date, entry.date)
         XCTAssertEqual(reloadedEntry.drinks, entry.drinks)

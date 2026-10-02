@@ -15,7 +15,49 @@ struct FoodMeatResolution: Codable, Hashable, Sendable {
     var version = 1
 }
 
-struct FoodMeatOverrides: Sendable {
+struct FoodCatalogIdentity: Codable, Hashable, Sendable, CodingKey {
+    let source: FoodSource
+    let sourceID: String
+
+    var stringValue: String { "\(source.rawValue):\(sourceID)" }
+    var intValue: Int? { nil }
+
+    init?(stringValue: String) {
+        guard let separator = stringValue.firstIndex(of: ":") else { return nil }
+        let sourceValue = String(stringValue[..<separator])
+        guard let source = FoodSource(rawValue: sourceValue), source == .usda || source == .openFoodFacts else {
+            return nil
+        }
+        let sourceID = String(stringValue[stringValue.index(after: separator)...])
+        guard !sourceID.isEmpty else { return nil }
+        self.source = source
+        self.sourceID = sourceID
+    }
+
+    init?(intValue: Int) { return nil }
+
+    init?(food: Food) {
+        guard food.source == .usda || food.source == .openFoodFacts else { return nil }
+        source = food.source
+        sourceID = food.sourceID
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let value = try container.decode(String.self)
+        guard let identity = FoodCatalogIdentity(stringValue: value) else {
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid corpus food identity.")
+        }
+        self = identity
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(stringValue)
+    }
+}
+
+struct FoodMeatOverrides: Codable, Equatable, Hashable, Sendable {
     var processed: Bool?
     var red: Bool?
 }
