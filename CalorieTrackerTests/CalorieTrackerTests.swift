@@ -3,6 +3,61 @@ import XCTest
 @testable import CalorieTracker
 
 final class CalorieTrackerTests: XCTestCase {
+    func testMealPhotoRequestUsesBoundedInlineImageAndStrictNoStoreContract() throws {
+        let jpeg = Data([0xff, 0xd8, 0xff])
+        let data = try MealAnalysisRequest.makeBody(jpeg: jpeg, context: "one bowl")
+        let body = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        XCTAssertEqual(body["model"] as? String, "gpt-6-luna")
+        XCTAssertEqual(body["store"] as? Bool, false)
+        XCTAssertEqual(body["max_output_tokens"] as? Int, 8_000)
+        XCTAssertEqual((body["tools"] as? [Any])?.count, 0)
+        let input = try XCTUnwrap((body["input"] as? [[String: Any]])?.first)
+        let content = try XCTUnwrap(input["content"] as? [[String: Any]])
+        XCTAssertTrue(try XCTUnwrap(content.first?["text"] as? String).contains("one bowl"))
+        XCTAssertEqual(content.last?["image_url"] as? String, "data:image/jpeg;base64,\(jpeg.base64EncodedString())")
+        XCTAssertNil(body["diary"])
+        XCTAssertNil(body["healthkit"])
+        let text = try XCTUnwrap(body["text"] as? [String: Any])
+        let format = try XCTUnwrap(text["format"] as? [String: Any])
+        XCTAssertEqual(format["type"] as? String, "json_schema")
+        XCTAssertEqual(format["strict"] as? Bool, true)
+    }
+
+    func testMealAnalysisResponsePreservesNullableUnknownsAndValidatesBounds() throws {
+        let valid = #"{"status":"success","reason":null,"meal":{"format":"calorie-tracker-meal","version":1,"name":"Soup","notes":null,"foods":[{"name":"Bean soup","servingDescription":"1 bowl","servingGrams":300,"notes":null,"containsProcessedMeat":null,"containsRedMeat":null,"nutrition":{"calories":240,"carbohydratesGrams":38,"fatGrams":5,"proteinGrams":12,"fiberGrams":null}}]}}"#
+        let result = try JSONDecoder().decode(MealAnalysisResponse.self, from: Data(valid.utf8)).validatedMeal()
+        XCTAssertNil(result.foods[0].nutrition.fiberGrams)
+        XCTAssertNil(result.foods[0].containsProcessedMeat)
+        XCTAssertNil(result.foods[0].containsRedMeat)
+
+        let invalid = valid.replacingOccurrences(of: "\"calories\":240", with: "\"calories\":-1")
+        XCTAssertThrowsError(try JSONDecoder().decode(MealAnalysisResponse.self, from: Data(invalid.utf8)).validatedMeal())
+
+        let cannotEstimate = #"{"status":"cannot_estimate","reason":"No food is visible.","meal":null}"#
+        XCTAssertThrowsError(try JSONDecoder().decode(MealAnalysisResponse.self, from: Data(cannotEstimate.utf8)).validatedMeal()) { error in
+            XCTAssertEqual(error as? MealAnalysisError, .cannotEstimate("No food is visible."))
+        }
+    }
+
+    func testMealPhotoSchemaDisallowsUndeclaredPropertiesAtEveryObjectLevel() throws {
+        func assertClosed(_ schema: [String: Any], file: StaticString = #filePath, line: UInt = #line) throws {
+            guard schema["type"] as? String == "object" else { return }
+            XCTAssertEqual(schema["additionalProperties"] as? Bool, false, file: file, line: line)
+            guard let properties = schema["properties"] as? [String: Any] else { return }
+            for value in properties.values {
+                guard let child = value as? [String: Any] else { continue }
+                if let nested = child["anyOf"] as? [[String: Any]] {
+                    for option in nested { try assertClosed(option, file: file, line: line) }
+                } else if let items = child["items"] as? [String: Any] {
+                    try assertClosed(items, file: file, line: line)
+                } else if child["type"] as? String == "object" {
+                    try assertClosed(child, file: file, line: line)
+                }
+            }
+        }
+        try assertClosed(MealAnalysisResponse.schema)
+    }
+
     func testSnackSuggestionsFilterAllFocusCombinationsAndAlwaysIncludeProtein() {
         XCTAssertEqual(Set(SnackSuggestions.library.map(\.id)).count, SnackSuggestions.library.count)
         for mask in 0..<16 {
@@ -258,6 +313,19 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(engine.meatDayFoods(numberOfDays: 1, referenceDate: day).first?.processedMeatFoods,
                        [meal.name + " — Bacon"])
         XCTAssertEqual(snapshot.entries[0].nutrients, meal.nutrients)
+    }
+
+    func testImportedMealSaveForReuseToggleControlsLibraryWithoutDroppingDiarySnapshot() throws {
+        let json = #"{"format":"calorie-tracker-meal","version":1,"name":"One-off soup","foods":[{"name":"Bean soup","servingDescription":"1 bowl","servingGrams":300,"nutrition":{"calories":240,"carbohydratesGrams":38,"fatGrams":5,"proteinGrams":12}}]}"#
+        let meal = try JSONDecoder().decode(CustomMealFile.self, from: Data(json.utf8)).makeMeal()
+        let url = temporaryDiaryURL()
+        let day = testDate(day: 1)
+        let repository = try DiaryRepository(fileURL: url, calendar: testCalendar, catalog: resolutionCatalog)
+        try repository.performSync(scope: .day(day)) { _ = try $0.logImportedMeal(meal, saveForReuse: false, on: day) }
+        let document = try repository.snapshotSync().document
+        XCTAssertTrue(document.meals.isEmpty)
+        XCTAssertEqual(document.entries.first?.mealItems?.count, 1)
+        XCTAssertNil(document.entries.first?.savedMealID)
     }
 
     func testResolverHandlesUnknownsQualifiersAndPerFlagOverrides() throws {

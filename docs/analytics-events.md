@@ -42,7 +42,7 @@ Tracked `screen` values currently include `diary`, `settings`, `trends`,
 `streak`, `food_picker`, `quantity_editor`, `alcohol_editor`,
 `food_weight_report`, `custom_catalog`, `custom_food_editor`,
 `saved_meal_editor`, `import_guide`, `food_import_review`,
-`meal_import_review`, and (in Debug) `developer_diagnostics` and
+`meal_import_review`, `meal_photo_review`, `openai_settings`, and (in Debug) `developer_diagnostics` and
 `analytics_diagnostics`, plus `analytics_event_payload` when an event is opened.
 
 ## Data minimization

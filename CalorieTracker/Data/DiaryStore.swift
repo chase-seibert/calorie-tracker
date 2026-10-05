@@ -912,9 +912,9 @@ class DiaryStore: ObservableObject {
         }
     }
 
-    func logImportedMeal(_ meal: SavedMeal, on date: Date, allowCheatDay: Bool = false) async throws -> SavedMeal {
+    func logImportedMeal(_ meal: SavedMeal, saveForReuse: Bool = true, on date: Date, allowCheatDay: Bool = false) async throws -> SavedMeal {
         try await perform(scope: .day(date)) {
-            try $0.logImportedMeal(meal, on: date, allowCheatDay: allowCheatDay)
+            try $0.logImportedMeal(meal, saveForReuse: saveForReuse, on: date, allowCheatDay: allowCheatDay)
         }
     }
 

@@ -76,6 +76,15 @@ struct SettingsView: View {
 
             Section("Connections") {
                 NavigationLink {
+                    OpenAISettingsView()
+                } label: {
+                    SettingsValueLabel(
+                        title: "OpenAI API",
+                        systemImage: "sparkles",
+                        value: openAIStatus
+                    )
+                }
+                NavigationLink {
                     AppleHealthSettingsView()
                 } label: {
                     SettingsValueLabel(
@@ -128,6 +137,11 @@ struct SettingsView: View {
         case .denied: "Access Off"
         case .unavailable: "Unavailable"
         }
+    }
+
+    private var openAIStatus: String {
+        do { return try OpenAICredentialStore.shared.load() == nil ? "Not configured" : "Configured" }
+        catch { return "Unavailable" }
     }
 }
 

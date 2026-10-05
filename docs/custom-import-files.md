@@ -11,18 +11,42 @@ separate components, with uncertainty described in notes and no ingredient
 counted twice. Repeated estimates use a fresh filename based on a normalized
 meal-name slug and a unique UUID suffix, ending in `.calmeal`.
 
-## Workflow
+## Workflows
 
-1. Send a food photo and any useful context to an assistant.
-2. In Yum Chase, open **Settings → AI Food & Meal Import** and copy the prompt.
-3. Paste the prompt after the assistant analyzes the food.
-4. Open or share the returned `.calmeal` attachment to Yum Chase.
-5. Review and edit every component and the calculated total. Tap **Log** to add
-   one serving to today.
-6. Enable the save toggle only when the meal is worth reusing.
+### Analyze a photo in Yum Chase
 
-The conversation is not shared with Yum Chase. Only the structured meal file
-crosses the boundary.
+1. In **Settings → Connections → OpenAI API**, add your own OpenAI API key.
+   API use has separate billing from a ChatGPT subscription. This direct
+   client-key setup is intended for private deployment; a distributed app
+   needs an authenticated backend to protect and limit a shared key.
+2. In Yum Chase, open **Log food → Analyze a meal photo**, then take or choose
+   one photo and optionally describe its portion or preparation.
+3. Review the photo and context shown before tapping **Analyze Photo**. Yum Chase
+   sends those inputs and fixed meal-estimation instructions directly to OpenAI.
+   It does not send diary or HealthKit history. The image is resized, converted
+   to JPEG, and stripped of source metadata before upload.
+4. Review and edit the estimated components and totals, then explicitly tap
+   **Log**. Analysis alone never writes to the diary or Apple Health. The meal is
+   logged to the diary day selected when Log food was opened, even if analysis
+   crosses midnight.
+
+Each analysis and retry makes one billable request. Cancel stops local waiting
+but may not stop provider processing or charges. The app uses the Responses API
+with `store: false`; this does not promise zero provider retention. See the
+[OpenAI data controls](https://developers.openai.com/api/docs/guides/your-data)
+for current platform behavior.
+
+### Import a `.calmeal` file
+
+1. Open **Settings → AI Food & Meal Import** and copy the prompt.
+2. Send a food photo and useful context to an assistant, then ask it to follow
+   the prompt and return a `.calmeal` attachment.
+3. Open or share the attachment to Yum Chase.
+4. Review and edit every component and the calculated total. Tap **Log** to add
+   one serving to today, and enable Save to Saved meals only when desired.
+
+This separate file-import route remains available; the app receives only the
+structured meal file, not the conversation.
 
 ## Version 1
 

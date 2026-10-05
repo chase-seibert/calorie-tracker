@@ -134,15 +134,30 @@ struct ReviewClassificationsView: View {
 }
 
 struct CustomMealImportView: View {
+    enum Source: Equatable {
+        case fileImport
+        case openAIPhoto
+
+        var analyticsMethod: String { self == .fileImport ? "file_import" : "openai_photo" }
+        var navigationTitle: String { self == .fileImport ? "Review Imported Meal" : "Review Meal" }
+    }
+
     @EnvironmentObject private var diary: DiaryStore
     @Environment(\.dismiss) private var dismiss
 
+    private let targetDate: Date
+    private let source: Source
+    private let onLogged: (() -> Void)?
     private let originalNotes: String?
     @State private var name: String
     @State private var foods: [CustomFoodDefinition]
     @State private var saveForReuse = false
+    @State private var isLogging = false
 
-    init(file: CustomMealFile) {
+    init(file: CustomMealFile, targetDate: Date = Date(), source: Source = .fileImport, onLogged: (() -> Void)? = nil) {
+        self.targetDate = targetDate
+        self.source = source
+        self.onLogged = onLogged
         originalNotes = file.notes
         _name = State(initialValue: file.name)
         _foods = State(initialValue: file.foods)
@@ -179,25 +194,25 @@ struct CustomMealImportView: View {
                     Toggle("Save to Saved meals", isOn: $saveForReuse)
                 } footer: {
                     Text(saveForReuse
-                        ? "The meal will be logged today and remain available for reuse."
-                        : "The meal will be logged today as a one-off. Its foods can still be inspected or broken apart from the diary entry.")
+                        ? "The meal will be logged on \(targetDate.formatted(date: .abbreviated, time: .omitted)) and saved for reuse."
+                        : "The meal will be logged on \(targetDate.formatted(date: .abbreviated, time: .omitted)) as a one-off. Its food snapshots remain in the diary entry.")
                 }
 
             }
             .scrollContentBackground(.hidden)
             .background(AppTheme.background)
-            .navigationTitle("Review Imported Meal")
+            .navigationTitle(source.navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Log", action: logMeal)
-                        .disabled(!canLog)
+                    Button(isLogging ? "Logging…" : "Log", action: logMeal)
+                        .disabled(!canLog || isLogging || diary.isSaving)
                 }
             }
-            .analyticsScreen("meal_import_review")
+            .analyticsScreen(source == .fileImport ? "meal_import_review" : "meal_photo_review")
         }
     }
 
@@ -227,26 +242,30 @@ struct CustomMealImportView: View {
     }
 
     private func logMeal() {
+        guard !isLogging, !diary.isSaving else { return }
+        isLogging = true
         diary.run {
+            defer { isLogging = false }
             guard canLog else { return }
             let importedMeal = reviewedFile.makeMeal()
-            let previousEntryCount = diary.entries(on: Date()).count
+            let previousEntryCount = diary.entries(on: targetDate).count
             let loggedMeal = try await diary.logImportedMeal(
                 importedMeal,
-                on: Date(),
+                saveForReuse: saveForReuse,
+                on: targetDate,
                 allowCheatDay: true
             )
             if saveForReuse {
                 AppAnalytics.capture("meal.created", properties: [
-                    "origin": "file_import", "item_count": String(importedMeal.items.count)
+                    "origin": source.analyticsMethod, "item_count": String(importedMeal.items.count)
                 ])
             }
-            if diary.entries(on: Date()).count > previousEntryCount {
+            if diary.entries(on: targetDate).count > previousEntryCount {
                 AppAnalytics.capture(
                     "food_log.completed",
                     properties: FoodLogAnalytics.mealProperties(
                         meal: loggedMeal,
-                        method: "file_import",
+                        method: source.analyticsMethod,
                         mode: "import",
                         isFavorite: saveForReuse && diary.isFavorite(loggedMeal),
                         foodKind: "imported",
@@ -254,9 +273,9 @@ struct CustomMealImportView: View {
                         savedForReuse: saveForReuse
                     )
                 )
+                onLogged?()
+                dismiss()
             }
-            dismiss()
-
         }
     }
 }

@@ -60,6 +60,17 @@ The review offers an explicit opt-in to save for reuse. Component nutrition is
 totaled by the existing meal snapshot path; no diary schema migration is needed.
 See `docs/custom-import-files.md` for the public schema.
 
+In-app meal-photo analysis uses PhotosUI or the camera and a foreground-only
+`URLSession` request to the fixed OpenAI Responses endpoint. The owner-provided
+API key is stored in a device-only Keychain item. The image is normalized,
+downsampled, re-encoded as JPEG without source metadata, and sent inline with
+optional context under a strict response schema. Local validation reuses the
+`.calmeal` model and meal-review editor. The review captures its diary target
+date before analysis begins and writes nothing until the user taps Log. No diary
+or HealthKit data is sent, and no schema migration is required. The client-held
+key is suitable only for private deployment; distributed use requires an
+authenticated backend.
+
 When Apple Health is connected, `HealthKitStore` mirrors each diary entry as up
 to five nutrition quantity samples: dietary energy, carbohydrates, total fat,
 protein, and dietary Fiber when known. Each sample uses the diary entry UUID as

@@ -189,6 +189,10 @@ enum CustomImportFile {
         return "\(safeSlug)-\(suffix).calmeal"
     }
 
+    static let mealEstimationInstructions = """
+    Estimate each serving weight even if uncertain. Split a meal into meaningful components and include one component even for a simple food. For dishes plausibly cooked with butter or oil or served with dressing or sauce, estimate likely added amounts when they contribute material calories; do not add arbitrary fats when preparation does not support them. State uncertainty in the affected component's notes or meal notes. Make clear whether a component estimate includes a fat or condiment, and never count it again elsewhere. Component nutrition must include only that component; the app calculates meal totals from components. Set processed-meat true for actual bacon, ham, sausage, or other processed meat; meatless substitutes are different foods. Red meat means unprocessed mammalian meat. Set meat flags only when known; preserve uncertainty instead of copying example values.
+    """
+
     static let assistantPrompt = """
     Analyze the pictured food manually and create exactly one downloadable Yum Chase `.calmeal` JSON attachment. `.calmeal` is the only supported import format. Always represent the whole serving as one named meal with one or more food components; even a simple single food must be one meal containing one component. Never create a food-only file or multiple files.
 
@@ -231,7 +235,7 @@ enum CustomImportFile {
       "notes": "Short explanation of the overall estimate and biggest uncertainty"
     }
 
-    Replace every example value with your estimate. Use numbers, not ranges. Estimate each serving weight even if uncertain. Split a meal into meaningful components and include one component even for a simple food. For dishes plausibly cooked with butter or oil or served with dressing or sauce, estimate the likely added amount and include a distinct component when it contributes material calories; do not add arbitrary fats when preparation does not support them. State uncertainty in the affected component's notes or meal notes. Make clear whether the component estimate already includes a fat or condiment, and never count it again in another component. Component nutrition must include only that component; do not add top-level nutrition because the app calculates meal totals from components. Set containsProcessedMeat to true for actual bacon, ham, sausage, or other processed meat; meatless substitutes are different foods. Red meat means unprocessed mammalian meat. Set each meat flag only when known; omit an uncertain flag instead of copying the example false. The app can resolve missing flags without replacing your nutrition estimate. Return the `.calmeal` as a downloadable UTF-8 JSON attachment, not only as a code block.
+    Replace every example value with your estimate. Use numbers, not ranges. \(mealEstimationInstructions) The app can resolve missing flags without replacing your nutrition estimate. Return the `.calmeal` as a downloadable UTF-8 JSON attachment, not only as a code block.
     """
 
     static func load(from url: URL) throws -> CustomMealFile {

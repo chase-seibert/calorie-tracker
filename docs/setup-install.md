@@ -24,6 +24,24 @@ Siri intents, and icon quick actions exercise the same fixture.
 Set `CALORIE_TRACKER_DISABLE_SIMULATOR_FIXTURE=1` in the scheme environment when
 you explicitly need an empty, persistent simulator diary.
 
+## OpenAI meal-photo analysis
+
+This private-app integration requires an OpenAI API key entered by the owner in
+**Settings → Connections → OpenAI API**. The key remains in this device's
+non-synchronizing Keychain and is never bundled with the app. A ChatGPT app
+subscription does not provide API access; API usage is billed separately by
+OpenAI. Review current model and image-token rates at the
+[OpenAI API pricing page](https://developers.openai.com/api/docs/pricing). At
+implementation time, `gpt-6-luna` is listed at $0.10 per million input text
+tokens and $0.50 per million output text tokens; image input is billed by image
+tokens separately. The current implementation selects `gpt-6-luna` for image
+input and strict structured output. Model availability and rates can change.
+
+The app sends one foreground request to the Responses API only after the user
+chooses Analyze Photo. A retry is a new billable request. This direct
+client-key design is for private deployment; use an authenticated backend before
+distributing the app to other users.
+
 To use a standalone SQLite export from the phone as the simulator's diary,
 run:
 

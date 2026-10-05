@@ -8,7 +8,6 @@ struct FoodPickerView: View {
         case frequent = "Frequent"
         case favorites = "Favorites"
         case meals = "Meals"
-        case scan = "Scan"
 
         var id: String { rawValue }
 
@@ -33,6 +32,7 @@ struct FoodPickerView: View {
     @State private var results: [FoodPickerItem] = []
     @State private var isSearching = false
     @State private var showingCustomFoodEditor = false
+    @State private var showingMealPhotoAnalysis = false
     @State private var searchAttempt = FoodSearchAttemptTracker()
     @FocusState private var searchIsFocused: Bool
 
@@ -49,14 +49,21 @@ struct FoodPickerView: View {
             VStack(spacing: 0) {
                 searchControls
                 if query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    FoodPickerModeStrip(selection: $mode) { selectedMode in
-                        searchIsFocused = false
-                        refreshItems(for: selectedMode)
-                        AppAnalytics.capture(
-                            "food_picker.mode_selected",
-                            properties: ["mode": selectedMode.analyticsValue]
-                        )
-                    }
+                    FoodPickerModeStrip(
+                        selection: $mode,
+                        onAnalyzePhoto: {
+                            searchIsFocused = false
+                            showingMealPhotoAnalysis = true
+                            AppAnalytics.capture("food_picker.analyze_photo_selected")
+                        }
+                    ) { selectedMode in
+                            searchIsFocused = false
+                            refreshItems(for: selectedMode)
+                            AppAnalytics.capture(
+                                "food_picker.mode_selected",
+                                properties: ["mode": selectedMode.analyticsValue]
+                            )
+                        }
                 }
                 Divider()
                 Group {
@@ -121,8 +128,6 @@ struct FoodPickerView: View {
                                     onQuickLog: logMeal,
                                     onEdit: { selectedMeal = $0 }
                                 )
-                            case .scan:
-                                BarcodeLookup(catalog: catalog, onSelect: { selectedFood = diary.displayedFood($0) })
                             }
                         } else {
                             magicSuggestionsContent
@@ -197,6 +202,13 @@ struct FoodPickerView: View {
                         }
                     }
                 )
+            }
+            .sheet(isPresented: $showingMealPhotoAnalysis) {
+                MealPhotoAnalysisView(targetDate: date) {
+                    finishSearchAttempt()
+                    dismiss()
+                }
+                .environmentObject(diary)
             }
             .task {
                 guard mode == nil else { return }
@@ -567,14 +579,14 @@ private struct FoodPickerCalorieSummary: View {
 
 struct FoodPickerModeStrip: View {
     @Binding var selection: FoodPickerView.Mode?
+    let onAnalyzePhoto: () -> Void
     var isEnabled = true
-    var showsScan = true
     var onDisabledTap: (() -> Void)? = nil
     let onSelect: (FoodPickerView.Mode) -> Void
 
     var body: some View {
         FlowLayout(spacing: 6) {
-            ForEach(FoodPickerView.Mode.allCases.filter { showsScan || $0 != .scan }) { item in
+            ForEach(FoodPickerView.Mode.allCases) { item in
                 Button {
                     guard isEnabled else {
                         onDisabledTap?()
@@ -588,8 +600,6 @@ struct FoodPickerModeStrip: View {
                     Group {
                         if item == .magic {
                             Image(systemName: "wand.and.sparkles")
-                        } else if item == .scan {
-                            Image(systemName: "barcode.viewfinder")
                         } else {
                             Text(item.rawValue)
                         }
@@ -606,6 +616,17 @@ struct FoodPickerModeStrip: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel(item.rawValue)
             }
+
+            Button(action: onAnalyzePhoto) {
+                Image(systemName: "camera")
+                    .font(.caption.weight(.semibold))
+                    .frame(width: 32, height: 32)
+                    .foregroundStyle(AppTheme.ink)
+                    .background(AppTheme.controlFill, in: Capsule())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Analyze a meal photo")
+            .accessibilityHint("Choose or take a meal photo to analyze")
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)

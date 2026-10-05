@@ -1115,8 +1115,8 @@ final class DiaryEngine {
         document.entries.append(entry)
     }
 
-    func logOneOffMeal(_ meal: SavedMeal, amount: Double = 1, on date: Date) {
-        guard !meal.items.isEmpty, amount > 0, canLogFood(on: date) else { return }
+    func logOneOffMeal(_ meal: SavedMeal, amount: Double = 1, on date: Date, allowCheatDay: Bool = false) {
+        guard !meal.items.isEmpty, amount > 0, allowCheatDay || canLogFood(on: date) else { return }
         clearAutomaticStatus(on: date)
         var entry = makeMealEntry(
             for: meal,
@@ -2087,14 +2087,18 @@ final class DiaryEngine {
         return food
     }
 
-    func logImportedMeal(_ meal: SavedMeal, on date: Date, allowCheatDay: Bool = false) throws -> SavedMeal {
+    func logImportedMeal(_ meal: SavedMeal, saveForReuse: Bool = true, on date: Date, allowCheatDay: Bool = false) throws -> SavedMeal {
         guard (allowCheatDay || canLogFood(on: date)), !meal.items.isEmpty else {
             throw DiaryDatabaseError.invalidData("The meal cannot be logged on this day.")
         }
         var resolved = meal
         resolved.items = resolvedItems(meal.items)
-        document.meals.insert(resolved, at: 0)
-        logMeal(resolved, on: date, allowCheatDay: allowCheatDay)
+        if saveForReuse {
+            document.meals.insert(resolved, at: 0)
+            logMeal(resolved, on: date, allowCheatDay: allowCheatDay)
+        } else {
+            logOneOffMeal(resolved, on: date, allowCheatDay: allowCheatDay)
+        }
         return resolved
     }
 
