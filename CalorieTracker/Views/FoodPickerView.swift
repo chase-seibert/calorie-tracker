@@ -1110,6 +1110,8 @@ struct QuantityEditor: View {
     @State private var initialUnitChoice: QuantityUnitChoice
     @State private var mealItems: [MealItem]
     @State private var mealItemsWereEdited = false
+    @State private var processedMeatOverride: Bool?
+    @State private var redMeatOverride: Bool?
     @State private var showingNameEditor = false
     @State private var showingMeatClassification = false
     @FocusState private var amountIsFocused: Bool
@@ -1130,6 +1132,8 @@ struct QuantityEditor: View {
         _unitChoice = State(initialValue: .ounces)
         _initialUnitChoice = State(initialValue: .ounces)
         _mealItems = State(initialValue: [])
+        _processedMeatOverride = State(initialValue: nil)
+        _redMeatOverride = State(initialValue: nil)
     }
 
     init(
@@ -1148,6 +1152,8 @@ struct QuantityEditor: View {
         _unitChoice = State(initialValue: .portion("saved-meal"))
         _initialUnitChoice = State(initialValue: .portion("saved-meal"))
         _mealItems = State(initialValue: meal.items)
+        _processedMeatOverride = State(initialValue: nil)
+        _redMeatOverride = State(initialValue: nil)
     }
 
     init(entry: DiaryEntry) {
@@ -1160,6 +1166,8 @@ struct QuantityEditor: View {
         onLogged = { _, _ in }
         _amount = State(initialValue: entry.amount)
         _mealItems = State(initialValue: entry.mealItems ?? [])
+        _processedMeatOverride = State(initialValue: entry.processedMeatOverride)
+        _redMeatOverride = State(initialValue: entry.redMeatOverride)
         if entry.isMeal {
             _unitChoice = State(initialValue: .portion(entry.portionID ?? "saved-meal"))
             _initialUnitChoice = State(initialValue: .portion(entry.portionID ?? "saved-meal"))
@@ -1302,14 +1310,24 @@ struct QuantityEditor: View {
                     .buttonStyle(.borderedProminent)
                     .disabled(amount <= 0)
 
-                    if !isMealEditor, FoodCatalogIdentity(food: food) != nil {
+                    if entryID != nil {
+                        GroupBox(isMealEditor ? "Meal-level meat tags" : "Meat classification") {
+                            VStack(alignment: .leading, spacing: 12) {
+                                meatTagPicker("Processed meat", choice: $processedMeatOverride,
+                                              automatic: food.containsProcessedMeat)
+                                meatTagPicker("Red meat", choice: $redMeatOverride,
+                                              automatic: food.containsRedMeat)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    } else if !isMealEditor, FoodCatalogIdentity(food: food) != nil {
                         DisclosureGroup(isExpanded: $showingMeatClassification) {
                             CorpusFoodMeatTagEditor(food: food)
                         } label: {
-                            Text("Edit meat tags")
+                            Text("Edit food meat tags")
                                 .font(.subheadline.weight(.medium))
                         }
-                        .accessibilityHint("Shows separate processed meat and red meat choices")
+                        .accessibilityHint("Changes meat tags for this food in future logs")
                     }
 
                     if isMealEditor, !mealItems.isEmpty {
@@ -1317,11 +1335,11 @@ struct QuantityEditor: View {
                             Text(entryID == nil ? "Contains" : "Meal ingredients")
                                 .font(.headline)
                             if entryID != nil {
-                                Text("Adjust quantities for this logged meal only.")
+                                Text("Changes here apply to this logged meal only.")
                                     .font(.caption)
                                     .foregroundStyle(AppTheme.muted)
                                 ForEach($mealItems) { item in
-                                    MealItemEditorRow(item: item) {
+                                    MealItemEditorRow(item: item, showsMeatClassification: true) {
                                         mealItemsWereEdited = true
                                     }
                                 }
@@ -1633,6 +1651,16 @@ struct QuantityEditor: View {
                             "unit": selectedUnit.analyticsValue,
                         ])
                 }
+                if let currentEntry = diary.document.entries.first(where: { $0.id == entryID }),
+                    currentEntry.processedMeatOverride != processedMeatOverride
+                        || currentEntry.redMeatOverride != redMeatOverride
+                {
+                    try await diary.updateEntryMeatClassification(
+                        entryID: entryID,
+                        processed: processedMeatOverride,
+                        red: redMeatOverride
+                    )
+                }
             } else if let savedMeal {
                 let previousEntryCount = diary.entries(on: date).count
                 let currentMeal = diary.document.meals.first { $0.id == savedMeal.id } ?? savedMeal
@@ -1674,6 +1702,25 @@ struct QuantityEditor: View {
             }
             dismiss()
 
+        }
+    }
+
+    private func meatTagPicker(_ title: String, choice: Binding<Bool?>, automatic: Bool?) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack {
+                Text(title).font(.subheadline.weight(.semibold))
+                Spacer()
+                Picker(title, selection: choice) {
+                    Text("Automatic").tag(nil as Bool?)
+                    Text("Yes").tag(true as Bool?)
+                    Text("No").tag(false as Bool?)
+                }
+                .pickerStyle(.segmented)
+                .frame(maxWidth: 245)
+            }
+            Text(automatic.map { "Automatic: \($0 ? "Yes" : "No")" } ?? "Automatic: unknown")
+                .font(.caption)
+                .foregroundStyle(AppTheme.muted)
         }
     }
 
@@ -1775,6 +1822,7 @@ private struct MealItemRow: View {
 
 struct MealItemEditorRow: View {
     @Binding var item: MealItem
+    var showsMeatClassification = false
     var onAmountChanged: () -> Void = {}
     @FocusState private var amountIsFocused: Bool
 
@@ -1813,6 +1861,14 @@ struct MealItemEditorRow: View {
                         .frame(maxWidth: 110, alignment: .leading)
                 }
             }
+            if showsMeatClassification {
+                VStack(alignment: .leading, spacing: 5) {
+                    ingredientTagPicker("Processed meat", keyPath: \.processedMeatOverride,
+                                        automatic: item.food.containsProcessedMeat)
+                    ingredientTagPicker("Red meat", keyPath: \.redMeatOverride,
+                                        automatic: item.food.containsRedMeat)
+                }
+            }
         }
         .padding(.vertical, 7)
         .accessibilityElement(children: .contain)
@@ -1829,6 +1885,39 @@ struct MealItemEditorRow: View {
                 onAmountChanged()
             }
         )
+    }
+
+    private func ingredientTagPicker(
+        _ title: String,
+        keyPath: WritableKeyPath<MealItem, Bool?>,
+        automatic: Bool?
+    ) -> some View {
+        HStack {
+            Text(title)
+                .font(.caption.weight(.medium))
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Picker(title, selection: Binding(
+                get: { item[keyPath: keyPath] },
+                set: { value in
+                    guard value != item[keyPath: keyPath] else { return }
+                    item[keyPath: keyPath] = value
+                    onAmountChanged()
+                }
+            )) {
+                Text("Automatic").tag(nil as Bool?)
+                Text("Yes").tag(true as Bool?)
+                Text("No").tag(false as Bool?)
+            }
+            .pickerStyle(.segmented)
+            .frame(maxWidth: 245)
+        }
+        .overlay(alignment: .bottomLeading) {
+            Text(automatic.map { "Automatic: \($0 ? "Yes" : "No")" } ?? "Automatic: unknown")
+                .font(.system(size: 10))
+                .foregroundStyle(AppTheme.muted)
+                .offset(y: 13)
+        }
+        .padding(.bottom, 12)
     }
 
     private var unitLabel: String {

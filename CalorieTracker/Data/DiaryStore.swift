@@ -716,6 +716,12 @@ class DiaryStore: ObservableObject {
         }
     }
 
+    func updateEntryMeatClassification(entryID: UUID, processed: Bool?, red: Bool?) async throws {
+        try await perform(scope: .entries([entryID])) {
+            $0.updateEntryMeatClassification(entryID: entryID, processed: processed, red: red)
+        }
+    }
+
     func moveEntry(
         _ entryID: UUID,
         relativeTo targetEntryID: UUID,

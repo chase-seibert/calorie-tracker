@@ -478,6 +478,9 @@ struct MealItem: Codable, Hashable, Identifiable, Sendable {
     var unit: LogUnit
     var portionID: String? = nil
     var meatServingsOverride: Double? = nil
+    // Nil keeps the logged ingredient's original food classification.
+    var processedMeatOverride: Bool? = nil
+    var redMeatOverride: Bool? = nil
 }
 
 enum SavedMealOrigin: String, Codable, Hashable, Sendable {

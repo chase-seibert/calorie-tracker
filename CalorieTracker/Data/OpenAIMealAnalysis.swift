@@ -11,8 +11,8 @@ enum MealAnalysisError: LocalizedError, Equatable {
     case missingCredential
     case invalidCredential
     case forbidden
-    case billingLimit
-    case rateLimited
+    case billingLimit(code: String?, requestID: String?)
+    case rateLimited(code: String?, retryAfterSeconds: Int?, requestID: String?)
     case unsupportedModel
     case serverFailure
     case network
@@ -28,23 +28,49 @@ enum MealAnalysisError: LocalizedError, Equatable {
 
     var errorDescription: String? {
         switch self {
-        case .missingCredential: "Add an OpenAI API key in Settings → Connections to analyze a meal photo."
-        case .invalidCredential: "OpenAI did not accept this API key. Check it in Settings and try again."
-        case .forbidden: "This API key cannot use the selected model. Check your OpenAI project access."
-        case .billingLimit: "The OpenAI project has reached its usage or billing limit. Check its billing settings."
-        case .rateLimited: "OpenAI is receiving too many requests. Wait a moment, then choose Retry."
-        case .unsupportedModel: "The configured OpenAI model is unavailable to this API project."
-        case .serverFailure: "OpenAI could not complete the request. Your photo is still here; choose Retry to make a new API request."
-        case .network: "Could not reach OpenAI. Check your connection and choose Retry."
-        case .timedOut: "Meal analysis took too long. Your photo is still here; choose Retry to make a new API request."
-        case .responseTooLarge: "OpenAI returned a response that was too large to process safely."
-        case .invalidImage: "This photo could not be prepared. Choose another image or retake it."
-        case .imageTooLarge: "This photo is too large to analyze safely. Choose a smaller image."
-        case let .cannotEstimate(reason): reason
-        case .refused: "OpenAI could not analyze this photo. Try a clearer image of the food."
-        case .incomplete: "OpenAI did not finish the analysis. Your photo is still here; choose Retry to make a new API request."
-        case .invalidResponse: "OpenAI returned meal data the app could not validate. No meal was logged. You can retry."
-        case .credentialUnavailable: "Secure credential storage is unavailable while this device is locked. Unlock it and try again."
+        case .missingCredential: return "Add an OpenAI API key in Settings → Connections to analyze a meal photo."
+        case .invalidCredential: return "OpenAI did not accept this API key. Check it in Settings and try again."
+        case .forbidden: return "This API key cannot use the selected model. Check your OpenAI project access."
+        case let .billingLimit(code, requestID):
+            let reason: String
+            switch code {
+            case "credit_balance_exhausted": reason = "The OpenAI API account has run out of prepaid credits. Add API credits before trying again."
+            case "project_spend_limit_exceeded": reason = "The OpenAI API project reached its spend limit. Review its limit or wait for the monthly reset."
+            case "organization_spend_limit_exceeded": reason = "The OpenAI organization reached its spend limit. Review its limit or wait for the monthly reset."
+            case "organization_usage_limit_exceeded", "usage_limit_exceeded": reason = "The OpenAI organization reached its API usage limit. Review usage limits or contact the organization owner."
+            default: reason = "The OpenAI API account or project reached a billing or usage limit. Check API billing and usage limits before trying again."
+            }
+            return Self.withRequestID(reason, requestID)
+        case let .rateLimited(code, retryAfterSeconds, requestID):
+            let cause = code == "slow_down"
+                ? "OpenAI is asking this API project to slow down."
+                : "OpenAI temporarily rate-limited requests for this API project or model."
+            let delay = retryAfterSeconds.map { " Wait at least \($0) seconds before retrying." } ?? " Wait a little before retrying."
+            return Self.withRequestID("\(cause) This can be caused by request or token limits and is separate from ChatGPT access.\(delay) If it keeps happening, check the API project's rate limits and usage.", requestID)
+        case .unsupportedModel: return "The configured OpenAI model is unavailable to this API project."
+        case .serverFailure: return "OpenAI could not complete the request. Your photo is still here; choose Retry to make a new API request."
+        case .network: return "Could not reach OpenAI. Check your connection and choose Retry."
+        case .timedOut: return "Meal analysis took too long. Your photo is still here; choose Retry to make a new API request."
+        case .responseTooLarge: return "OpenAI returned a response that was too large to process safely."
+        case .invalidImage: return "This photo could not be prepared. Choose another image or retake it."
+        case .imageTooLarge: return "This photo is too large to analyze safely. Choose a smaller image."
+        case let .cannotEstimate(reason): return reason
+        case .refused: return "OpenAI could not analyze this photo. Try a clearer image of the food."
+        case .incomplete: return "OpenAI did not finish the analysis. Your photo is still here; choose Retry to make a new API request."
+        case .invalidResponse: return "OpenAI returned meal data the app could not validate. No meal was logged. You can retry."
+        case .credentialUnavailable: return "Secure credential storage is unavailable while this device is locked. Unlock it and try again."
+        }
+    }
+
+    private static func withRequestID(_ message: String, _ requestID: String?) -> String {
+        guard let requestID, !requestID.isEmpty else { return message }
+        return "\(message) OpenAI request ID: \(requestID)."
+    }
+
+    var hasAPIUsageHelp: Bool {
+        switch self {
+        case .billingLimit, .rateLimited: true
+        default: false
         }
     }
 }
@@ -264,7 +290,14 @@ struct OpenAIMealAnalysisClient: MealAnalysisClient {
                 guard body.count < Self.maximumResponseBytes else { throw MealAnalysisError.responseTooLarge }
                 body.append(byte)
             }
-            guard (200..<300).contains(http.statusCode) else { throw mapHTTPError(status: http.statusCode, body: body) }
+            guard (200..<300).contains(http.statusCode) else {
+                throw Self.mapHTTPError(
+                    status: http.statusCode,
+                    body: body,
+                    retryAfterHeader: http.value(forHTTPHeaderField: "Retry-After"),
+                    requestID: http.value(forHTTPHeaderField: "x-request-id")
+                )
+            }
             let envelope = try JSONDecoder().decode(ResponseEnvelope.self, from: body)
             if envelope.status == "incomplete" { throw MealAnalysisError.incomplete }
             if envelope.status != "completed" { throw MealAnalysisError.invalidResponse }
@@ -284,18 +317,39 @@ struct OpenAIMealAnalysisClient: MealAnalysisClient {
         catch { throw MealAnalysisError.invalidResponse }
     }
 
-    private func mapHTTPError(status: Int, body: Data) -> MealAnalysisError {
-        struct ErrorBody: Decodable { struct Detail: Decodable { let code: String? }; let error: Detail? }
-        let code = (try? JSONDecoder().decode(ErrorBody.self, from: body))?.error?.code?.lowercased() ?? ""
+    static func mapHTTPError(
+        status: Int,
+        body: Data,
+        retryAfterHeader: String? = nil,
+        requestID: String? = nil
+    ) -> MealAnalysisError {
+        struct ErrorBody: Decodable {
+            struct Detail: Decodable { let code: String? }
+            let error: Detail?
+        }
+        let code = (try? JSONDecoder().decode(ErrorBody.self, from: body))?.error?.code?.lowercased()
+        let retryAfterSeconds = retryAfterHeader.flatMap(Int.init).flatMap { $0 >= 0 ? $0 : nil }
         return switch status {
         case 401: .invalidCredential
         case 403: .forbidden
         case 404: .unsupportedModel
-        case 429 where code.contains("quota") || code.contains("billing") || code.contains("hard_limit"): .billingLimit
-        case 429: .rateLimited
+        case 429 where Self.isBillingLimit(code): .billingLimit(code: code, requestID: requestID)
+        case 429: .rateLimited(code: code, retryAfterSeconds: retryAfterSeconds, requestID: requestID)
         case 500...599: .serverFailure
         default: .invalidResponse
         }
+    }
+
+    private static func isBillingLimit(_ code: String?) -> Bool {
+        guard let code else { return false }
+        return code == "credit_balance_exhausted"
+            || code == "project_spend_limit_exceeded"
+            || code == "organization_spend_limit_exceeded"
+            || code == "organization_usage_limit_exceeded"
+            || code == "usage_limit_exceeded"
+            || code == "insufficient_quota"
+            || code.contains("billing")
+            || code.contains("hard_limit")
     }
 }
 

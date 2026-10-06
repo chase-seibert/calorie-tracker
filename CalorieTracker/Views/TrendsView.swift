@@ -498,12 +498,14 @@ private struct MeatWeekFoodsView: View {
     @State private var activeEditor: MeatDetailEditor?
 
     private enum MeatDetailEditor: Identifiable {
-        case tags(Food)
+        case foodTags(Food)
+        case loggedTags(MeatDayFood)
         case servings(MeatDayFood)
 
         var id: String {
             switch self {
-            case let .tags(food): "tags:\(food.id)"
+            case let .foodTags(food): "food-tags:\(food.id)"
+            case let .loggedTags(item): "logged-tags:\(item.id)"
             case let .servings(item): "servings:\(item.id)"
             }
         }
@@ -537,7 +539,8 @@ private struct MeatWeekFoodsView: View {
                                         foods: day.processedMeatItems,
                                         color: AppTheme.processedMeat,
                                         onAdjustServings: { activeEditor = .servings($0) },
-                                        onEditTags: { activeEditor = .tags($0) }
+                                        onEditTags: { activeEditor = .foodTags($0) },
+                                        onEditLoggedTags: { activeEditor = .loggedTags($0) }
                                     )
                                 }
                                 if showsRedMeat, !day.redMeatFoods.isEmpty {
@@ -547,7 +550,8 @@ private struct MeatWeekFoodsView: View {
                                         foods: day.redMeatItems,
                                         color: AppTheme.redMeat,
                                         onAdjustServings: { activeEditor = .servings($0) },
-                                        onEditTags: { activeEditor = .tags($0) }
+                                        onEditTags: { activeEditor = .foodTags($0) },
+                                        onEditLoggedTags: { activeEditor = .loggedTags($0) }
                                     )
                                 }
                             }
@@ -580,7 +584,7 @@ private struct MeatWeekFoodsView: View {
             }
             .sheet(item: $activeEditor, onDismiss: refreshDays) { editor in
                 switch editor {
-                case let .tags(food):
+                case let .foodTags(food):
                     NavigationStack {
                         CorpusFoodMeatTagEditor(food: food, onSaved: refreshDays)
                             .padding()
@@ -592,6 +596,8 @@ private struct MeatWeekFoodsView: View {
                             }
                     }
                     .presentationDetents([.medium])
+                case let .loggedTags(item):
+                    LoggedMeatTagSelectionView(item: item)
                 case let .servings(item):
                     MeatServingsAdjustmentView(item: item)
                 }
@@ -605,7 +611,8 @@ private struct MeatWeekFoodsView: View {
         foods: [MeatDayFood],
         color: Color,
         onAdjustServings: @escaping (MeatDayFood) -> Void,
-        onEditTags: @escaping (Food) -> Void
+        onEditTags: @escaping (Food) -> Void,
+        onEditLoggedTags: @escaping (MeatDayFood) -> Void
     ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 7) {
@@ -623,7 +630,8 @@ private struct MeatWeekFoodsView: View {
                     onEditTags: {
                         guard let food = item.food, FoodCatalogIdentity(food: food) != nil else { return }
                         onEditTags(food)
-                    }
+                    },
+                    onEditLoggedTags: { onEditLoggedTags(item) }
                 )
             }
         }
@@ -647,6 +655,7 @@ private struct MeatDayFoodRow: View {
     let item: MeatDayFood
     let onAdjustServings: () -> Void
     let onEditTags: () -> Void
+    let onEditLoggedTags: () -> Void
 
     private func calculationDescription(for contribution: MeatDayFoodContribution) -> String {
         if contribution.isMealFallback {
@@ -690,8 +699,10 @@ private struct MeatDayFoodRow: View {
             HStack(spacing: 18) {
                 Button("Adjust servings", systemImage: "slider.horizontal.3", action: onAdjustServings)
                     .font(.caption.weight(.medium))
+                Button("Edit logged tags", systemImage: "tag", action: onEditLoggedTags)
+                    .font(.caption.weight(.medium))
                 if item.food.map({ FoodCatalogIdentity(food: $0) != nil }) == true {
-                    Button("Edit tags", systemImage: "tag", action: onEditTags)
+                    Button("Edit food tags", systemImage: "tag", action: onEditTags)
                         .font(.caption.weight(.medium))
                 }
             }
@@ -699,6 +710,46 @@ private struct MeatDayFoodRow: View {
         }
         .padding(.vertical, 5)
         .accessibilityElement(children: .contain)
+    }
+}
+
+private struct LoggedMeatTagSelectionView: View {
+    @EnvironmentObject private var diary: DiaryStore
+    @Environment(\.dismiss) private var dismiss
+
+    let item: MeatDayFood
+
+    var body: some View {
+        NavigationStack {
+            List(item.contributions) { contribution in
+                if let entry = diary.document.entries.first(where: { $0.id == contribution.entryID }) {
+                    NavigationLink {
+                        QuantityEditor(entry: entry)
+                    } label: {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(contributionName(contribution, entry: entry))
+                                .font(.body.weight(.medium))
+                            Text("\(entry.date.formatted(date: .abbreviated, time: .omitted)) · \(entry.amount.cleanAmount) \(entry.unit.title)")
+                                .font(.caption)
+                                .foregroundStyle(AppTheme.muted)
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Logged entries")
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private func contributionName(_ contribution: MeatDayFoodContribution, entry: DiaryEntry) -> String {
+        guard let mealItemID = contribution.mealItemID,
+            let ingredient = entry.mealItems?.first(where: { $0.id == mealItemID })
+        else { return entry.food.name }
+        return "\(entry.food.name) — \(ingredient.food.name)"
     }
 }
 

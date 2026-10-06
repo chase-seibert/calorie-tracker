@@ -23,6 +23,40 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(format["strict"] as? Bool, true)
     }
 
+    func testMealAnalysis429ErrorsDistinguishLimitsAndIncludeRetryDiagnostics() {
+        let retryBody = Data(#"{"error":{"code":"rate_limit_exceeded"}}"#.utf8)
+        let rateLimit = OpenAIMealAnalysisClient.mapHTTPError(
+            status: 429,
+            body: retryBody,
+            retryAfterHeader: "45",
+            requestID: "req_test123"
+        )
+        XCTAssertEqual(rateLimit, .rateLimited(code: "rate_limit_exceeded", retryAfterSeconds: 45, requestID: "req_test123"))
+        XCTAssertTrue(rateLimit.localizedDescription.contains("Wait at least 45 seconds"))
+        XCTAssertTrue(rateLimit.localizedDescription.contains("req_test123"))
+
+        let billingCodes = [
+            "credit_balance_exhausted",
+            "project_spend_limit_exceeded",
+            "organization_spend_limit_exceeded",
+            "organization_usage_limit_exceeded",
+            "usage_limit_exceeded",
+            "insufficient_quota"
+        ]
+        for code in billingCodes {
+            let body = Data("{\"error\":{\"code\":\"\(code)\"}}".utf8)
+            let error = OpenAIMealAnalysisClient.mapHTTPError(status: 429, body: body)
+            XCTAssertEqual(error, .billingLimit(code: code, requestID: nil), "Expected \(code) to be treated as a billing or usage limit")
+            XCTAssertTrue(error.hasAPIUsageHelp)
+            XCTAssertFalse(error.localizedDescription.contains("Wait a little before retrying"))
+        }
+
+        let slowDownBody = Data(#"{"error":{"code":"slow_down"}}"#.utf8)
+        let slowDown = OpenAIMealAnalysisClient.mapHTTPError(status: 429, body: slowDownBody)
+        XCTAssertEqual(slowDown, .rateLimited(code: "slow_down", retryAfterSeconds: nil, requestID: nil))
+        XCTAssertTrue(slowDown.localizedDescription.contains("asking this API project to slow down"))
+    }
+
     func testMealAnalysisResponsePreservesNullableUnknownsAndValidatesBounds() throws {
         let valid = #"{"status":"success","reason":null,"meal":{"format":"calorie-tracker-meal","version":1,"name":"Soup","notes":null,"foods":[{"name":"Bean soup","servingDescription":"1 bowl","servingGrams":300,"notes":null,"containsProcessedMeat":null,"containsRedMeat":null,"nutrition":{"calories":240,"carbohydratesGrams":38,"fatGrams":5,"proteinGrams":12,"fiberGrams":null}}]}}"#
         let result = try JSONDecoder().decode(MealAnalysisResponse.self, from: Data(valid.utf8)).validatedMeal()
@@ -2452,6 +2486,111 @@ final class CalorieTrackerTests: XCTestCase {
         )
         XCTAssertEqual(details.processedMeatFoods, ["Bacon"])
         XCTAssertEqual(details.redMeatFoods, ["Steak dinner — Steak"])
+    }
+
+    func testLoggedFoodMeatOverridesApplyToAnyEntryAndRestoreAutomaticAfterReload() throws {
+        let day = testDate(day: 1)
+        var jambalaya = testFood(calories: 300, name: "Jambalaya")
+        jambalaya.containsProcessedMeat = false
+        jambalaya.containsRedMeat = true
+        let engine = DiaryEngine(document: DiaryDocument(), calendar: testCalendar)
+        engine.log(jambalaya, amount: 1, unit: .serving, on: day)
+        engine.log(jambalaya, amount: 2, unit: .serving, on: testDate(day: 2))
+
+        let repository = try DiaryRepository(fileURL: temporaryDiaryURL(), calendar: testCalendar)
+        try repository.importDocument(engine.document)
+        let before = try repository.snapshotSync().document
+        let target = try XCTUnwrap(before.entries.first)
+        let other = try XCTUnwrap(before.entries.last)
+        let originalNutrients = target.nutrients
+
+        try repository.performSync(scope: .entries([target.id])) {
+            $0.updateEntryMeatClassification(entryID: target.id, processed: true, red: false)
+        }
+        var after = try repository.snapshotSync().document
+        var edited = try XCTUnwrap(after.entries.first { $0.id == target.id })
+        XCTAssertEqual(edited.processedMeatOverride, true)
+        XCTAssertEqual(edited.redMeatOverride, false)
+        XCTAssertEqual(edited.food.containsProcessedMeat, false, "Overrides must not rewrite the Automatic food snapshot.")
+        XCTAssertEqual(edited.food.containsRedMeat, true)
+        XCTAssertEqual(edited.nutrients, originalNutrients)
+        XCTAssertEqual(try XCTUnwrap(after.entries.first { $0.id == other.id }), other)
+        XCTAssertEqual(DiaryEngine(document: after, calendar: testCalendar).meatPresence(on: day),
+                       MeatClassification(containsProcessedMeat: true, containsRedMeat: false))
+
+        try repository.performSync(scope: .entries([target.id])) {
+            $0.updateEntryMeatClassification(entryID: target.id, processed: nil, red: true)
+        }
+        after = try repository.snapshotSync().document
+        edited = try XCTUnwrap(after.entries.first { $0.id == target.id })
+        XCTAssertNil(edited.processedMeatOverride)
+        XCTAssertEqual(edited.redMeatOverride, true)
+        XCTAssertEqual(DiaryEngine(document: after, calendar: testCalendar).meatPresence(on: day),
+                       MeatClassification(containsProcessedMeat: false, containsRedMeat: true))
+
+        try repository.performSync(scope: .entries([target.id])) {
+            $0.updateEntryMeatClassification(entryID: target.id, processed: nil, red: nil)
+        }
+        after = try repository.snapshotSync().document
+        edited = try XCTUnwrap(after.entries.first { $0.id == target.id })
+        XCTAssertNil(edited.processedMeatOverride)
+        XCTAssertNil(edited.redMeatOverride)
+        XCTAssertEqual(DiaryEngine(document: after, calendar: testCalendar).meatPresence(on: day),
+                       MeatClassification(containsProcessedMeat: false, containsRedMeat: true))
+    }
+
+    func testLoggedMealIngredientMeatOverridesPersistOnlyOnEditedSnapshot() throws {
+        let day = testDate(day: 1)
+        var sausage = testFood(calories: 120, name: "Sausage")
+        sausage.containsProcessedMeat = false
+        sausage.containsRedMeat = true
+        var rice = testFood(calories: 180, name: "Rice")
+        rice.containsProcessedMeat = false
+        rice.containsRedMeat = false
+        let meal = SavedMeal(id: UUID(), name: "Jambalaya", items: [
+            MealItem(id: UUID(), food: sausage, amount: 1, unit: .serving),
+            MealItem(id: UUID(), food: rice, amount: 1, unit: .serving),
+        ])
+        var document = DiaryDocument()
+        document.meals = [meal]
+        let engine = DiaryEngine(document: document, calendar: testCalendar)
+        engine.logMeal(meal, on: day)
+        engine.logMeal(meal, on: testDate(day: 2))
+        let repository = try DiaryRepository(fileURL: temporaryDiaryURL(), calendar: testCalendar)
+        try repository.importDocument(engine.document)
+        let before = try repository.snapshotSync().document
+        let target = try XCTUnwrap(before.entries.first)
+        let secondLog = try XCTUnwrap(before.entries.last)
+        var editedItems = try XCTUnwrap(target.mealItems)
+        editedItems[0].processedMeatOverride = true
+        editedItems[0].redMeatOverride = false
+
+        try repository.performSync(scope: .entries([target.id])) {
+            $0.updateMealEntry(entryID: target.id, amount: target.amount, items: editedItems)
+        }
+
+        let after = try repository.snapshotSync().document
+        let edited = try XCTUnwrap(after.entries.first { $0.id == target.id })
+        XCTAssertNil(edited.savedMealID)
+        XCTAssertEqual(edited.mealItems?[0].processedMeatOverride, true)
+        XCTAssertEqual(edited.mealItems?[0].redMeatOverride, false)
+        XCTAssertEqual(edited.nutrients, target.nutrients)
+        XCTAssertEqual(try XCTUnwrap(after.entries.first { $0.id == secondLog.id }), secondLog)
+        XCTAssertEqual(after.meals.first?.items[0].processedMeatOverride, nil)
+        XCTAssertEqual(after.meals.first?.items[0].redMeatOverride, nil)
+        let details = try XCTUnwrap(DiaryEngine(document: after, calendar: testCalendar)
+            .meatDayFoods(numberOfDays: 1, referenceDate: day).first)
+        XCTAssertEqual(details.processedMeatFoods, ["Jambalaya — Sausage"])
+        XCTAssertTrue(details.redMeatFoods.isEmpty)
+    }
+
+    func testLegacyMealItemPayloadDecodesWithoutMeatOverrideFields() throws {
+        let food = testFood(calories: 10, name: "Rice")
+        let item = MealItem(id: UUID(), food: food, amount: 1, unit: .serving)
+        let encoded = try JSONEncoder().encode(item)
+        let decoded = try JSONDecoder().decode(MealItem.self, from: encoded)
+        XCTAssertNil(decoded.processedMeatOverride)
+        XCTAssertNil(decoded.redMeatOverride)
     }
 
     @MainActor

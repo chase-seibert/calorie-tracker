@@ -160,7 +160,9 @@ struct DiaryTool {
             engine.logOneOffMeal(meal, on: today)
         }
         let detached = try repository.snapshotSync().document.entries[0]
-        try require(detached.savedMealID == nil && detached.mealItems == [item], "Detached snapshot lost.")
+        var expectedItem = item
+        expectedItem.food.name = "My bacon"
+        try require(detached.savedMealID == nil && detached.mealItems == [expectedItem], "Detached snapshot lost.")
         try require(detached.nutrients.fiber == nil, "Unknown fiber became zero.")
         let engine = DiaryEngine(document: try repository.snapshotSync().document)
         try require(engine.meatPresence(on: today).containsProcessedMeat, "Ingredient bacon classification lost.")

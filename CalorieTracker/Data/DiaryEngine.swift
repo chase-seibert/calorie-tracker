@@ -151,7 +151,7 @@ final class DiaryEngine {
                 var matchedProcessed = false
                 var matchedRed = false
                 for item in items {
-                    let classification = Self.classification(for: item.food)
+                    let classification = mealItemMeatClassification(item)
                     let calculatedServings = servingEquivalent(
                         amount: item.amount,
                         unit: item.unit,
@@ -180,7 +180,7 @@ final class DiaryEngine {
                     red += fallbackServings
                 }
             } else {
-                let classification = Self.classification(for: entry.food)
+                let classification = entryMeatClassification(entry)
                 let calculatedServings = servingEquivalent(
                     amount: entry.amount,
                     unit: entry.unit,
@@ -492,6 +492,20 @@ final class DiaryEngine {
             unit: unit,
             portionID: portionID
         )
+    }
+
+    func updateEntryMeatClassification(entryID: UUID, processed: Bool?, red: Bool?) {
+        guard let index = document.entries.firstIndex(where: { $0.id == entryID }),
+            !document.entries[index].isCheatDayAdjustment
+        else { return }
+
+        // Once a saved-meal log receives a direct correction, retain it as this
+        // diary entry's snapshot so later template edits cannot replace the choice.
+        if document.entries[index].isMeal {
+            document.entries[index].savedMealID = nil
+        }
+        document.entries[index].processedMeatOverride = processed
+        document.entries[index].redMeatOverride = red
     }
 
     func updateMeatServingsOverride(contributions: [MeatDayFoodContribution], servings: Double?) {
@@ -1768,12 +1782,24 @@ final class DiaryEngine {
 
     private func entryMeatClassification(_ entry: DiaryEntry) -> MeatClassification {
         guard entry.isMeal, let items = entry.mealItems else {
-            return Self.classification(for: entry.food)
+            let derived = Self.classification(for: entry.food)
+            return MeatClassification(
+                containsProcessedMeat: entry.processedMeatOverride ?? derived.containsProcessedMeat,
+                containsRedMeat: entry.redMeatOverride ?? derived.containsRedMeat
+            )
         }
         let derived = Self.meatClassification(for: items)
         return MeatClassification(
             containsProcessedMeat: entry.processedMeatOverride ?? derived.containsProcessedMeat,
             containsRedMeat: entry.redMeatOverride ?? derived.containsRedMeat
+        )
+    }
+
+    private func mealItemMeatClassification(_ item: MealItem) -> MeatClassification {
+        let derived = Self.classification(for: item.food)
+        return MeatClassification(
+            containsProcessedMeat: item.processedMeatOverride ?? derived.containsProcessedMeat,
+            containsRedMeat: item.redMeatOverride ?? derived.containsRedMeat
         )
     }
 
@@ -1803,7 +1829,7 @@ final class DiaryEngine {
                         isMealFallback: false
                     ),
                     item.food,
-                    Self.classification(for: item.food)
+                    mealItemMeatClassification(item)
                 )
             }
 
@@ -1906,8 +1932,12 @@ final class DiaryEngine {
 
     private static func meatClassification(for items: [MealItem]) -> MeatClassification {
         MeatClassification(
-            containsProcessedMeat: items.contains { classification(for: $0.food).containsProcessedMeat },
-            containsRedMeat: items.contains { classification(for: $0.food).containsRedMeat }
+            containsProcessedMeat: items.contains {
+                $0.processedMeatOverride ?? classification(for: $0.food).containsProcessedMeat
+            },
+            containsRedMeat: items.contains {
+                $0.redMeatOverride ?? classification(for: $0.food).containsRedMeat
+            }
         )
     }
 

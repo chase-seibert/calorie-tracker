@@ -19,6 +19,7 @@ struct MealPhotoAnalysisView: View {
     @State private var requestGeneration = UUID()
     @State private var isAnalyzing = false
     @State private var errorMessage: String?
+    @State private var errorNeedsUsageHelp = false
     @State private var reviewingFile: CustomMealFile?
     @State private var showingCamera = false
     @State private var showingCameraUnavailable = false
@@ -101,6 +102,10 @@ struct MealPhotoAnalysisView: View {
                     }
                     if let errorMessage {
                         Text(errorMessage).font(.callout).foregroundStyle(.red)
+                        if errorNeedsUsageHelp {
+                            Link("Check OpenAI API rate limits", destination: URL(string: "https://platform.openai.com/settings/organization/limits")!)
+                            Link("Check OpenAI API billing", destination: URL(string: "https://platform.openai.com/settings/organization/billing/overview")!)
+                        }
                         if sourceImage != nil && !isAnalyzing {
                             Button("Retry Analysis") { startAnalysis() }
                         }
@@ -126,6 +131,7 @@ struct MealPhotoAnalysisView: View {
                     }
                     sourceImage = data
                     errorMessage = nil
+                    errorNeedsUsageHelp = false
                 }
             }
             .alert("Camera unavailable", isPresented: $showingCameraUnavailable) {
@@ -164,6 +170,7 @@ struct MealPhotoAnalysisView: View {
         requestGeneration = generation
         let requestContext = context
         errorMessage = nil
+        errorNeedsUsageHelp = false
         isAnalyzing = true
         analysisTask = Task {
             defer {
@@ -183,6 +190,7 @@ struct MealPhotoAnalysisView: View {
             } catch {
                 guard !Task.isCancelled, requestGeneration == generation else { return }
                 errorMessage = error.localizedDescription
+                errorNeedsUsageHelp = (error as? MealAnalysisError)?.hasAPIUsageHelp == true
             }
         }
     }

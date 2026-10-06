@@ -1,5 +1,13 @@
 # Frustration Log
 
+## 2026-10-06: Storage self-test expected a pre-rename ingredient name
+
+The detached-meal storage self-test compared its logged ingredient to the
+original `Bacon` value even though the fixture also sets the diary's custom
+food name to `My bacon`. `DiaryEngine` correctly applies that name to the
+logged snapshot. Build the expected item with the mapped name before comparing
+the round trip.
+
 ## 2026-09-02: Concurrent UI tests fought over the default simulator
 
 The snack navigation UI test lost its Settings tap when a separate StrengthLog
