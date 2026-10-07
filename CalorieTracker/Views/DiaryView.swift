@@ -29,7 +29,6 @@ struct DiaryView: View {
     @State private var showingBottomCheatPopover = false
     @State private var showingBannerCheatPopover = false
     @State private var showingLogFoodCheatPopover = false
-    @State private var showingLoggedEntriesCheatPopover = false
     @State private var didSeedDebugScreenshot = false
     @State private var activeCheatDayDiagnosticsID: String?
     @State private var activeCheatDayStartedAt: UInt64?
@@ -58,9 +57,11 @@ struct DiaryView: View {
                                     showingBannerCheatPopover = true
                                 } label: {
                                     DayStatusBanner(status: status)
+                                        .contentShape(Rectangle())
                                 }
                                 .buttonStyle(.plain)
                                 .accessibilityHint("Undo this cheat day")
+                                .accessibilityIdentifier("cheat-day-banner")
                                 .cheatDayPopover(
                                     isPresented: $showingBannerCheatPopover,
                                     date: date,
@@ -232,6 +233,7 @@ struct DiaryView: View {
                         .tint(AppTheme.coral)
                         .disabled(isFutureDay)
                         .accessibilityLabel(isCheatDay ? "Undo cheat day" : "Mark cheat day")
+                        .accessibilityIdentifier("cheat-day-toolbar")
                         .cheatDayPopover(
                             isPresented: $showingBottomCheatPopover,
                             date: date,
@@ -502,7 +504,8 @@ struct DiaryView: View {
                             },
                             onEdit: { entry in
                                 if isCheatDay {
-                                    showingLoggedEntriesCheatPopover = true
+                                    // The list can extend offscreen; anchor confirmation to the fixed toolbar.
+                                    showingBottomCheatPopover = true
                                 } else if !entry.isCheatDayAdjustment {
                                     editingEntry = entry
                                 }
@@ -530,15 +533,6 @@ struct DiaryView: View {
                         .accessibilityIdentifier("logged-foods-reorder-list")
                         .frame(height: max(diaryEntriesHeight, CGFloat(entries.count) * 78))
                         .padding(.horizontal, 16)
-                        .cheatDayPopover(
-                            isPresented: $showingLoggedEntriesCheatPopover,
-                            date: date,
-                            isCheatDay: isCheatDay,
-                            arrowEdge: .top,
-                            onConfirm: { diagnosticsID in
-                                confirmCheatDayAction(diagnosticsID: diagnosticsID)
-                            }
-                        )
                     }
                 }
             }
@@ -623,26 +617,31 @@ struct DiaryView: View {
     }
 
     private func confirmCheatDayAction(diagnosticsID: String? = nil) {
-        let operationName = isCheatDay ? "cheat_day_clear" : "cheat_day_mark"
+        // Capture the confirmed intent before a queued action or date navigation changes the view.
+        let targetDate = date
+        let shouldUndo = isCheatDay
+        let preserveAdjustment = alwaysShowQuickCalories
+        let dayRelation = analyticsDayRelation
+        let operationName = shouldUndo ? "cheat_day_clear" : "cheat_day_mark"
         let operationID = diagnosticsID ?? DiaryPerformanceDiagnostics.newOperationID()
         activeCheatDayDiagnosticsID = operationID
         activeCheatDayStartedAt = DiaryPerformanceDiagnostics.monotonicTimestamp()
         DiaryPerformanceDiagnostics.record(
             "confirmation_received",
             operationID: operationID,
-            properties: ["action": isCheatDay ? "clear" : "mark"]
+            properties: ["action": shouldUndo ? "clear" : "mark"]
         )
         diary.run(operation: operationName, operationID: operationID) {
-            if isCheatDay {
+            if shouldUndo {
                 try await diary.undoCheatDay(
-                    on: date,
-                    preservingCalorieAdjustment: alwaysShowQuickCalories,
+                    on: targetDate,
+                    preservingCalorieAdjustment: preserveAdjustment,
                     diagnosticsID: operationID
                 )
-                AppAnalytics.capture("cheat_day.cleared", properties: ["day": analyticsDayRelation])
+                AppAnalytics.capture("cheat_day.cleared", properties: ["day": dayRelation])
             } else {
-                try await diary.markCheatDay(on: date, diagnosticsID: operationID)
-                AppAnalytics.capture("cheat_day.marked", properties: ["day": analyticsDayRelation])
+                try await diary.markCheatDay(on: targetDate, diagnosticsID: operationID)
+                AppAnalytics.capture("cheat_day.marked", properties: ["day": dayRelation])
             }
 
         }
@@ -824,8 +823,8 @@ private struct CheatDayPopoverModifier: ViewModifier {
                     operationID: operationID,
                     properties: ["action": isCheatDay ? "clear" : "mark"]
                 )
-                onConfirm(operationID)
                 isPresented = false
+                onConfirm(operationID)
             }
             .onAppear {
                 let operationID = DiaryPerformanceDiagnostics.newOperationID()
@@ -873,6 +872,7 @@ private struct CheatDayActionPopover: View {
     let isCheatDay: Bool
     let diagnosticsID: String?
     let onConfirm: (String) -> Void
+    @State private var hasConfirmed = false
 
     private var relativeDayName: String {
         if Calendar.current.isDateInToday(date) { return "Today" }
@@ -894,7 +894,9 @@ private struct CheatDayActionPopover: View {
                 .font(.subheadline)
                 .foregroundStyle(AppTheme.muted)
                 .fixedSize(horizontal: false, vertical: true)
-            Button(isCheatDay ? "Undo Cheat Day" : "Yes") {
+            Button {
+                guard !hasConfirmed else { return }
+                hasConfirmed = true
                 let operationID = diagnosticsID ?? DiaryPerformanceDiagnostics.newOperationID()
                 DiaryPerformanceDiagnostics.record(
                     "confirmation_button_invoked",
@@ -902,13 +904,18 @@ private struct CheatDayActionPopover: View {
                     properties: ["action": isCheatDay ? "clear" : "mark"]
                 )
                 onConfirm(operationID)
+            } label: {
+                Text(isCheatDay ? "Undo Cheat Day" : "Yes")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 11)
+                    .background(AppTheme.coral, in: Capsule())
+                    .contentShape(Capsule())
             }
-                .font(.headline)
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 11)
-                .background(AppTheme.coral, in: Capsule())
-                .buttonStyle(.plain)
+            .buttonStyle(.plain)
+            .disabled(hasConfirmed)
+            .accessibilityIdentifier("cheat-day-confirm")
         }
         .padding(18)
         .frame(width: 310)

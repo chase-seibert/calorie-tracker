@@ -276,6 +276,18 @@ diary content or exact dates. The UI records share an operation ID with the
 store timings, so a future reproduction can distinguish an input-recognition
 delay, a popover-dismissal delay, and a slow SwiftUI update.
 
+The confirmation capsule's layout and content shape belong inside the button
+label, so Yes/Undo accepts taps across its visible area. Each popover accepts
+only one confirmation while dismissing. Tapping a logged food on a cheat day
+uses the fixed toolbar's popover; the full list can extend beyond the viewport
+and must not anchor a confirmation offscreen. The queued action captures the
+selected date, mark/undo intent, and adjustment preference at confirmation time.
+Later changes to view state cannot retarget a waiting action.
+`make ui-test-cheat-day` covers capsule-edge taps, rapid duplicate taps, 20
+mark/undo cycles across toolbar, banner, logging, alcohol, and logged-food entry
+points, selected dates, food retention, and relaunch persistence. A store test
+also verifies rollback/error recovery followed by repeated persisted cycles.
+
 The broader product event catalog is documented in
 [`analytics-events.md`](analytics-events.md). Feature-usage events carry only
 coarse categorical context and counts; food names, meal contents, diary

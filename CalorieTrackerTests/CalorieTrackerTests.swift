@@ -948,6 +948,56 @@ final class CalorieTrackerTests: XCTestCase {
     }
 
     @MainActor
+    func testCheatDayQueueRecoversAfterRolledBackSaveAndPersistsRepeatedCycles() async throws {
+        let url = temporaryDiaryURL()
+        let day = Calendar.current.startOfDay(for: Date())
+        let entry = testEntry(calories: 300, date: day, name: "Retained food")
+        var document = DiaryDocument()
+        document.entries = [entry]
+        let store = DiaryStore(document: document, fileURL: url)
+        await store.reloadFromDisk()
+        let repository = try XCTUnwrap(store.repository)
+
+        store.run {
+            try await repository.perform(scope: .day(day)) { engine in
+                engine.markCheatDay(on: day)
+                throw DiaryDatabaseError.invalidData("Injected save failure")
+            }
+        }
+        try await waitForDiaryActions(store)
+        XCTAssertNotNil(store.lastSaveError)
+        XCTAssertNil(store.status(on: day))
+        XCTAssertNil(try repository.snapshotSync().document.dayStatuses.first { $0.kind == .cheat })
+        store.dismissSaveError()
+
+        for _ in 0..<20 {
+            store.run { try await store.markCheatDay(on: day) }
+            try await waitForDiaryActions(store)
+            XCTAssertEqual(store.status(on: day)?.kind, .cheat)
+            XCTAssertNil(store.lastSaveError)
+            store.run { try await store.undoCheatDay(on: day) }
+            try await waitForDiaryActions(store)
+            XCTAssertNil(store.status(on: day))
+            XCTAssertNil(store.lastSaveError)
+            XCTAssertEqual(store.entries(on: day), [entry])
+        }
+        let reloaded = DiaryStore(fileURL: url)
+        await reloaded.reloadFromDisk()
+        XCTAssertNil(reloaded.lastSaveError)
+        XCTAssertNil(reloaded.status(on: day))
+        XCTAssertEqual(reloaded.entries(on: day), [entry])
+    }
+
+    @MainActor
+    private func waitForDiaryActions(_ store: DiaryStore) async throws {
+        let deadline = ContinuousClock.now + .seconds(3)
+        while store.isSaving, ContinuousClock.now < deadline {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        XCTAssertFalse(store.isSaving, "The serialized queue must recover and become idle")
+    }
+
+    @MainActor
     func testFailedDiaryLoadDoesNotPublishAnEmptyUsableStore() async throws {
         let url = temporaryDiaryURL()
         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)

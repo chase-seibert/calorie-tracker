@@ -1,5 +1,20 @@
 # Frustration Log
 
+## 2026-10-07: Visible popover controls can miss input or sit offscreen
+
+The cheat-day confirmation drew a capsule outside a plain text Button's label,
+so tapping its visible padding never invoked the action. Move all button layout
+inside the label and define its content shape. Stress testing found a second
+missed-input path: anchoring the popover to the bottom of the full logged-food
+list placed the confirmation at y=937 on an 874-point screen. Reuse the fixed
+bottom toolbar popover for row taps. Check actual hit areas and onscreen frames
+before attributing missing confirmation callbacks to the action queue or SQLite.
+
+For fixture relaunch checks, set `CALORIE_TRACKER_DISABLE_SIMULATOR_FIXTURE=1`
+alongside explicit `CALORIE_TRACKER_FIXTURE=device`. Otherwise the default
+simulator demo forces a fresh database even with `CALORIE_TRACKER_FIXTURE_RESET=0`,
+which can look like a persistence failure after successful commits.
+
 ## 2026-10-06: Storage self-test expected a pre-rename ingredient name
 
 The detached-meal storage self-test compared its logged ingredient to the
