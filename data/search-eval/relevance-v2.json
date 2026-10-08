@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "datasetVersion": "account-calibration-2026-10-08-v2",
   "catalogFingerprint": "b04f972920c6",
-  "rankingRuleVersion": "catalog-fts5-v1",
+  "rankingRuleVersion": "catalog-fts5-v2-broad-simplicity",
   "queries": [
     {
       "query": "rice",

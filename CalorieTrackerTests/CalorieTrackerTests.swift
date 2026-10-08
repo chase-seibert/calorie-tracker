@@ -2093,6 +2093,100 @@ final class CalorieTrackerTests: XCTestCase {
         }
     }
 
+    func testBroadCatalogSearchPromotesSimpleFoodStatesAndPreservesQualifiedQueries() throws {
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let catalog = CatalogStore(url: root.appendingPathComponent("CalorieTracker/Resources/FoodCatalog.sqlite3"))
+
+        for (query, expectedTopID) in [
+            ("rice", "usda:2708408"),
+            ("milk", "usda:2705385"),
+            ("coffee", "usda:2710375"),
+            ("banana", "usda:2709224"),
+        ] {
+            XCTAssertEqual(catalog.searchAll(query, limit: 10).first?.id, expectedTopID, "Unexpected top result for \(query)")
+        }
+        XCTAssertEqual(catalog.searchAll("coffee", limit: 10).dropFirst().first?.id, "usda:2710378")
+
+        XCTAssertEqual(catalog.searchAll("fried rice", limit: 10).first?.name, "Rice, fried, NFS")
+        XCTAssertEqual(catalog.search("fried rice", source: .usda, limit: 10).first?.name, "Rice, fried, NFS")
+    }
+
+    func testDeveloperFoodSearchRankingSettingSwitchesVersionsImmediately() throws {
+        XCTAssertEqual(FoodSearchRankingVersion.orderedByVersion.map(\.versionNumber), [1, 2, 3])
+        XCTAssertEqual(FoodSearchRankingVersion.latest, .canonicalFirst)
+        XCTAssertTrue(FoodSearchRankingVersion.latest.title.contains("Latest"))
+
+        let defaults = UserDefaults.standard
+        let key = FoodSearchRankingVersion.preferenceKey
+        let previousValue = defaults.object(forKey: key)
+        defer {
+            if let previousValue {
+                defaults.set(previousValue, forKey: key)
+            } else {
+                defaults.removeObject(forKey: key)
+            }
+        }
+
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let catalog = CatalogStore(url: root.appendingPathComponent("CalorieTracker/Resources/FoodCatalog.sqlite3"))
+
+        defaults.set(FoodSearchRankingVersion.original.rawValue, forKey: key)
+        XCTAssertEqual(catalog.searchAll("rice", limit: 10).first?.id, "usda:2708952")
+        XCTAssertEqual(catalog.searchAll("fried rice", limit: 10).first?.name, "Rice, fried, NFS")
+
+        defaults.set(FoodSearchRankingVersion.broadSimplicity.rawValue, forKey: key)
+        XCTAssertEqual(catalog.searchAll("rice", limit: 10).first?.id, "usda:2708408")
+        XCTAssertEqual(catalog.searchAll("fried rice", limit: 10).first?.name, "Rice, fried, NFS")
+
+        defaults.set(FoodSearchRankingVersion.canonicalFirst.rawValue, forKey: key)
+        XCTAssertEqual(catalog.searchAll("rice", limit: 10).first?.id, "usda:2708408")
+        XCTAssertEqual(catalog.searchAll("fried rice", limit: 10).first?.name, "Rice, fried, NFS")
+    }
+
+    func testCanonicalFirstPutsCatalogFoodsBeforeMatchingPersonalMealsForBroadSearch() throws {
+        let defaults = UserDefaults.standard
+        let key = FoodSearchRankingVersion.preferenceKey
+        let previousValue = defaults.object(forKey: key)
+        defer {
+            if let previousValue {
+                defaults.set(previousValue, forKey: key)
+            } else {
+                defaults.removeObject(forKey: key)
+            }
+        }
+        defaults.set(FoodSearchRankingVersion.canonicalFirst.rawValue, forKey: key)
+
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let catalog = CatalogStore(url: root.appendingPathComponent("CalorieTracker/Resources/FoodCatalog.sqlite3"))
+        var document = DiaryDocument()
+        document.meals = ["Chili no rice", "Fried fish with rice", "Spanish rice"].enumerated().map {
+            index, name in
+            SavedMeal(
+                id: UUID(uuidString: String(format: "00000000-0000-0000-0000-%012d", index + 1))!,
+                name: name,
+                items: []
+            )
+        }
+
+        let catalogResults = catalog.searchAll("rice", limit: 50)
+        let results = DiaryEngine(document: document, catalog: catalog).searchItems(
+            "rice", catalogFoods: catalogResults
+        )
+        XCTAssertEqual(results.first?.id, "food:usda:2708408")
+        XCTAssertTrue(results.prefix(3).allSatisfy { item in
+            if case let .food(food) = item { return food.source != .custom }
+            return false
+        })
+        XCTAssertEqual(results.dropFirst(3).prefix(3).map(searchResultName), [
+            "Chili no rice", "Fried fish with rice", "Spanish rice",
+        ])
+
+        let specificResults = DiaryEngine(document: document, catalog: catalog).searchItems(
+            "fried rice", catalogFoods: catalog.searchAll("fried rice", limit: 50)
+        )
+        XCTAssertEqual(specificResults.first?.id, "food:usda:2708952")
+    }
+
     func testSearchOrderingIsRepeatableWithExplicitPersonalLogHistory() throws {
         let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
         let catalog = CatalogStore(url: root.appendingPathComponent("CalorieTracker/Resources/FoodCatalog.sqlite3"))

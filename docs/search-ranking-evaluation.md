@@ -9,12 +9,20 @@ handling.
 
 ## Offline baseline
 
-Run `make search-eval` to evaluate the current bundled catalog against
-[`relevance-v2.json`](../data/search-eval/relevance-v2.json). The output is
+Run `make search-eval` to evaluate the bundled catalog and its fixture-defined
+personal-search context against [`relevance-v3.json`](../data/search-eval/relevance-v3.json). The output is
 JSON with the query rationale, each expected item's exact rank, top ten actual
 results, mean reciprocal rank, hit rate at five, target rate, catalog
 fingerprint, and ranking-rule version. Override the fixture with
-`make search-eval FIXTURE=path/to/fixture.json`.
+`make search-eval FIXTURE=path/to/fixture.json`. Select a ranking explicitly
+with `make search-eval SEARCH_RANKING_VERSION=catalog-fts5-v1`,
+`SEARCH_RANKING_VERSION=catalog-fts5-v2-broad-simplicity`, or
+`SEARCH_RANKING_VERSION=catalog-fts5-v3-canonical-first`.
+In a Debug app build, the same choice is available at Settings → Developer
+Diagnostics → Experimental Features → Food search ranking. Options are ordered
+by version number, and the newest option is marked `Latest`; the current version
+is displayed above the picker. The latest version is the default when no choice
+has been saved, and the setting takes effect on the next search.
 
 The fixture is versioned and tied to a 12-character catalog fingerprint. A
 fingerprint mismatch is included in the report so a catalog refresh cannot be
@@ -25,12 +33,17 @@ the user-confirmed intent of plain cooked white rice
 (`Rice, white, cooked, no added fat`). Missing selections, unreported ranks,
 and unresolved bread/chicken item IDs are not guessed.
 
-The command evaluates `CatalogStore.searchAll`, so it covers the bundled
-catalog's FTS5 ranking only. It does not read the phone diary, favorites, saved
-meals, or analytics. `DiaryEngine.searchItems` can prepend favorites, matching
-saved meals, and recently logged personal foods. Unit tests cover that local
-merge with explicit synthetic log timestamps and verify it remains
-deterministic. Diary frequency is not currently an independent ranking weight.
+Catalog matching starts with FTS5 exact/prefix relevance, BM25, name length,
+and source rank. V2 and V3 reorder one-word catalog matches by demoting names
+with preparation/treatment terms and preferring simple-state cues such as
+`white`, `cooked`, `raw`, `whole`, and `brewed`; multiword queries retain the
+lexical order. For broad one-word queries, V3 puts the top three canonical
+catalog foods ahead of matching personal foods and saved meals, then interleaves
+personal matches before the remaining catalog rows. V1 and V2 preserve the
+existing personal-first merge. The v3 fixture includes synthetic saved-meal
+names for `rice`, so the evaluator measures this merge behavior without reading
+the phone diary, private food names, favorites, or analytics. Diary frequency
+is not currently an independent ranking weight.
 
 ## Metrics
 
@@ -67,14 +80,16 @@ The Analytics Server export contains an `events` table with `namespace`,
 `event_type`, `occurred_at`, `app_version`, `audience`, and `payload_json`.
 `make search-analytics SEARCH_ANALYTICS_DB=path/to/analytics.sqlite3` reads the
 database in read-only mode and filters to the `calorie-tracker` namespace,
-`production` audience, and the three food-search outcome events. It defaults to
-the most recent 90 days; set `SEARCH_ANALYTICS_DAYS` to change the window. The
-output groups outcomes by query and selected item, reports selected ranks, and
-includes the result IDs above each selection when available. Catalog IDs stay
-stable; local food and meal IDs are replaced with short stable hashes. No names,
-session IDs, or account identifiers are emitted. Keep the source database and
-analysis output local; only reviewed aggregates and public catalog IDs belong
-in the shared evaluation Sheet.
+`production` audience, and the three food-search outcome events. Set
+`SEARCH_ANALYTICS_AUDIENCE=debug` only for an explicitly requested debug-only
+calibration, and label those results as debug. It defaults to the most recent
+90 days; set `SEARCH_ANALYTICS_DAYS` to change the window. The output groups
+outcomes by query and selected item, reports selected ranks, and includes the
+result IDs above each selection when available. Catalog IDs stay stable; local
+food and meal IDs are replaced with short stable hashes. No names, session IDs,
+or account identifiers are emitted. Keep the source database and analysis
+output local; only reviewed aggregates and public catalog IDs belong in the
+shared evaluation Sheet.
 
 The Analytics Server's `export-sqlite` action exports all configured namespaces
 and audiences. The reader applies the production and Calorie Tracker filters

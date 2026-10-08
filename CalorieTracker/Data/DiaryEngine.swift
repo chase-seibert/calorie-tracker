@@ -1279,13 +1279,28 @@ final class DiaryEngine {
         ).sorted(by: searchItemAlphabeticalOrder)
 
         let personalResults = searchPersonalFoods(normalized)
-        let fallbackItems =
-            Array(personalResults.prefix(10))
+        let queryTokenCount = normalized
+            .split(whereSeparator: { !$0.isLetter && !$0.isNumber })
+            .count
+        let canonicalFirstBroadSearch = catalog?.activeRankingVersion == .canonicalFirst
+            && queryTokenCount == 1
+        let fallbackItems = Array(personalResults.prefix(10))
             + catalogFoods
             + Array(personalResults.dropFirst(10))
 
         var seen = Set<String>()
-        return (prioritizedItems + fallbackItems.map { .food(displayedFood($0)) })
+        let orderedItems: [FoodPickerItem]
+        if canonicalFirstBroadSearch {
+            let canonicalLead = Array(catalogFoods.prefix(3)).map { FoodPickerItem.food(displayedFood($0)) }
+            let remainingCatalog = Array(catalogFoods.dropFirst(3)).map { FoodPickerItem.food(displayedFood($0)) }
+            orderedItems = canonicalLead
+                + prioritizedItems
+                + personalResults.map { .food(displayedFood($0)) }
+                + remainingCatalog
+        } else {
+            orderedItems = prioritizedItems + fallbackItems.map { .food(displayedFood($0)) }
+        }
+        return orderedItems
             .filter { seen.insert($0.id).inserted }
             .prefix(limit)
             .map { $0 }

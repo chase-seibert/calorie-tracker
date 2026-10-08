@@ -15,7 +15,6 @@ from typing import Any
 
 
 NAMESPACE = "calorie-tracker"
-AUDIENCE = "production"
 EVENT_TYPES = (
     "food_search.result_selected",
     "food_search.no_match",
@@ -27,6 +26,12 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--db", required=True, type=pathlib.Path, help="Analytics Server SQLite export")
     parser.add_argument("--days", type=int, default=90, help="Recent event window in days (default: 90)")
+    parser.add_argument(
+        "--audience",
+        choices=("production", "debug"),
+        default="production",
+        help="Analytics audience to include (default: production).",
+    )
     parser.add_argument("--output", type=pathlib.Path, help="Optional local JSON output path")
     return parser.parse_args()
 
@@ -86,7 +91,7 @@ def positive_int(value: Any) -> int | None:
     return result if result > 0 else None
 
 
-def load_report(database: pathlib.Path, days: int) -> dict[str, Any]:
+def load_report(database: pathlib.Path, days: int, audience: str) -> dict[str, Any]:
     if days <= 0:
         raise ValueError("--days must be positive.")
     if not database.is_file():
@@ -103,7 +108,7 @@ def load_report(database: pathlib.Path, days: int) -> dict[str, Any]:
                 FROM events
                 WHERE namespace = ? AND audience = ? AND event_type IN ({placeholders})
                 ORDER BY occurred_at""",
-            (NAMESPACE, AUDIENCE, *EVENT_TYPES),
+            (NAMESPACE, audience, *EVENT_TYPES),
         )
         counts: collections.Counter[str] = collections.Counter()
         by_query: dict[str, dict[str, Any]] = {}
@@ -179,7 +184,7 @@ def load_report(database: pathlib.Path, days: int) -> dict[str, Any]:
             "source": "Analytics Server SQLite export",
             "database": database.name,
             "namespace": NAMESPACE,
-            "audience": AUDIENCE,
+            "audience": audience,
             "windowDays": days,
             "windowStart": start.isoformat().replace("+00:00", "Z"),
             "windowEnd": now.isoformat().replace("+00:00", "Z"),
@@ -197,7 +202,7 @@ def load_report(database: pathlib.Path, days: int) -> dict[str, Any]:
 def main() -> int:
     args = parse_args()
     try:
-        report = load_report(args.db, args.days)
+        report = load_report(args.db, args.days, args.audience)
     except (OSError, sqlite3.Error, ValueError) as exc:
         print(f"Search analytics: {exc}", file=sys.stderr)
         return 1

@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "datasetVersion": "search-calibration-2026-10-08-v3",
+  "catalogFingerprint": "b04f972920c6",
+  "rankingRuleVersion": "catalog-fts5-v3-canonical-first",
+  "queries": [
+    {
+      "query": "rice",
+      "rationale": "For a broad query, plain cooked white rice should rank first, ahead of matching saved meal names and prepared catalog variants.",
+      "expectedTargets": [
+        {
+          "itemID": "usda:2708408",
+          "label": "Rice, white, cooked, no added fat",
+          "relevance": 3,
+          "desiredMaxRank": 1
+        }
+      ],
+      "matchingSavedMealNames": [
+        "Chili meal with rice",
+        "Fried fish meal with rice",
+        "Spanish rice meal"
+      ]
+    },
+    {
+      "query": "milk",
+      "rationale": "Whole milk was reported as a good broad-query result to preserve at the top.",
+      "expectedTargets": [
+        {
+          "itemID": "usda:2705385",
+          "label": "Milk, whole",
+          "relevance": 3,
+          "desiredMaxRank": 1
+        }
+      ]
+    },
+    {
+      "query": "coffee",
+      "rationale": "Brewed coffee is the preferred simple result, with espresso also preferred ahead of flavored or prepared variants.",
+      "expectedTargets": [
+        {
+          "itemID": "usda:2710375",
+          "label": "Coffee, brewed",
+          "relevance": 3,
+          "desiredMaxRank": 1
+        },
+        {
+          "itemID": "usda:2710378",
+          "label": "Coffee, espresso",
+          "relevance": 2,
+          "desiredMaxRank": 2
+        }
+      ]
+    },
+    {
+      "query": "banana",
+      "rationale": "Raw banana is the expected simple result; baked banana is acceptable below it.",
+      "expectedTargets": [
+        {
+          "itemID": "usda:2709224",
+          "label": "Banana, raw",
+          "relevance": 3,
+          "desiredMaxRank": 1
+        }
+      ]
+    }
+  ]
+}

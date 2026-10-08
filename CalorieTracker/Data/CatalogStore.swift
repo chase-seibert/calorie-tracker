@@ -2,7 +2,59 @@ import CryptoKit
 import Foundation
 import SQLite3
 
+enum FoodSearchRankingVersion: String, CaseIterable, Identifiable {
+    case original = "catalog-fts5-v1"
+    case broadSimplicity = "catalog-fts5-v2-broad-simplicity"
+    case canonicalFirst = "catalog-fts5-v3-canonical-first"
+
+    static let preferenceKey = "developer.foodSearchRankingVersion"
+
+    static var orderedByVersion: [Self] {
+        allCases.sorted { $0.versionNumber < $1.versionNumber }
+    }
+
+    static var latest: Self {
+        orderedByVersion.last ?? .original
+    }
+
+    var id: String { rawValue }
+
+    var versionNumber: Int {
+        switch self {
+        case .original: 1
+        case .broadSimplicity: 2
+        case .canonicalFirst: 3
+        }
+    }
+
+    var isLatest: Bool { self == Self.latest }
+
+    var title: String {
+        let name: String
+        switch self {
+        case .original: name = "Original (catalog FTS5)"
+        case .broadSimplicity: name = "Simple broad-query ranking"
+        case .canonicalFirst: name = "Canonical foods before personal matches"
+        }
+        return "V\(versionNumber) · \(name)\(isLatest ? " (Latest)" : "")"
+    }
+
+    var currentStatus: String {
+        isLatest ? "V\(versionNumber) (latest)" : "V\(versionNumber); V\(Self.latest.versionNumber) is latest"
+    }
+}
+
 final class CatalogStore: @unchecked Sendable {
+    private static let broadQueryPreparationTerms: Set<String> = [
+        "baked", "breaded", "butter", "cappuccino", "chips", "condensed", "cuban",
+        "dehydrated", "dressing", "evaporated", "flavored", "fried", "glutinous",
+        "ingredient", "latte", "macchiato", "margarine", "malted", "mocha", "nectar",
+        "oil", "powder", "pudding", "sauce", "smoked", "split", "stuffed", "sweetened",
+    ]
+    private static let broadQuerySimpleStateTerms: Set<String> = [
+        "brewed", "cooked", "espresso", "plain", "raw", "unflavored", "white", "whole",
+    ]
+
     private var database: OpaquePointer?
     private let lock = NSLock()
     let catalogVersion: String?
@@ -58,14 +110,15 @@ final class CatalogStore: @unchecked Sendable {
                 f.rank DESC
             LIMIT ?
             """
-        return queryFoods(sql: sql) { statement in
+        let results = queryFoods(sql: sql) { statement in
             bind(terms, at: 1, to: statement)
             bind(source.rawValue, at: 2, to: statement)
             bind(query, at: 3, to: statement)
             bind(query, at: 4, to: statement)
             bind(query, at: 5, to: statement)
-            sqlite3_bind_int(statement, 6, Int32(limit))
+            sqlite3_bind_int(statement, 6, Int32(max(limit, 50)))
         }
+        return rankedBroadQueryResults(results, query: query, limit: limit, version: activeRankingVersion)
     }
 
     func searchAll(_ query: String, limit: Int = 50) -> [Food] {
@@ -96,13 +149,71 @@ final class CatalogStore: @unchecked Sendable {
                 f.rank DESC
             LIMIT ?
             """
-        return queryFoods(sql: sql) { statement in
+        let results = queryFoods(sql: sql) { statement in
             bind(terms, at: 1, to: statement)
             bind(query, at: 2, to: statement)
             bind(query, at: 3, to: statement)
             bind(query, at: 4, to: statement)
-            sqlite3_bind_int(statement, 5, Int32(limit))
+            sqlite3_bind_int(statement, 5, Int32(max(limit, 50)))
         }
+        return rankedBroadQueryResults(results, query: query, limit: limit, version: activeRankingVersion)
+    }
+
+    var activeRankingVersion: FoodSearchRankingVersion {
+        let rawValue = ProcessInfo.processInfo.environment["CALORIE_SEARCH_RANKING_VERSION"]
+            ?? UserDefaults.standard.string(forKey: FoodSearchRankingVersion.preferenceKey)
+        guard let rawValue,
+              let version = FoodSearchRankingVersion(rawValue: rawValue)
+        else { return .broadSimplicity }
+        return version
+    }
+
+    /// Broad one-word searches benefit from simple food states; qualified queries keep their
+    /// lexical ranking so a request such as "fried rice" still favors the prepared result.
+    private func rankedBroadQueryResults(
+        _ foods: [Food],
+        query: String,
+        limit: Int,
+        version: FoodSearchRankingVersion
+    ) -> [Food] {
+        let queryTokens = query.lowercased().split(whereSeparator: { !$0.isLetter && !$0.isNumber })
+        guard version != .original, queryTokens.count == 1, limit > 0 else {
+            return Array(foods.prefix(max(0, limit)))
+        }
+        let queryToken = String(queryTokens[0])
+
+        func matchClass(_ food: Food) -> Int {
+            let name = food.name.lowercased()
+            if name == queryToken { return 0 }
+            if name.hasPrefix(queryToken + ",") { return 1 }
+            if name.hasPrefix(queryToken) { return 2 }
+            return 3
+        }
+
+        func terms(in name: String) -> Set<String> {
+            Set(name.lowercased().split(whereSeparator: { !$0.isLetter && !$0.isNumber }).map(String.init))
+        }
+
+        return foods.enumerated().sorted { left, right in
+            let leftClass = matchClass(left.element)
+            let rightClass = matchClass(right.element)
+            if leftClass != rightClass { return leftClass < rightClass }
+
+            let leftTerms = terms(in: left.element.name).subtracting([queryToken])
+            let rightTerms = terms(in: right.element.name).subtracting([queryToken])
+            let leftPreparationCount = leftTerms.intersection(Self.broadQueryPreparationTerms).count
+            let rightPreparationCount = rightTerms.intersection(Self.broadQueryPreparationTerms).count
+            if (leftPreparationCount > 0) != (rightPreparationCount > 0) {
+                return leftPreparationCount == 0
+            }
+
+            let leftSimpleStateCount = leftTerms.intersection(Self.broadQuerySimpleStateTerms).count
+            let rightSimpleStateCount = rightTerms.intersection(Self.broadQuerySimpleStateTerms).count
+            if leftSimpleStateCount != rightSimpleStateCount {
+                return leftSimpleStateCount > rightSimpleStateCount
+            }
+            return left.offset < right.offset
+        }.prefix(limit).map(\.element)
     }
 
     func popular(source: FoodSource, limit: Int = 50) -> [Food] {

@@ -666,8 +666,14 @@ private struct DiaryDatabaseFileDocument: FileDocument {
     }
 }
 
-    private struct ExperimentalFeaturesView: View {
+private struct ExperimentalFeaturesView: View {
     @AppStorage("experimental.alwaysShowQuickCalories") private var alwaysShowQuickCalories = false
+    @AppStorage(FoodSearchRankingVersion.preferenceKey)
+    private var searchRankingVersion = FoodSearchRankingVersion.latest.rawValue
+
+    private var selectedSearchRankingVersion: FoodSearchRankingVersion {
+        FoodSearchRankingVersion(rawValue: searchRankingVersion) ?? .latest
+    }
 
     var body: some View {
         Form {
@@ -675,6 +681,17 @@ private struct DiaryDatabaseFileDocument: FileDocument {
                 Toggle("Always show quick calories", isOn: $alwaysShowQuickCalories)
             } footer: {
                 Text("Shows the +500, +1,000, +1,500, and +2,000 calorie shortcuts on every day. When disabled, they appear only on cheat days or when that day already has an adjustment.")
+            }
+
+            Section {
+                LabeledContent("Current version", value: selectedSearchRankingVersion.currentStatus)
+                Picker("Food search ranking", selection: $searchRankingVersion) {
+                    ForEach(FoodSearchRankingVersion.orderedByVersion) { version in
+                        Text(version.title).tag(version.rawValue)
+                    }
+                }
+            } footer: {
+                Text("Versions are listed oldest to newest. The latest version is marked in the list and shown above; the selected version takes effect on the next search.")
             }
         }
         .scrollContentBackground(.hidden)

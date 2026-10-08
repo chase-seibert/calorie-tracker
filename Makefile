@@ -92,14 +92,18 @@ diary-validate: diary-tool
 	@test -n "$(INPUT)" || (echo 'Set INPUT=converted.sqlite'; exit 1)
 	build/diary-tool validate "$(INPUT)"
 
+SEARCH_RANKING_VERSION ?= catalog-fts5-v3-canonical-first
+SEARCH_EVAL_FIXTURE ?= data/search-eval/relevance-v3.json
+
 search-eval: diary-tool
-	build/diary-tool search-eval "$(or $(FIXTURE),data/search-eval/relevance-v2.json)"
+	CALORIE_SEARCH_RANKING_VERSION="$(SEARCH_RANKING_VERSION)" build/diary-tool search-eval "$(or $(FIXTURE),$(SEARCH_EVAL_FIXTURE))"
 
 SEARCH_ANALYTICS_DB ?= downloads/analytics.sqlite3
 SEARCH_ANALYTICS_DAYS ?= 90
+SEARCH_ANALYTICS_AUDIENCE ?= production
 
 search-analytics:
-	$(PYTHON) scripts/analyze_search_analytics.py --db "$(SEARCH_ANALYTICS_DB)" --days "$(SEARCH_ANALYTICS_DAYS)"
+	$(PYTHON) scripts/analyze_search_analytics.py --db "$(SEARCH_ANALYTICS_DB)" --days "$(SEARCH_ANALYTICS_DAYS)" --audience "$(SEARCH_ANALYTICS_AUDIENCE)"
 
 clean:
 	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -derivedDataPath $(DERIVED_DATA) clean

@@ -14,6 +14,7 @@ struct SearchEvaluationQuery: Decodable {
     let query: String
     let rationale: String
     let expectedTargets: [SearchEvaluationTarget]
+    let matchingSavedMealNames: [String]?
 }
 
 struct SearchEvaluationTarget: Decodable {
@@ -83,10 +84,24 @@ struct DiaryTool {
         try require(catalog.isAvailable, "Bundled food catalog is unavailable.")
         let actualFingerprint = catalog.catalogVersion ?? "unknown"
         let cases = fixture.queries.map { query in
-            let results = catalog.searchAll(query.query, limit: 50)
-            let rankedIDs = results.map(\.id)
+            var document = DiaryDocument()
+            document.meals = (query.matchingSavedMealNames ?? []).enumerated().map { index, name in
+                SavedMeal(
+                    id: UUID(uuidString: String(format: "00000000-0000-0000-0000-%012d", index + 1))!,
+                    name: name,
+                    items: []
+                )
+            }
+            let results = DiaryEngine(document: document, catalog: catalog).searchItems(
+                query.query,
+                catalogFoods: catalog.searchAll(query.query, limit: 50),
+                limit: 50
+            )
             let targetRanks = query.expectedTargets.map { target in
-                let rank = rankedIDs.firstIndex(of: target.itemID).map { $0 + 1 }
+                let rank = results.firstIndex { item in
+                    if case let .food(food) = item { return food.id == target.itemID }
+                    return false
+                }.map { $0 + 1 }
                 return [
                     "itemID": target.itemID,
                     "label": target.label,
@@ -106,10 +121,18 @@ struct DiaryTool {
                 bestRank: bestRank,
                 hitAtFive: bestRank.map { $0 <= 5 } ?? false,
                 targetMet: query.expectedTargets.contains { target in
-                    rankedIDs.firstIndex(of: target.itemID).map { $0 + 1 <= target.desiredMaxRank } ?? false
+                    results.firstIndex { item in
+                        if case let .food(food) = item { return food.id == target.itemID }
+                        return false
+                    }.map { $0 + 1 <= target.desiredMaxRank } ?? false
                 },
                 results: results.prefix(10).enumerated().map { index, food in
-                    ["rank": index + 1, "itemID": food.id, "name": food.name, "source": food.source.rawValue] as [String: Any]
+                    switch food {
+                    case let .food(value):
+                        return ["rank": index + 1, "itemID": value.id, "name": value.name, "source": value.source.rawValue] as [String: Any]
+                    case let .meal(value):
+                        return ["rank": index + 1, "itemID": "meal:\(value.id.uuidString)", "name": value.name, "source": "synthetic_saved_meal"] as [String: Any]
+                    }
                 }
             )
         }
@@ -117,11 +140,12 @@ struct DiaryTool {
         let report: [String: Any] = [
             "schemaVersion": fixture.schemaVersion,
             "datasetVersion": fixture.datasetVersion,
-            "rankingRuleVersion": fixture.rankingRuleVersion,
+            "rankingRuleVersion": catalog.activeRankingVersion.rawValue,
+            "fixtureRankingRuleVersion": fixture.rankingRuleVersion,
             "fixtureCatalogFingerprint": fixture.catalogFingerprint,
             "actualCatalogFingerprint": actualFingerprint,
             "catalogFingerprintMatches": fixture.catalogFingerprint == actualFingerprint,
-            "scope": "bundled catalog only; no diary, favorites, meals, or analytics",
+            "scope": "bundled catalog plus only explicit synthetic saved meals in the fixture; no diary, favorites, or analytics",
             "queryCount": cases.count,
             "meanReciprocalRank": reciprocalRanks.isEmpty ? NSNull() : reciprocalRanks.reduce(0, +) / Double(reciprocalRanks.count),
             "hitRateAtFive": Double(cases.filter(\.hitAtFive).count) / Double(cases.count),
