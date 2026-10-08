@@ -7,6 +7,7 @@ struct QuickLogWidgetEntry: TimelineEntry {
     let selections: [QuickLogSelection]
     let caloriesRemaining: Int?
     let receipt: QuickLogReceipt?
+    let pendingSelectionID: String?
 }
 
 struct QuickLogWidgetProvider: TimelineProvider {
@@ -24,7 +25,8 @@ struct QuickLogWidgetProvider: TimelineProvider {
                 )
             ],
             caloriesRemaining: 1_240,
-            receipt: nil
+            receipt: nil,
+            pendingSelectionID: nil
         )
     }
 
@@ -49,14 +51,16 @@ struct QuickLogWidgetProvider: TimelineProvider {
                 date: date,
                 selections: [],
                 caloriesRemaining: nil,
-                receipt: recentReceipt(at: date)
+                receipt: recentReceipt(at: date),
+                pendingSelectionID: QuickLogWidgetActionState.pendingSelectionID(at: date)
             )
         }
         return QuickLogWidgetEntry(
             date: date,
-            selections: snapshot.widgetSelections(at: date, limit: 8),
+            selections: snapshot.widgetSelections(at: date, limit: 10),
             caloriesRemaining: try? snapshot.caloriesRemaining(at: date),
-            receipt: recentReceipt(at: date)
+            receipt: recentReceipt(at: date),
+            pendingSelectionID: QuickLogWidgetActionState.pendingSelectionID(at: date)
         )
     }
 
@@ -94,8 +98,6 @@ struct QuickLogWidgetView: View {
                 circularContent
             case .accessoryRectangular:
                 lockScreenContent
-            case .systemSmall:
-                smallContent
             case .systemLarge:
                 largeContent
             default:
@@ -105,23 +107,8 @@ struct QuickLogWidgetView: View {
         .widgetURL(VitaChaseDeepLink.logFoodURL)
     }
 
-    private var smallContent: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            header
-            if let selection = entry.selections.first {
-                quickLogButton(selection, compact: false)
-            } else {
-                emptyState
-            }
-            Spacer(minLength: 0)
-            calorieLabel
-        }
-        .padding()
-        .containerBackground(.background, for: .widget)
-    }
-
     private var mediumContent: some View {
-        VStack(alignment: .leading, spacing: 9) {
+        VStack(alignment: .leading, spacing: 7) {
             HStack {
                 header
                 Spacer()
@@ -130,12 +117,20 @@ struct QuickLogWidgetView: View {
             if entry.selections.isEmpty {
                 emptyState
             } else {
-                ForEach(entry.selections.prefix(3)) { selection in
-                    quickLogButton(selection, compact: true)
+                LazyVGrid(
+                    columns: [GridItem(.flexible()), GridItem(.flexible())],
+                    alignment: .leading,
+                    spacing: 10
+                ) {
+                    ForEach(entry.selections.prefix(4)) { selection in
+                        quickLogButton(selection, compact: true)
+                    }
                 }
             }
         }
         .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .clipped()
         .containerBackground(.background, for: .widget)
     }
 
@@ -154,7 +149,7 @@ struct QuickLogWidgetView: View {
                     alignment: .leading,
                     spacing: 10
                 ) {
-                    ForEach(entry.selections.prefix(8)) { selection in
+                    ForEach(entry.selections.prefix(10)) { selection in
                         quickLogButton(selection, compact: true)
                     }
                 }
@@ -162,6 +157,8 @@ struct QuickLogWidgetView: View {
             Spacer(minLength: 0)
         }
         .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .clipped()
         .containerBackground(.background, for: .widget)
     }
 
@@ -211,17 +208,10 @@ struct QuickLogWidgetView: View {
     }
 
     private var header: some View {
-        Group {
-            if let receipt = entry.receipt {
-                Label("Logged \(receipt.title)", systemImage: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
-            } else {
-                Label("Quick Log", systemImage: "sparkles")
-                    .foregroundStyle(.orange)
-            }
-        }
-        .font(.headline)
-        .lineLimit(1)
+        Label("Quick Log", systemImage: "sparkles")
+            .foregroundStyle(.orange)
+            .font(.headline)
+            .lineLimit(1)
     }
 
     private var calorieLabel: some View {
@@ -248,13 +238,24 @@ struct QuickLogWidgetView: View {
     }
 
     private func quickLogButton(_ selection: QuickLogSelection, compact: Bool) -> some View {
-        Button(intent: LogRecentItemIntent(item: QuickLogSelectionEntity(selection: selection))) {
+        let isPending = entry.pendingSelectionID == selection.id
+        let isComplete = entry.receipt?.selectionID == selection.id
+        return Button(intent: LogRecentItemIntent(item: QuickLogSelectionEntity(selection: selection))) {
             HStack(spacing: 8) {
-                Image(systemName: "plus.circle.fill")
-                    .foregroundStyle(.orange)
+                Group {
+                    if isPending {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else {
+                        Image(systemName: isComplete ? "checkmark.circle.fill" : "plus.circle.fill")
+                            .foregroundStyle(isComplete ? .green : .orange)
+                            .symbolEffect(.bounce, value: isComplete)
+                    }
+                }
+                .frame(width: compact ? 14 : 20, height: compact ? 14 : 20)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(selection.title)
-                        .font(compact ? .subheadline.weight(.semibold) : .headline)
+                        .font(compact ? .caption.weight(.semibold) : .headline)
                         .lineLimit(compact ? 1 : 2)
                     Text(selection.subtitle)
                         .font(.caption2)
@@ -264,6 +265,7 @@ struct QuickLogWidgetView: View {
             }
             .contentShape(Rectangle())
         }
+        .disabled(isPending)
         .buttonStyle(.plain)
     }
 }
@@ -278,7 +280,6 @@ struct VitaChaseQuickLogWidget: Widget {
         .configurationDisplayName("Yum Chase Quick Log")
         .description("Log a Magic or recent food and check today’s calories left.")
         .supportedFamilies([
-            .systemSmall,
             .systemMedium,
             .systemLarge,
             .accessoryCircular,
@@ -289,13 +290,24 @@ struct VitaChaseQuickLogWidget: Widget {
 
 struct CaloriesLeftWidgetEntry: TimelineEntry {
     let date: Date
-    let goal: Int?
-    let remaining: Int?
+    let summary: CaloriesLeftWidgetSummary?
 }
 
 struct CaloriesLeftWidgetProvider: TimelineProvider {
     func placeholder(in context: Context) -> CaloriesLeftWidgetEntry {
-        CaloriesLeftWidgetEntry(date: Date(), goal: 2_000, remaining: 740)
+        CaloriesLeftWidgetEntry(
+            date: Date(),
+            summary: CaloriesLeftWidgetSummary(
+                progress: DailyCalorieProgress(calories: 760, goal: 2_000),
+                carbs: 82,
+                fat: 24,
+                protein: 61,
+                foods: [
+                    CaloriesLeftWidgetFood(id: UUID(), name: "Cappuccino", amount: "1 serving", calories: 120),
+                    CaloriesLeftWidgetFood(id: UUID(), name: "Avocado toast", amount: "1 slice", calories: 340)
+                ]
+            )
+        )
     }
 
     func getSnapshot(in context: Context, completion: @escaping (CaloriesLeftWidgetEntry) -> Void) {
@@ -315,12 +327,11 @@ struct CaloriesLeftWidgetProvider: TimelineProvider {
 
     private func entry(at date: Date) -> CaloriesLeftWidgetEntry {
         guard let snapshot = try? QuickLogRepository().snapshot() else {
-            return CaloriesLeftWidgetEntry(date: date, goal: nil, remaining: nil)
+            return CaloriesLeftWidgetEntry(date: date, summary: nil)
         }
         return CaloriesLeftWidgetEntry(
             date: date,
-            goal: snapshot.document.dailyCalorieGoal,
-            remaining: try? snapshot.caloriesRemaining(at: date)
+            summary: snapshot.caloriesLeftWidgetSummary(at: date)
         )
     }
 }
@@ -335,10 +346,12 @@ struct CaloriesLeftWidgetView: View {
             case .accessoryCircular:
                 circularContent
             case .accessoryInline:
-                Label(summary, systemImage: "flame.fill")
+                Label(summaryText, systemImage: "flame.fill")
                     .containerBackground(.clear, for: .widget)
             case .accessoryRectangular:
                 rectangularContent
+            case .systemLarge:
+                largeContent
             case .systemMedium:
                 mediumContent
             default:
@@ -349,59 +362,263 @@ struct CaloriesLeftWidgetView: View {
     }
 
     private var smallContent: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label("Calories Left", systemImage: "flame.fill")
-                .font(.headline)
-                .foregroundStyle(.orange)
-            Spacer(minLength: 0)
-            VStack(alignment: .leading, spacing: 0) {
-                Text(displayValue)
-                    .font(.system(.title2, design: .rounded, weight: .bold))
-                    .minimumScaleFactor(0.7)
-                    .monospacedDigit()
-                Text(displayStatus)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+        Group {
+            if let summary = entry.summary {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .center, spacing: 4) {
+                        calorieFigure(summary, compact: true)
+                        Spacer(minLength: 0)
+                        progressIcon(summary, size: 38)
+                    }
+                    macroBar(summary, height: 7)
+                    HStack(spacing: 4) {
+                        macroValue("Carbs", summary.carbs, color: macroCarbs, compact: true)
+                        macroValue("Fat", summary.fat, color: macroFat, compact: true)
+                        macroValue("Protein", summary.protein, color: macroProtein, compact: true)
+                    }
+                }
+                .padding(12)
+                .background(cardColor, in: RoundedRectangle(cornerRadius: 22))
+            } else {
+                unavailableContent
             }
-            ProgressView(value: progress)
-                .tint(.orange)
         }
         .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .clipped()
         .containerBackground(.background, for: .widget)
     }
 
     private var mediumContent: some View {
-        HStack(spacing: 18) {
-            CaloriesProgressRing(
-                progress: ringProgress,
-                value: compactValue,
-                status: compactStatus,
-                size: 82
-            )
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Calories Left Today")
-                    .font(.headline)
-                Text(summary)
-                    .font(.title2.bold())
-                if let goal = entry.goal {
-                    Text("Daily goal: \(goal.formatted()) cal")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+        Group {
+            if let summary = entry.summary {
+                VStack(alignment: .leading, spacing: 8) {
+                    summarySection(summary, compact: true)
                 }
+                .padding(16)
+                .background(cardColor, in: RoundedRectangle(cornerRadius: 22))
+            } else {
+                unavailableContent
             }
-            Spacer(minLength: 0)
         }
-        .padding()
+        .padding(3)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .clipped()
         .containerBackground(.background, for: .widget)
     }
 
+    private var largeContent: some View {
+        Group {
+            if let summary = entry.summary {
+                VStack(alignment: .leading, spacing: 11) {
+                    summarySection(summary, compact: false)
+                    Divider()
+                    Text("Today’s food")
+                        .font(.headline)
+                    foodList(summary.foods, limit: 6)
+                    Spacer(minLength: 0)
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 21)
+                .padding(.bottom, 16)
+                .background(cardColor, in: RoundedRectangle(cornerRadius: 22))
+            } else {
+                unavailableContent
+            }
+        }
+        .padding(8)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .clipped()
+        .containerBackground(.background, for: .widget)
+    }
+
+    private func summarySection(_ summary: CaloriesLeftWidgetSummary, compact: Bool) -> some View {
+        VStack(alignment: .leading, spacing: compact ? 7 : 10) {
+            HStack(alignment: .center, spacing: 12) {
+                calorieFigure(summary, compact: compact)
+                Spacer(minLength: 0)
+                progressIcon(summary, size: compact ? 54 : 58, showsDetails: true)
+            }
+            macroBar(summary, height: compact ? 10 : 9)
+            HStack(spacing: compact ? 8 : 12) {
+                macroValue("Carbs", summary.carbs, color: macroCarbs, compact: compact, larger: compact)
+                macroValue("Fat", summary.fat, color: macroFat, compact: compact, larger: compact)
+                macroValue("Protein", summary.protein, color: macroProtein, compact: compact, larger: compact)
+            }
+        }
+        .accessibilityElement(children: .contain)
+    }
+
+    private func calorieFigure(_ summary: CaloriesLeftWidgetSummary, compact: Bool) -> some View {
+        let progress = summary.progress
+        let value: Int
+        let status: String
+        let color: Color
+        if let over = progress.over, over > 0 {
+            value = over
+            status = "calories over"
+            color = coral
+        } else if let remaining = progress.remaining {
+            value = remaining
+            status = "calories left"
+            color = .primary
+        } else {
+            value = progress.consumed
+            status = "calories"
+            color = .primary
+        }
+        return VStack(alignment: .leading, spacing: 0) {
+            Text(value.formatted())
+                .font(.system(size: compact ? 33 : 44, weight: .bold, design: .rounded))
+                .foregroundStyle(color)
+                .minimumScaleFactor(0.65)
+                .lineLimit(1)
+                .monospacedDigit()
+            Text(status)
+                .font(compact ? .caption2.weight(.medium) : .subheadline.weight(.medium))
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(progress.accessibilityLabel)
+    }
+
+    private func progressIcon(
+        _ summary: CaloriesLeftWidgetSummary,
+        size: CGFloat,
+        showsDetails: Bool = false
+    ) -> some View {
+        VStack(spacing: 3) {
+            ZStack {
+                Circle().fill(coral.opacity(0.12))
+                Image(systemName: "flame.fill")
+                    .font(.system(size: size * 0.45, weight: .medium))
+                    .foregroundStyle(coral)
+                Circle().stroke(coral.opacity(0.2), lineWidth: 3)
+                if let fraction = summary.progress.fraction {
+                    Circle()
+                        .trim(from: 0, to: fraction)
+                        .stroke(coral, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                }
+            }
+            .frame(width: size, height: size)
+            if showsDetails {
+                if let goal = summary.progress.goal {
+                    Text("\(summary.progress.consumed.formatted()) / \(goal.formatted()) cal")
+                        .font(.caption2.weight(.semibold).monospacedDigit())
+                        .foregroundStyle(.secondary)
+                        .fixedSize()
+                } else {
+                    Text("Goal not set")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .fixedSize()
+                }
+            }
+        }
+        .accessibilityHidden(true)
+    }
+
+    private func macroBar(_ summary: CaloriesLeftWidgetSummary, height: CGFloat) -> some View {
+        let carbs = max(summary.carbs, 0)
+        let fat = max(summary.fat, 0)
+        let protein = max(summary.protein, 0)
+        let total = carbs + fat + protein
+        return GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                Capsule().fill(Color.primary.opacity(0.08))
+                if total > 0 {
+                    HStack(spacing: 0) {
+                        Rectangle().fill(macroCarbs).frame(width: geometry.size.width * CGFloat(carbs / total))
+                        Rectangle().fill(macroFat).frame(width: geometry.size.width * CGFloat(fat / total))
+                        Rectangle().fill(macroProtein).frame(width: geometry.size.width * CGFloat(protein / total))
+                    }
+                    .clipShape(Capsule())
+                }
+            }
+        }
+        .frame(height: height)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Carbs \(summary.carbs.cleanAmount) grams, fat \(summary.fat.cleanAmount) grams, protein \(summary.protein.cleanAmount) grams")
+    }
+
+    private func macroValue(
+        _ title: String,
+        _ value: Double,
+        color: Color,
+        compact: Bool,
+        larger: Bool = false
+    ) -> some View {
+        HStack(spacing: 4) {
+            Circle().fill(color).frame(width: compact ? 5 : 6, height: compact ? 5 : 6)
+            Text(compact && title.count > 1 ? String(title.prefix(1)) : title)
+                .foregroundStyle(.secondary)
+            Text("\(value.cleanAmount)g")
+                .fontWeight(.semibold)
+                .monospacedDigit()
+        }
+        .font(compact && !larger ? .caption2 : .caption)
+        .lineLimit(1)
+        .minimumScaleFactor(0.75)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(title), \(value.cleanAmount) grams")
+    }
+
+    @ViewBuilder
+    private func foodList(_ foods: [CaloriesLeftWidgetFood], limit: Int) -> some View {
+        if foods.isEmpty {
+            Text("No food logged today")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        } else {
+            VStack(alignment: .leading, spacing: 5) {
+                ForEach(foods.prefix(limit)) { food in
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(food.name)
+                                .font(.caption.weight(.semibold))
+                                .lineLimit(1)
+                            Text(food.amount)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                        Spacer(minLength: 4)
+                        Text("\(food.calories.formatted()) cal")
+                            .font(.caption2.monospacedDigit())
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                }
+            }
+        }
+    }
+
+    private var unavailableContent: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Label("Today’s calories", systemImage: "flame.fill")
+                .font(.headline)
+            Text("Open Yum Chase on your iPhone to refresh the diary.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .padding()
+    }
+
     private var circularContent: some View {
-        CaloriesProgressRing(
-            progress: ringProgress,
-            value: compactValue,
-            status: compactStatus,
-            size: 44
-        )
+        Group {
+            if let summary = entry.summary {
+                CaloriesProgressRing(
+                    progress: summary.progress.fraction ?? 0,
+                    value: compactValue(summary),
+                    status: compactStatus(summary),
+                    size: 44
+                )
+            } else {
+                Image(systemName: "flame.fill").foregroundStyle(coral)
+            }
+        }
         .containerBackground(.clear, for: .widget)
     }
 
@@ -409,54 +626,56 @@ struct CaloriesLeftWidgetView: View {
         VStack(alignment: .leading, spacing: 2) {
             Label("Calories left", systemImage: "flame.fill")
                 .font(.caption)
-            Text(summary)
+            Text(summaryText)
                 .font(.title3.bold())
                 .lineLimit(1)
-            ProgressView(value: progress)
+            if let fraction = entry.summary?.progress.fraction {
+                ProgressView(value: fraction).tint(coral)
+            }
         }
         .containerBackground(.clear, for: .widget)
     }
 
-    private var progress: Double {
-        guard let goal = entry.goal, goal > 0, let remaining = entry.remaining else { return 0 }
-        return min(max(Double(goal - remaining) / Double(goal), 0), 1)
-    }
-
-    private var ringProgress: Double {
-        guard let goal = entry.goal, goal > 0, let remaining = entry.remaining else { return 0 }
-        return min(max(Double(goal - remaining) / Double(goal), 0), 2)
-    }
-
-    private var displayValue: String {
-        guard let remaining = entry.remaining else { return "—" }
-        return abs(remaining).formatted()
-    }
-
-    private var displayStatus: String {
-        guard let remaining = entry.remaining else { return "Set a goal in Yum Chase" }
-        return remaining >= 0 ? "calories left" : "calories over"
-    }
-
-    private var compactValue: String {
-        guard let remaining = entry.remaining else { return "—" }
-        let value = abs(remaining)
+    private func compactValue(_ summary: CaloriesLeftWidgetSummary) -> String {
+        let progress = summary.progress
+        let value = (progress.over ?? 0) > 0 ? (progress.over ?? 0) : (progress.remaining ?? progress.consumed)
         if value >= 1_000 {
             return String(format: "%.1fk", Double(value) / 1_000)
         }
         return value.formatted()
     }
 
-    private var compactStatus: String {
-        guard let remaining = entry.remaining else { return "" }
-        return remaining >= 0 ? "left" : "over"
+    private func compactStatus(_ summary: CaloriesLeftWidgetSummary) -> String {
+        if (summary.progress.over ?? 0) > 0 { return "over" }
+        return summary.progress.goal == nil ? "cal" : "left"
     }
 
-    private var summary: String {
-        guard let remaining = entry.remaining else { return "Goal not set" }
-        return remaining >= 0
-            ? "\(remaining.formatted()) calories left"
-            : "\((-remaining).formatted()) calories over"
+    private var summaryText: String {
+        guard let summary = entry.summary else { return "Diary unavailable" }
+        if let over = summary.progress.over, over > 0 {
+            return "\(over.formatted()) over"
+        }
+        if let remaining = summary.progress.remaining {
+            return "\(remaining.formatted()) left"
+        }
+        return "\(summary.progress.consumed.formatted()) cal"
     }
+
+    private var cardColor: Color {
+        Color(uiColor: .secondarySystemGroupedBackground)
+    }
+
+    private var coral: Color {
+        Color(uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 1, green: 0.39, blue: 0.33, alpha: 1)
+                : UIColor(red: 0.94, green: 0.35, blue: 0.28, alpha: 1)
+        })
+    }
+
+    private let macroCarbs = Color(uiColor: .systemBlue)
+    private let macroFat = Color(uiColor: .systemPurple)
+    private let macroProtein = Color(uiColor: .systemGreen)
 }
 
 private struct CaloriesProgressRing: View {
@@ -466,7 +685,7 @@ private struct CaloriesProgressRing: View {
     let size: CGFloat
 
     private let baseLineWidth: CGFloat = 4
-    private let progressColor = Color.orange.opacity(0.88)
+    private let progressColor = Color(red: 0.94, green: 0.35, blue: 0.28).opacity(0.9)
 
     var body: some View {
         ZStack {
@@ -521,10 +740,11 @@ struct VitaChaseCaloriesLeftWidget: Widget {
             CaloriesLeftWidgetView(entry: entry)
         }
         .configurationDisplayName("Yum Chase Calories Left")
-        .description("See how many calories remain against today’s goal.")
+        .description("See today’s calories and macros, plus logged foods in larger sizes.")
         .supportedFamilies([
             .systemSmall,
             .systemMedium,
+            .systemLarge,
             .accessoryInline,
             .accessoryCircular,
             .accessoryRectangular

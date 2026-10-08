@@ -130,6 +130,43 @@ enum SharedDiaryStorage {
 
 }
 
+enum QuickLogWidgetActionState {
+    private static let selectionIDKey = "widget.quick-log.pending-selection-id"
+    private static let startedAtKey = "widget.quick-log.pending-started-at"
+    private static let staleAfter: TimeInterval = 60
+
+    static func begin(
+        selectionID: String,
+        at date: Date = Date(),
+        defaults: UserDefaults? = nil
+    ) {
+        let defaults = defaults ?? sharedDefaults
+        defaults.set(selectionID, forKey: selectionIDKey)
+        defaults.set(date, forKey: startedAtKey)
+    }
+
+    static func pendingSelectionID(
+        at date: Date = Date(),
+        defaults: UserDefaults? = nil
+    ) -> String? {
+        let defaults = defaults ?? sharedDefaults
+        guard let selectionID = defaults.string(forKey: selectionIDKey),
+              let startedAt = defaults.object(forKey: startedAtKey) as? Date else { return nil }
+        return date.timeIntervalSince(startedAt) <= staleAfter ? selectionID : nil
+    }
+
+    static func finish(selectionID: String, defaults: UserDefaults? = nil) {
+        let defaults = defaults ?? sharedDefaults
+        guard defaults.string(forKey: selectionIDKey) == selectionID else { return }
+        defaults.removeObject(forKey: selectionIDKey)
+        defaults.removeObject(forKey: startedAtKey)
+    }
+
+    private static var sharedDefaults: UserDefaults {
+        UserDefaults(suiteName: SharedDiaryStorage.appGroupIdentifier) ?? .standard
+    }
+}
+
 struct QuickLogReceipt: Equatable, Sendable {
     let selectionID: String
     let title: String
@@ -175,6 +212,40 @@ enum QuickLogError: LocalizedError, Equatable {
 struct QuickLogSnapshot: Sendable {
     let document: DiaryDocument
     let calendar: Calendar
+
+    func caloriesLeftWidgetSummary(at date: Date, foodLimit: Int = 8) -> CaloriesLeftWidgetSummary {
+        let diary = DiaryEngine(document: document, calendar: calendar)
+        let nutrients = diary.totals(on: date)
+        let progress = DailyCalorieProgress(
+            calories: nutrients.calories,
+            goal: document.dailyCalorieGoal
+        )
+        let foods = diary.entries(on: date)
+            .filter { !$0.isCheatDayAdjustment }
+            .prefix(max(foodLimit, 0))
+            .map { entry in
+                let amount: String
+                switch entry.unit {
+                case .grams, .ounces:
+                    amount = "\(entry.amount.cleanAmount) \(entry.unit.rawValue)"
+                case .serving:
+                    amount = "\(entry.amount.cleanAmount) \(entry.food.portion(id: entry.portionID)?.label ?? "serving")"
+                }
+                return CaloriesLeftWidgetFood(
+                    id: entry.id,
+                    name: entry.food.name,
+                    amount: amount,
+                    calories: Int(entry.nutrients.calories.rounded())
+                )
+            }
+        return CaloriesLeftWidgetSummary(
+            progress: progress,
+            carbs: nutrients.carbs,
+            fat: nutrients.fat,
+            protein: nutrients.protein,
+            foods: Array(foods)
+        )
+    }
 
     init(document: DiaryDocument, calendar: Calendar = .current) {
         self.document = document
@@ -551,6 +622,21 @@ struct QuickLogSnapshot: Sendable {
         }
         return result
     }
+}
+
+struct CaloriesLeftWidgetFood: Equatable, Identifiable, Sendable {
+    let id: UUID
+    let name: String
+    let amount: String
+    let calories: Int
+}
+
+struct CaloriesLeftWidgetSummary: Equatable, Sendable {
+    let progress: DailyCalorieProgress
+    let carbs: Double
+    let fat: Double
+    let protein: Double
+    let foods: [CaloriesLeftWidgetFood]
 }
 
 struct QuickLogRepository: Sendable {

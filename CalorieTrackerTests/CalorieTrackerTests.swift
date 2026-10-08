@@ -3915,6 +3915,100 @@ extension CalorieTrackerTests {
         XCTAssertEqual(remaining, 1_225)
     }
 
+    func testCaloriesLeftWidgetSummaryUsesDiaryTotalsOrderAndBoundsTodayFoods() {
+        let date = testDate(day: 12)
+        var document = DiaryDocument()
+        document.dailyCalorieGoal = 5_000
+        let todayEntries = (0..<10).map { index -> DiaryEntry in
+            var entry = testEntry(
+                calories: Double(100 + index * 10),
+                date: date.addingTimeInterval(Double(index)),
+                name: "Food \(index)"
+            )
+            entry.displayOrder = index
+            return entry
+        }
+        var adjustment = testEntry(calories: 0, date: date, name: "Adjustment")
+        adjustment.kind = .cheatDayAdjustment
+        let yesterday = testEntry(
+            calories: 900,
+            date: testDate(day: 11),
+            name: "Yesterday’s food"
+        )
+        document.entries = [yesterday, adjustment] + todayEntries
+        document.alcoholEntries = [AlcoholEntry(
+            id: UUID(),
+            date: date,
+            drinks: 1,
+            type: .wine,
+            loggedAt: date
+        )]
+
+        let summary = QuickLogSnapshot(document: document, calendar: testCalendar)
+            .caloriesLeftWidgetSummary(at: date)
+
+        XCTAssertEqual(summary.progress.consumed, 1_575)
+        XCTAssertEqual(summary.progress.remaining, 3_425)
+        XCTAssertEqual(summary.carbs, todayEntries.reduce(0) { $0 + $1.nutrients.carbs })
+        XCTAssertEqual(summary.fat, todayEntries.reduce(0) { $0 + $1.nutrients.fat })
+        XCTAssertEqual(summary.protein, todayEntries.reduce(0) { $0 + $1.nutrients.protein })
+        XCTAssertEqual(summary.foods.count, 8)
+        XCTAssertEqual(summary.foods.map(\.name), (0..<8).map { "Food \($0)" })
+        XCTAssertFalse(summary.foods.contains { $0.name == "Yesterday’s food" || $0.name == "Adjustment" })
+    }
+
+    func testCaloriesLeftWidgetSummaryHandlesOverGoalAndUnsetGoal() {
+        let date = testDate(day: 12)
+        var document = DiaryDocument()
+        document.dailyCalorieGoal = 100
+        document.entries = [testEntry(calories: 250, date: date, name: "Lunch")]
+
+        let overGoal = QuickLogSnapshot(document: document, calendar: testCalendar)
+            .caloriesLeftWidgetSummary(at: date)
+        XCTAssertEqual(overGoal.progress.consumed, 250)
+        XCTAssertEqual(overGoal.progress.remaining, 0)
+        XCTAssertEqual(overGoal.progress.over, 150)
+
+        document.dailyCalorieGoal = nil
+        let noGoal = QuickLogSnapshot(document: document, calendar: testCalendar)
+            .caloriesLeftWidgetSummary(at: date)
+        XCTAssertEqual(noGoal.progress.consumed, 250)
+        XCTAssertNil(noGoal.progress.remaining)
+        XCTAssertNil(noGoal.progress.over)
+        XCTAssertEqual(noGoal.foods.map(\.name), ["Lunch"])
+    }
+
+    func testQuickLogWidgetActionStateShowsPendingExpiresAndPreservesNewerAction() {
+        let suiteName = "QuickLogWidgetActionStateTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let start = testDate(day: 12)
+
+        QuickLogWidgetActionState.begin(selectionID: "first", at: start, defaults: defaults)
+        XCTAssertEqual(
+            QuickLogWidgetActionState.pendingSelectionID(at: start.addingTimeInterval(10), defaults: defaults),
+            "first"
+        )
+        XCTAssertNil(
+            QuickLogWidgetActionState.pendingSelectionID(at: start.addingTimeInterval(61), defaults: defaults)
+        )
+
+        QuickLogWidgetActionState.begin(
+            selectionID: "second",
+            at: start.addingTimeInterval(62),
+            defaults: defaults
+        )
+        QuickLogWidgetActionState.finish(selectionID: "first", defaults: defaults)
+        XCTAssertEqual(
+            QuickLogWidgetActionState.pendingSelectionID(at: start.addingTimeInterval(63), defaults: defaults),
+            "second"
+        )
+        QuickLogWidgetActionState.finish(selectionID: "second", defaults: defaults)
+        XCTAssertNil(
+            QuickLogWidgetActionState.pendingSelectionID(at: start.addingTimeInterval(64), defaults: defaults)
+        )
+    }
+
     private var testCalendar: Calendar {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(secondsFromGMT: 0)!

@@ -141,6 +141,12 @@ struct LogRecentItemIntent: AppIntent {
 
     func perform() async -> some IntentResult & ProvidesDialog {
         let selectionHash = SiriQuickLogDiagnostics.selectionHash(item.id)
+        QuickLogWidgetActionState.begin(selectionID: item.id)
+        SharedDiaryStorage.reloadWidget()
+        defer {
+            QuickLogWidgetActionState.finish(selectionID: item.id)
+            SharedDiaryStorage.reloadWidget()
+        }
         SiriQuickLogInstrumentation.record(
             "started",
             properties: ["selection_hash": selectionHash]
