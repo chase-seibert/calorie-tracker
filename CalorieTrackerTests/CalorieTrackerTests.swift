@@ -2034,6 +2034,90 @@ final class CalorieTrackerTests: XCTestCase {
         })
     }
 
+    func testSearchSelectionAnalyticsCapturesQueryIdentityRankAndResultsAbove() throws {
+        let rankedIDs = ["food:usda:one", "meal:local:two", "food:off:three"]
+        let properties = try XCTUnwrap(FoodSearchSelectionAnalytics.properties(
+            query: "  coffee  ",
+            selectedItemID: "food:off:three",
+            rankedItemIDs: rankedIDs
+        ))
+
+        XCTAssertEqual(properties["query"], "coffee")
+        XCTAssertEqual(properties["selected_item_id"], "food:off:three")
+        XCTAssertEqual(properties["selected_rank"], "3")
+        XCTAssertEqual(properties["result_ids_above"], "food:usda:one,meal:local:two")
+        XCTAssertNil(FoodSearchSelectionAnalytics.properties(
+            query: "coffee", selectedItemID: "food:custom:missing", rankedItemIDs: rankedIDs
+        ))
+
+        let bounded = try XCTUnwrap(FoodSearchSelectionAnalytics.properties(
+            query: String(repeating: "q", count: 220),
+            selectedItemID: "selected",
+            rankedItemIDs: Array(repeating: String(repeating: "x", count: 30), count: 20) + ["selected"]
+        ))
+        XCTAssertEqual(bounded["query"]?.count, 200)
+        XCTAssertLessThanOrEqual(try XCTUnwrap(bounded["result_ids_above"]).count, 240)
+    }
+
+    func testSearchEvaluationFixtureIsCatalogPinnedAndRepeatable() throws {
+        struct Fixture: Decodable {
+            struct Query: Decodable {
+                struct Target: Decodable {
+                    let itemID: String
+                }
+                let query: String
+                let expectedTargets: [Target]
+            }
+            let schemaVersion: Int
+            let catalogFingerprint: String
+            let queries: [Query]
+        }
+
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let fixtureURL = root.appendingPathComponent("data/search-eval/relevance-v2.json")
+        let fixture = try JSONDecoder().decode(Fixture.self, from: Data(contentsOf: fixtureURL))
+        let catalog = CatalogStore(url: root.appendingPathComponent("CalorieTracker/Resources/FoodCatalog.sqlite3"))
+
+        XCTAssertEqual(fixture.schemaVersion, 1)
+        XCTAssertEqual(catalog.catalogVersion, fixture.catalogFingerprint)
+        XCTAssertEqual(fixture.queries.count, 4)
+        XCTAssertEqual(fixture.queries[0].query, "rice")
+        XCTAssertEqual(fixture.queries[0].expectedTargets.first?.itemID, "usda:2708408")
+        for query in fixture.queries {
+            let firstRun = catalog.searchAll(query.query, limit: 50).map(\.id)
+            let secondRun = catalog.searchAll(query.query, limit: 50).map(\.id)
+            XCTAssertEqual(firstRun, secondRun, "Search changed order for \(query.query)")
+            for target in query.expectedTargets {
+                XCTAssertTrue(firstRun.contains(target.itemID), "Missing \(target.itemID) for \(query.query)")
+            }
+        }
+    }
+
+    func testSearchOrderingIsRepeatableWithExplicitPersonalLogHistory() throws {
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let catalog = CatalogStore(url: root.appendingPathComponent("CalorieTracker/Resources/FoodCatalog.sqlite3"))
+        let brewed = try XCTUnwrap(catalog.food(sourceID: "2710375", source: .usda))
+        let espresso = try XCTUnwrap(catalog.food(sourceID: "2710378", source: .usda))
+        let latestDate = Date(timeIntervalSince1970: 1_760_000_000)
+        var document = DiaryDocument()
+        document.entries = [
+            brewed, brewed, brewed, espresso
+        ].enumerated().map { index, food in
+            let loggedAt = latestDate.addingTimeInterval(-Double(index) * 86_400)
+            return DiaryEntry(
+                id: UUID(), date: loggedAt, food: food, amount: 1, unit: .serving,
+                nutrients: food.nutrients, loggedAt: loggedAt
+            )
+        }
+        let catalogResults = catalog.searchAll("coffee", limit: 50)
+        let firstRun = DiaryEngine(document: document, catalog: catalog).searchItems("coffee", catalogFoods: catalogResults)
+        let secondRun = DiaryEngine(document: document, catalog: catalog).searchItems("coffee", catalogFoods: catalogResults)
+
+        XCTAssertEqual(firstRun.map(\.id), secondRun.map(\.id))
+        XCTAssertEqual(firstRun.filter { $0.id == "food:usda:2710375" }.count, 1)
+        XCTAssertEqual(firstRun.filter { $0.id == "food:usda:2710378" }.count, 1)
+    }
+
     private func searchResultName(_ item: FoodPickerItem) -> String {
         switch item {
         case let .food(food): food.name

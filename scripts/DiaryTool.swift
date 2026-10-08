@@ -2,6 +2,27 @@ import CryptoKit
 import Foundation
 import SQLite3
 
+struct SearchEvaluationFixture: Decodable {
+    let schemaVersion: Int
+    let datasetVersion: String
+    let catalogFingerprint: String
+    let rankingRuleVersion: String
+    let queries: [SearchEvaluationQuery]
+}
+
+struct SearchEvaluationQuery: Decodable {
+    let query: String
+    let rationale: String
+    let expectedTargets: [SearchEvaluationTarget]
+}
+
+struct SearchEvaluationTarget: Decodable {
+    let itemID: String
+    let label: String
+    let relevance: Int
+    let desiredMaxRank: Int
+}
+
 /// Uses the exact storage implementation linked into the app and extensions.
 @main
 struct DiaryTool {
@@ -36,6 +57,11 @@ struct DiaryTool {
                 try await selfTest()
             case "benchmark":
                 try await benchmark()
+            case "search-eval":
+                guard args.count <= 2 else { throw Failure(message: usage) }
+                try searchEvaluation(fixtureURL: URL(fileURLWithPath: args.count == 2
+                    ? args[1]
+                    : "data/search-eval/relevance-v1.json"))
             default: throw Failure(message: usage)
             }
         } catch {
@@ -45,7 +71,75 @@ struct DiaryTool {
     }
 
     static let usage =
-        "Usage: diary-tool convert INPUT.json OUTPUT.sqlite | validate INPUT.sqlite | self-test | benchmark"
+        "Usage: diary-tool convert INPUT.json OUTPUT.sqlite | validate INPUT.sqlite | self-test | benchmark | search-eval [FIXTURE.json]"
+
+    static func searchEvaluation(fixtureURL: URL) throws {
+        let fixture = try JSONDecoder().decode(SearchEvaluationFixture.self, from: Data(contentsOf: fixtureURL))
+        try require(fixture.schemaVersion == 1, "Unsupported search evaluation fixture schema.")
+        try require(!fixture.queries.isEmpty, "Search evaluation fixture contains no queries.")
+
+        let catalogURL = URL(fileURLWithPath: "CalorieTracker/Resources/FoodCatalog.sqlite3")
+        let catalog = CatalogStore(url: catalogURL)
+        try require(catalog.isAvailable, "Bundled food catalog is unavailable.")
+        let actualFingerprint = catalog.catalogVersion ?? "unknown"
+        let cases = fixture.queries.map { query in
+            let results = catalog.searchAll(query.query, limit: 50)
+            let rankedIDs = results.map(\.id)
+            let targetRanks = query.expectedTargets.map { target in
+                let rank = rankedIDs.firstIndex(of: target.itemID).map { $0 + 1 }
+                return [
+                    "itemID": target.itemID,
+                    "label": target.label,
+                    "relevance": target.relevance,
+                    "desiredMaxRank": target.desiredMaxRank,
+                    "actualRank": rank as Any? ?? NSNull(),
+                    "reciprocalRank": rank.map { 1.0 / Double($0) } as Any? ?? NSNull(),
+                    "withinDesiredRank": rank.map { $0 <= target.desiredMaxRank } as Any? ?? NSNull(),
+                ] as [String: Any]
+            }
+            let foundRanks = targetRanks.compactMap { $0["actualRank"] as? Int }
+            let bestRank = foundRanks.min()
+            return (
+                query: query.query,
+                rationale: query.rationale,
+                targets: targetRanks,
+                bestRank: bestRank,
+                hitAtFive: bestRank.map { $0 <= 5 } ?? false,
+                targetMet: query.expectedTargets.contains { target in
+                    rankedIDs.firstIndex(of: target.itemID).map { $0 + 1 <= target.desiredMaxRank } ?? false
+                },
+                results: results.prefix(10).enumerated().map { index, food in
+                    ["rank": index + 1, "itemID": food.id, "name": food.name, "source": food.source.rawValue] as [String: Any]
+                }
+            )
+        }
+        let reciprocalRanks = cases.compactMap { $0.bestRank.map { 1.0 / Double($0) } }
+        let report: [String: Any] = [
+            "schemaVersion": fixture.schemaVersion,
+            "datasetVersion": fixture.datasetVersion,
+            "rankingRuleVersion": fixture.rankingRuleVersion,
+            "fixtureCatalogFingerprint": fixture.catalogFingerprint,
+            "actualCatalogFingerprint": actualFingerprint,
+            "catalogFingerprintMatches": fixture.catalogFingerprint == actualFingerprint,
+            "scope": "bundled catalog only; no diary, favorites, meals, or analytics",
+            "queryCount": cases.count,
+            "meanReciprocalRank": reciprocalRanks.isEmpty ? NSNull() : reciprocalRanks.reduce(0, +) / Double(reciprocalRanks.count),
+            "hitRateAtFive": Double(cases.filter(\.hitAtFive).count) / Double(cases.count),
+            "targetRate": Double(cases.filter(\.targetMet).count) / Double(cases.count),
+            "queries": cases.map { [
+                "query": $0.query,
+                "rationale": $0.rationale,
+                "targets": $0.targets,
+                "bestRelevantRank": $0.bestRank as Any? ?? NSNull(),
+                "reciprocalRank": $0.bestRank.map { 1.0 / Double($0) } as Any? ?? NSNull(),
+                "hitAtFive": $0.hitAtFive,
+                "targetMet": $0.targetMet,
+                "topResults": $0.results,
+            ] as [String: Any] }
+        ]
+        let data = try JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted, .sortedKeys])
+        print(String(decoding: data, as: UTF8.self))
+    }
 
     static func encode(_ document: DiaryDocument) throws -> Data {
         try DiaryJSONMigration.canonicalData(document)

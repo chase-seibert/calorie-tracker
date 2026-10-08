@@ -65,7 +65,7 @@ build: sim-build
 
 DIARY_TOOL_SOURCES := CalorieTracker/Models/Domain.swift CalorieTracker/Data/FoodResolution.swift CalorieTracker/Data/DiaryEngine.swift CalorieTracker/Data/DiaryRepository.swift CalorieTracker/Data/QuickLogStore.swift CalorieTracker/Data/CatalogStore.swift scripts/DiaryTool.swift
 
-.PHONY: diary-tool storage-test storage-benchmark diary-convert diary-validate icon-review
+.PHONY: diary-tool storage-test storage-benchmark diary-convert diary-validate search-eval search-analytics icon-review
 ICON_DIR ?= docs/icon-concepts/2026-09-02
 
 icon-review:
@@ -91,6 +91,15 @@ diary-convert: diary-tool
 diary-validate: diary-tool
 	@test -n "$(INPUT)" || (echo 'Set INPUT=converted.sqlite'; exit 1)
 	build/diary-tool validate "$(INPUT)"
+
+search-eval: diary-tool
+	build/diary-tool search-eval "$(or $(FIXTURE),data/search-eval/relevance-v2.json)"
+
+SEARCH_ANALYTICS_DB ?= downloads/analytics.sqlite3
+SEARCH_ANALYTICS_DAYS ?= 90
+
+search-analytics:
+	$(PYTHON) scripts/analyze_search_analytics.py --db "$(SEARCH_ANALYTICS_DB)" --days "$(SEARCH_ANALYTICS_DAYS)"
 
 clean:
 	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -derivedDataPath $(DERIVED_DATA) clean

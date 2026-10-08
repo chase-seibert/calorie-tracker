@@ -419,17 +419,14 @@ struct FoodPickerView: View {
     }
 
     private func captureSearchResultSelection(_ item: FoodPickerItem) {
-        let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !normalizedQuery.isEmpty, let rank = selectionRank(for: item) else { return }
-        let aboveIDs = results.prefix(rank - 1).map(analyticsSearchItemID)
+        guard let properties = FoodSearchSelectionAnalytics.properties(
+            query: query,
+            selectedItemID: analyticsSearchItemID(item),
+            rankedItemIDs: results.map(analyticsSearchItemID)
+        ) else { return }
         AppAnalytics.capture(
             "food_search.result_selected",
-            properties: [
-                "query": String(normalizedQuery.prefix(200)),
-                "selected_item_id": analyticsSearchItemID(item),
-                "selected_rank": String(rank),
-                "result_ids_above": String(aboveIDs.joined(separator: ",").prefix(240))
-            ]
+            properties: properties
         )
     }
 
@@ -546,6 +543,26 @@ struct FoodSearchOutcome: Equatable {
     let eventType: String
     let query: String
     let resultCount: Int
+}
+
+struct FoodSearchSelectionAnalytics {
+    static func properties(
+        query: String,
+        selectedItemID: String,
+        rankedItemIDs: [String]
+    ) -> [String: String]? {
+        let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedQuery.isEmpty,
+              let index = rankedItemIDs.firstIndex(of: selectedItemID)
+        else { return nil }
+
+        return [
+            "query": String(normalizedQuery.prefix(200)),
+            "selected_item_id": selectedItemID,
+            "selected_rank": String(index + 1),
+            "result_ids_above": String(rankedItemIDs.prefix(index).joined(separator: ",").prefix(240))
+        ]
+    }
 }
 
 private struct FoodPickerCalorieSummary: View {
