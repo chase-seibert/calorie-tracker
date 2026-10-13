@@ -210,7 +210,7 @@ aliases or saved configurations.
 | Southwest Caesar Salad | Exclude as a standalone catalog food; its base can be Caesar salad, with steak and toppings added when desired. |
 | Salad Dressings; Secret Sauce; vinaigrettes; adobo; chili oil; pickles; stock; plum jam/preserves | Reusable condiments, ingredients, or recipe data. Do not create meal-sized canonical food results for these. |
 | Drive-Thru Burgers | **Burger** with saved composition/alias; restaurant terms should not imply exact branded nutrition. |
-| Taco Night; Red Chile Chicken Enchiladas; Bean and Cheese Tomatillo Enchiladas | **Taco** for taco night, with refried beans and rice as related foods. Enchiladas can share an **Enchiladas** entry with a filling choice if users log them often. |
+| Taco Night; Red Chile Chicken Enchiladas; Bean and Cheese Tomatillo Enchiladas | **Taco** for taco night, with one exclusive protein choice, meaningful toppings, and refried beans and rice as related foods. Keep low-impact toppings out of quick controls. Enchiladas can share an **Enchiladas** entry with a filling choice if users log them often. |
 | Neopolitan Pizza; Deep Dish Pizza | **Pizza** with mutually exclusive style choices such as Neapolitan/thin crust and deep dish. Search for “deep dish pizza” returns Pizza with Deep dish selected. |
 | Baked Ziti; Broccoli Sausage Orecchiette; Garlic Chili Pasta; Pasta e Ceci; Aperto's Tagliolini Pepati; Pasta Cacio e Uova | Use **Pasta with sauce** and saved configurations/choices for pasta shape, sauce, meatballs, broccoli, sausage, chickpeas, or olive oil. Keep **Lasagna** as its own canonical entry. |
 | Noel's Chili | Own **Chili** entry; exclusive beef, turkey, or vegetarian type, plus rice, sour cream, and cheese. |

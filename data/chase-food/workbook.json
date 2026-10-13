@@ -904,12 +904,12 @@
       "Recipe / assembled",
       "",
       "1 taco",
-      "125.0",
+      "100",
       "Yes",
       "tacos; soft taco",
-      "Cheddar cheese; Salsa; Sour cream; Guacamole; Lettuce",
+      "Cheese; Sour cream; Guacamole; Refried beans; Rice",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Default maps to USDA FNDDS 1 small/regular taco (100 g); size mappings use the same source record."
     ],
     [
       "food_hard_shell_taco",
@@ -7357,12 +7357,12 @@
       "prt_food_taco_small",
       "food_taco",
       "Taco",
-      "Small taco",
+      "Small taco (miniature)",
       "small",
       "1",
-      "90",
-      "Draft estimate",
-      "Concept portion · draft estimate"
+      "50",
+      "USDA FNDDS",
+      "FDC 2708530 portion: 1 miniature (50 g)."
     ],
     [
       "prt_food_taco_default",
@@ -7371,9 +7371,9 @@
       "Medium taco",
       "medium",
       "1",
-      "125",
-      "Draft estimate",
-      "Concept portion · draft estimate"
+      "100",
+      "USDA FNDDS",
+      "FDC 2708530 portion: 1 small/regular (100 g)."
     ],
     [
       "prt_food_taco_large",
@@ -7382,9 +7382,9 @@
       "Large taco",
       "large",
       "1",
-      "180",
-      "Draft estimate",
-      "Concept portion · draft estimate"
+      "150",
+      "USDA FNDDS",
+      "FDC 2708530 portion: 1 large (150 g)."
     ],
     [
       "prt_food_penne_pasta_with_sauce_small",
@@ -39443,54 +39443,41 @@
     [
       "food_taco",
       "Taco",
-      "food_baked_chicken_breast",
-      "Chicken",
+      "food_ground_beef_cooked",
+      "Beef",
       "25",
-      "Protein",
+      "Filling",
       "Yes",
       "Draft",
       "Protein",
       "exclusive",
-      ""
+      "55"
     ],
     [
       "food_taco",
       "Taco",
-      "food_beef_patty",
-      "Beef",
+      "food_baked_chicken_breast",
+      "Chicken",
       "26",
-      "Protein",
+      "Filling",
       "No",
       "Draft",
       "Protein",
       "exclusive",
-      ""
+      "75"
     ],
     [
       "food_taco",
       "Taco",
-      "food_pork",
+      "food_pulled_pork",
       "Pork",
       "27",
-      "Protein",
+      "Filling",
       "No",
       "Draft",
       "Protein",
       "exclusive",
-      ""
-    ],
-    [
-      "food_taco",
-      "Taco",
-      "food_salsa",
-      "Salsa",
-      "28",
-      "Suggested addition",
-      "No",
-      "Draft",
-      "",
-      "multiple",
-      ""
+      "55"
     ],
     [
       "food_taco",
@@ -39498,12 +39485,12 @@
       "food_cheddar_cheese",
       "Cheese",
       "29",
-      "Suggested addition",
+      "Topping",
       "No",
       "Draft",
       "",
       "multiple",
-      ""
+      "15"
     ],
     [
       "food_taco",
@@ -39511,38 +39498,51 @@
       "food_sour_cream",
       "Sour cream",
       "30",
-      "Suggested addition",
+      "Topping",
       "No",
       "Draft",
       "",
       "multiple",
-      ""
+      "20"
+    ],
+    [
+      "food_taco",
+      "Taco",
+      "food_guacamole",
+      "Guacamole",
+      "31",
+      "Topping",
+      "No",
+      "Draft",
+      "",
+      "multiple",
+      "30"
     ],
     [
       "food_taco",
       "Taco",
       "food_refried_beans",
       "Refried beans",
-      "31",
-      "Suggested addition",
+      "32",
+      "Related food",
       "No",
       "Draft",
       "",
       "multiple",
-      ""
+      "118"
     ],
     [
       "food_taco",
       "Taco",
       "food_white_rice",
       "Rice",
-      "32",
-      "Suggested addition",
+      "33",
+      "Related food",
       "No",
       "Draft",
       "",
       "multiple",
-      ""
+      "79"
     ],
     [
       "food_penne_pasta_with_sauce",
@@ -42152,13 +42152,13 @@
     [
       "food_taco",
       "Taco",
-      "Recipe calculation needed",
-      null,
-      null,
-      null,
-      null,
-      null,
-      "Not sourced"
+      "USDA FoodData Central Survey (FNDDS) reviewed record",
+      "243",
+      "15.2",
+      "15.9",
+      "13.2",
+      "2708530",
+      "Reviewed 2026-10-13; Medium confidence; generic meat taco without cheese; portion and preparation vary."
     ],
     [
       "food_hard_shell_taco",

@@ -617,7 +617,8 @@ def create_database(output: Path, foods: Iterable[CatalogFood]) -> tuple[int, di
             food_id TEXT PRIMARY KEY, category TEXT NOT NULL, food_kind TEXT NOT NULL,
             confidence TEXT NOT NULL, review_required INTEGER NOT NULL,
             match_source TEXT, match_source_id TEXT, match_name TEXT, match_basis TEXT,
-            similarity REAL, review_reasons_json TEXT NOT NULL
+            similarity REAL, review_reasons_json TEXT NOT NULL,
+            nutrition_evidence_json TEXT, baseline_source_json TEXT
         );
         CREATE TABLE chase_food_aliases (
             food_id TEXT NOT NULL, alias TEXT NOT NULL, kind TEXT NOT NULL,
@@ -823,13 +824,15 @@ def main() -> int:
                 provenance.get("source"), provenance.get("sourceID"), provenance.get("name"),
                 provenance.get("matchBasis"), provenance.get("similarity"),
                 json.dumps(item.get("reviewReasons", []), separators=(",", ":")),
+                json.dumps(item.get("nutritionEvidence"), separators=(",", ":")) if item.get("nutritionEvidence") else None,
+                json.dumps(item.get("baselineNutritionSource"), separators=(",", ":")) if item.get("baselineNutritionSource") else None,
             ))
         payload_aliases = [(a["foodID"], a["alias"], a.get("kind", "synonym")) for a in chase.get("aliases", [])]
         foods = list(foods) + chase_foods
     count, counts = create_database(arguments.output.resolve(), foods)
     if chase_path.exists():
         with sqlite3.connect(arguments.output.resolve()) as database:
-            database.executemany("INSERT INTO chase_food_metadata VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", database_metadata)
+            database.executemany("INSERT INTO chase_food_metadata VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", database_metadata)
             database.executemany("INSERT OR IGNORE INTO chase_food_aliases VALUES (?, ?, ?)", payload_aliases)
             database.executemany("INSERT OR REPLACE INTO chase_food_options VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", option_rows)
             database.executemany(

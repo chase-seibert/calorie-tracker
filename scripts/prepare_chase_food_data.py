@@ -18,6 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_WORKBOOK = ROOT / "data/chase-food/workbook.json"
+DEFAULT_ENRICHMENTS = ROOT / "data/chase-food/enrichments.json"
 DEFAULT_CATALOG = ROOT / "CalorieTracker/Resources/FoodCatalog.sqlite3"
 DEFAULT_OUTPUT = ROOT / "data/chase-food/catalog.json"
 
@@ -79,10 +80,13 @@ def load_existing(path: Path) -> list[dict]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--workbook", type=Path, default=DEFAULT_WORKBOOK)
+    parser.add_argument("--enrichments", type=Path, default=DEFAULT_ENRICHMENTS)
     parser.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()
     workbook = json.loads(args.workbook.read_text())
+    enrichment_data = json.loads(args.enrichments.read_text()) if args.enrichments.exists() else {"foods": {}}
+    enrichments = enrichment_data.get("foods", {})
     foods_rows = workbook["foods"]
     food_headers = foods_rows[0]
     food_index = {name: food_headers.index(name) for name in food_headers}
@@ -157,6 +161,29 @@ def main() -> int:
             scale = grams / max(float(match["base_grams"] or 100), .01)
             nutrients = {key: round(float(match[key] or 0) * scale, 2) for key in ("calories", "carbs", "fat", "protein")}
             nutrients["fiber"] = round(float(match["fiber"]) * scale, 2) if match["fiber"] is not None else None
+        enrichment = enrichments.get(food_id)
+        baseline_source = {"source": match["source"], "sourceID": match["source_id"], "name": match["name"], "matchBasis": match_basis, "similarity": round(score, 4)} if match else None
+        if enrichment and enrichment.get("baselineNutritionSource"):
+            baseline_source = enrichment["baselineNutritionSource"]
+        nutrition_source = baseline_source
+        nutrition_evidence = None
+        if enrichment:
+            per_100g = enrichment["nutritionPer100g"]
+            nutrients = {
+                key: round(float(per_100g[key]) * grams / 100, 2)
+                for key in ("calories", "carbs", "fat", "protein")
+            }
+            nutrients["fiber"] = round(float(per_100g["fiber"]) * grams / 100, 2) if per_100g.get("fiber") is not None else None
+            nutrition_source = {
+                "source": "usda",
+                "sourceID": str(enrichment["source"]["recordID"]),
+                "name": enrichment["source"]["recordName"],
+                "matchBasis": "reviewed FDC record",
+                "similarity": None,
+            }
+            nutrition_evidence = enrichment
+            confidence = enrichment["confidence"]
+            review_reasons = list(enrichment.get("reviewReasons", []))
         if food_id in INTERNAL_OPTION_FOODS:
             nutrients = {"calories": 0, "carbs": 0, "fat": 0, "protein": 0, "fiber": 0}
         output_foods.append({
@@ -168,8 +195,9 @@ def main() -> int:
             "sizeAvailable": clean(row[food_index["S/M/L available?"]]).lower() == "yes",
             "aliases": aliases,
             "nutrients": nutrients,
-            "nutritionPer100g": ({key: round(float(match[key] or 0), 4) for key in ("calories", "carbs", "fat", "protein")} | {"fiber": round(float(match["fiber"]), 4) if match["fiber"] is not None else None}) if match else None,
-            "nutritionSource": {"source": match["source"], "sourceID": match["source_id"], "name": match["name"], "matchBasis": match_basis, "similarity": round(score, 4)} if match else None,
+            "nutritionPer100g": enrichment["nutritionPer100g"] if enrichment else (({key: round(float(match[key] or 0), 4) for key in ("calories", "carbs", "fat", "protein")} | {"fiber": round(float(match["fiber"]), 4) if match["fiber"] is not None else None}) if match else None),
+            "nutritionSource": nutrition_source,
+            **({"baselineNutritionSource": baseline_source, "nutritionEvidence": nutrition_evidence} if enrichment else {}),
             "confidence": confidence,
             "reviewRequired": bool(review_reasons),
             "reviewReasons": review_reasons,
@@ -177,7 +205,7 @@ def main() -> int:
         })
     payload = {
         "schemaVersion": 1,
-        "datasetVersion": "chase-food-2026-10-13-7",
+        "datasetVersion": "chase-food-2026-10-13-8",
         "workbookTitle": "Canonical U.S. Food Taxonomy — 514 Foods (Review Draft)",
         "workbookURL": "https://docs.google.com/spreadsheets/d/16Y1Uc0jldJ4tGO_vf5mgjT0n8pwJxO13W54zR5M_wWo/edit",
         "foods": output_foods,

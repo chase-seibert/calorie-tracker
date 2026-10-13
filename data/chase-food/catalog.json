@@ -6303,7 +6303,7 @@
       "Draft"
     ]
   ],
-  "datasetVersion": "chase-food-2026-10-13-7",
+  "datasetVersion": "chase-food-2026-10-13-8",
   "foods": [
     {
       "aliases": [
@@ -8924,37 +8924,109 @@
         "tacos",
         "soft taco"
       ],
-      "category": "Mexican & Tex-Mex",
-      "confidence": "Low",
-      "defaultGrams": 125.0,
-      "defaultUnit": "1 taco",
-      "foodKind": "Recipe / assembled",
-      "id": "food_taco",
-      "name": "Taco",
-      "nutrients": {
-        "calories": 307.5,
-        "carbs": 19.5,
-        "fat": 17.0,
-        "fiber": 2.75,
-        "protein": 19.12
-      },
-      "nutritionPer100g": {
-        "calories": 246.0,
-        "carbs": 15.6,
-        "fat": 13.6,
-        "fiber": 2.2,
-        "protein": 15.3
-      },
-      "nutritionSource": {
+      "baselineNutritionSource": {
         "matchBasis": "canonical",
         "name": "Taco, NFS",
         "similarity": 0.6667,
         "source": "usda",
         "sourceID": "2708514"
       },
+      "category": "Mexican & Tex-Mex",
+      "confidence": "Medium",
+      "defaultGrams": 100.0,
+      "defaultUnit": "1 taco",
+      "foodKind": "Recipe / assembled",
+      "id": "food_taco",
+      "name": "Taco",
+      "nutrients": {
+        "calories": 243.0,
+        "carbs": 15.9,
+        "fat": 13.2,
+        "fiber": 2.2,
+        "protein": 15.2
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Taco, NFS",
+          "similarity": 0.6667,
+          "source": "usda",
+          "sourceID": "2708514"
+        },
+        "catalogPortion": {
+          "grams": 100,
+          "label": "1 taco",
+          "nutrients": {
+            "calories": 243.0,
+            "carbs": 15.9,
+            "fat": 13.2,
+            "fiber": 2.2,
+            "protein": 15.2
+          }
+        },
+        "compositionEvidence": {
+          "confidence": "Medium",
+          "decision": "Keep one Taco canonical identity. Offer one exclusive protein choice (beef default, chicken, or pork), material toppings (cheese, sour cream, guacamole), and refried beans and rice as optional related foods for taco-night logging. Leave low-impact salsa and lettuce out of the quick controls.",
+          "reason": "Options follow the approved concept and cookbook mapping. Component quantities are practical draft servings, matched to reusable food records; the taco filling and related-side amounts need recipe-level review.",
+          "sources": [
+            {
+              "name": "Chase Food customization concepts",
+              "pages": [
+                5
+              ],
+              "path": "docs/chase-food-concepts.pdf"
+            },
+            {
+              "name": "Chase Food taxonomy",
+              "path": "docs/chase-food-taxonomy.md",
+              "section": "Cookbook coverage map"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 243,
+          "carbs": 15.9,
+          "fat": 13.2,
+          "fiber": 2.2,
+          "protein": 15.2
+        },
+        "reviewReasons": [
+          "USDA FNDDS is a direct generic meat-taco profile without cheese; tortilla style, filling recipe, and toppings vary.",
+          "Protein, topping, and related-side component amounts are draft serving estimates and need recipe-level refinement."
+        ],
+        "source": {
+          "dataType": "Survey (FNDDS)",
+          "database": "FoodData Central",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2708530",
+          "recordName": "Taco, meat, no cheese",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-13",
+          "serving": {
+            "description": "1 small/regular",
+            "grams": 100
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2708530/nutrients"
+        }
+      },
+      "nutritionPer100g": {
+        "calories": 243,
+        "carbs": 15.9,
+        "fat": 13.2,
+        "fiber": 2.2,
+        "protein": 15.2
+      },
+      "nutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Taco, meat, no cheese",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2708530"
+      },
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "USDA FNDDS is a direct generic meat-taco profile without cheese; tortilla style, filling recipe, and toppings vary.",
+        "Protein, topping, and related-side component amounts are draft serving estimates and need recipe-level refinement."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -27209,12 +27281,12 @@
       "prt_food_taco_small",
       "food_taco",
       "Taco",
-      "Small taco",
+      "Small taco (miniature)",
       "small",
       "1",
-      "90",
-      "Draft estimate",
-      "Concept portion · draft estimate"
+      "50",
+      "USDA FNDDS",
+      "FDC 2708530 portion: 1 miniature (50 g)."
     ],
     [
       "prt_food_taco_default",
@@ -27223,9 +27295,9 @@
       "Medium taco",
       "medium",
       "1",
-      "125",
-      "Draft estimate",
-      "Concept portion · draft estimate"
+      "100",
+      "USDA FNDDS",
+      "FDC 2708530 portion: 1 small/regular (100 g)."
     ],
     [
       "prt_food_taco_large",
@@ -27234,9 +27306,9 @@
       "Large taco",
       "large",
       "1",
-      "180",
-      "Draft estimate",
-      "Concept portion · draft estimate"
+      "150",
+      "USDA FNDDS",
+      "FDC 2708530 portion: 1 large (150 g)."
     ],
     [
       "prt_food_penne_pasta_with_sauce_small",
@@ -50096,54 +50168,41 @@
     [
       "food_taco",
       "Taco",
-      "food_baked_chicken_breast",
-      "Chicken",
+      "food_ground_beef_cooked",
+      "Beef",
       "25",
-      "Protein",
+      "Filling",
       "Yes",
       "Draft",
       "Protein",
       "exclusive",
-      ""
+      "55"
     ],
     [
       "food_taco",
       "Taco",
-      "food_beef_patty",
-      "Beef",
+      "food_baked_chicken_breast",
+      "Chicken",
       "26",
-      "Protein",
+      "Filling",
       "No",
       "Draft",
       "Protein",
       "exclusive",
-      ""
+      "75"
     ],
     [
       "food_taco",
       "Taco",
-      "food_pork",
+      "food_pulled_pork",
       "Pork",
       "27",
-      "Protein",
+      "Filling",
       "No",
       "Draft",
       "Protein",
       "exclusive",
-      ""
-    ],
-    [
-      "food_taco",
-      "Taco",
-      "food_salsa",
-      "Salsa",
-      "28",
-      "Suggested addition",
-      "No",
-      "Draft",
-      "",
-      "multiple",
-      ""
+      "55"
     ],
     [
       "food_taco",
@@ -50151,12 +50210,12 @@
       "food_cheddar_cheese",
       "Cheese",
       "29",
-      "Suggested addition",
+      "Topping",
       "No",
       "Draft",
       "",
       "multiple",
-      ""
+      "15"
     ],
     [
       "food_taco",
@@ -50164,38 +50223,51 @@
       "food_sour_cream",
       "Sour cream",
       "30",
-      "Suggested addition",
+      "Topping",
       "No",
       "Draft",
       "",
       "multiple",
-      ""
+      "20"
+    ],
+    [
+      "food_taco",
+      "Taco",
+      "food_guacamole",
+      "Guacamole",
+      "31",
+      "Topping",
+      "No",
+      "Draft",
+      "",
+      "multiple",
+      "30"
     ],
     [
       "food_taco",
       "Taco",
       "food_refried_beans",
       "Refried beans",
-      "31",
-      "Suggested addition",
+      "32",
+      "Related food",
       "No",
       "Draft",
       "",
       "multiple",
-      ""
+      "118"
     ],
     [
       "food_taco",
       "Taco",
       "food_white_rice",
       "Rice",
-      "32",
-      "Suggested addition",
+      "33",
+      "Related food",
       "No",
       "Draft",
       "",
       "multiple",
-      ""
+      "79"
     ],
     [
       "food_penne_pasta_with_sauce",

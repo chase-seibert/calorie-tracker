@@ -26,13 +26,13 @@ summary.getRange("A3:B14").values = [
   ["Configurable component options", optionCount],
   ["Portion mappings", source.portions.length],
   ["Dataset revision", source.datasetVersion],
-  ["Nutrition source", "Existing bundled USDA / Open Food Facts catalog"],
+  ["Nutrition source", "Existing bundled catalog plus reviewed USDA FoodData Central enrichments where available"],
   ["Workbook source", source.workbookURL],
 ];
 summary.getRange("A16:B21").values = [
-  ["Confidence method", "High = exact canonical name; Medium = close lexical match (>=0.78); Low = approximate match (<0.78)."],
-  ["Nutrition values", "Existing matched record values scaled to each workbook default gram estimate."],
-  ["Limit", "These matches are screening estimates. They are not reviewed recipe analyses or product-label values."],
+  ["Confidence method", "Direct authoritative source and portion match can be High; close but recipe-variable matches are Medium; approximate matches are Low."],
+  ["Nutrition values", "Per-food evidence records document the source portion, per-100 g values, and scaling to the canonical default portion."],
+  ["Limit", "Generic prepared-food records can differ from a user's recipe; unresolved composition and component amounts stay flagged for refinement."],
   ["Refinement rule", "Review every Low match, prepared dish, and record with missing fiber."],
   ["Synchronization", "This sheet is generated from data/chase-food/catalog.json, the manifest used by the app catalog builder."],
   ["Alias policy", "Brand and restaurant names point to generic canonical identities; cereal package labels are comparison evidence only, kept on the separate Cereal Brand Research tab."],
@@ -43,7 +43,7 @@ summary.getRange("A:A").format.columnWidth = 34;
 summary.getRange("B:B").format.columnWidth = 100;
 summary.getRange("B16:B21").format.wrapText = true;
 
-const headers = ["Food ID", "Canonical food", "Category", "Food kind", "Default unit", "Default grams", "Calories / default", "Carbs g / default", "Fat g / default", "Protein g / default", "Fiber g / default", "Confidence", "Refinement needed", "Review reason", "Matched source", "Matched source ID", "Matched catalog name", "Match basis", "Similarity", "Available in search"];
+const headers = ["Food ID", "Canonical food", "Category", "Food kind", "Default unit", "Default grams", "Calories / default", "Carbs g / default", "Fat g / default", "Protein g / default", "Fiber g / default", "Confidence", "Refinement needed", "Review reason", "Matched source", "Matched source ID", "Matched catalog name", "Match basis", "Similarity", "Available in search", "Evidence source URL", "Source serving", "Evidence reviewed", "Composition decision", "Baseline match"];
 const records = source.foods.map(f => [
   f.id, f.name, f.category, f.foodKind, f.defaultUnit, f.defaultGrams,
   f.nutrients?.calories ?? null, f.nutrients?.carbs ?? null, f.nutrients?.fat ?? null,
@@ -51,13 +51,22 @@ const records = source.foods.map(f => [
   f.reviewRequired ? "Yes" : "No", f.reviewReasons.join("; "),
   f.nutritionSource?.source ?? "", f.nutritionSource?.sourceID ?? "",
   f.nutritionSource?.name ?? "", f.nutritionSource?.matchBasis ?? "",
-  f.nutritionSource?.similarity ?? null, f.searchEnabled === false ? "No" : "Yes",
+  f.nutritionSource?.similarity ?? null,
+  f.searchEnabled === false ? "No" : "Yes",
+  f.nutritionEvidence?.source?.url ?? "",
+  f.nutritionEvidence?.source?.serving
+    ? `${f.nutritionEvidence.source.serving.description} (${f.nutritionEvidence.source.serving.grams} g)` : "",
+  f.nutritionEvidence?.source?.reviewedDate ?? "",
+  f.nutritionEvidence?.compositionEvidence?.decision ?? "",
+  f.baselineNutritionSource
+    ? `${f.baselineNutritionSource.name} (${f.baselineNutritionSource.source}:${f.baselineNutritionSource.sourceID}; ${f.baselineNutritionSource.matchBasis}; ${f.baselineNutritionSource.similarity})`
+    : "",
 ]);
 foods.getRangeByIndexes(0, 0, 1, headers.length).values = [headers];
 foods.getRangeByIndexes(1, 0, records.length, headers.length).values = records;
 foods.freezePanes.freezeRows(1);
 foods.freezePanes.freezeColumns(2);
-foods.tables.add(`A1:T${records.length + 1}`, true, "ChaseFoodProfiles").style = "TableStyleMedium2";
+foods.tables.add(`A1:Y${records.length + 1}`, true, "ChaseFoodProfiles").style = "TableStyleMedium2";
 foods.getRange(`F2:K${records.length + 1}`).format.numberFormat = "0.00";
 foods.getRange(`S2:S${records.length + 1}`).format.numberFormat = "0.00";
 foods.getRange("A:A").format.columnWidth = 26;
@@ -68,8 +77,14 @@ foods.getRange("F:M").format.columnWidth = 16;
 foods.getRange("N:N").format.columnWidth = 58;
 foods.getRange("O:R").format.columnWidth = 24;
 foods.getRange("S:S").format.columnWidth = 12;
-foods.getRange("T:T").format.columnWidth = 18;
+foods.getRange("T:T").format.columnWidth = 46;
+foods.getRange("U:U").format.columnWidth = 30;
+foods.getRange("V:V").format.columnWidth = 18;
+foods.getRange("W:W").format.columnWidth = 70;
+foods.getRange("X:X").format.columnWidth = 28;
+foods.getRange("Y:Y").format.columnWidth = 18;
 foods.getRange(`N2:N${records.length + 1}`).format.wrapText = true;
+foods.getRange(`T2:X${records.length + 1}`).format.wrapText = true;
 
 const aliasHeaders = ["Canonical food ID", "Canonical food", "Search alias", "Alias kind"];
 const names = new Map(source.foods.map(f => [f.id, f.name]));

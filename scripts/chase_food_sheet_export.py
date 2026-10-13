@@ -38,22 +38,25 @@ def load_rows(kind: str) -> list[list[object]]:
             ["Configurable component options", len(source["suggestedAdditions"]) + len(source.get("baseCompositions", []))],
             ["Portion mappings", len(source["portions"])],
             ["Dataset revision", source["datasetVersion"]],
-            ["Nutrition source", "Existing bundled USDA / Open Food Facts catalog"],
+            ["Nutrition source", "Existing bundled catalog plus reviewed USDA FoodData Central enrichments where available"],
             ["Workbook source", source["workbookURL"]],
             [],
-            ["Confidence method", "High = exact canonical name; Medium = close lexical match (>=0.78); Low = approximate match (<0.78)."],
-            ["Nutrition values", "Existing matched record values scaled to each workbook default gram estimate."],
-            ["Limit", "These matches are screening estimates. They are not reviewed recipe analyses or product-label values."],
+            ["Confidence method", "Direct authoritative source and portion match can be High; close but recipe-variable matches are Medium; approximate matches are Low."],
+            ["Nutrition values", "Per-food evidence records document the source portion, per-100 g values, and scaling to the canonical default portion."],
+            ["Limit", "Generic prepared-food records can differ from a user's recipe; unresolved composition and component amounts stay flagged for refinement."],
             ["Refinement rule", "Review every Low match, prepared dish, and record with missing fiber."],
             ["Synchronization", "This sheet is generated from data/chase-food/catalog.json, the manifest used by the app catalog builder."],
             ["Alias policy", "Brand and restaurant names point to generic canonical identities; no brand-specific nutrient claim."],
         ]
     if kind == "profiles":
-        headers = ["Food ID", "Canonical food", "Category", "Food kind", "Default unit", "Default grams", "Calories / default", "Carbs g / default", "Fat g / default", "Protein g / default", "Fiber g / default", "Confidence", "Refinement needed", "Review reason", "Matched source", "Matched source ID", "Matched catalog name", "Match basis", "Similarity", "Available in search"]
+        headers = ["Food ID", "Canonical food", "Category", "Food kind", "Default unit", "Default grams", "Calories / default", "Carbs g / default", "Fat g / default", "Protein g / default", "Fiber g / default", "Confidence", "Refinement needed", "Review reason", "Matched source", "Matched source ID", "Matched catalog name", "Match basis", "Similarity", "Available in search", "Evidence source URL", "Source serving", "Evidence reviewed", "Composition decision", "Baseline match"]
         rows = []
         for food in foods:
             nutrients = food.get("nutrients") or {}
             match = food.get("nutritionSource") or {}
+            evidence = food.get("nutritionEvidence") or {}
+            source = evidence.get("source") or {}
+            serving = source.get("serving") or {}
             rows.append([
                 food["id"], food["name"], food["category"], food["foodKind"],
                 food["defaultUnit"], food["defaultGrams"], nutrients.get("calories"),
@@ -62,6 +65,17 @@ def load_rows(kind: str) -> list[list[object]]:
                 "; ".join(food["reviewReasons"]), match.get("source", ""), match.get("sourceID", ""),
                 match.get("name", ""), match.get("matchBasis", ""), match.get("similarity"),
                 "No" if food.get("searchEnabled") is False else "Yes",
+                source.get("url", ""),
+                f"{serving['description']} ({serving['grams']} g)" if serving.get("description") and serving.get("grams") else "",
+                source.get("reviewedDate", ""), (evidence.get("compositionEvidence") or {}).get("decision", ""),
+                (
+                    f"{food['baselineNutritionSource'].get('name', '')} "
+                    f"({food['baselineNutritionSource'].get('source', '')}:"
+                    f"{food['baselineNutritionSource'].get('sourceID', '')}; "
+                    f"{food['baselineNutritionSource'].get('matchBasis', '')}; "
+                    f"{food['baselineNutritionSource'].get('similarity', '')})"
+                    if food.get("baselineNutritionSource") else ""
+                ),
             ])
         return [headers, *rows]
     if kind == "aliases":

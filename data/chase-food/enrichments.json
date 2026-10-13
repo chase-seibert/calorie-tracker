@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "foods": {
+    "food_taco": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 243,
+        "carbs": 15.9,
+        "fat": 13.2,
+        "protein": 15.2,
+        "fiber": 2.2
+      },
+      "source": {
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "recordID": "2708530",
+        "recordName": "Taco, meat, no cheese",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2708530/nutrients",
+        "reviewedDate": "2026-10-13",
+        "serving": {
+          "description": "1 small/regular",
+          "grams": 100
+        }
+      },
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2708514",
+        "name": "Taco, NFS",
+        "matchBasis": "canonical",
+        "similarity": 0.6667
+      },
+      "compositionEvidence": {
+        "sources": [
+          {
+            "name": "Chase Food customization concepts",
+            "path": "docs/chase-food-concepts.pdf",
+            "pages": [
+              5
+            ]
+          },
+          {
+            "name": "Chase Food taxonomy",
+            "path": "docs/chase-food-taxonomy.md",
+            "section": "Cookbook coverage map"
+          }
+        ],
+        "decision": "Keep one Taco canonical identity. Offer one exclusive protein choice (beef default, chicken, or pork), material toppings (cheese, sour cream, guacamole), and refried beans and rice as optional related foods for taco-night logging. Leave low-impact salsa and lettuce out of the quick controls.",
+        "confidence": "Medium",
+        "reason": "Options follow the approved concept and cookbook mapping. Component quantities are practical draft servings, matched to reusable food records; the taco filling and related-side amounts need recipe-level review."
+      },
+      "reviewReasons": [
+        "USDA FNDDS is a direct generic meat-taco profile without cheese; tortilla style, filling recipe, and toppings vary.",
+        "Protein, topping, and related-side component amounts are draft serving estimates and need recipe-level refinement."
+      ],
+      "catalogPortion": {
+        "label": "1 taco",
+        "grams": 100,
+        "nutrients": {
+          "calories": 243.0,
+          "carbs": 15.9,
+          "fat": 13.2,
+          "protein": 15.2,
+          "fiber": 2.2
+        }
+      }
+    }
+  }
+}
