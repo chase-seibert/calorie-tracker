@@ -137,3 +137,13 @@ the test session could not materialize a worker because CoreSimulator was
 unavailable and the attached iPhone was passcode protected. Treat the source
 build as verified and report simulator test execution as unverified until a
 usable simulator runtime is available.
+
+## 2026-10-13: Google Sheets review stopped an authorized bulk catalog sync
+
+A Google Sheets batch update was blocked by approval review because the target
+sheet's ownership was not established from the original request. The write had
+already updated a summary and part of the profile tab before a later chunk was
+rejected, leaving the document partial. For future catalog exports, name the
+exact destination spreadsheet and obtain destination-specific approval before
+sending bulk nutrition data; after approval, rewrite every generated range and
+verify canonical rows, aliases, and summary counts.

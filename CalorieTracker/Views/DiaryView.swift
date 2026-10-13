@@ -1275,6 +1275,13 @@ private struct DiaryEntryRow: View {
                 .font(.caption)
                 .foregroundStyle(AppTheme.muted)
                 .lineLimit(1)
+                if let components = entry.foodConfigurationSnapshot?.components, !components.isEmpty {
+                    Text(components.map { $0.food.name }.joined(separator: " · "))
+                        .font(.caption2)
+                        .foregroundStyle(AppTheme.muted)
+                        .lineLimit(2)
+                        .accessibilityLabel("Contains \(components.map { $0.food.name }.joined(separator: ", "))")
+                }
             }
             Spacer()
             Text("\(Int(entry.nutrients.calories.rounded()))")
@@ -1549,7 +1556,7 @@ struct SourceBadge: View {
         switch source {
         case .usda: AppTheme.protein
         case .openFoodFacts: AppTheme.carbs
-        case .custom: AppTheme.coral
+        case .chaseFood, .custom: AppTheme.coral
         }
     }
 }

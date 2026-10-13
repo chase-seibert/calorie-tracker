@@ -90,7 +90,7 @@ enum DiaryJSONMigration {
         }
 
         let root = try JSONSerialization.jsonObject(with: bytes) as? [String: Any]
-        guard let version = root?["schemaVersion"] as? Int, (1...9).contains(version),
+        guard let version = root?["schemaVersion"] as? Int, (1...10).contains(version),
             root?["entries"] is [Any], root?["fixtureVersion"] == nil
         else { throw DiaryDatabaseError.invalidData("Unrecognized or unsupported JSON diary. Original and backup retained.") }
         let decoder = JSONDecoder()
@@ -236,7 +236,7 @@ private struct DiarySettings: Codable, Equatable {
 /// Each process has its own connection and serial executor. SQLite coordinates processes.
 /// No caller-owned document is ever written wholesale over another process's changes.
 final class DiaryRepository: @unchecked Sendable {
-    static let schemaVersion = 1
+    static let schemaVersion = 2
     let fileURL: URL
     private let calendar: Calendar
     private let queue = DispatchQueue(label: "com.cseibert.CalorieTracker.diary", qos: .userInitiated)
@@ -295,9 +295,14 @@ final class DiaryRepository: @unchecked Sendable {
             let version = Int(try scalar("PRAGMA user_version"))
             if version == 0, !existed {
                 try execute(Self.schema)
-                try execute("PRAGMA user_version = 1")
+                try execute("PRAGMA user_version = 2")
                 try execute("INSERT INTO store_state(id, revision, initialized) VALUES(1, 0, 0)")
                 try putSettings(DiaryDocument())
+            } else if version == 1 {
+                try execute("CREATE TABLE food_suggestions(id TEXT PRIMARY KEY, position INTEGER NOT NULL, payload TEXT NOT NULL)")
+                try execute("CREATE TABLE saved_food_configurations(id TEXT PRIMARY KEY, base_food_id TEXT NOT NULL, position INTEGER NOT NULL, payload TEXT NOT NULL)")
+                try execute("CREATE INDEX saved_food_configurations_base ON saved_food_configurations(base_food_id, position)")
+                try execute("PRAGMA user_version = 2")
             } else if version != Self.schemaVersion {
                 throw DiaryDatabaseError.unsupportedVersion(version)
             }
@@ -462,6 +467,8 @@ final class DiaryRepository: @unchecked Sendable {
         }
         document.dayStatuses = try objects("SELECT payload FROM day_statuses ORDER BY day")
         document.alcoholEntries = try objects("SELECT payload FROM alcohol_entries ORDER BY day")
+        document.foodSuggestions = try objects("SELECT payload FROM food_suggestions ORDER BY position")
+        document.savedFoodConfigurations = try objects("SELECT payload FROM saved_food_configurations ORDER BY base_food_id, position")
 
         let (predicate, bindings) = try predicate(for: scope)
         document.entries = try objects("SELECT payload FROM diary_entries WHERE \(predicate) ORDER BY rowid", bindings)
@@ -563,6 +570,14 @@ final class DiaryRepository: @unchecked Sendable {
             try execute(
                 "INSERT OR REPLACE INTO personal_foods(id, name, position, payload) VALUES(?, ?, ?, ?)",
                 [.text(food.id), .text(food.name), .integer(Int64(index)), try encoded(food)])
+        }
+        try syncCollection(table: "food_suggestions", old: old.foodSuggestions, new: new.foodSuggestions, key: { $0.id.uuidString }) { suggestion, index in
+            try execute("INSERT OR REPLACE INTO food_suggestions(id, position, payload) VALUES(?, ?, ?)",
+                        [.text(suggestion.id.uuidString), .integer(Int64(index)), try encoded(suggestion)])
+        }
+        try syncCollection(table: "saved_food_configurations", old: old.savedFoodConfigurations, new: new.savedFoodConfigurations, key: { $0.id.uuidString }) { configuration, index in
+            try execute("INSERT OR REPLACE INTO saved_food_configurations(id, base_food_id, position, payload) VALUES(?, ?, ?, ?)",
+                        [.text(configuration.id.uuidString), .text(configuration.baseFoodID), .integer(Int64(index)), try encoded(configuration)])
         }
         try syncCollection(table: "meals", old: old.meals, new: new.meals, key: { $0.id.uuidString }) { meal, index in
             var header = meal
@@ -907,6 +922,8 @@ final class DiaryRepository: @unchecked Sendable {
         try unique(document.dayStatuses.map(\.date), "day statuses")
         try unique(document.alcoholEntries.map(\.date), "alcohol days")
         try unique(document.alcoholEntries.map(\.id), "alcohol IDs")
+        try unique(document.foodSuggestions.map(\.id), "food suggestion IDs")
+        try unique(document.savedFoodConfigurations.map(\.id), "saved food configuration IDs")
         for entry in document.entries {
             guard entry.date.timeIntervalSince1970.isFinite, entry.loggedAt.timeIntervalSince1970.isFinite else {
                 throw DiaryDatabaseError.invalidData("Invalid entry date.")
@@ -1038,6 +1055,9 @@ final class DiaryRepository: @unchecked Sendable {
         CREATE TABLE store_state(id INTEGER PRIMARY KEY CHECK(id=1), revision INTEGER NOT NULL, initialized INTEGER NOT NULL, finalized_through REAL);
         CREATE TABLE diary_settings(id INTEGER PRIMARY KEY CHECK(id=1), payload TEXT NOT NULL);
         CREATE TABLE personal_foods(id TEXT PRIMARY KEY, name TEXT NOT NULL, position INTEGER NOT NULL, payload TEXT NOT NULL);
+        CREATE TABLE food_suggestions(id TEXT PRIMARY KEY, position INTEGER NOT NULL, payload TEXT NOT NULL);
+        CREATE TABLE saved_food_configurations(id TEXT PRIMARY KEY, base_food_id TEXT NOT NULL, position INTEGER NOT NULL, payload TEXT NOT NULL);
+        CREATE INDEX saved_food_configurations_base ON saved_food_configurations(base_food_id, position);
         CREATE TABLE meals(id TEXT PRIMARY KEY, name TEXT NOT NULL, position INTEGER NOT NULL, payload TEXT NOT NULL);
         CREATE TABLE meal_ingredients(meal_id TEXT NOT NULL REFERENCES meals(id) ON DELETE CASCADE, position INTEGER NOT NULL, food_id TEXT NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(meal_id, position));
         CREATE INDEX meal_ingredient_food ON meal_ingredients(food_id);

@@ -27,14 +27,20 @@ struct FoodPickerView: View {
     @State private var magicTimeRange = MagicFoodTimeRange(date: Date(), calendar: .current)
     @State private var didLoadInitialSnapshot = false
     @State private var selectedFood: Food?
+    @State private var customizingFood: Food?
+    @State private var customizingConfiguration: SavedFoodConfiguration?
     @State private var selectedMeal: SavedMeal?
     @State private var query = ProcessInfo.processInfo.arguments.contains("--show-food-search") ? "banana" : ""
     @State private var results: [FoodPickerItem] = []
     @State private var isSearching = false
     @State private var showingCustomFoodEditor = false
+    @State private var showingFoodSuggestionEditor = false
     @State private var showingMealPhotoAnalysis = false
     @State private var searchAttempt = FoodSearchAttemptTracker()
     @FocusState private var searchIsFocused: Bool
+    @AppStorage("foodSource.enabled.usda") private var usdaEnabled = true
+    @AppStorage("foodSource.enabled.off") private var offEnabled = true
+    @AppStorage("foodSource.enabled.chaseFood") private var chaseFoodEnabled = false
 
     private let analytics = AnalyticsService.shared
 
@@ -73,14 +79,20 @@ struct FoodPickerView: View {
                             results: results,
                             isSearching: isSearching,
                             onQuickLogFood: quickLog,
-                            onEditFood: { selectedFood = $0 },
+                            onEditFood: { editFood($0) },
+                            onCustomizeFood: { food, configuration in
+                                customizingConfiguration = configuration
+                                customizingFood = food
+                            },
+                            onQuickLogConfiguration: quickLogConfiguration,
                             onQuickLogMeal: logMeal,
                             onEditMeal: { selectedMeal = $0 },
                             onSearchResultSelected: captureSearchResultSelection,
                             onAddCustomFood: {
                                 finishSearchAttempt(recordNothingSelected: false)
                                 showingCustomFoodEditor = true
-                            }
+                            },
+                            onSuggestCanonical: { showingFoodSuggestionEditor = true }
                         )
                     } else {
                         if let mode {
@@ -171,6 +183,10 @@ struct FoodPickerView: View {
                 }
                     .presentationDetents([.medium, .large])
             }
+            .sheet(isPresented: $showingFoodSuggestionEditor) {
+                FoodSuggestionEditor(query: query)
+                    .environmentObject(diary)
+            }
             .sheet(isPresented: $showingCustomFoodEditor, onDismiss: refreshSearchResults) {
                 CustomFoodEditorView(
                     food: nil,
@@ -203,6 +219,10 @@ struct FoodPickerView: View {
                     }
                 )
             }
+            .fullScreenCover(item: $customizingFood, onDismiss: { customizingConfiguration = nil }) { food in
+                ChaseFoodCustomizeView(food: food, catalog: catalog, date: date, initialConfiguration: customizingConfiguration)
+                    .environmentObject(diary)
+            }
             .sheet(isPresented: $showingMealPhotoAnalysis) {
                 MealPhotoAnalysisView(targetDate: date) {
                     finishSearchAttempt()
@@ -223,7 +243,7 @@ struct FoodPickerView: View {
                     "initial_mode": mode?.analyticsValue ?? "search"
                 ])
             }
-            .task(id: query) {
+            .task(id: "\(query)|\(usdaEnabled)|\(offEnabled)|\(chaseFoodEnabled)") {
                 let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !normalizedQuery.isEmpty else {
                     results = []
@@ -233,7 +253,11 @@ struct FoodPickerView: View {
                 isSearching = true
                 try? await Task.sleep(for: .milliseconds(140))
                 guard !Task.isCancelled else { return }
-                let bundledResults = catalog.searchAll(normalizedQuery)
+                var enabledSources = Set<FoodSource>()
+                if usdaEnabled { enabledSources.insert(.usda) }
+                if offEnabled { enabledSources.insert(.openFoodFacts) }
+                if chaseFoodEnabled { enabledSources.insert(.chaseFood) }
+                let bundledResults = catalog.searchAll(normalizedQuery, enabledSources: enabledSources)
                 let matches = await diary.searchItemsIncludingHistory(normalizedQuery, catalogFoods: bundledResults)
                 guard !Task.isCancelled else { return }
                 results = matches
@@ -296,6 +320,55 @@ struct FoodPickerView: View {
                 portionID: preference.portionID
             )
 
+        }
+    }
+
+    private func editFood(_ food: Food) {
+        if food.source == .chaseFood {
+            customizingConfiguration = nil
+            customizingFood = food
+        } else {
+            selectedFood = food
+        }
+    }
+
+    private func quickLogConfiguration(_ food: Food, _ configuration: SavedFoodConfiguration) {
+        markCurrentSearchLogged()
+        let options = catalog.chaseFoodOptions(for: food.sourceID)
+        let selected = Set(configuration.selectedOptionIDs)
+        var nutrients = food.nutrients(for: 1, unit: .serving, portionID: configuration.portionID)
+        for option in options {
+            guard option.relationship.caseInsensitiveCompare("style") != .orderedSame else { continue }
+            let included = selected.contains(option.id)
+            guard (option.includedByDefault && !included) || (!option.includedByDefault && included) else { continue }
+            let value = option.food.nutrients(for: option.amountGrams, unit: .grams)
+            if included { nutrients = nutrients + value }
+            else {
+                nutrients = MacroNutrients(calories: max(0, nutrients.calories - value.calories),
+                                           carbs: max(0, nutrients.carbs - value.carbs),
+                                           fat: max(0, nutrients.fat - value.fat),
+                                           protein: max(0, nutrients.protein - value.protein),
+                                           fiber: nutrients.fiber.map { max(0, $0 - (value.fiber ?? 0)) })
+            }
+        }
+        for component in configuration.components {
+            nutrients = nutrients + component.food.nutrients(for: component.amount, unit: component.unit, portionID: component.portionID)
+        }
+        let additions = options.filter {
+            selected.contains($0.id) && $0.relationship.caseInsensitiveCompare("style") != .orderedSame
+        }.map {
+            MealItem(id: UUID(), food: $0.food, amount: $0.amountGrams, unit: .grams)
+        } + configuration.components
+        let refreshedConfiguration = SavedFoodConfiguration(baseFoodID: food.id, label: configuration.label,
+                                                            selectedOptionIDs: configuration.selectedOptionIDs,
+                                                            components: configuration.components, portionID: configuration.portionID)
+        diary.run(operation: "chase_food_saved_variation_log") {
+            let previousCount = diary.entries(on: date).count
+            try await diary.logConfiguredFood(food, nutrients: nutrients, selectedOptionIDs: configuration.selectedOptionIDs,
+                                              components: additions, suggestedChanges: nil, portionID: configuration.portionID,
+                                              configuration: refreshedConfiguration, suggestion: nil, on: date, allowCheatDay: true)
+            guard diary.entries(on: date).count > previousCount else { return }
+            captureFoodLog(food: food, method: "saved_configuration", unit: .serving, portionID: configuration.portionID)
         }
     }
 
@@ -857,6 +930,7 @@ struct FoodResultRow: View {
     var preference: QuantityPreference? = nil
     var actionTitle: String? = nil
     var action: (() -> Void)? = nil
+    var customizeAction: (() -> Void)? = nil
 
     var body: some View {
         HStack(spacing: 12) {
@@ -874,6 +948,17 @@ struct FoodResultRow: View {
                 .lineLimit(1)
             }
             Spacer()
+            if let customizeAction {
+                Button(action: customizeAction) {
+                    Image(systemName: "pencil")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(AppTheme.muted)
+                        .frame(width: 40, height: 40)
+                        .background(AppTheme.controlFill, in: Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Customize \(food.name)")
+            }
             if let actionTitle, let action {
                 AddConfirmationButton(
                     actionTitle: actionTitle,
@@ -955,10 +1040,13 @@ private struct SearchResultsList: View {
     let isSearching: Bool
     let onQuickLogFood: (Food) -> Void
     let onEditFood: (Food) -> Void
+    let onCustomizeFood: (Food, SavedFoodConfiguration?) -> Void
+    let onQuickLogConfiguration: (Food, SavedFoodConfiguration) -> Void
     let onQuickLogMeal: (SavedMeal) -> Void
     let onEditMeal: (SavedMeal) -> Void
     let onSearchResultSelected: (FoodPickerItem) -> Void
     let onAddCustomFood: () -> Void
+    let onSuggestCanonical: () -> Void
 
     var body: some View {
         if isSearching {
@@ -972,6 +1060,10 @@ private struct SearchResultsList: View {
                     .controlSize(.large)
                     .frame(maxWidth: .infinity)
                     .padding(.top, 28)
+                Button("Suggest a canonical food", systemImage: "lightbulb", action: onSuggestCanonical)
+                    .buttonStyle(.bordered)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 10)
             }
             .padding(.horizontal, 24)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -981,19 +1073,43 @@ private struct SearchResultsList: View {
                     ForEach(results) { item in
                         switch item {
                         case .food(let food):
-                            FoodResultRow(
-                                food: food,
-                                preference: diary.preference(for: food),
-                                actionTitle: "Quick add",
-                                action: {
+                            VStack(alignment: .leading, spacing: 3) {
+                                FoodResultRow(
+                                    food: food,
+                                    preference: diary.preference(for: food),
+                                    actionTitle: "Quick add",
+                                    action: {
+                                        onSearchResultSelected(.food(food))
+                                        onQuickLogFood(food)
+                                    },
+                                    customizeAction: food.source == .chaseFood ? { onCustomizeFood(food, nil) } : nil
+                                )
+                                .contentShape(Rectangle())
+                                .onTapGesture {
                                     onSearchResultSelected(.food(food))
-                                    onQuickLogFood(food)
+                                    onEditFood(food)
                                 }
-                            )
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                onSearchResultSelected(.food(food))
-                                onEditFood(food)
+                                let variations = diary.document.savedFoodConfigurations
+                                    .filter { $0.baseFoodID == food.id }
+                                    .sorted { $0.lastUsedAt > $1.lastUsedAt }
+                                ForEach(variations) { configuration in
+                                    Button {
+                                        onSearchResultSelected(.food(food))
+                                            onQuickLogConfiguration(food, configuration)
+                                    } label: {
+                                        HStack(spacing: 8) {
+                                            Image(systemName: "arrow.turn.down.right")
+                                                .foregroundStyle(AppTheme.muted)
+                                            Text(configuration.label).lineLimit(1)
+                                            Spacer()
+                                            Image(systemName: "plus.circle.fill").foregroundStyle(AppTheme.coral)
+                                        }
+                                        .font(.caption.weight(.medium))
+                                        .padding(.leading, 50)
+                                        .padding(.vertical, 5)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
                             }
                         case .meal(let meal):
                             MealListActionRow(
@@ -1012,9 +1128,352 @@ private struct SearchResultsList: View {
                 } footer: {
                     Text("Tap + to log the displayed quantity. Tap the row to change it.")
                 }
+                Section {
+                    Button("Suggest a canonical food or search change", systemImage: "lightbulb", action: onSuggestCanonical)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
+        }
+    }
+}
+
+private struct FoodSuggestionEditor: View {
+    @EnvironmentObject private var diary: DiaryStore
+    @Environment(\.dismiss) private var dismiss
+    let query: String
+    @State private var suggestedName: String
+    @State private var suggestedChanges = ""
+
+    init(query: String) {
+        self.query = query
+        _suggestedName = State(initialValue: query.trimmingCharacters(in: .whitespacesAndNewlines))
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("New canonical food") {
+                    TextField("Food name", text: $suggestedName)
+                        .textInputAutocapitalization(.words)
+                    Text("Search: \(query)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Section("Suggested changes") {
+                    TextEditor(text: $suggestedChanges)
+                        .frame(minHeight: 150)
+                    Text("Describe what food should be available or how the search result should change.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .scrollContentBackground(.hidden)
+            .background(AppTheme.background)
+            .navigationTitle("Suggest a food")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Send") { submit() }
+                        .disabled(suggestedName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                                  || suggestedChanges.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+        }
+    }
+
+    private func submit() {
+        let suggestion = FoodSuggestion(
+            kind: .newCanonicalFood,
+            suggestedName: suggestedName,
+            suggestedChanges: suggestedChanges,
+            searchQuery: query
+        )
+        diary.run(operation: "food_suggestion_submit") {
+            try await diary.saveFoodSuggestion(suggestion)
+            AppAnalytics.capture("food.suggestion_submitted", properties: [
+                "kind": suggestion.kind.rawValue,
+                "suggested_name": suggestion.suggestedName,
+                "suggested_changes": suggestion.suggestedChanges,
+                "search_query": query
+            ])
+            dismiss()
+        }
+    }
+}
+
+private struct ChaseFoodOptionGroup: Identifiable {
+    let name: String
+    let selectionMode: String
+    let options: [ChaseFoodOption]
+
+    var id: String { name }
+}
+
+private struct ChaseFoodCustomizeView: View {
+    @EnvironmentObject private var diary: DiaryStore
+    @Environment(\.dismiss) private var dismiss
+    let food: Food
+    let catalog: CatalogStore
+    let date: Date
+    let initialConfiguration: SavedFoodConfiguration?
+    @State private var selectedOptionIDs: Set<String>
+    @State private var selectedExtraFoodIDs: Set<String>
+    @State private var portionID: String
+    @State private var ingredientQuery = ""
+    @State private var suggestedChanges = ""
+
+    init(food: Food, catalog: CatalogStore, date: Date, initialConfiguration: SavedFoodConfiguration?) {
+        self.food = food
+        self.catalog = catalog
+        self.date = date
+        self.initialConfiguration = initialConfiguration
+        let options = catalog.chaseFoodOptions(for: food.sourceID)
+        _selectedOptionIDs = State(initialValue: Set(initialConfiguration?.selectedOptionIDs
+            ?? options.filter(\.includedByDefault).map(\.id)))
+        _selectedExtraFoodIDs = State(initialValue: Set(initialConfiguration?.components.map(\.food.id) ?? []))
+        _portionID = State(initialValue: initialConfiguration?.portionID ?? food.availablePortions.first?.id ?? "")
+    }
+
+    private var options: [ChaseFoodOption] { catalog.chaseFoodOptions(for: food.sourceID) }
+    private var optionGroups: [ChaseFoodOptionGroup] {
+        var grouped: [String: [ChaseFoodOption]] = [:]
+        for option in options {
+            if let name = option.optionGroup {
+                grouped[name, default: []].append(option)
+            }
+        }
+        return grouped.map { key, values in
+            ChaseFoodOptionGroup(
+                name: key,
+                selectionMode: values.first?.selectionMode ?? "multiple",
+                options: values.sorted { $0.displayOrder < $1.displayOrder }
+            )
+        }
+        .sorted { ($0.options.first?.displayOrder ?? 0) < ($1.options.first?.displayOrder ?? 0) }
+    }
+    private var includedOptions: [ChaseFoodOption] { options.filter { $0.optionGroup == nil && $0.includedByDefault } }
+    private var additionOptions: [ChaseFoodOption] { options.filter { $0.optionGroup == nil && !$0.includedByDefault } }
+    private var extraFoods: [Food] {
+        selectedExtraFoodIDs.compactMap { id in
+            if let saved = initialConfiguration?.components.first(where: { $0.food.id == id }) { return saved.food }
+            let pieces = id.components(separatedBy: ":")
+            guard pieces.count >= 2, let source = FoodSource(rawValue: pieces[0]) else { return nil }
+            return catalog.food(sourceID: pieces.dropFirst().joined(separator: ":"), source: source)
+        }
+    }
+    private var ingredientSearchResults: [Food] {
+        let query = ingredientQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard query.count >= 2 else { return [] }
+        return catalog.searchAll(query, limit: 8).filter { $0.id != food.id }
+    }
+    private var selectedPortionID: String? { portionID.isEmpty ? nil : portionID }
+    private var totalNutrients: MacroNutrients {
+        var total = food.nutrients(for: 1, unit: .serving, portionID: selectedPortionID)
+        for option in options {
+            guard option.relationship.caseInsensitiveCompare("style") != .orderedSame else { continue }
+            let selected = selectedOptionIDs.contains(option.id)
+            guard (option.includedByDefault && !selected) || (!option.includedByDefault && selected) else { continue }
+            let nutrients = option.food.nutrients(for: option.amountGrams, unit: .grams)
+            total = selected ? total + nutrients : MacroNutrients(
+                calories: max(0, total.calories - nutrients.calories),
+                carbs: max(0, total.carbs - nutrients.carbs),
+                fat: max(0, total.fat - nutrients.fat),
+                protein: max(0, total.protein - nutrients.protein),
+                fiber: total.fiber.map { max(0, $0 - (nutrients.fiber ?? 0)) }
+            )
+        }
+        for extra in extraFoods {
+            total = total + extra.nutrients(for: 1, unit: .serving)
+        }
+        return total
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Size") {
+                    if food.availablePortions.isEmpty {
+                        Text("1 serving · \(food.baseAmountGrams.cleanAmount) g")
+                    } else {
+                        Picker("Portion", selection: $portionID) {
+                            ForEach(food.availablePortions) { portion in
+                                Text("\(portion.label) · \(portion.grams.cleanAmount) g").tag(portion.id)
+                            }
+                        }
+                    }
+                }
+                ForEach(optionGroups) { group in
+                    Section(group.name) {
+                        if group.selectionMode == "exclusive" {
+                            Picker(group.name, selection: exclusiveSelection(for: group)) {
+                                Text("None").tag("")
+                                ForEach(group.options) { option in
+                                    Text(option.displayName).tag(option.id)
+                                }
+                            }
+                        } else {
+                            ForEach(group.options) { option in
+                                optionToggle(option, defaultSelected: option.includedByDefault)
+                            }
+                        }
+                    }
+                }
+                if !includedOptions.isEmpty {
+                    Section("Included by default · tap to remove") {
+                        ForEach(includedOptions) { option in
+                            optionToggle(option, defaultSelected: true)
+                        }
+                    }
+                }
+                if !additionOptions.isEmpty {
+                    Section("Add to this food or meal") {
+                        ForEach(additionOptions) { option in
+                            optionToggle(option, defaultSelected: false)
+                        }
+                    }
+                }
+                Section("Add another ingredient") {
+                    TextField("Search foods", text: $ingredientQuery)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                    ForEach(ingredientSearchResults) { ingredient in
+                        Button {
+                            if selectedExtraFoodIDs.contains(ingredient.id) {
+                                selectedExtraFoodIDs.remove(ingredient.id)
+                            } else {
+                                selectedExtraFoodIDs.insert(ingredient.id)
+                            }
+                        } label: {
+                            HStack {
+                                Text(ingredient.name)
+                                Spacer()
+                                Image(systemName: selectedExtraFoodIDs.contains(ingredient.id) ? "checkmark.circle.fill" : "plus.circle")
+                                    .foregroundStyle(AppTheme.coral)
+                            }
+                        }
+                    }
+                    ForEach(extraFoods) { ingredient in
+                        LabeledContent("Added", value: ingredient.name)
+                    }
+                }
+                Section("Nutrition · updates as you customize") {
+                    LabeledContent("Calories", value: "\(Int(totalNutrients.calories.rounded())) kcal")
+                    LabeledContent("Protein", value: "\(totalNutrients.protein.cleanAmount) g")
+                    LabeledContent("Carbs", value: "\(totalNutrients.carbs.cleanAmount) g")
+                    LabeledContent("Fat", value: "\(totalNutrients.fat.cleanAmount) g")
+                    LabeledContent("Fiber", value: totalNutrients.fiber.map { "\($0.cleanAmount) g" } ?? "—")
+                }
+                Section("Suggested changes · optional") {
+                    TextEditor(text: $suggestedChanges)
+                        .frame(minHeight: 100)
+                    Text("This feedback is saved with your diary data and sent to your analytics server.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .scrollContentBackground(.hidden)
+            .background(AppTheme.background)
+            .navigationTitle("Customize \(food.name)")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") { logConfiguration() }
+                        .fontWeight(.semibold)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func optionToggle(_ option: ChaseFoodOption, defaultSelected: Bool) -> some View {
+        Toggle(isOn: Binding(
+            get: { selectedOptionIDs.contains(option.id) },
+            set: { selected in
+                if selected { selectedOptionIDs.insert(option.id) } else { selectedOptionIDs.remove(option.id) }
+            }
+        )) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(option.displayName)
+                Text("\(Int(option.food.nutrients(for: option.amountGrams, unit: .grams).calories.rounded())) cal · \(option.amountGrams.cleanAmount) g")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private func exclusiveSelection(for group: ChaseFoodOptionGroup) -> Binding<String> {
+        Binding(
+            get: { group.options.first(where: { selectedOptionIDs.contains($0.id) })?.id ?? "" },
+            set: { selection in
+                for option in group.options { selectedOptionIDs.remove(option.id) }
+                if !selection.isEmpty { selectedOptionIDs.insert(selection) }
+            }
+        )
+    }
+
+    private var configuredComponents: [MealItem] {
+        var selected = options.filter {
+            selectedOptionIDs.contains($0.id) && $0.food.id != food.id
+                && $0.relationship.caseInsensitiveCompare("style") != .orderedSame
+        }.map { option in
+            MealItem(id: UUID(), food: option.food, amount: option.amountGrams, unit: .grams)
+        }
+        selected += extraFoods.map { MealItem(id: UUID(), food: $0, amount: 1, unit: .serving) }
+        return selected
+    }
+
+    private var variationLabel: String {
+        let details = options.filter {
+            selectedOptionIDs.contains($0.id) && $0.food.id != food.id
+                && $0.relationship.caseInsensitiveCompare("style") != .orderedSame
+        }.map(\.displayName)
+            + extraFoods.map(\.name)
+            + includedOptions.filter { !selectedOptionIDs.contains($0.id) }.map { "no \($0.food.name.lowercased())" }
+        let style = options.first {
+            $0.optionGroup == "Style" && selectedOptionIDs.contains($0.id) && !$0.includedByDefault
+        }?.displayName
+        let namedDetails = details + (style.map { [$0] } ?? [])
+        let portion = food.portion(id: selectedPortionID)?.label ?? "serving"
+        return "\(food.name) · \(portion)" + (namedDetails.isEmpty ? "" : ", \(namedDetails.joined(separator: ", "))")
+    }
+
+    private func logConfiguration() {
+        let note = suggestedChanges.trimmingCharacters(in: .whitespacesAndNewlines)
+        let suggestion = note.isEmpty ? nil : FoodSuggestion(
+            kind: .changeToFood, suggestedName: food.name, suggestedChanges: note, foodID: food.id)
+        let configuration = SavedFoodConfiguration(
+            baseFoodID: food.id,
+            label: variationLabel,
+            selectedOptionIDs: Array(selectedOptionIDs).sorted(),
+            components: extraFoods.map { MealItem(id: UUID(), food: $0, amount: 1, unit: .serving) },
+            portionID: selectedPortionID
+        )
+        diary.run(operation: "chase_food_configured_log") {
+            let previousCount = diary.entries(on: date).count
+            try await diary.logConfiguredFood(
+                food, nutrients: totalNutrients, selectedOptionIDs: Array(selectedOptionIDs).sorted(),
+                components: configuredComponents, suggestedChanges: note.isEmpty ? nil : note,
+                portionID: selectedPortionID, configuration: configuration, suggestion: suggestion, on: date,
+                allowCheatDay: true
+            )
+            if diary.entries(on: date).count > previousCount {
+                AppAnalytics.capture("food.logged", properties: ["source": FoodSource.chaseFood.rawValue, "method": "customize"])
+                if let suggestion {
+                    AppAnalytics.capture("food.suggestion_submitted", properties: [
+                        "kind": suggestion.kind.rawValue,
+                        "suggested_name": suggestion.suggestedName,
+                        "suggested_changes": suggestion.suggestedChanges,
+                        "food_id": food.id
+                    ])
+                }
+                dismiss()
+            }
         }
     }
 }

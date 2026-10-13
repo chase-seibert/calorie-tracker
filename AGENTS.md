@@ -57,5 +57,7 @@ tests as unverified.
 - `docs/architecture.md`
 - `docs/setup-install.md`
 - `docs/data-sources.md`
+- `docs/chase-food-taxonomy.md`
+- `docs/chase-food-concepts.pdf`
 - `docs/custom-import-files.md`
 - `docs/how-to-work-with-stagechase.md`

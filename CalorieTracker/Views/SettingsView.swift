@@ -342,12 +342,16 @@ private struct AppleHealthSettingsView: View {
 
 private struct FoodDataSourcesView: View {
     let catalog: CatalogStore
+    @AppStorage("foodSource.enabled.usda") private var usdaEnabled = true
+    @AppStorage("foodSource.enabled.off") private var offEnabled = true
+    @AppStorage("foodSource.enabled.chaseFood") private var chaseFoodEnabled = false
 
     var body: some View {
         List {
             Section("Local Catalogs") {
-                sourceRow(.usda, count: catalog.count(source: .usda))
-                sourceRow(.openFoodFacts, count: catalog.count(source: .openFoodFacts))
+                sourceRow(.usda, count: catalog.count(source: .usda), isEnabled: $usdaEnabled)
+                sourceRow(.openFoodFacts, count: catalog.count(source: .openFoodFacts), isEnabled: $offEnabled)
+                sourceRow(.chaseFood, count: catalog.count(source: .chaseFood), isEnabled: $chaseFoodEnabled)
             }
 
             Section("Source Links") {
@@ -358,6 +362,8 @@ private struct FoodDataSourcesView: View {
             Section("Attribution") {
                 Text("USDA records are U.S. government public-domain data. Open Food Facts database records are reused under ODbL with source attribution and remain identifiable in this derived local database.")
                     .foregroundStyle(.secondary)
+                Text("Chase Food is a personal canonical catalog. Its initial nutrient values are matched from existing local catalog records and have varying review confidence.")
+                    .foregroundStyle(.secondary)
             }
         }
         .scrollContentBackground(.hidden)
@@ -367,7 +373,7 @@ private struct FoodDataSourcesView: View {
         .analyticsScreen("settings_food_data_sources")
     }
 
-    private func sourceRow(_ source: FoodSource, count: Int) -> some View {
+    private func sourceRow(_ source: FoodSource, count: Int, isEnabled: Binding<Bool>) -> some View {
         HStack {
             SourceBadge(source: source)
             Text(source.title)
@@ -375,6 +381,8 @@ private struct FoodDataSourcesView: View {
             Text(count.formatted())
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
+            Toggle("Show \(source.title) in search", isOn: isEnabled)
+                .labelsHidden()
         }
     }
 }

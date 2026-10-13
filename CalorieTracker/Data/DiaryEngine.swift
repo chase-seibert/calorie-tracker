@@ -9,6 +9,48 @@ final class DiaryEngine {
     private var entriesByDay: [Date: [DiaryEntry]]?
     private(set) var clearsPersonalData = false
 
+    func saveFoodSuggestion(_ suggestion: FoodSuggestion) {
+        guard !suggestion.suggestedName.isEmpty, !suggestion.suggestedChanges.isEmpty else { return }
+        document.foodSuggestions.removeAll { $0.id == suggestion.id }
+        document.foodSuggestions.append(suggestion)
+    }
+
+    func saveFoodConfiguration(_ configuration: SavedFoodConfiguration) {
+        if let index = document.savedFoodConfigurations.firstIndex(where: {
+            $0.baseFoodID == configuration.baseFoodID && $0.selectedOptionIDs.sorted() == configuration.selectedOptionIDs.sorted()
+                && $0.portionID == configuration.portionID
+                && $0.components.map(\.food.id).sorted() == configuration.components.map(\.food.id).sorted()
+        }) {
+            var updated = document.savedFoodConfigurations[index]
+            updated.lastUsedAt = Date()
+            document.savedFoodConfigurations[index] = updated
+        } else {
+            document.savedFoodConfigurations.append(configuration)
+        }
+    }
+
+    func logConfiguredFood(
+        _ food: Food,
+        nutrients: MacroNutrients,
+        selectedOptionIDs: [String],
+        components: [MealItem],
+        suggestedChanges: String?,
+        portionID: String?,
+        on date: Date,
+        allowCheatDay: Bool = false
+    ) {
+        let previousCount = document.entries.count
+        log(food, amount: 1, unit: .serving, portionID: portionID, on: date, allowCheatDay: allowCheatDay)
+        guard document.entries.count > previousCount, let index = document.entries.indices.last else { return }
+        document.entries[index].nutrients = nutrients
+        document.entries[index].foodConfigurationSnapshot = FoodConfigurationSnapshot(
+            selectedOptionIDs: selectedOptionIDs,
+            components: components,
+            suggestedChanges: suggestedChanges,
+            catalogVersion: catalog?.catalogVersion
+        )
+    }
+
     init(document: DiaryDocument, calendar: Calendar = .current, catalog: CatalogStore? = nil) {
         self.calendar = calendar
         self.catalog = catalog

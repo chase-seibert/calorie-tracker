@@ -3,7 +3,23 @@ import Foundation
 enum FoodSource: String, Codable, CaseIterable, Identifiable, Sendable {
     case usda
     case openFoodFacts = "off"
+    case chaseFood
     case custom
+
+    static let localCatalogSources: Set<FoodSource> = [.usda, .openFoodFacts, .chaseFood]
+
+    static var enabledLocalCatalogSources: Set<FoodSource> {
+        let defaults = UserDefaults.standard
+        let keys: [(FoodSource, String)] = [
+            (.usda, "foodSource.enabled.usda"),
+            (.openFoodFacts, "foodSource.enabled.off"),
+            (.chaseFood, "foodSource.enabled.chaseFood"),
+        ]
+        return Set(keys.compactMap { source, key in
+            let isEnabled = (defaults.object(forKey: key) as? Bool) ?? (source != .chaseFood)
+            return isEnabled ? source : nil
+        })
+    }
 
     var id: String { rawValue }
 
@@ -11,6 +27,7 @@ enum FoodSource: String, Codable, CaseIterable, Identifiable, Sendable {
         switch self {
         case .usda: "USDA"
         case .openFoodFacts: "Open Food Facts"
+        case .chaseFood: "Chase Food"
         case .custom: "Custom"
         }
     }
@@ -19,6 +36,7 @@ enum FoodSource: String, Codable, CaseIterable, Identifiable, Sendable {
         switch self {
         case .usda: "USDA"
         case .openFoodFacts: "OFF"
+        case .chaseFood: "Chase"
         case .custom: "Mine"
         }
     }
@@ -461,6 +479,7 @@ struct DiaryEntry: Codable, Hashable, Identifiable, Sendable {
     var redMeatOverride: Bool? = nil
     // Optional chart-only correction; nil derives servings from the logged quantity.
     var meatServingsOverride: Double? = nil
+    var foodConfigurationSnapshot: FoodConfigurationSnapshot? = nil
 
     var isMeal: Bool {
         savedMealID != nil || !(mealItems?.isEmpty ?? true)
@@ -468,6 +487,60 @@ struct DiaryEntry: Codable, Hashable, Identifiable, Sendable {
 
     var isCheatDayAdjustment: Bool {
         kind == .cheatDayAdjustment
+    }
+}
+
+struct FoodConfigurationSnapshot: Codable, Hashable, Sendable {
+    var selectedOptionIDs: [String]
+    var components: [MealItem]
+    var suggestedChanges: String?
+    var catalogVersion: String?
+}
+
+struct SavedFoodConfiguration: Codable, Hashable, Identifiable, Sendable {
+    let id: UUID
+    var baseFoodID: String
+    var label: String
+    var selectedOptionIDs: [String]
+    var components: [MealItem]
+    var portionID: String?
+    var createdAt: Date
+    var lastUsedAt: Date
+
+    init(baseFoodID: String, label: String, selectedOptionIDs: [String], components: [MealItem], portionID: String?) {
+        id = UUID()
+        self.baseFoodID = baseFoodID
+        self.label = String(label.prefix(100))
+        self.selectedOptionIDs = selectedOptionIDs
+        self.components = components
+        self.portionID = portionID
+        createdAt = Date()
+        lastUsedAt = createdAt
+    }
+}
+
+enum FoodSuggestionKind: String, Codable, Hashable, Sendable {
+    case newCanonicalFood
+    case changeToFood
+}
+
+struct FoodSuggestion: Codable, Hashable, Identifiable, Sendable {
+    let id: UUID
+    var kind: FoodSuggestionKind
+    var suggestedName: String
+    var suggestedChanges: String
+    var searchQuery: String?
+    var foodID: String?
+    var createdAt: Date
+
+    init(kind: FoodSuggestionKind, suggestedName: String, suggestedChanges: String, searchQuery: String? = nil, foodID: String? = nil) {
+        id = UUID()
+        self.kind = kind
+        self.suggestedName = String(suggestedName.trimmingCharacters(in: .whitespacesAndNewlines).prefix(160))
+        self.suggestedChanges = String(suggestedChanges.trimmingCharacters(in: .whitespacesAndNewlines).prefix(2_000))
+        self.searchQuery = searchQuery.map { String($0.prefix(200)) }
+        self.foodID = foodID
+        createdAt = Date()
     }
 }
 
@@ -686,7 +759,7 @@ struct MagicFoodSuggestionResult: Sendable {
 }
 
 struct DiaryDocument: Codable, Sendable {
-    var schemaVersion = 9
+    var schemaVersion = 10
     var dailyCalorieGoal: Int? = nil
     var trackingStartDate: Date? = nil
     var dayStatuses: [DayStatus] = []
@@ -700,6 +773,8 @@ struct DiaryDocument: Codable, Sendable {
     var customFoodNames: [String: String] = [:]
     var alcoholEntries: [AlcoholEntry] = []
     var corpusFoodMeatOverrides: [FoodCatalogIdentity: FoodMeatOverrides] = [:]
+    var foodSuggestions: [FoodSuggestion] = []
+    var savedFoodConfigurations: [SavedFoodConfiguration] = []
 
     init() {}
 
@@ -718,6 +793,8 @@ struct DiaryDocument: Codable, Sendable {
         case customFoodNames
         case alcoholEntries
         case corpusFoodMeatOverrides
+        case foodSuggestions
+        case savedFoodConfigurations
     }
 
     init(from decoder: Decoder) throws {
@@ -745,6 +822,8 @@ struct DiaryDocument: Codable, Sendable {
             [FoodCatalogIdentity: FoodMeatOverrides].self,
             forKey: .corpusFoodMeatOverrides
         ) ?? [:]
+        foodSuggestions = try container.decodeIfPresent([FoodSuggestion].self, forKey: .foodSuggestions) ?? []
+        savedFoodConfigurations = try container.decodeIfPresent([SavedFoodConfiguration].self, forKey: .savedFoodConfigurations) ?? []
     }
 }
 

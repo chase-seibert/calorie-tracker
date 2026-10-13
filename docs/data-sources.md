@@ -6,6 +6,28 @@ filters, measured row costs, and larger catalog projections.
 See [Foods to add or investigate](missing-foods.md) for the running list of
 personal coverage gaps and their current match counts.
 
+## Chase Food
+
+Chase Food is a curated local catalog of canonical foods, search aliases,
+natural portions, and reusable components. It is available in Settings as a
+local food data source and is off by default.
+The design direction and source/history rules are recorded in
+[Chase Food taxonomy and source](chase-food-taxonomy.md), with 25 phone-screen
+concepts in [Chase Food customization concepts](chase-food-concepts.pdf).
+
+Settings → Food & Meals → Food Data Sources lets each local catalog (USDA,
+Open Food Facts, and Chase Food) be included in or excluded
+from search independently. A disabled source contributes no new search results;
+its records remain available to resolve existing diary history and retain the
+nutrition snapshot used when logged. The planned Chase Food search uses
+canonical names and aliases, omitting category and food-kind labels from
+results.
+
+The linked review workbook tracks the 508 food identities, their nutrient
+confidence, portion estimates, aliases, and configurable component options.
+Nutrition values are screening estimates from the existing catalog. The
+calorie and macro figures in the concept PDF are placeholders.
+
 ## USDA FoodData Central
 
 The current catalog imports Foundation Foods, SR Legacy, and FNDDS. USDA Branded

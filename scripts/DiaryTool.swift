@@ -195,7 +195,7 @@ struct DiaryTool {
                 root?["entries"] != nil && root?["schemaVersion"] != nil, "Not a recognized diary JSON document.")
             document = try decoder.decode(DiaryDocument.self, from: data)
         }
-        try require((1...8).contains(document.schemaVersion), "Unsupported JSON schema version.")
+        try require((1...10).contains(document.schemaVersion), "Unsupported JSON schema version.")
         try DiaryRepository.validateDocument(document)
         let directory = try temporaryDirectory()
         defer { try? manager.removeItem(at: directory) }

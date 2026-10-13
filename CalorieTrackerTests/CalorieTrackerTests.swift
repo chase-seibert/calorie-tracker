@@ -864,7 +864,7 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(try Data(contentsOf: backup), bytes)
         let migrated = try DiaryRepository(fileURL: destination).snapshotSync().document
         XCTAssertEqual(migrated.dailyCalorieGoal, 2100)
-        XCTAssertEqual(migrated.schemaVersion, 9)
+        XCTAssertEqual(migrated.schemaVersion, 10)
         XCTAssertNil(try DiaryJSONMigration.convertIfNeeded(
             destination: destination, sources: [shared], backupDirectory: backups))
         XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: backups.path).count, 1)
@@ -2111,6 +2111,56 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(catalog.search("fried rice", source: .usda, limit: 10).first?.name, "Rice, fried, NFS")
     }
 
+    func testChaseFoodHasGroupedSandwichAndProteinShakeOptions() throws {
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let catalog = CatalogStore(url: root.appendingPathComponent("CalorieTracker/Resources/FoodCatalog.sqlite3"))
+
+        let sandwich = catalog.chaseFoodOptions(for: "food_sandwich")
+        XCTAssertEqual(sandwich.filter { $0.optionGroup == "Filling" && $0.includedByDefault }.map(\.displayName), ["Turkey"])
+        XCTAssertEqual(Set(sandwich.filter { $0.optionGroup == "Filling" }.map(\.displayName)), ["Turkey", "Ham", "Tuna salad", "Roast beef", "Chicken"])
+        XCTAssertEqual(sandwich.filter { $0.optionGroup == "Bread" && $0.includedByDefault }.map(\.food.name), ["White bread"])
+        XCTAssertEqual(sandwich.filter { $0.optionGroup == "Cheese" && $0.selectionMode == "exclusive" }.count, 4)
+        XCTAssertEqual(sandwich.first { $0.food.name == "Mayonnaise" }?.selectionMode, "multiple")
+
+        let shake = catalog.chaseFoodOptions(for: "food_protein_shake")
+        XCTAssertTrue(shake.contains { $0.food.name == "Protein powder" && $0.includedByDefault })
+        XCTAssertEqual(shake.filter { $0.optionGroup == "Liquid" && $0.includedByDefault }.map(\.food.name), ["Almond milk"])
+        XCTAssertTrue(["Almond milk", "Milk, whole"].allSatisfy { name in shake.contains { $0.food.name == name } })
+        XCTAssertTrue(["Peanut butter", "Banana", "Coconut oil"].allSatisfy { name in shake.contains { $0.food.name == name } })
+
+        let burgerBase = catalog.chaseFoodOptions(for: "food_burger").filter { $0.relationship == "included" }
+        XCTAssertEqual(Set(burgerBase.map(\.food.name)), ["Beef patty", "Hamburger bun"])
+        XCTAssertTrue(burgerBase.allSatisfy(\.includedByDefault), "Burger base ingredients should be removable default constituents")
+
+        XCTAssertEqual(catalog.searchAll("turkey sandwich", limit: 30, enabledSources: [.chaseFood]).first?.sourceID, "food_sandwich")
+        XCTAssertNotNil(catalog.food(sourceID: "food_turkey_sandwich", source: .chaseFood), "Legacy diary identity should still resolve")
+    }
+
+    func testConfiguredFoodSnapshotKeepsSelectedConstituents() throws {
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let catalog = CatalogStore(url: root.appendingPathComponent("CalorieTracker/Resources/FoodCatalog.sqlite3"))
+        let sandwich = try XCTUnwrap(catalog.food(sourceID: "food_sandwich", source: .chaseFood))
+        let options = catalog.chaseFoodOptions(for: sandwich.sourceID)
+        let selected = options.filter { ["Turkey", "White", "Mayonnaise", "Cheddar"].contains($0.displayName) }
+        let selectedIDs = selected.map(\.id).sorted()
+        let components = selected.map { MealItem(id: UUID(), food: $0.food, amount: $0.amountGrams, unit: .grams) }
+        let date = testDate(day: 1)
+        let engine = DiaryEngine(document: DiaryDocument(), calendar: testCalendar, catalog: catalog)
+
+        engine.logConfiguredFood(
+            sandwich,
+            nutrients: sandwich.nutrients,
+            selectedOptionIDs: selectedIDs,
+            components: components,
+            suggestedChanges: nil,
+            portionID: sandwich.availablePortions.first?.id,
+            on: date,
+            allowCheatDay: true
+        )
+
+        XCTAssertEqual(Set(engine.document.entries.last?.foodConfigurationSnapshot?.components.map(\.food.name) ?? []), ["Turkey breast", "White bread", "Mayonnaise", "Cheddar cheese"])
+    }
+
     func testDeveloperFoodSearchRankingSettingSwitchesVersionsImmediately() throws {
         XCTAssertEqual(FoodSearchRankingVersion.orderedByVersion.map(\.versionNumber), [1, 2, 3])
         XCTAssertEqual(FoodSearchRankingVersion.latest, .canonicalFirst)
@@ -3283,7 +3333,7 @@ extension CalorieTrackerTests {
 
         let reloaded = TestDiaryStore(fileURL: fileURL, calendar: testCalendar, referenceDate: day)
         let reloadedEntry = try XCTUnwrap(reloaded.alcoholEntry(on: day))
-        XCTAssertEqual(reloaded.document.schemaVersion, 9)
+        XCTAssertEqual(reloaded.document.schemaVersion, 10)
         XCTAssertEqual(reloadedEntry.id, entry.id)
         XCTAssertEqual(reloadedEntry.date, entry.date)
         XCTAssertEqual(reloadedEntry.drinks, entry.drinks)

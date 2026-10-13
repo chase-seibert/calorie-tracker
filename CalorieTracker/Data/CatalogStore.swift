@@ -2,6 +2,18 @@ import CryptoKit
 import Foundation
 import SQLite3
 
+struct ChaseFoodOption: Identifiable, Sendable {
+    let id: String
+    let food: Food
+    let displayName: String
+    let amountGrams: Double
+    let relationship: String
+    let includedByDefault: Bool
+    let displayOrder: Int
+    let optionGroup: String?
+    let selectionMode: String
+}
+
 enum FoodSearchRankingVersion: String, CaseIterable, Identifiable {
     case original = "catalog-fts5-v1"
     case broadSimplicity = "catalog-fts5-v2-broad-simplicity"
@@ -105,7 +117,7 @@ final class CatalogStore: @unchecked Sendable {
                     WHEN lower(f.name) LIKE lower(?) || '%' THEN 2
                     ELSE 3
                 END,
-                bm25(foods_fts, 8.0, 3.0),
+                bm25(foods_fts, 8.0, 3.0, 2.0),
                 length(f.name),
                 f.rank DESC
             LIMIT ?
@@ -118,10 +130,20 @@ final class CatalogStore: @unchecked Sendable {
             bind(query, at: 5, to: statement)
             sqlite3_bind_int(statement, 6, Int32(max(limit, 50)))
         }
-        return rankedBroadQueryResults(results, query: query, limit: limit, version: activeRankingVersion)
+        return rankedSandwichResults(
+            rankedBroadQueryResults(results, query: query, limit: limit, version: activeRankingVersion),
+            query: query
+        )
     }
 
-    func searchAll(_ query: String, limit: Int = 50) -> [Food] {
+    func searchAll(
+        _ query: String,
+        limit: Int = 50,
+        enabledSources: Set<FoodSource>? = nil
+    ) -> [Food] {
+        let sources = FoodSource.localCatalogSources.intersection(enabledSources ?? FoodSource.enabledLocalCatalogSources)
+            .sorted { $0.rawValue < $1.rawValue }
+        guard !sources.isEmpty else { return [] }
         let terms = query
             .split(whereSeparator: { !$0.isLetter && !$0.isNumber })
             .prefix(8)
@@ -136,7 +158,7 @@ final class CatalogStore: @unchecked Sendable {
                    f.contains_processed_meat, f.contains_red_meat
             FROM foods_fts
             JOIN foods f ON f.rowid = foods_fts.rowid
-            WHERE foods_fts MATCH ?
+            WHERE foods_fts MATCH ? AND f.source IN (\(sources.map { _ in "?" }.joined(separator: ",")))
             ORDER BY
                 CASE
                     WHEN lower(f.name) = lower(?) THEN 0
@@ -144,19 +166,26 @@ final class CatalogStore: @unchecked Sendable {
                     WHEN lower(f.name) LIKE lower(?) || '%' THEN 2
                     ELSE 3
                 END,
-                bm25(foods_fts, 8.0, 3.0),
+                bm25(foods_fts, 8.0, 3.0, 2.0),
                 length(f.name),
                 f.rank DESC
             LIMIT ?
             """
         let results = queryFoods(sql: sql) { statement in
             bind(terms, at: 1, to: statement)
-            bind(query, at: 2, to: statement)
-            bind(query, at: 3, to: statement)
-            bind(query, at: 4, to: statement)
-            sqlite3_bind_int(statement, 5, Int32(max(limit, 50)))
+            for (index, source) in sources.enumerated() {
+                bind(source.rawValue, at: Int32(index + 2), to: statement)
+            }
+            let queryIndex = Int32(sources.count + 2)
+            bind(query, at: queryIndex, to: statement)
+            bind(query, at: queryIndex + 1, to: statement)
+            bind(query, at: queryIndex + 2, to: statement)
+            sqlite3_bind_int(statement, Int32(sources.count + 5), Int32(max(limit, 50)))
         }
-        return rankedBroadQueryResults(results, query: query, limit: limit, version: activeRankingVersion)
+        return rankedSandwichResults(
+            rankedBroadQueryResults(results, query: query, limit: limit, version: activeRankingVersion),
+            query: query
+        )
     }
 
     var activeRankingVersion: FoodSearchRankingVersion {
@@ -216,12 +245,21 @@ final class CatalogStore: @unchecked Sendable {
         }.prefix(limit).map(\.element)
     }
 
+    private func rankedSandwichResults(_ foods: [Food], query: String) -> [Food] {
+        let terms = Set(query.lowercased().split(whereSeparator: { !$0.isLetter && !$0.isNumber }).map(String.init))
+        let specificPreparations: Set<String> = ["blt", "club", "reuben", "fried", "fish", "breakfast", "peanut", "jelly"]
+        guard terms.contains("sandwich"), terms.isDisjoint(with: specificPreparations),
+              let canonical = foods.first(where: { $0.source == .chaseFood && $0.sourceID == "food_sandwich" })
+        else { return foods }
+        return [canonical] + foods.filter { $0.id != canonical.id }
+    }
+
     func popular(source: FoodSource, limit: Int = 50) -> [Food] {
         let sql = """
             SELECT source_id, source, name, brand, barcode, calories, carbs,
                    fat, protein, fiber, base_grams, serving_grams, serving_description, portions_json,
                    contains_processed_meat, contains_red_meat
-            FROM foods WHERE source = ? ORDER BY rank DESC, name LIMIT ?
+            FROM foods WHERE source = ? AND search_enabled = 1 ORDER BY rank DESC, name LIMIT ?
             """
         return queryFoods(sql: sql) { statement in
             bind(source.rawValue, at: 1, to: statement)
@@ -265,6 +303,31 @@ final class CatalogStore: @unchecked Sendable {
               let statement else { return 0 }
         bind(source.rawValue, at: 1, to: statement)
         return sqlite3_step(statement) == SQLITE_ROW ? Int(sqlite3_column_int64(statement, 0)) : 0
+    }
+
+    func chaseFoodOptions(for sourceID: String) -> [ChaseFoodOption] {
+        lock.lock()
+        guard let database else { lock.unlock(); return [] }
+        var statement: OpaquePointer?
+        var rows: [(String, String, String, Double, String, Bool, Int, String?, String)] = []
+        if sqlite3_prepare_v2(database, "SELECT option_id, component_food_id, component_name, amount_grams, relationship, included_by_default, display_order, option_group, selection_mode FROM chase_food_options WHERE parent_food_id = ? ORDER BY display_order, component_name COLLATE NOCASE", -1, &statement, nil) == SQLITE_OK,
+           let statement {
+            bind(sourceID, at: 1, to: statement)
+            while sqlite3_step(statement) == SQLITE_ROW {
+                guard let optionID = text(statement, 0), let componentID = text(statement, 1) else { continue }
+                rows.append((optionID, componentID, text(statement, 2) ?? componentID, sqlite3_column_double(statement, 3),
+                            text(statement, 4) ?? "addition", sqlite3_column_int(statement, 5) != 0,
+                            Int(sqlite3_column_int(statement, 6)), text(statement, 7), text(statement, 8) ?? "multiple"))
+            }
+        }
+        sqlite3_finalize(statement)
+        lock.unlock()
+        return rows.compactMap { row in
+            guard let food = food(sourceID: row.1, source: .chaseFood) else { return nil }
+            return ChaseFoodOption(id: row.0, food: food, displayName: row.2, amountGrams: row.3,
+                                   relationship: row.4, includedByDefault: row.5, displayOrder: row.6,
+                                   optionGroup: row.7, selectionMode: row.8)
+        }
     }
 
     func meatClassification(sourceID: String, source: FoodSource) -> MeatClassification? {

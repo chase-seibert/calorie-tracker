@@ -72,6 +72,8 @@ class CatalogFood:
     contains_processed_meat: bool = False
     contains_red_meat: bool = False
     rank: int = 0
+    search_text: str = ""
+    search_enabled: bool = True
 
 
 PROCESSED_MEAT_PATTERN = re.compile(
@@ -603,20 +605,41 @@ def create_database(output: Path, foods: Iterable[CatalogFood]) -> tuple[int, di
             portions_json TEXT,
             contains_processed_meat INTEGER NOT NULL DEFAULT 0,
             contains_red_meat INTEGER NOT NULL DEFAULT 0,
+            search_text TEXT NOT NULL DEFAULT '',
             rank INTEGER NOT NULL DEFAULT 0,
+            search_enabled INTEGER NOT NULL DEFAULT 1,
             UNIQUE(source, source_id)
         );
         CREATE INDEX foods_source_rank ON foods(source, rank DESC);
         CREATE INDEX foods_barcode ON foods(barcode) WHERE barcode IS NOT NULL;
         CREATE TABLE metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+        CREATE TABLE chase_food_metadata (
+            food_id TEXT PRIMARY KEY, category TEXT NOT NULL, food_kind TEXT NOT NULL,
+            confidence TEXT NOT NULL, review_required INTEGER NOT NULL,
+            match_source TEXT, match_source_id TEXT, match_name TEXT, match_basis TEXT,
+            similarity REAL, review_reasons_json TEXT NOT NULL
+        );
+        CREATE TABLE chase_food_aliases (
+            food_id TEXT NOT NULL, alias TEXT NOT NULL, kind TEXT NOT NULL,
+            PRIMARY KEY(food_id, alias)
+        );
+        CREATE INDEX chase_food_alias_lookup ON chase_food_aliases(alias COLLATE NOCASE);
+        CREATE TABLE chase_food_options (
+            parent_food_id TEXT NOT NULL, option_id TEXT NOT NULL, component_food_id TEXT NOT NULL,
+            component_name TEXT NOT NULL, amount_grams REAL NOT NULL, relationship TEXT NOT NULL,
+            included_by_default INTEGER NOT NULL, display_order INTEGER NOT NULL,
+            option_group TEXT, selection_mode TEXT NOT NULL DEFAULT 'multiple',
+            PRIMARY KEY(parent_food_id, option_id)
+        );
+        CREATE INDEX chase_food_options_parent ON chase_food_options(parent_food_id, included_by_default, display_order);
         """
     )
     insert = """
         INSERT OR REPLACE INTO foods (
             source_id, source, name, brand, barcode, calories, carbs, fat,
             protein, fiber, base_grams, serving_grams, serving_description, portions_json,
-            contains_processed_meat, contains_red_meat, rank
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            contains_processed_meat, contains_red_meat, rank, search_text, search_enabled
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
     count = 0
     counts: dict[str, int] = {}
@@ -641,6 +664,8 @@ def create_database(output: Path, foods: Iterable[CatalogFood]) -> tuple[int, di
                 int(food.contains_processed_meat),
                 int(food.contains_red_meat),
                 food.rank,
+                food.search_text,
+                int(food.search_enabled),
             )
         )
         if len(batch) >= 2_000:
@@ -657,13 +682,14 @@ def create_database(output: Path, foods: Iterable[CatalogFood]) -> tuple[int, di
         CREATE VIRTUAL TABLE foods_fts USING fts5(
             name,
             brand,
+            search_text,
             content='foods',
             content_rowid='rowid',
             tokenize='unicode61 remove_diacritics 2'
         );
-        INSERT INTO foods_fts(rowid, name, brand)
-            SELECT rowid, name, coalesce(brand, '') FROM foods;
-        INSERT INTO metadata VALUES ('schema_version', '4');
+        INSERT INTO foods_fts(rowid, name, brand, search_text)
+            SELECT rowid, name, coalesce(brand, ''), search_text FROM foods WHERE search_enabled = 1;
+        INSERT INTO metadata VALUES ('schema_version', '5');
         INSERT INTO metadata VALUES ('usda_release', '2026-04-30 foundation; 2018-04 SR Legacy; 2024-10-31 FNDDS');
         INSERT INTO metadata VALUES ('off_scope', 'popular products tagged United States with calorie data');
         ANALYZE;
@@ -672,6 +698,33 @@ def create_database(output: Path, foods: Iterable[CatalogFood]) -> tuple[int, di
     )
     database.close()
     return count, counts
+
+
+def existing_catalog(path: Path) -> list[CatalogFood]:
+    """Preserve the installed catalog when upstream downloads are absent."""
+    if not path.exists():
+        return []
+    try:
+        connection = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+        connection.row_factory = sqlite3.Row
+        records = []
+        for row in connection.execute("SELECT * FROM foods"):
+            records.append(CatalogFood(
+                source_id=row["source_id"], source=row["source"], name=row["name"],
+                brand=row["brand"], barcode=row["barcode"], calories=row["calories"],
+                carbs=row["carbs"], fat=row["fat"], protein=row["protein"], fiber=row["fiber"],
+                base_grams=row["base_grams"], serving_grams=row["serving_grams"],
+                serving_description=row["serving_description"],
+                portions=tuple(json.loads(row["portions_json"] or "[]")),
+                contains_processed_meat=bool(row["contains_processed_meat"]),
+                contains_red_meat=bool(row["contains_red_meat"]), rank=row["rank"],
+                search_text=row["search_text"] if "search_text" in row.keys() else "",
+                search_enabled=bool(row["search_enabled"]) if "search_enabled" in row.keys() else True,
+            ))
+        connection.close()
+        return records
+    except (sqlite3.Error, KeyError, ValueError, TypeError):
+        return []
 
 
 def main() -> int:
@@ -690,9 +743,100 @@ def main() -> int:
     if upstream:
         foods = upstream
     else:
-        print("No cached upstream files found; creating the fallback seed catalog.")
-        foods = seed_foods()
+        retained = existing_catalog(arguments.output.resolve())
+        if retained:
+            print(f"No cached upstream files found; retaining {len(retained):,} records from the existing catalog.")
+            foods = retained
+        else:
+            print("No cached upstream files or existing catalog found; creating the fallback seed catalog.")
+            foods = seed_foods()
+    chase_path = ROOT / "data/chase-food/catalog.json"
+    if chase_path.exists():
+        chase = json.loads(chase_path.read_text(encoding="utf-8"))
+        portions_by_food: dict[str, list[dict[str, object]]] = {}
+        portion_rows = chase.get("portions", [])
+        if portion_rows:
+            for raw in portion_rows:
+                if len(raw) < 7:
+                    continue
+                portion_id, food_id, _, display, size, quantity, grams = raw[:7]
+                try:
+                    amount_grams = float(grams)
+                except (TypeError, ValueError):
+                    continue
+                # The workbook's display column is the user-facing portion
+                # label. Size remains structured metadata for review and sort.
+                label = str(display or "serving")
+                portions_by_food.setdefault(str(food_id), []).append({"id": str(portion_id), "label": label, "grams": amount_grams})
+        chase_foods = []
+        database_metadata = []
+        option_rows = []
+        canonical_by_id = {item["id"]: item for item in chase.get("foods", [])}
+        for index, row in enumerate(chase.get("suggestedAdditions", [])):
+            if len(row) < 8:
+                continue
+            parent_id, _, component_id, component_name, display_order = row[:5]
+            included = str(row[6]).strip().lower() == "yes"
+            option_group = str(row[8]).strip() if len(row) > 8 and row[8] else None
+            selection_mode = str(row[9]).strip().lower() if len(row) > 9 and row[9] else "multiple"
+            component = canonical_by_id.get(component_id)
+            default_amount = float(component.get("defaultGrams") or 30) if component else 30.0
+            try:
+                amount_value = row[10] if len(row) > 10 else None
+                amount = float(amount_value) if amount_value else default_amount
+            except (TypeError, ValueError):
+                amount = default_amount
+            option_rows.append((parent_id, f"addition:{component_id}", component_id, component_name, amount,
+                                str(row[5] or "addition"), int(included), int(display_order or index),
+                                option_group, selection_mode))
+        for index, row in enumerate(chase.get("baseCompositions", [])):
+            if len(row) < 6:
+                continue
+            parent_id, _, component_id, component_name, grams, display_order = row[:6]
+            try:
+                amount = float(grams)
+            except (TypeError, ValueError):
+                continue
+            option_rows.append((parent_id, f"included:{component_id}", component_id, component_name, amount,
+                                "included", 1, int(display_order or index), None, "multiple"))
+        for item in chase.get("foods", []):
+            nutrients = item.get("nutrients") or {"calories": 0, "carbs": 0, "fat": 0, "protein": 0, "fiber": None}
+            serving_grams = float(item.get("defaultGrams") or 100)
+            portions = portions_by_food.get(item["id"], [])
+            if not portions:
+                portions = [{"id": f"prt_{item['id']}_default", "label": str(item.get("defaultUnit") or "serving"), "grams": serving_grams}]
+            aliases = [str(alias) for alias in item.get("aliases", [])]
+            chase_foods.append(CatalogFood(
+                source_id=item["id"], source="chaseFood", name=item["name"], brand=None, barcode=None,
+                calories=float(nutrients.get("calories") or 0), carbs=float(nutrients.get("carbs") or 0),
+                fat=float(nutrients.get("fat") or 0), protein=float(nutrients.get("protein") or 0),
+                fiber=float(nutrients["fiber"]) if nutrients.get("fiber") is not None else None,
+                base_grams=serving_grams, serving_grams=serving_grams,
+                serving_description=str(item.get("defaultUnit") or "serving"), portions=tuple(portions),
+                search_text=" ".join(aliases), rank=50,
+                search_enabled=bool(item.get("searchEnabled", True)),
+            ))
+            provenance = item.get("nutritionSource") or {}
+            database_metadata.append((
+                item["id"], item.get("category", ""), item.get("foodKind", ""),
+                item.get("confidence", "Unavailable"), int(bool(item.get("reviewRequired"))),
+                provenance.get("source"), provenance.get("sourceID"), provenance.get("name"),
+                provenance.get("matchBasis"), provenance.get("similarity"),
+                json.dumps(item.get("reviewReasons", []), separators=(",", ":")),
+            ))
+        payload_aliases = [(a["foodID"], a["alias"], a.get("kind", "synonym")) for a in chase.get("aliases", [])]
+        foods = list(foods) + chase_foods
     count, counts = create_database(arguments.output.resolve(), foods)
+    if chase_path.exists():
+        with sqlite3.connect(arguments.output.resolve()) as database:
+            database.executemany("INSERT INTO chase_food_metadata VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", database_metadata)
+            database.executemany("INSERT OR IGNORE INTO chase_food_aliases VALUES (?, ?, ?)", payload_aliases)
+            database.executemany("INSERT OR REPLACE INTO chase_food_options VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", option_rows)
+            database.executemany(
+                "INSERT INTO metadata VALUES (?, ?)",
+                [("chase_food_dataset_version", chase["datasetVersion"]),
+                 ("chase_food_identity_count", str(len(database_metadata)))],
+            )
     print(f"Wrote {count:,} input records to {arguments.output.resolve()}")
     print("Final source counts: " + ", ".join(f"{key}={value:,}" for key, value in sorted(counts.items())))
     print(f"Database size: {arguments.output.stat().st_size / 1024 / 1024:.1f} MB")

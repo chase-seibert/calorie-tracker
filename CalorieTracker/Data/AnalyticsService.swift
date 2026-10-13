@@ -253,7 +253,9 @@ actor AnalyticsService {
             occurredAt: Date(),
             audience: configuration.audience,
             sessionId: sessionID,
-            properties: properties.mapValues { String($0.prefix(256)) }
+            properties: Dictionary(uniqueKeysWithValues: properties.map { key, value in
+                (key, String(value.prefix(key == "suggested_changes" ? 2_000 : 256)))
+            })
         )
 #if DEBUG
         let diagnosticPayload = AnalyticsDiagnosticPayload(
@@ -262,7 +264,9 @@ actor AnalyticsService {
             occurredAt: event.occurredAt,
             audience: event.audience,
             sessionId: event.sessionId,
-            properties: event.properties
+            properties: Dictionary(uniqueKeysWithValues: event.properties.map { key, value in
+                (key, key == "suggested_changes" ? "[user text omitted from diagnostics]" : value)
+            })
         )
 #else
         let diagnosticPayload: AnalyticsDiagnosticPayload? = nil

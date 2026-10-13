@@ -25,7 +25,7 @@ struct FoodCatalogIdentity: Codable, Hashable, Sendable, CodingKey {
     init?(stringValue: String) {
         guard let separator = stringValue.firstIndex(of: ":") else { return nil }
         let sourceValue = String(stringValue[..<separator])
-        guard let source = FoodSource(rawValue: sourceValue), source == .usda || source == .openFoodFacts else {
+        guard let source = FoodSource(rawValue: sourceValue), FoodSource.localCatalogSources.contains(source) else {
             return nil
         }
         let sourceID = String(stringValue[stringValue.index(after: separator)...])
@@ -37,7 +37,7 @@ struct FoodCatalogIdentity: Codable, Hashable, Sendable, CodingKey {
     init?(intValue: Int) { return nil }
 
     init?(food: Food) {
-        guard food.source == .usda || food.source == .openFoodFacts else { return nil }
+        guard FoodSource.localCatalogSources.contains(food.source) else { return nil }
         source = food.source
         sourceID = food.sourceID
     }

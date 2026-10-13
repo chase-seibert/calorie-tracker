@@ -542,6 +542,33 @@ class DiaryStore: ObservableObject {
         engine.entries(on: date)
     }
 
+    func saveFoodSuggestion(_ suggestion: FoodSuggestion) async throws {
+        try await perform(scope: .library) { engine in
+            engine.saveFoodSuggestion(suggestion)
+        }
+    }
+
+    func logConfiguredFood(
+        _ food: Food,
+        nutrients: MacroNutrients,
+        selectedOptionIDs: [String],
+        components: [MealItem],
+        suggestedChanges: String?,
+        portionID: String?,
+        configuration: SavedFoodConfiguration,
+        suggestion: FoodSuggestion?,
+        on date: Date,
+        allowCheatDay: Bool = false
+    ) async throws {
+        try await perform(scope: .day(date)) { engine in
+            engine.logConfiguredFood(food, nutrients: nutrients, selectedOptionIDs: selectedOptionIDs,
+                                     components: components, suggestedChanges: suggestedChanges,
+                                     portionID: portionID, on: date, allowCheatDay: allowCheatDay)
+            engine.saveFoodConfiguration(configuration)
+            if let suggestion { engine.saveFoodSuggestion(suggestion) }
+        }
+    }
+
     func totals(on date: Date) -> MacroNutrients {
         engine.totals(on: date)
     }
