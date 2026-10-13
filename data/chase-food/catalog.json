@@ -5593,7 +5593,7 @@
     {
       "alias": "Cheerios",
       "foodID": "food_oat_ring_cereal",
-      "kind": "synonym"
+      "kind": "brand"
     },
     {
       "alias": "black olives",
@@ -5823,17 +5823,17 @@
     {
       "alias": "Frosted Flakes",
       "foodID": "food_frosted_corn_flakes",
-      "kind": "canonical"
+      "kind": "brand"
     },
     {
       "alias": "Kellogg Frosted Flakes",
       "foodID": "food_frosted_corn_flakes",
-      "kind": "synonym"
+      "kind": "brand"
     },
     {
       "alias": "Raisin Bran",
       "foodID": "food_bran_flakes_cereal",
-      "kind": "canonical"
+      "kind": "brand"
     },
     {
       "alias": "bran flakes",
@@ -5843,7 +5843,7 @@
     {
       "alias": "Frosted Mini-Wheats",
       "foodID": "food_shredded_wheat_cereal",
-      "kind": "canonical"
+      "kind": "brand"
     },
     {
       "alias": "shredded wheat",
@@ -5853,7 +5853,7 @@
     {
       "alias": "Rice Krispies",
       "foodID": "food_rice_cereal_squares",
-      "kind": "canonical"
+      "kind": "brand"
     },
     {
       "alias": "rice cereal",
@@ -5899,6 +5899,76 @@
       "alias": "breakfast cereal",
       "foodID": "food_cold_breakfast_cereal",
       "kind": "synonym"
+    },
+    {
+      "alias": "Honey Nut Cheerios",
+      "foodID": "food_oat_ring_cereal",
+      "kind": "brand"
+    },
+    {
+      "alias": "Multigrain Cheerios",
+      "foodID": "food_oat_ring_cereal",
+      "kind": "brand"
+    },
+    {
+      "alias": "Cheerios Oat Crunch",
+      "foodID": "food_oat_ring_cereal",
+      "kind": "brand"
+    },
+    {
+      "alias": "Lucky Charms",
+      "foodID": "food_cold_breakfast_cereal",
+      "kind": "brand"
+    },
+    {
+      "alias": "Froot Loops",
+      "foodID": "food_cold_breakfast_cereal",
+      "kind": "brand"
+    },
+    {
+      "alias": "Froot Loops cereal",
+      "foodID": "food_cold_breakfast_cereal",
+      "kind": "brand"
+    },
+    {
+      "alias": "Cocoa Puffs",
+      "foodID": "food_cold_breakfast_cereal",
+      "kind": "brand"
+    },
+    {
+      "alias": "Cinnamon Toast Crunch",
+      "foodID": "food_cold_breakfast_cereal",
+      "kind": "brand"
+    },
+    {
+      "alias": "Special K",
+      "foodID": "food_cold_breakfast_cereal",
+      "kind": "brand"
+    },
+    {
+      "alias": "Honey Bunches of Oats",
+      "foodID": "food_cold_breakfast_cereal",
+      "kind": "brand"
+    },
+    {
+      "alias": "Corn Pops",
+      "foodID": "food_cold_breakfast_cereal",
+      "kind": "brand"
+    },
+    {
+      "alias": "Wheaties",
+      "foodID": "food_cold_breakfast_cereal",
+      "kind": "brand"
+    },
+    {
+      "alias": "Trix cereal",
+      "foodID": "food_cold_breakfast_cereal",
+      "kind": "brand"
+    },
+    {
+      "alias": "Cap’n Crunch",
+      "foodID": "food_cold_breakfast_cereal",
+      "kind": "brand"
     },
     {
       "alias": "Five Guys",
@@ -6233,7 +6303,7 @@
       "Draft"
     ]
   ],
-  "datasetVersion": "chase-food-2026-10-13-5",
+  "datasetVersion": "chase-food-2026-10-13-7",
   "foods": [
     {
       "aliases": [
@@ -6867,7 +6937,18 @@
       "aliases": [
         "cereal",
         "breakfast cereal",
-        "cold breakfast cereal"
+        "cold breakfast cereal",
+        "Lucky Charms",
+        "Froot Loops",
+        "Froot Loops cereal",
+        "Cocoa Puffs",
+        "Cinnamon Toast Crunch",
+        "Special K",
+        "Honey Bunches of Oats",
+        "Corn Pops",
+        "Wheaties",
+        "Trix cereal",
+        "Cap’n Crunch"
       ],
       "category": "Breakfast & eggs",
       "confidence": "Low",
@@ -25623,35 +25704,38 @@
     },
     {
       "aliases": [
-        "Cheerios"
+        "Cheerios",
+        "Honey Nut Cheerios",
+        "Multigrain Cheerios",
+        "Cheerios Oat Crunch"
       ],
       "category": "Breakfast & grains",
-      "confidence": "Medium",
+      "confidence": "Low",
       "defaultGrams": 28.0,
       "defaultUnit": "1 cup",
       "foodKind": "Reusable ingredient",
       "id": "food_oat_ring_cereal",
       "name": "Oat ring cereal",
       "nutrients": {
-        "calories": 100.51,
-        "carbs": 20.82,
-        "fat": 1.79,
-        "fiber": 2.87,
-        "protein": 3.59
+        "calories": 12.88,
+        "carbs": 3.44,
+        "fat": 0.36,
+        "fiber": 0.81,
+        "protein": 0.9
       },
       "nutritionPer100g": {
-        "calories": 358.9744,
-        "carbs": 74.359,
-        "fat": 6.4103,
-        "fiber": 10.2564,
-        "protein": 12.8205
+        "calories": 46.0,
+        "carbs": 12.3,
+        "fat": 1.3,
+        "fiber": 2.9,
+        "protein": 3.21
       },
       "nutritionSource": {
-        "matchBasis": "alias",
-        "name": "Cheerios",
-        "similarity": 0.94,
-        "source": "off",
-        "sourceID": "0016000275263"
+        "matchBasis": "canonical",
+        "name": "Oat bran cereal, cooked",
+        "similarity": 0.7027,
+        "source": "usda",
+        "sourceID": "2708444"
       },
       "reviewReasons": [
         "Approximate existing-catalog match; verify identity and preparation"
@@ -26837,25 +26921,25 @@
       "id": "food_bran_flakes_cereal",
       "name": "Bran flakes cereal",
       "nutrients": {
-        "calories": 128.81,
-        "carbs": 31.86,
-        "fat": 0.68,
-        "fiber": 4.75,
-        "protein": 3.39
+        "calories": 163.27,
+        "carbs": 0.0,
+        "fat": 1.22,
+        "fiber": 6.53,
+        "protein": 5.71
       },
       "nutritionPer100g": {
-        "calories": 322.0339,
-        "carbs": 79.661,
-        "fat": 1.6949,
-        "fiber": 11.8644,
-        "protein": 8.4746
+        "calories": 408.1633,
+        "carbs": 0.0,
+        "fat": 3.0612,
+        "fiber": 16.3265,
+        "protein": 14.2857
       },
       "nutritionSource": {
-        "matchBasis": "alias",
-        "name": "Raisin Bran",
-        "similarity": 0.94,
+        "matchBasis": "canonical",
+        "name": "Heritage Flakes Cereal",
+        "similarity": 0.8,
         "source": "off",
-        "sourceID": "0041192102110"
+        "sourceID": "0058449770213"
       },
       "reviewReasons": [
         "Approximate existing-catalog match; verify identity and preparation"
@@ -49843,71 +49927,6 @@
     [
       "food_burger",
       "Burger",
-      "food_yellow_mustard",
-      "Yellow mustard",
-      "7",
-      "Suggested addition",
-      "No",
-      "Draft",
-      "",
-      "multiple",
-      ""
-    ],
-    [
-      "food_burger",
-      "Burger",
-      "food_lettuce",
-      "Lettuce",
-      "8",
-      "Suggested addition",
-      "No",
-      "Draft",
-      "",
-      "multiple",
-      ""
-    ],
-    [
-      "food_burger",
-      "Burger",
-      "food_tomato",
-      "Tomato",
-      "9",
-      "Suggested addition",
-      "No",
-      "Draft",
-      "",
-      "multiple",
-      ""
-    ],
-    [
-      "food_burger",
-      "Burger",
-      "food_onions_cooked",
-      "Onions, cooked",
-      "10",
-      "Suggested addition",
-      "No",
-      "Draft",
-      "",
-      "multiple",
-      ""
-    ],
-    [
-      "food_burger",
-      "Burger",
-      "food_pickle",
-      "Pickle",
-      "11",
-      "Suggested addition",
-      "No",
-      "Draft",
-      "",
-      "multiple",
-      ""
-    ],
-    [
-      "food_burger",
-      "Burger",
       "food_french_fries",
       "Fries · side",
       "12",
@@ -52012,19 +52031,6 @@
       ""
     ],
     [
-      "food_cheesecake",
-      "Cheesecake",
-      "food_burnt_cheesecake_style",
-      "Burnt style",
-      "174",
-      "Suggested addition",
-      "No",
-      "Draft",
-      "",
-      "multiple",
-      ""
-    ],
-    [
       "food_pancakes",
       "Pancake",
       "food_butter",
@@ -52074,6 +52080,19 @@
       "Draft",
       "",
       "multiple",
+      ""
+    ],
+    [
+      "food_cappuccino",
+      "Cappuccino",
+      "food_milk_1",
+      "1% milk",
+      "84",
+      "Milk",
+      "No",
+      "Draft",
+      "Milk",
+      "exclusive",
       ""
     ]
   ],

@@ -148,8 +148,8 @@ review rather than silently dropping it.
 
 ### Nutrition quality and initial data
 
-The source workbook now contains 508 food identities, 1,908 portions, 1,180
-aliases, 297 configurable component options, and 28 presets. Its nutrition values are screening estimates matched to the
+The source workbook now contains 514 food identities, 1,908 portions, 1,210
+deduplicated aliases, 313 configurable component options, and 28 presets. Its nutrition values are screening estimates matched to the
 existing catalog; they are not recipe analyses or product-label values. The
 first pass matches each identity to the existing bundled USDA/Open Food Facts catalog and scales the selected
 record to the workbook's default grams. Every match records its source ID,
@@ -162,7 +162,7 @@ builder.
 The data build should consume checked-in, reviewable source files under a
 dedicated `data/chase-food/` directory and produce the Chase Food rows and
 metadata as part of `FoodCatalog.sqlite3`. Keep source IDs stable across builds.
-Expose all 508 searchable taxonomy identities, including the generic Sandwich and
+Expose all 514 searchable taxonomy identities, including the generic Sandwich and
 protein-powder/cereal/milk components added for customization; keep category and food-kind metadata in
 the data if useful for curation, but do not include them in result rows.
 
@@ -214,7 +214,7 @@ used as nutrient sources.
 
 ## Approved implementation decisions
 
-- Expose all 508 workbook identities in Chase Food. Confidence and review
+- Expose all 514 workbook identities in Chase Food. Confidence and review
   reasons are tracked per identity in the synchronized review spreadsheet.
 - Keep USDA and Open Food Facts enabled and Chase Food disabled by default;
   disabling a source only filters new catalog discovery and leaves diary
@@ -222,7 +222,9 @@ used as nutrient sources.
 - Log configured related foods as components of one diary entry. Store the
   selected options and component snapshots with that entry.
 - Map restaurant and product aliases to generic canonical identities without
-  making brand-specific nutrition claims.
+  making brand-specific nutrition claims. Keep manufacturer label comparisons
+  in separate research evidence with the product, serving size, access date,
+  and source; never treat a brand alias as proof of generic nutrition.
 - Persist free-text food suggestions in the SQLite diary and queue them in the
   existing signed analytics upload pipeline.
 - Group saved Chase Food configurations beneath their canonical search result.

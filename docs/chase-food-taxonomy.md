@@ -12,8 +12,8 @@ evaluate Chase Food on its own.
 
 The workbook is [Canonical U.S. Food Taxonomy — Review Draft](https://docs.google.com/spreadsheets/d/16Y1Uc0jldJ4tGO_vf5mgjT0n8pwJxO13W54zR5M_wWo/edit).
 The preceding [Canonical Food List Criteria conversation](https://chatgpt.com/share/6ace459c-9910-83e8-b7db-44bcaa4894be)
-provides the rationale and initial model. The current review dataset has 508 food
-identities, 1,908 portion mappings, 1,180 search terms, 297 reusable component
+provides the rationale and initial model. The current review dataset has 514 food
+identities, 1,908 portion mappings, 1,210 deduplicated search terms, 313 reusable component
 options, and 28 presets. Portion and option amounts are first-pass estimates;
 nutrition values are matched from the bundled USDA/Open Food Facts catalog and
 still need review when confidence or preparation notes flag them.
@@ -53,6 +53,21 @@ claim that recipe nutrition is already measured.
    compositions are estimates pending review. Nutrient values must be populated
    from an authoritative source or otherwise verified before they are treated
    as production values.
+8. **Reserve quick controls for meaningful nutrition changes.** Show an add-on
+   as a quick choice when a usual serving materially changes calories or one of
+   the tracked macros. For a burger, cheese, bacon, mayonnaise, ketchup, and
+   fries qualify; lettuce, tomato, onion, pickle, and a small mustard serving
+   do not. Keep unlisted ingredients available through Add ingredient when
+   useful. Apply this judgment to the modeled amount rather than a fixed
+   calorie cutoff.
+9. **Keep brand searches generic and label evidence separate.** Map cereal
+   brands to the closest generic food or to Cereal when the current types do
+   not fit. Store manufacturer label values as research evidence with product,
+   serving size, date, and source; do not use them as generic nutrition values
+   or imply that an alias has brand-specific nutrition.
+   The initial cereal comparison is checked in at
+   `data/chase-food/cereal-brand-research.json` and appears as the **Cereal
+   Brand Research** tab in the review workbook.
 
 ## Source controls
 
@@ -124,7 +139,9 @@ rewrite history.
 ## Size and food-specific directions
 
 - **Burger:** The base includes a bun, which can be removed. Offer cheese,
-  bacon, sauces, and related sides such as fries. Use a visual size cue as well
+  bacon, mayonnaise, ketchup, and related sides such as fries. Keep garnish
+  ingredients out of quick controls; they remain searchable through Add
+  ingredient. Use a visual size cue as well
   as weight: draft cues could be a small slider/hockey-puck-scale patty, a
   standard roughly 4-inch patty, and a larger roughly 5-inch patty. Review
   diameter and cooked weight before assigning nutrition.
@@ -148,7 +165,11 @@ rewrite history.
 - **Cereal:** Display the canonical name **Cereal**. Use a natural cup amount
   and a mutually exclusive cereal-type selector. Common cereal names and
   brands can be searchable aliases or choices without multiplying generic
-  canonical identities.
+  canonical identities. Map Cheerios varieties to oat-ring cereal, Frosted
+  Flakes to frosted corn flakes, and Raisin Bran to bran flakes; route brands
+  without a close generic type (such as Lucky Charms, Froot Loops, Cocoa Puffs,
+  Cinnamon Toast Crunch, and Special K) to Cereal. Keep brand label values in
+  the separate research ledger, not in generic nutrition profiles.
 - **Coffee:** Display the canonical name **Coffee**. Use cup sizes with the
   fluid-ounce amount shown. Milk type (for example, 1%, 2%, or whole) is
   mutually exclusive; sugar and cream are optional additions.
@@ -157,8 +178,9 @@ rewrite history.
   berries, granola, honey, or banana.
 - **Cappuccino:** Give Cappuccino its own canonical entry, separate from Coffee.
   Use cup sizes with the ounce amount shown and an exclusive milk selector
-  (whole, 2%, 1%, skim, almond, or oat); espresso and foamed milk define the
-  base. Sugar, cocoa, or cinnamon can be optional. This is a personal staple.
+  (whole, 2%, 1%, skim, almond, or oat); 1% milk is a selectable option.
+  Espresso and foamed milk define the base. Sugar, cocoa, or cinnamon can be
+  optional. This is a personal staple.
 - **Protein shake:** Use the existing canonical Protein shake entry. Start with a
   serving of protein powder and a selectable liquid (almond, 2%, or whole milk),
   then offer peanut butter, banana, and coconut oil. Useful additional choices
@@ -198,7 +220,7 @@ aliases or saved configurations.
 | Thanksgiving Dinner; Turkey; Green Bean Casserole; Stuffing; Gravy; Mashed Potatoes | **Roast turkey** is the main entry, with “Thanksgiving turkey” and “Thanksgiving” as aliases. Keep mashed potatoes, stuffing, gravy, and green bean casserole as separate reusable foods that can be added together. |
 | Beef Pot Roast; South Carolina Pulled Pork; Roast Chicken and Green Beans; Pot Roast; Chicken Kebabs | Candidate common entries **Pot roast**, **Pulled pork**, **Roast chicken**, and **Chicken kebab** if coverage warrants; green beans are a related food. Use recipe names as saved variations rather than one record per recipe. |
 | Macaroni and Cheese; Cream of Mushroom and Chicken; Louisiana Hot-links and Lentils; Fiery Green Beans and Tofu; Vermicelli Bowl; Pho; Pork Ramen; Chicken Pot Pie; Yellow Curry; Thai Cashew Chicken; Pad See Ew; Braised Chicken Thighs with Black Bean Rice | Map to broad familiar foods (macaroni and cheese, chicken casserole, lentil dish, tofu with vegetables, noodle bowl/soup, curry, chicken with rice, or pot pie) only where the catalog needs them. Keep recipe names as aliases or configurations, not automatic one-for-one canonicals. |
-| Burnt Cheesecake | Own **Cheesecake** entry; “burnt cheesecake” can be a style choice or variation. |
+| Burnt Cheesecake | Search as **Cheesecake** if useful; do not offer burnt style as a variation. |
 | Pancakes; Christmas Morning Casserole; Ham and Scalloped Potatoes; Horseradish-Crusted Beef Tenderloin; Bread; Flatbread; Prosciutto Cheese Bread; Banana Muffins; Cinnamon Rolls; Biscuits; Yellow Cake; Omelet | **Pancake** is a canonical food. The other dishes fit an existing casserole, ham, scalloped potatoes, beef roast, bread, muffin, cinnamon roll, biscuit, cake, or omelet identity; add distinct entries only when search coverage demonstrates a need. |
 | Cocktails; Whiskey Sour; Paloma; Margarita; Negroni; Popcorn; Raspberry Lime Rickey; Ocean Park's Famous Ham and Cheese Italian | Treat as beverages/snacks/sandwiches through their broad canonical foods and ingredient selections; specific recipes can be saved configurations. |
 

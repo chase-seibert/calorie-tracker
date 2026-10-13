@@ -8,7 +8,8 @@ const foods = workbook.worksheets.add("Food Profiles");
 const aliases = workbook.worksheets.add("Search Aliases");
 const options = workbook.worksheets.add("Food Options");
 const portions = workbook.worksheets.add("Portion Estimates");
-for (const sheet of [summary, foods, aliases, options, portions]) sheet.showGridLines = false;
+const cerealResearch = workbook.worksheets.add("Cereal Brand Research");
+for (const sheet of [summary, foods, aliases, options, portions, cerealResearch]) sheet.showGridLines = false;
 
 const counts = Object.fromEntries(["High", "Medium", "Low", "Unavailable"].map(level => [level, source.foods.filter(f => f.confidence === level).length]));
 const reviewCount = source.foods.filter(f => f.reviewRequired).length;
@@ -34,7 +35,7 @@ summary.getRange("A16:B21").values = [
   ["Limit", "These matches are screening estimates. They are not reviewed recipe analyses or product-label values."],
   ["Refinement rule", "Review every Low match, prepared dish, and record with missing fiber."],
   ["Synchronization", "This sheet is generated from data/chase-food/catalog.json, the manifest used by the app catalog builder."],
-  ["Alias policy", "Brand and restaurant names point to generic canonical identities; no brand-specific nutrient claim."],
+  ["Alias policy", "Brand and restaurant names point to generic canonical identities; cereal package labels are comparison evidence only, kept on the separate Cereal Brand Research tab."],
 ];
 summary.getRange("A1:B1").format = { fill: "#243B53", font: { bold: true, color: "#FFFFFF", size: 14 } };
 summary.getRange("A3:A21").format = { fill: "#E9EEF3", font: { bold: true, color: "#243B53" } };
@@ -84,10 +85,11 @@ aliases.getRange("D:D").format.columnWidth = 18;
 
 const optionHeaders = ["Parent food ID", "Canonical food", "Component food ID", "Component", "Amount g", "Relationship", "Selected by default", "Option group", "Selection mode", "Display order"];
 const foodNames = new Map(source.foods.map(f => [f.id, f.name]));
+const componentDefaultGrams = new Map(source.foods.map(f => [f.id, Number(f.defaultGrams) || 30]));
 const optionRows = [
   ...source.suggestedAdditions.map(r => [
   r[0], foodNames.get(r[0]) ?? r[1], r[2], foodNames.get(r[2]) ?? r[3],
-  Number(r[10]) || null, r[5], r[6], r[8] ?? "", r[9] ?? "multiple", Number(r[4]) || null,
+  Number(r[10]) || componentDefaultGrams.get(r[2]) || null, r[5], r[6], r[8] ?? "", r[9] ?? "multiple", Number(r[4]) || null,
   ]),
   ...source.baseCompositions.map(r => [
     r[0], foodNames.get(r[0]) ?? r[1], r[2], foodNames.get(r[2]) ?? r[3],
@@ -123,6 +125,25 @@ portions.getRange("C:D").format.columnWidth = 32;
 portions.getRange("E:F").format.columnWidth = 16;
 portions.getRange("G:G").format.columnWidth = 14;
 portions.getRange("H:I").format.columnWidth = 28;
+
+const research = JSON.parse(await fs.readFile("data/chase-food/cereal-brand-research.json", "utf8"));
+const researchHeaders = ["Brand / product", "Serving", "Serving g", "Calories", "Carbs g", "Fat g", "Protein g", "Fiber g", "Generic target ID", "Source", "Official label URL", "Research note"];
+const researchRows = research.records.map(r => [
+  r.brand, r.serving, r.grams, r.calories, r.carbs_g, r.fat_g, r.protein_g,
+  r.fiber_g, r.genericTargetID, r.source, r.url, r.note,
+]);
+cerealResearch.getRangeByIndexes(0, 0, 1, researchHeaders.length).values = [researchHeaders];
+cerealResearch.getRangeByIndexes(1, 0, researchRows.length, researchHeaders.length).values = researchRows;
+cerealResearch.freezePanes.freezeRows(1);
+cerealResearch.tables.add(`A1:L${researchRows.length + 1}`, true, "CerealBrandResearch").style = "TableStyleMedium2";
+cerealResearch.getRange("A:A").format.columnWidth = 38;
+cerealResearch.getRange("B:B").format.columnWidth = 22;
+cerealResearch.getRange("C:H").format.columnWidth = 14;
+cerealResearch.getRange("I:I").format.columnWidth = 30;
+cerealResearch.getRange("J:J").format.columnWidth = 38;
+cerealResearch.getRange("K:K").format.columnWidth = 64;
+cerealResearch.getRange("L:L").format.columnWidth = 58;
+cerealResearch.getRange(`K2:L${researchRows.length + 1}`).format.wrapText = true;
 
 workbook.recalculate();
 const file = await SpreadsheetFile.exportXlsx(workbook);

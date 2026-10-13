@@ -87,14 +87,18 @@ def main() -> int:
     food_headers = foods_rows[0]
     food_index = {name: food_headers.index(name) for name in food_headers}
     alias_by_food: dict[str, list[str]] = {}
+    nutrition_alias_by_food: dict[str, list[str]] = {}
     alias_records: list[dict] = []
     for row in workbook["aliases"][1:]:
         if len(row) < 5 or clean(row[1]) != "food":
             continue
         food_id, alias = clean(row[2]), clean(row[0])
+        alias_kind = clean(row[3]).lower() or "synonym"
         if alias:
             alias_by_food.setdefault(food_id, []).append(alias)
-            alias_records.append({"foodID": food_id, "alias": alias, "kind": clean(row[3]).lower() or "synonym"})
+            alias_records.append({"foodID": food_id, "alias": alias, "kind": alias_kind})
+            if alias_kind not in {"brand", "restaurant", "product"}:
+                nutrition_alias_by_food.setdefault(food_id, []).append(alias)
     for food_id, values in RESTAURANT_ALIASES.items():
         for alias in values:
             alias_by_food.setdefault(food_id, []).append(alias)
@@ -129,7 +133,7 @@ def main() -> int:
             score = similarity(name, record["name"])
             if score >= .42:
                 candidates.append((score, record, "canonical"))
-        for alias in aliases:
+        for alias in nutrition_alias_by_food.get(food_id, []):
             exact = by_name.get(normalize(alias), [])
             candidates.extend((.94, record, "alias") for record in exact)
         if not candidates:
@@ -173,8 +177,8 @@ def main() -> int:
         })
     payload = {
         "schemaVersion": 1,
-        "datasetVersion": "chase-food-2026-10-13-4",
-        "workbookTitle": "Canonical U.S. Food Taxonomy — 508 Foods (Review Draft)",
+        "datasetVersion": "chase-food-2026-10-13-7",
+        "workbookTitle": "Canonical U.S. Food Taxonomy — 514 Foods (Review Draft)",
         "workbookURL": "https://docs.google.com/spreadsheets/d/16Y1Uc0jldJ4tGO_vf5mgjT0n8pwJxO13W54zR5M_wWo/edit",
         "foods": output_foods,
         "aliases": alias_records,

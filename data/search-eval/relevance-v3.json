@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "datasetVersion": "search-calibration-2026-10-08-v3",
-  "catalogFingerprint": "7e256e5d2898",
+  "catalogFingerprint": "6f988a00804f",
   "rankingRuleVersion": "catalog-fts5-v3-canonical-first",
   "queries": [
     {
