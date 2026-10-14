@@ -35,7 +35,7 @@ struct FoodPickerView: View {
     @State private var isSearching = false
     @State private var showingCustomFoodEditor = false
     @State private var showingFoodSuggestionEditor = false
-    @State private var showingMealPhotoAnalysis = false
+    @State private var showingMealAnalysis = false
     @State private var searchAttempt = FoodSearchAttemptTracker()
     @FocusState private var searchIsFocused: Bool
     @AppStorage("foodSource.enabled.usda") private var usdaEnabled = true
@@ -57,10 +57,10 @@ struct FoodPickerView: View {
                 if query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     FoodPickerModeStrip(
                         selection: $mode,
-                        onAnalyzePhoto: {
+                        onAnalyzeMeal: {
                             searchIsFocused = false
-                            showingMealPhotoAnalysis = true
-                            AppAnalytics.capture("food_picker.analyze_photo_selected")
+                            showingMealAnalysis = true
+                            AppAnalytics.capture("food_picker.analyze_meal_selected")
                         }
                     ) { selectedMode in
                             searchIsFocused = false
@@ -219,8 +219,8 @@ struct FoodPickerView: View {
                 ChaseFoodCustomizeView(food: food, catalog: catalog, date: date, initialConfiguration: customizingConfiguration)
                     .environmentObject(diary)
             }
-            .sheet(isPresented: $showingMealPhotoAnalysis) {
-                MealPhotoAnalysisView(targetDate: date) {
+            .sheet(isPresented: $showingMealAnalysis) {
+                MealAnalysisView(targetDate: date) {
                     finishSearchAttempt()
                     dismiss()
                 }
@@ -674,7 +674,7 @@ private struct FoodPickerCalorieSummary: View {
 
 struct FoodPickerModeStrip: View {
     @Binding var selection: FoodPickerView.Mode?
-    let onAnalyzePhoto: () -> Void
+    let onAnalyzeMeal: () -> Void
     var isEnabled = true
     var onDisabledTap: (() -> Void)? = nil
     let onSelect: (FoodPickerView.Mode) -> Void
@@ -712,16 +712,16 @@ struct FoodPickerModeStrip: View {
                 .accessibilityLabel(item.rawValue)
             }
 
-            Button(action: onAnalyzePhoto) {
-                Image(systemName: "camera")
+            Button(action: onAnalyzeMeal) {
+                Image(systemName: "sparkles")
                     .font(.caption.weight(.semibold))
                     .frame(width: 32, height: 32)
                     .foregroundStyle(AppTheme.ink)
                     .background(AppTheme.controlFill, in: Capsule())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Analyze a meal photo")
-            .accessibilityHint("Choose or take a meal photo to analyze")
+            .accessibilityLabel("Analyze a meal with AI")
+            .accessibilityHint("Describe your meal and optionally add a photo")
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)

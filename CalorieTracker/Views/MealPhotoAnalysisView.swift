@@ -3,7 +3,7 @@ import PhotosUI
 import SwiftUI
 import UIKit
 
-struct MealPhotoAnalysisView: View {
+struct MealAnalysisView: View {
     @EnvironmentObject private var diary: DiaryStore
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
@@ -14,7 +14,7 @@ struct MealPhotoAnalysisView: View {
 
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var sourceImage: Data?
-    @State private var context = ""
+    @State private var mealDescription = ""
     @State private var analysisTask: Task<Void, Never>?
     @State private var requestGeneration = UUID()
     @State private var isAnalyzing = false
@@ -24,6 +24,11 @@ struct MealPhotoAnalysisView: View {
     @State private var showingCamera = false
     @State private var showingCameraUnavailable = false
     @State private var cameraError: String?
+    @FocusState private var descriptionIsFocused: Bool
+
+    private var hasUsableInput: Bool {
+        sourceImage != nil || !mealDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 
     init(
         targetDate: Date,
@@ -39,84 +44,112 @@ struct MealPhotoAnalysisView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section {
-                    if let sourceImage, let image = UIImage(data: sourceImage) {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxHeight: 280)
-                            .frame(maxWidth: .infinity)
-                            .accessibilityLabel("Selected meal photo")
-                    } else {
-                        ContentUnavailableView("Choose a meal photo", systemImage: "fork.knife", description: Text("Take a photo or select one from your library."))
-                            .frame(maxWidth: .infinity)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Meal description")
+                            .font(.headline)
+                        TextField("What did you eat? Include portions or ingredients if you know them.", text: $mealDescription, axis: .vertical)
+                            .lineLimit(3...5)
+                            .focused($descriptionIsFocused)
+                            .accessibilityLabel("Meal description")
+                            .onChange(of: mealDescription) { _, value in
+                                if value.count > MealAnalysisRequest.maximumDescriptionCharacters {
+                                    mealDescription = String(value.prefix(MealAnalysisRequest.maximumDescriptionCharacters))
+                                }
+                            }
+                            .padding(12)
+                            .background(AppTheme.controlFill, in: RoundedRectangle(cornerRadius: 12))
+                        Text("\(mealDescription.count)/\(MealAnalysisRequest.maximumDescriptionCharacters)")
+                            .font(.caption.monospacedDigit())
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .trailing)
                     }
-                    HStack {
-                        PhotosPicker(selection: $selectedPhoto, matching: .images) {
-                            Label("Choose Photo", systemImage: "photo")
-                        }
-                        .buttonStyle(.bordered)
-                        Button {
-                            Task { await prepareCamera() }
-                        } label: {
-                            Label("Take Photo", systemImage: "camera")
-                        }
-                        .buttonStyle(.bordered)
-                    }
-                    if let cameraError { Text(cameraError).font(.caption).foregroundStyle(.red) }
-                    Text("Before you analyze, the photo and context shown here will be sent to OpenAI. The estimate is not a measured nutrition result.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                } header: { Text("Photo") }
 
-                Section("Meal context (optional)") {
-                    TextField("Portion, ingredients, or preparation", text: $context, axis: .vertical)
-                        .lineLimit(3...6)
-                        .onChange(of: context) { _, value in
-                            if value.count > MealAnalysisRequest.maximumContextCharacters {
-                                context = String(value.prefix(MealAnalysisRequest.maximumContextCharacters))
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Photo (optional)")
+                            .font(.headline)
+                        if let sourceImage, let image = UIImage(data: sourceImage) {
+                            HStack(spacing: 12) {
+                                Image(uiImage: image)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 88, height: 88)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    .accessibilityLabel("Selected meal photo")
+                                Text("Photo added")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                                Spacer(minLength: 0)
+                                Button("Remove", systemImage: "xmark.circle.fill", role: .destructive) {
+                                    selectedPhoto = nil
+                                    self.sourceImage = nil
+                                }
+                                .labelStyle(.iconOnly)
+                                .accessibilityLabel("Remove selected photo")
                             }
                         }
-                    Text("\(context.count)/\(MealAnalysisRequest.maximumContextCharacters)")
+                        HStack(spacing: 10) {
+                            PhotosPicker(selection: $selectedPhoto, matching: .images) {
+                                Label(sourceImage == nil ? "Add Photo" : "Change Photo", systemImage: "photo")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.bordered)
+                            Button {
+                                Task { await prepareCamera() }
+                            } label: {
+                                Label("Take Photo", systemImage: "camera")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                        if let cameraError { Text(cameraError).font(.caption).foregroundStyle(.red) }
+                    }
+
+                    Text("Your description and any photo you add will be sent to OpenAI. The estimate is not a measured nutrition result.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                }
 
-                Section {
-                    if isAnalyzing {
-                        ProgressView("Analyzing meal photo…")
-                        Text("This sends one request to OpenAI. Cancel stops waiting here, but it may not stop provider processing or charges.")
-                            .font(.caption).foregroundStyle(.secondary)
-                        Button("Cancel Analysis", role: .cancel, action: cancelAnalysis)
-                    } else {
-                        Button {
-                            startAnalysis()
-                        } label: {
-                            Label("Analyze Photo", systemImage: "sparkles")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .disabled(sourceImage == nil)
-                    }
                     if let errorMessage {
-                        Text(errorMessage).font(.callout).foregroundStyle(.red)
-                        if errorNeedsUsageHelp {
-                            Link("Check OpenAI API rate limits", destination: URL(string: "https://platform.openai.com/settings/organization/limits")!)
-                            Link("Check OpenAI API billing", destination: URL(string: "https://platform.openai.com/settings/organization/billing/overview")!)
-                        }
-                        if sourceImage != nil && !isAnalyzing {
-                            Button("Retry Analysis") { startAnalysis() }
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(errorMessage).font(.callout).foregroundStyle(.red)
+                            if errorNeedsUsageHelp {
+                                Link("Check OpenAI API rate limits", destination: URL(string: "https://platform.openai.com/settings/organization/limits")!)
+                                Link("Check OpenAI API billing", destination: URL(string: "https://platform.openai.com/settings/organization/billing/overview")!)
+                            }
                         }
                     }
-                } footer: {
-                    Text("Each retry sends a new API request and may incur usage charges. Analysis alone does not save anything to your diary or Apple Health.")
                 }
+                .padding(16)
             }
             .scrollContentBackground(.hidden)
             .background(AppTheme.background)
-            .navigationTitle("Analyze Meal Photo")
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                VStack(spacing: 8) {
+                    if isAnalyzing {
+                        ProgressView("Analyzing meal…")
+                        Text("This sends one request to OpenAI. Cancel stops waiting here, but it may not stop provider processing or charges.")
+                            .font(.caption).foregroundStyle(.secondary)
+                        Button("Cancel Analysis", role: .cancel, action: cancelAnalysis)
+                            .buttonStyle(.bordered)
+                    } else {
+                        Button(action: startAnalysis) {
+                            Label(errorMessage == nil ? "Analyze Meal" : "Retry Analysis", systemImage: "sparkles")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(!hasUsableInput)
+                        Text("Each analysis may incur usage charges. Nothing is logged until you review the estimate.")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 10)
+                .padding(.bottom, 8)
+                .background(.regularMaterial)
+            }
+            .navigationTitle("Analyze Meal")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -138,7 +171,7 @@ struct MealPhotoAnalysisView: View {
                 Button("OK", role: .cancel) { }
             } message: { Text(cameraError ?? "Allow camera access in Settings or select a photo instead.") }
             .sheet(item: Binding(get: { reviewingFile.map(ReviewingMeal.init) }, set: { reviewingFile = $0?.file })) { item in
-                CustomMealImportView(file: item.file, targetDate: targetDate, source: .openAIPhoto, onLogged: {
+                CustomMealImportView(file: item.file, targetDate: targetDate, source: .openAIAnalysis, onLogged: {
                     reviewingFile = nil
                     onLogged()
                 })
@@ -165,10 +198,12 @@ struct MealPhotoAnalysisView: View {
     }
 
     private func startAnalysis() {
-        guard let sourceImage, !isAnalyzing else { return }
+        guard hasUsableInput, !isAnalyzing else { return }
         let generation = UUID()
         requestGeneration = generation
-        let requestContext = context
+        let requestDescription = mealDescription
+        let requestImage = sourceImage
+        descriptionIsFocused = false
         errorMessage = nil
         errorNeedsUsageHelp = false
         isAnalyzing = true
@@ -177,12 +212,13 @@ struct MealPhotoAnalysisView: View {
                 if requestGeneration == generation { isAnalyzing = false; analysisTask = nil }
             }
             do {
-                let jpeg = try await Task.detached(priority: .userInitiated) {
-                    try MealPhotoPreprocessor().jpeg(from: sourceImage)
+                let jpeg: Data? = try await Task.detached(priority: .userInitiated) {
+                    guard let requestImage else { return nil }
+                    return try MealPhotoPreprocessor().jpeg(from: requestImage)
                 }.value
                 let key = try credentialStore.load()
                 guard let key else { throw MealAnalysisError.missingCredential }
-                let file = try await analysisClient.analyze(jpeg: jpeg, context: requestContext, apiKey: key)
+                let file = try await analysisClient.analyze(description: requestDescription, jpeg: jpeg, apiKey: key)
                 guard !Task.isCancelled, requestGeneration == generation else { return }
                 reviewingFile = file
             } catch is CancellationError {

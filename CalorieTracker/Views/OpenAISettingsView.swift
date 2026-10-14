@@ -35,11 +35,11 @@ struct OpenAISettingsView: View {
             } header: {
                 Text("OpenAI API")
             } footer: {
-                Text("The key is stored in this device’s Keychain and is used only when you explicitly analyze a photo. Saving a key does not contact OpenAI. The ChatGPT subscription is separate from API billing.")
+                Text("The key is stored in this device’s Keychain and is used only when you explicitly analyze a meal. Saving a key does not contact OpenAI. The ChatGPT subscription is separate from API billing.")
             }
 
             Section("Privacy and billing") {
-                Text("This personal app sends the selected photo, the optional context shown before analysis, and fixed meal-estimation instructions directly to OpenAI. It does not send your diary or HealthKit history. Photo metadata is removed before upload. OpenAI processes API inputs under its current data controls; store=false does not promise zero provider retention.")
+                Text("This personal app sends the meal description you enter, any photo you add, and fixed meal-estimation instructions directly to OpenAI. You can analyze from a description alone, a photo alone, or both. It does not send your diary or HealthKit history. Photo metadata is removed before upload. OpenAI processes API inputs under its current data controls; store=false does not promise zero provider retention.")
                 Link("OpenAI API usage and billing", destination: URL(string: "https://platform.openai.com/settings/organization/billing/overview")!)
                 Link("OpenAI API data controls", destination: URL(string: "https://developers.openai.com/api/docs/guides/your-data")!)
                 Text("A key stored in a client app is not a server secret. This direct personal setup is for private deployment. A shared or distributed app needs an authenticated backend that owns the key and limits use.")

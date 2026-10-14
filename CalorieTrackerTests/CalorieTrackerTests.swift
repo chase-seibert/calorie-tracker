@@ -3,24 +3,58 @@ import XCTest
 @testable import CalorieTracker
 
 final class CalorieTrackerTests: XCTestCase {
-    func testMealPhotoRequestUsesBoundedInlineImageAndStrictNoStoreContract() throws {
+    func testMealAnalysisRequestSupportsDescriptionOnlyPhotoOnlyAndCombinedInputs() throws {
         let jpeg = Data([0xff, 0xd8, 0xff])
-        let data = try MealAnalysisRequest.makeBody(jpeg: jpeg, context: "one bowl")
+        func requestContent(description: String, jpeg: Data?) throws -> (body: [String: Any], content: [[String: Any]]) {
+            let data = try MealAnalysisRequest.makeBody(description: description, jpeg: jpeg)
+            let body = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+            let input = try XCTUnwrap((body["input"] as? [[String: Any]])?.first)
+            return (body, try XCTUnwrap(input["content"] as? [[String: Any]]))
+        }
+
+        let descriptionOnly = try requestContent(description: "one bowl of lentil soup", jpeg: nil)
+        XCTAssertEqual(descriptionOnly.content.count, 1)
+        XCTAssertTrue(try XCTUnwrap(descriptionOnly.content[0]["text"] as? String).contains("one bowl of lentil soup"))
+        XCTAssertNil(descriptionOnly.content.first?["image_url"])
+
+        let photoOnly = try requestContent(description: "  ", jpeg: jpeg)
+        XCTAssertEqual(photoOnly.content.count, 2)
+        XCTAssertEqual(photoOnly.content[1]["image_url"] as? String, "data:image/jpeg;base64,\(jpeg.base64EncodedString())")
+
+        let combined = try requestContent(description: "one bowl", jpeg: jpeg)
+        XCTAssertEqual(combined.content.count, 2)
+        XCTAssertTrue(try XCTUnwrap(combined.content[0]["text"] as? String).contains("one bowl"))
+        XCTAssertEqual(combined.content[1]["image_url"] as? String, "data:image/jpeg;base64,\(jpeg.base64EncodedString())")
+
+        for body in [descriptionOnly.body, photoOnly.body, combined.body] {
+            XCTAssertEqual(body["model"] as? String, "gpt-6-luna")
+            XCTAssertEqual(body["store"] as? Bool, false)
+            XCTAssertEqual(body["max_output_tokens"] as? Int, 8_000)
+            XCTAssertEqual((body["tools"] as? [Any])?.count, 0)
+            XCTAssertNil(body["diary"])
+            XCTAssertNil(body["healthkit"])
+            let text = try XCTUnwrap(body["text"] as? [String: Any])
+            let format = try XCTUnwrap(text["format"] as? [String: Any])
+            XCTAssertEqual(format["type"] as? String, "json_schema")
+            XCTAssertEqual(format["strict"] as? Bool, true)
+        }
+    }
+
+    func testMealAnalysisRequestRejectsMissingInputAndBoundsDescription() throws {
+        XCTAssertThrowsError(try MealAnalysisRequest.makeBody(description: " \n\t", jpeg: nil)) { error in
+            XCTAssertEqual(error as? MealAnalysisError, .missingInput)
+        }
+
+        let maxLength = MealAnalysisRequest.maximumDescriptionCharacters
+        let description = String(repeating: "a", count: maxLength) + "beyond limit"
+        let data = try MealAnalysisRequest.makeBody(description: description, jpeg: nil)
         let body = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
-        XCTAssertEqual(body["model"] as? String, "gpt-6-luna")
-        XCTAssertEqual(body["store"] as? Bool, false)
-        XCTAssertEqual(body["max_output_tokens"] as? Int, 8_000)
-        XCTAssertEqual((body["tools"] as? [Any])?.count, 0)
         let input = try XCTUnwrap((body["input"] as? [[String: Any]])?.first)
         let content = try XCTUnwrap(input["content"] as? [[String: Any]])
-        XCTAssertTrue(try XCTUnwrap(content.first?["text"] as? String).contains("one bowl"))
-        XCTAssertEqual(content.last?["image_url"] as? String, "data:image/jpeg;base64,\(jpeg.base64EncodedString())")
-        XCTAssertNil(body["diary"])
-        XCTAssertNil(body["healthkit"])
-        let text = try XCTUnwrap(body["text"] as? [String: Any])
-        let format = try XCTUnwrap(text["format"] as? [String: Any])
-        XCTAssertEqual(format["type"] as? String, "json_schema")
-        XCTAssertEqual(format["strict"] as? Bool, true)
+        let prompt = try XCTUnwrap(content.first?["text"] as? String)
+        let submittedDescription = try XCTUnwrap(prompt.components(separatedBy: "User meal description (may be empty when a photo is supplied):\n").last?.components(separatedBy: "\n").first)
+        XCTAssertEqual(submittedDescription.count, maxLength)
+        XCTAssertFalse(submittedDescription.contains("beyond limit"))
     }
 
     func testMealAnalysis429ErrorsDistinguishLimitsAndIncludeRetryDiagnostics() {

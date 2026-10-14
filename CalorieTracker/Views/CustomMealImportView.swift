@@ -136,9 +136,9 @@ struct ReviewClassificationsView: View {
 struct CustomMealImportView: View {
     enum Source: Equatable {
         case fileImport
-        case openAIPhoto
+        case openAIAnalysis
 
-        var analyticsMethod: String { self == .fileImport ? "file_import" : "openai_photo" }
+        var analyticsMethod: String { self == .fileImport ? "file_import" : "openai_meal_analysis" }
         var navigationTitle: String { self == .fileImport ? "Review Imported Meal" : "Review Meal" }
     }
 

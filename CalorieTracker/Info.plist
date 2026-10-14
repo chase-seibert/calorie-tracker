@@ -53,7 +53,7 @@
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Scan food barcodes for local lookup or take a meal photo to estimate its components.</string>
+	<string>Scan food barcodes for local lookup or take an optional meal photo to include in an AI estimate.</string>
 	<key>NSRemindersFullAccessUsageDescription</key>
 	<string>Yum Chase accesses Reminders so you can choose a shopping list and add selected snack ideas without duplicating incomplete items. Nothing is added until you tap Add.</string>
 	<key>NSHealthShareUsageDescription</key>
