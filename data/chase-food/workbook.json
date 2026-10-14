@@ -13,7 +13,8 @@
       "Common optional additions",
       "Review status",
       "Portion notes",
-      "Reviewer feedback"
+      "Reviewer feedback",
+      "Options (add-ons and variants)"
     ],
     [
       "food_scrambled_eggs",
@@ -27,7 +28,9 @@
       "scrambled egg; eggs scrambled",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_whole_egg",
@@ -41,7 +44,9 @@
       "raw egg; large egg; whole chicken egg",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_fried_egg",
@@ -55,7 +60,9 @@
       "sunny side up egg; over easy egg; fried eggs",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_boiled_egg",
@@ -69,7 +76,9 @@
       "hard boiled egg; soft boiled egg",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_poached_egg",
@@ -83,7 +92,9 @@
       "poached eggs",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_omelet",
@@ -97,7 +108,9 @@
       "omelette; egg omelette",
       "Cheddar cheese; Mozzarella cheese; Ham; Bacon; Mushrooms, cooked; Bell pepper; Spinach, cooked; Salsa",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Cheddar, Ham, Bacon · Included: Whole egg, Butter"
     ],
     [
       "food_egg_whites",
@@ -111,7 +124,9 @@
       "liquid egg whites; egg white",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_eggs_benedict",
@@ -125,7 +140,9 @@
       "eggs benedict",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_breakfast_sandwich",
@@ -134,12 +151,14 @@
       "Recipe / assembled",
       "",
       "1 sandwich",
-      "160.0",
+      "135.0",
       "Yes",
       "egg sandwich; breakfast biscuit sandwich",
       "American cheese; Bacon; Breakfast sausage; Ham; Ketchup",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Ketchup · Meat: Bacon, Sausage, Ham · Cheese: Cheese · Included: English muffin, Whole egg"
     ],
     [
       "food_breakfast_burrito",
@@ -153,7 +172,9 @@
       "egg burrito; morning burrito",
       "Cheddar cheese; Bacon; Salsa; Avocado; Sour cream",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Cheddar cheese, Bacon, Salsa, Avocado, Sour cream"
     ],
     [
       "food_breakfast_taco",
@@ -167,7 +188,9 @@
       "egg taco",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pancakes",
@@ -181,7 +204,9 @@
       "pancake; hotcakes",
       "Butter; Maple syrup; Pancake syrup; Blueberries; Strawberries",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Butter, Blueberries, Maple syrup, Chocolate chips"
     ],
     [
       "food_waffles",
@@ -195,7 +220,9 @@
       "waffle; belgian waffle",
       "Butter; Maple syrup; Whipped cream; Strawberries",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Butter, Maple syrup, Whipped cream, Strawberries"
     ],
     [
       "food_french_toast",
@@ -209,7 +236,9 @@
       "french toast slice",
       "Butter; Maple syrup; Strawberries",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Butter, Maple syrup, Strawberries"
     ],
     [
       "food_oatmeal",
@@ -223,7 +252,9 @@
       "porridge; hot oats",
       "Milk, whole; Blueberries; Banana; Peanut butter; Maple syrup; Honey",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Milk, whole, Blueberries, Banana, Peanut butter, Maple syrup, Honey"
     ],
     [
       "food_cold_breakfast_cereal",
@@ -237,7 +268,9 @@
       "cereal; breakfast cereal; cold breakfast cereal; Lucky Charms; Froot Loops; Cocoa Puffs; Cinnamon Toast Crunch; Special K; Honey Bunches of Oats",
       "Milk, whole; Milk, 2%; Oat milk; Almond milk; Banana",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Cereal type: Corn flakes, Oat rings, Granola, Frosted flakes, Bran flakes, Shredded wheat, Rice cereal, Muesli · Add-ons: Milk, Banana, Berries, Honey"
     ],
     [
       "food_granola",
@@ -251,7 +284,9 @@
       "granola cereal",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_grits",
@@ -265,7 +300,9 @@
       "hominy grits",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_cream_of_wheat",
@@ -279,7 +316,9 @@
       "hot wheat cereal",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_hash_browns",
@@ -293,7 +332,9 @@
       "hashbrowns; shredded hash browns",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_home_fries",
@@ -307,7 +348,9 @@
       "breakfast potatoes; home fried potatoes",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_breakfast_sausage",
@@ -315,13 +358,15 @@
       "Breakfast & eggs",
       "Reusable ingredient",
       "",
-      "1 link",
-      "45.0",
+      "1 patty",
+      "35.0",
       "No",
       "sausage link; breakfast sausage link",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_sausage_patty",
@@ -335,7 +380,9 @@
       "breakfast sausage patty",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_bacon",
@@ -344,12 +391,14 @@
       "Reusable ingredient",
       "",
       "1 slice",
-      "12.0",
+      "11.5",
       "No",
       "bacon strip; crispy bacon",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_canadian_bacon",
@@ -363,7 +412,9 @@
       "back bacon",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_ham_steak",
@@ -377,7 +428,9 @@
       "breakfast ham; ham slice",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_bagel_with_cream_cheese",
@@ -386,12 +439,14 @@
       "Recipe / assembled",
       "",
       "1 bagel",
-      "130.0",
+      "129",
       "Yes",
       "cream cheese bagel",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Included: Bagel, Cream cheese"
     ],
     [
       "food_yogurt_parfait",
@@ -405,7 +460,9 @@
       "fruit yogurt parfait",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_breakfast_smoothie_bowl",
@@ -419,7 +476,9 @@
       "smoothie bowl",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_biscuits_and_gravy",
@@ -427,13 +486,15 @@
       "Breakfast & eggs",
       "Recipe / assembled",
       "",
-      "1 serving",
-      "280.0",
+      "1 biscuit with gravy",
+      "220.0",
       "Yes",
       "sausage gravy and biscuits",
       "",
-      "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "History only",
+      "History-preserving combined food; new searches resolve to Biscuit with Gravy option.",
+      "",
+      "None"
     ],
     [
       "food_breakfast_casserole",
@@ -447,7 +508,9 @@
       "egg casserole",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Protein: Sausage, Bacon, Ham · Cheese: Cheese · Vegetables: Bell pepper"
     ],
     [
       "food_burger",
@@ -461,7 +524,9 @@
       "hamburger; beef burger; smash burger",
       "Cheddar cheese; American cheese; Bacon; Ketchup; Mayonnaise; Yellow mustard; Pickle; Tomato",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Protein selector: Beef (default), Chicken, or Bean; each replaces the previous patty. Bun remains included.",
+      "",
+      "Add-ons: Cheese, Ketchup, Bacon, Mayonnaise, Fries · side · Protein: Beef, Chicken, Bean · Included: Hamburger bun"
     ],
     [
       "food_hot_dog",
@@ -475,7 +540,9 @@
       "hotdog; frankfurter in bun",
       "Yellow mustard; Ketchup; Pickle relish; Sauerkraut; Chili con carne; Cheddar cheese; French fries",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Yellow mustard, Ketchup, Pickle relish, Sauerkraut, Chili con carne, Cheddar cheese, French fries · Included: Hot dog sausage, Hot dog bun"
     ],
     [
       "food_chicken_sandwich",
@@ -489,7 +556,9 @@
       "chicken burger; chicken breast sandwich",
       "American cheese; Mayonnaise; Lettuce; Tomato; Pickle",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: American cheese, Mayonnaise, Lettuce, Tomato, Pickle"
     ],
     [
       "food_fried_chicken_sandwich",
@@ -503,7 +572,9 @@
       "crispy chicken sandwich",
       "Mayonnaise; Pickle; Cheddar cheese; Buffalo wing sauce",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Mayonnaise, Pickle, Cheddar cheese, Buffalo wing sauce"
     ],
     [
       "food_turkey_sandwich",
@@ -517,7 +588,9 @@
       "turkey sub; turkey deli sandwich",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_ham_sandwich",
@@ -531,7 +604,9 @@
       "ham and bread sandwich",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_roast_beef_sandwich",
@@ -545,7 +620,9 @@
       "roast beef sub",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_deli_sandwich",
@@ -559,7 +636,9 @@
       "cold cuts sandwich; sub sandwich",
       "Mayonnaise; Yellow mustard; Swiss cheese; American cheese; Pickle; Lettuce",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Mayonnaise, Yellow mustard, Swiss cheese, American cheese, Pickle, Lettuce"
     ],
     [
       "food_grilled_cheese",
@@ -573,7 +652,9 @@
       "grilled cheese sandwich; cheese toastie",
       "Bacon; Tomato; Cheddar cheese; Mayonnaise",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Bacon, Tomato, Cheddar cheese, Mayonnaise · Included: White bread, Cheddar cheese, Butter"
     ],
     [
       "food_peanut_butter_and_jelly_sandwich",
@@ -587,7 +668,9 @@
       "pbj; pb&j; peanut butter jelly sandwich",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Included: White bread, Peanut butter, Jam"
     ],
     [
       "food_blt_sandwich",
@@ -596,12 +679,14 @@
       "Recipe / assembled",
       "",
       "1 sandwich",
-      "170.0",
+      "105.0",
       "Yes",
       "bacon lettuce tomato sandwich; blt",
       "Avocado; Mayonnaise; French fries",
-      "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "History only",
+      "History-preserving food used as the BLT variant under Sandwich.",
+      "",
+      "Add-ons: Avocado, Mayonnaise, French fries"
     ],
     [
       "food_club_sandwich",
@@ -615,7 +700,9 @@
       "turkey club; sandwich club",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_tuna_salad_sandwich",
@@ -629,7 +716,9 @@
       "tuna sandwich",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_egg_salad_sandwich",
@@ -643,7 +732,9 @@
       "egg sandwich with mayonnaise",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chicken_salad_sandwich",
@@ -657,7 +748,9 @@
       "chicken salad on bread",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_philly_cheesesteak",
@@ -671,7 +764,9 @@
       "cheesesteak; steak and cheese sub",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_meatball_sub",
@@ -685,7 +780,9 @@
       "meatball sandwich",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pulled_pork_sandwich",
@@ -699,7 +796,9 @@
       "bbq pork sandwich",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_bbq_beef_sandwich",
@@ -708,12 +807,14 @@
       "Recipe / assembled",
       "",
       "1 sandwich",
-      "225.0",
+      "180",
       "Yes",
       "barbecue beef sandwich",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_fish_sandwich",
@@ -727,7 +828,9 @@
       "fried fish sandwich",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_veggie_burger",
@@ -741,7 +844,9 @@
       "vegetarian burger",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_bean_burger",
@@ -754,8 +859,10 @@
       "Yes",
       "black bean burger",
       "",
-      "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "History only",
+      "History-preserving option component for Burger; not searchable as a separate canonical.",
+      "",
+      "None"
     ],
     [
       "food_chicken_wrap",
@@ -769,7 +876,9 @@
       "chicken tortilla wrap",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_turkey_wrap",
@@ -783,7 +892,9 @@
       "turkey tortilla wrap",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_vegetable_wrap",
@@ -797,7 +908,9 @@
       "veggie wrap",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_falafel_wrap",
@@ -811,7 +924,9 @@
       "falafel pita; falafel sandwich",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_gyro",
@@ -825,7 +940,9 @@
       "gyros; gyro sandwich",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_shawarma_wrap",
@@ -839,7 +956,9 @@
       "shawarma sandwich; chicken shawarma wrap",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_sloppy_joe",
@@ -853,7 +972,9 @@
       "sloppy joe sandwich",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_reuben_sandwich",
@@ -867,7 +988,9 @@
       "reuben",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_panini",
@@ -881,7 +1004,9 @@
       "grilled panini",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_french_dip_sandwich",
@@ -895,7 +1020,9 @@
       "french dip; beef dip sandwich",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_taco",
@@ -909,7 +1036,9 @@
       "tacos; soft taco",
       "Cheese; Sour cream; Guacamole; Refried beans; Rice",
       "Draft",
-      "Default maps to USDA FNDDS 1 small/regular taco (100 g); size mappings use the same source record."
+      "Default maps to USDA FNDDS 1 small/regular taco (100 g); size mappings use the same source record.",
+      "",
+      "Protein: Beef, Chicken, Pork · Add-ons: Cheese, Sour cream, Guacamole, Refried beans, Rice"
     ],
     [
       "food_hard_shell_taco",
@@ -923,7 +1052,9 @@
       "crunchy taco",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_burrito",
@@ -937,7 +1068,9 @@
       "wrapped burrito",
       "Black beans; White rice; Cheddar cheese; Sour cream; Guacamole; Salsa",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Black beans, White rice, Cheddar cheese, Sour cream, Guacamole, Salsa"
     ],
     [
       "food_burrito_bowl",
@@ -951,7 +1084,9 @@
       "rice burrito bowl; chipotle style bowl",
       "Chicken fajita filling; Black beans; White rice; Guacamole; Cheddar cheese",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Chicken fajita filling, Black beans, White rice, Guacamole, Cheddar cheese"
     ],
     [
       "food_quesadilla",
@@ -965,7 +1100,9 @@
       "cheese quesadilla",
       "Chicken fajita filling; Cheddar cheese; Sour cream; Guacamole; Salsa",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Chicken fajita filling, Cheddar cheese, Sour cream, Guacamole, Salsa"
     ],
     [
       "food_nachos",
@@ -979,7 +1116,9 @@
       "nacho plate; loaded nachos",
       "Cheddar cheese; Cheese sauce; Salsa; Sour cream; Guacamole",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Cheddar cheese, Cheese sauce, Salsa, Sour cream, Guacamole"
     ],
     [
       "food_enchiladas",
@@ -993,7 +1132,9 @@
       "enchilada",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_fajitas",
@@ -1007,7 +1148,9 @@
       "sizzling fajitas",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_tamale",
@@ -1021,7 +1164,9 @@
       "tamales",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_tostada",
@@ -1035,7 +1180,9 @@
       "tostadas",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_taquito",
@@ -1049,7 +1196,9 @@
       "rolled taco; flauta",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chimichanga",
@@ -1063,7 +1212,9 @@
       "fried burrito",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chilaquiles",
@@ -1077,7 +1228,9 @@
       "chilaquile",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_huevos_rancheros",
@@ -1091,7 +1244,9 @@
       "ranch style eggs",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_mexican_rice",
@@ -1105,7 +1260,9 @@
       "spanish rice; red rice",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_refried_beans",
@@ -1119,7 +1276,9 @@
       "refritos; mashed pinto beans",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_black_beans",
@@ -1133,7 +1292,9 @@
       "cooked black beans",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pinto_beans",
@@ -1147,7 +1308,9 @@
       "cooked pinto beans",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_guacamole",
@@ -1161,7 +1324,9 @@
       "guac; avocado dip",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_salsa",
@@ -1175,7 +1340,9 @@
       "pico sauce; salsa roja",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pico_de_gallo",
@@ -1189,7 +1356,9 @@
       "fresh tomato salsa",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_corn_tortilla",
@@ -1203,7 +1372,9 @@
       "masa tortilla",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_flour_tortilla",
@@ -1217,7 +1388,9 @@
       "wheat tortilla",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_tortilla_chips",
@@ -1231,7 +1404,9 @@
       "corn chips; nacho chips",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_elote",
@@ -1245,7 +1420,9 @@
       "mexican street corn",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pizza_slice",
@@ -1259,7 +1436,9 @@
       "pizza; slice of pizza; cheese pizza",
       "Pepperoni; Mushrooms, cooked; Bell pepper; Italian sausage; Parmesan cheese",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Crust: Regular crust, Deep dish crust · Add-ons: Pepperoni, Extra cheese, Mushrooms, Sausage, Green peppers, Black olives, Onion, Bacon, Pineapple · Included: Tomato pasta sauce, Mozzarella cheese"
     ],
     [
       "food_calzone",
@@ -1273,7 +1452,9 @@
       "pizza pocket; folded pizza",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_stromboli",
@@ -1287,7 +1468,9 @@
       "stromboli roll",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_spaghetti_with_tomato_sauce",
@@ -1301,7 +1484,9 @@
       "spaghetti marinara; spaghetti and sauce",
       "Parmesan cheese; Meatballs; Ground beef, cooked",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Parmesan cheese, Meatballs, Ground beef, cooked · Included: Pasta, cooked, Tomato pasta sauce"
     ],
     [
       "food_spaghetti_with_meat_sauce",
@@ -1315,7 +1500,9 @@
       "spaghetti bolognese; spaghetti meat sauce",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_macaroni_and_cheese",
@@ -1329,7 +1516,9 @@
       "mac and cheese; mac n cheese",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_lasagna",
@@ -1343,7 +1532,9 @@
       "lasagne",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Meat sauce, Vegetable filling, Extra cheese, Garlic bread · side"
     ],
     [
       "food_fettuccine_alfredo",
@@ -1357,7 +1548,9 @@
       "alfredo pasta; pasta alfredo",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_penne_pasta_with_sauce",
@@ -1371,7 +1564,9 @@
       "penne pasta; penne marinara",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Sauce: Marinara, Alfredo, Meat sauce · Add-ons: Meatballs, Sausage, Broccoli, Olive oil"
     ],
     [
       "food_ravioli",
@@ -1385,7 +1580,9 @@
       "cheese ravioli",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_tortellini",
@@ -1399,7 +1596,9 @@
       "cheese tortellini",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_baked_ziti",
@@ -1413,7 +1612,9 @@
       "baked pasta",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pasta_primavera",
@@ -1427,7 +1628,9 @@
       "vegetable pasta",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pasta_pesto",
@@ -1441,7 +1644,9 @@
       "pesto pasta",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pasta_salad",
@@ -1455,7 +1660,9 @@
       "cold pasta salad",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chicken_parmesan",
@@ -1469,7 +1676,9 @@
       "chicken parmigiana; chicken parm",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Pasta with sauce · side, Extra marinara, Extra mozzarella, Salad · side"
     ],
     [
       "food_eggplant_parmesan",
@@ -1483,7 +1692,9 @@
       "eggplant parmigiana; eggplant parm",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_meatballs",
@@ -1497,7 +1708,9 @@
       "beef meatball",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_garlic_bread",
@@ -1511,7 +1724,9 @@
       "garlic toast",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_breadsticks",
@@ -1525,7 +1740,9 @@
       "bread stick",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pasta_cooked",
@@ -1539,7 +1756,9 @@
       "plain noodles; boiled pasta",
       "Tomato pasta sauce; Alfredo sauce; Pesto sauce; Parmesan cheese",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Tomato pasta sauce, Alfredo sauce, Pesto sauce, Parmesan cheese"
     ],
     [
       "food_tomato_pasta_sauce",
@@ -1553,7 +1772,9 @@
       "marinara; spaghetti sauce",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_alfredo_sauce",
@@ -1567,7 +1788,9 @@
       "cream pasta sauce",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pesto_sauce",
@@ -1581,7 +1804,9 @@
       "basil pesto",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_parmesan_cheese",
@@ -1595,7 +1820,9 @@
       "parmesan; parmesan topping",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pepperoni",
@@ -1609,7 +1836,9 @@
       "pizza pepperoni",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_mozzarella_cheese",
@@ -1623,7 +1852,9 @@
       "mozzarella; shredded mozzarella",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_ricotta_cheese",
@@ -1637,7 +1868,9 @@
       "ricotta",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_grilled_chicken_breast",
@@ -1651,7 +1884,9 @@
       "grilled chicken; chicken breast",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_baked_chicken_breast",
@@ -1665,7 +1900,9 @@
       "oven baked chicken breast",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_fried_chicken",
@@ -1679,7 +1916,9 @@
       "southern fried chicken",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_roast_chicken",
@@ -1693,7 +1932,9 @@
       "roasted chicken",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_rotisserie_chicken",
@@ -1707,7 +1948,9 @@
       "rotisserie chicken meat",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chicken_nuggets",
@@ -1721,7 +1964,9 @@
       "chicken nugget; nuggets",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chicken_tenders",
@@ -1735,7 +1980,9 @@
       "chicken strips; chicken fingers",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chicken_wings",
@@ -1749,7 +1996,9 @@
       "buffalo wings; wing",
       "Buffalo wing sauce; Ranch dressing; Blue cheese dressing",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Buffalo wing sauce, Ranch dressing, Blue cheese dressing"
     ],
     [
       "food_buffalo_chicken_dip",
@@ -1763,7 +2012,9 @@
       "chicken wing dip",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chicken_thighs",
@@ -1777,7 +2028,9 @@
       "chicken thigh",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chicken_drumstick",
@@ -1791,7 +2044,9 @@
       "chicken leg; drumstick",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chicken_fajita_filling",
@@ -1805,7 +2060,9 @@
       "fajita chicken",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chicken_stir_fry",
@@ -1819,7 +2076,9 @@
       "stir fry chicken",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chicken_pot_pie",
@@ -1833,7 +2092,9 @@
       "pot pie",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chicken_and_dumplings",
@@ -1847,7 +2108,9 @@
       "chicken dumplings",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chicken_casserole",
@@ -1861,7 +2124,9 @@
       "baked chicken casserole",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chicken_rice_bowl",
@@ -1875,7 +2140,9 @@
       "chicken and rice bowl",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_turkey_breast",
@@ -1889,7 +2156,9 @@
       "sliced turkey breast",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_roast_turkey_with_gravy",
@@ -1903,7 +2172,9 @@
       "thanksgiving turkey",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_ground_turkey_cooked",
@@ -1917,7 +2188,9 @@
       "cooked ground turkey",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_turkey_meatballs",
@@ -1931,7 +2204,9 @@
       "turkey meatball",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_turkey_burger",
@@ -1945,7 +2220,9 @@
       "ground turkey burger",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_turkey_bacon",
@@ -1959,7 +2236,9 @@
       "bacon turkey",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_steak",
@@ -1973,7 +2252,9 @@
       "beef steak; grilled steak",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_ribeye_steak",
@@ -1987,7 +2268,9 @@
       "rib eye; ribeye",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_sirloin_steak",
@@ -2001,7 +2284,9 @@
       "top sirloin",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_beef_patty",
@@ -2012,10 +2297,12 @@
       "1 patty",
       "113.0",
       "Yes",
-      "hamburger patty; ground beef patty",
       "",
-      "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "",
+      "Internal option component",
+      "Reusable burger protein; select from Burger Protein options.",
+      "",
+      "None"
     ],
     [
       "food_ground_beef_cooked",
@@ -2029,7 +2316,9 @@
       "cooked hamburger meat; minced beef",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_roast_beef",
@@ -2043,7 +2332,9 @@
       "roasted beef",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pot_roast",
@@ -2057,7 +2348,9 @@
       "braised beef roast",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_beef_stew",
@@ -2071,7 +2364,9 @@
       "stewed beef",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Bread · side, Rice, Extra potatoes, Carrots"
     ],
     [
       "food_chili_con_carne",
@@ -2085,7 +2380,9 @@
       "beef chili; chili",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_meatloaf",
@@ -2099,7 +2396,9 @@
       "meat loaf",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_bbq_ribs",
@@ -2113,7 +2412,9 @@
       "barbecue pork ribs; spare ribs",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pulled_pork",
@@ -2127,7 +2428,9 @@
       "shredded pork; bbq pulled pork",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pork_chop",
@@ -2141,7 +2444,9 @@
       "pork chops",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pork_tenderloin",
@@ -2155,7 +2460,9 @@
       "roasted pork tenderloin",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_ham",
@@ -2169,7 +2476,9 @@
       "deli ham; sliced ham",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_sausage",
@@ -2183,7 +2492,9 @@
       "sausage link; grilled sausage",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_italian_sausage",
@@ -2197,7 +2508,9 @@
       "italian sausage link",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chorizo",
@@ -2211,7 +2524,9 @@
       "mexican chorizo",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_bratwurst",
@@ -2225,7 +2540,9 @@
       "brat; grilled brat",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_hot_dog_sausage",
@@ -2239,7 +2556,9 @@
       "hot dog frank; frankfurter; wiener",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_salami",
@@ -2253,7 +2572,9 @@
       "deli salami",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_prosciutto",
@@ -2267,7 +2588,9 @@
       "cured ham prosciutto",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_corned_beef",
@@ -2281,7 +2604,9 @@
       "corned beef brisket",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_lamb_chop",
@@ -2295,7 +2620,9 @@
       "lamb chops",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_lamb_kebab",
@@ -2309,7 +2636,9 @@
       "lamb kabob",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_beef_kebab",
@@ -2317,13 +2646,15 @@
       "Beef, pork & other meat",
       "Recipe / assembled",
       "",
-      "1 skewer",
-      "170.0",
+      "1 shish kebab",
+      "202.0",
       "Yes",
       "beef kabob",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_beef_jerky",
@@ -2337,7 +2668,9 @@
       "jerky",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_salmon_cooked",
@@ -2351,7 +2684,9 @@
       "grilled salmon; baked salmon",
       "Olive oil; Butter; Lemon",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Olive oil, Butter, Lemon"
     ],
     [
       "food_tuna_steak",
@@ -2365,7 +2700,9 @@
       "seared tuna",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_canned_tuna",
@@ -2379,7 +2716,9 @@
       "tuna in water; canned tuna fish",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_tilapia_cooked",
@@ -2393,7 +2732,9 @@
       "baked tilapia",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_cod_cooked",
@@ -2407,7 +2748,9 @@
       "baked cod",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_fish_and_chips",
@@ -2421,21 +2764,25 @@
       "fried fish and fries",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_breaded_fried_fish",
-      "Breaded fried fish",
+      "Fried fish",
       "Seafood",
       "Recipe / assembled",
       "",
       "1 fillet",
       "150.0",
       "Yes",
-      "fried fish fillet",
+      "breaded fried fish; fried fish fillet; fish and chips",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Generic fried fish; the fish-and-chips alias refers to the fish item only.",
+      "",
+      "None"
     ],
     [
       "food_fish_sticks",
@@ -2449,7 +2796,9 @@
       "fish fingers",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_shrimp_cooked",
@@ -2463,7 +2812,9 @@
       "boiled shrimp; peeled shrimp",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_fried_shrimp",
@@ -2477,7 +2828,9 @@
       "breaded shrimp",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_grilled_shrimp",
@@ -2491,7 +2844,9 @@
       "shrimp skewer",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_shrimp_scampi",
@@ -2505,7 +2860,9 @@
       "garlic butter shrimp",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_shrimp_cocktail",
@@ -2519,7 +2876,9 @@
       "cocktail shrimp",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_crab_cakes",
@@ -2533,7 +2892,9 @@
       "crab cake",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_crab_meat",
@@ -2547,7 +2908,9 @@
       "cooked crab",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_lobster_tail",
@@ -2561,7 +2924,9 @@
       "lobster tail meat",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_clams_cooked",
@@ -2575,7 +2940,9 @@
       "steamed clams",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_mussels_cooked",
@@ -2589,7 +2956,9 @@
       "steamed mussels",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_scallops_cooked",
@@ -2603,7 +2972,9 @@
       "seared scallops",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_sushi_roll",
@@ -2617,7 +2988,9 @@
       "sushi; makizushi; makis",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_sashimi",
@@ -2631,7 +3004,9 @@
       "sashimi fish",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_poke_bowl",
@@ -2645,7 +3020,9 @@
       "ahi poke; poke",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_fried_rice",
@@ -2659,7 +3036,9 @@
       "chinese fried rice",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_white_rice",
@@ -2673,7 +3052,9 @@
       "steamed white rice; rice",
       "Butter; Soy sauce",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Butter, Soy sauce"
     ],
     [
       "food_brown_rice",
@@ -2687,7 +3068,9 @@
       "cooked brown rice",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_jasmine_rice",
@@ -2701,7 +3084,9 @@
       "cooked jasmine rice",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_sushi_rice",
@@ -2715,7 +3100,9 @@
       "seasoned sushi rice",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_lo_mein",
@@ -2729,7 +3116,9 @@
       "chow mein noodles; lo mein noodles",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_ramen_noodle_soup",
@@ -2743,7 +3132,9 @@
       "ramen; japanese ramen",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pho",
@@ -2757,7 +3148,9 @@
       "vietnamese noodle soup",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pad_thai",
@@ -2771,7 +3164,9 @@
       "pad thai noodles",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_drunken_noodles",
@@ -2785,7 +3180,9 @@
       "pad kee mao",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_stir_fried_vegetables",
@@ -2799,7 +3196,9 @@
       "vegetable stir fry",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_beef_and_broccoli",
@@ -2813,7 +3212,9 @@
       "beef broccoli",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_orange_chicken",
@@ -2827,7 +3228,9 @@
       "orange glazed chicken",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Steamed rice, Extra orange sauce, Broccoli, Sesame seeds"
     ],
     [
       "food_general_tso_s_chicken",
@@ -2841,7 +3244,9 @@
       "general tso chicken",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_sweet_and_sour_chicken",
@@ -2855,7 +3260,9 @@
       "sweet sour chicken",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_teriyaki_chicken",
@@ -2869,7 +3276,9 @@
       "chicken teriyaki",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_kung_pao_chicken",
@@ -2883,7 +3292,9 @@
       "kung pao",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chicken_tikka_masala",
@@ -2897,7 +3308,9 @@
       "tikka masala",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_butter_chicken",
@@ -2911,7 +3324,9 @@
       "murgh makhani",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chickpea_curry",
@@ -2925,7 +3340,9 @@
       "chana masala",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_vegetable_curry",
@@ -2939,7 +3356,9 @@
       "mixed vegetable curry",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_dal",
@@ -2953,7 +3372,9 @@
       "lentil dal; dahl",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_naan",
@@ -2967,7 +3388,9 @@
       "naan bread",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_biryani",
@@ -2981,7 +3404,9 @@
       "chicken biryani; rice biryani",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Generic biryani base; protein selector is a draft component estimate and may overlap the source recipe. Review before treating combined macros as precise.",
+      "",
+      "Protein: Chicken, Beef"
     ],
     [
       "food_dumplings",
@@ -2995,7 +3420,9 @@
       "potsticker; gyoza",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_egg_roll",
@@ -3009,7 +3436,9 @@
       "eggroll; spring roll fried",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_spring_roll",
@@ -3023,7 +3452,9 @@
       "fresh spring roll; rice paper roll",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_edamame",
@@ -3037,7 +3468,9 @@
       "steamed soybeans",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_tofu",
@@ -3051,7 +3484,9 @@
       "bean curd",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_tempeh",
@@ -3065,7 +3500,9 @@
       "fermented soybean cake",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_falafel",
@@ -3079,7 +3516,9 @@
       "falafel ball",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_hummus",
@@ -3093,7 +3532,9 @@
       "chickpea dip",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_tabbouleh",
@@ -3107,7 +3548,9 @@
       "tabbouli",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_couscous",
@@ -3121,7 +3564,9 @@
       "cooked couscous",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_quinoa",
@@ -3135,7 +3580,9 @@
       "cooked quinoa",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_garden_salad",
@@ -3149,7 +3596,9 @@
       "side salad; green salad; other salad; garden salad",
       "Ranch dressing; Italian dressing; Balsamic vinaigrette; Croutons; Cheddar cheese",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Greens: Mixed greens, Spinach, Romaine, Kale · Add-ons: Egg, Bacon, Feta cheese, Edamame, Brussels sprouts, cooked, Vinaigrette"
     ],
     [
       "food_caesar_salad",
@@ -3163,7 +3612,9 @@
       "classic caesar salad",
       "Caesar dressing; Parmesan cheese; Croutons; Grilled chicken breast",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Chicken, Croutons, Extra dressing, Parmesan"
     ],
     [
       "food_chicken_caesar_salad",
@@ -3177,7 +3628,9 @@
       "caesar with chicken",
       "Caesar dressing; Parmesan cheese; Croutons; Bacon",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Caesar dressing, Parmesan cheese, Croutons, Bacon · Included: Lettuce, Grilled chicken breast, Caesar dressing, Croutons, Parmesan cheese"
     ],
     [
       "food_cobb_salad",
@@ -3191,7 +3644,9 @@
       "cobb",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_greek_salad",
@@ -3205,7 +3660,9 @@
       "horiatiki salad",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chef_salad",
@@ -3219,7 +3676,9 @@
       "chef's salad",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_spinach_salad",
@@ -3233,7 +3692,9 @@
       "baby spinach salad",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_taco_salad",
@@ -3247,7 +3708,9 @@
       "tex mex taco salad",
       "Cheddar cheese; Salsa; Sour cream; Guacamole",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Cheddar cheese, Salsa, Sour cream, Guacamole"
     ],
     [
       "food_coleslaw",
@@ -3261,7 +3724,9 @@
       "cole slaw; cabbage slaw",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_potato_salad",
@@ -3275,7 +3740,9 @@
       "american potato salad",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Extra mayonnaise, Peas, Egg, Dill"
     ],
     [
       "food_macaroni_salad",
@@ -3289,7 +3756,9 @@
       "mac salad",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_tuna_salad",
@@ -3303,7 +3772,9 @@
       "mayonnaise tuna salad",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chicken_salad",
@@ -3317,7 +3788,9 @@
       "mayonnaise chicken salad",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_egg_salad",
@@ -3331,7 +3804,9 @@
       "mayonnaise egg salad",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_bean_salad",
@@ -3345,7 +3820,9 @@
       "three bean salad",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_caprese_salad",
@@ -3359,7 +3836,9 @@
       "tomato mozzarella salad",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_fruit_salad",
@@ -3373,7 +3852,9 @@
       "mixed fruit salad",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_cucumber_salad",
@@ -3387,7 +3868,9 @@
       "cucumber vinegar salad",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_seaweed_salad",
@@ -3401,7 +3884,9 @@
       "wakame salad",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chicken_noodle_soup",
@@ -3415,7 +3900,9 @@
       "chicken soup with noodles",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_tomato_soup",
@@ -3429,7 +3916,9 @@
       "cream of tomato soup",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_broccoli_cheddar_soup",
@@ -3443,7 +3932,9 @@
       "broccoli cheese soup",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_clam_chowder",
@@ -3457,7 +3948,9 @@
       "new england clam chowder",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_minestrone_soup",
@@ -3471,7 +3964,9 @@
       "minestrone",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_vegetable_soup",
@@ -3485,7 +3980,9 @@
       "mixed vegetable soup",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_french_onion_soup",
@@ -3499,7 +3996,9 @@
       "onion soup",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_lentil_soup",
@@ -3513,7 +4012,9 @@
       "soup of lentils",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_split_pea_soup",
@@ -3527,7 +4028,9 @@
       "pea soup",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_miso_soup",
@@ -3541,7 +4044,9 @@
       "japanese miso soup",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chicken_tortilla_soup",
@@ -3555,7 +4060,9 @@
       "tortilla soup",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_baked_potato_soup",
@@ -3564,12 +4071,14 @@
       "Recipe / assembled",
       "",
       "1 bowl",
-      "290.0",
+      "255",
       "Yes",
       "loaded potato soup",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_mushroom_soup",
@@ -3583,7 +4092,9 @@
       "cream of mushroom soup",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chicken_chili",
@@ -3597,7 +4108,9 @@
       "white chicken chili",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_vegetarian_chili",
@@ -3611,7 +4124,9 @@
       "bean chili",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_gumbo",
@@ -3625,7 +4140,9 @@
       "cajun gumbo",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_jambalaya",
@@ -3639,7 +4156,9 @@
       "cajun jambalaya",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_french_fries",
@@ -3653,7 +4172,9 @@
       "fries; french fried potatoes",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_sweet_potato_fries",
@@ -3667,7 +4188,9 @@
       "yam fries",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_mashed_potatoes",
@@ -3681,7 +4204,9 @@
       "mashed potato",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_baked_potato",
@@ -3695,7 +4220,9 @@
       "jacket potato; oven baked potato",
       "Butter; Sour cream; Cheddar cheese; Bacon; Broccoli, cooked",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Butter, Sour cream, Cheddar cheese, Bacon, Broccoli, cooked"
     ],
     [
       "food_sweet_potato_baked",
@@ -3709,7 +4236,9 @@
       "baked sweet potato",
       "Butter; Honey",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Butter, Honey"
     ],
     [
       "food_roasted_potatoes",
@@ -3723,7 +4252,9 @@
       "oven roasted potatoes",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_scalloped_potatoes",
@@ -3737,7 +4268,9 @@
       "au gratin potatoes",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_tater_tots",
@@ -3751,7 +4284,9 @@
       "potato tots",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_corn_on_the_cob",
@@ -3765,7 +4300,9 @@
       "corn cob",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_corn_kernels",
@@ -3779,7 +4316,9 @@
       "sweet corn; cooked corn",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_broccoli_cooked",
@@ -3793,7 +4332,9 @@
       "steamed broccoli",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_cauliflower_cooked",
@@ -3807,7 +4348,9 @@
       "steamed cauliflower",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_carrots_cooked",
@@ -3821,7 +4364,9 @@
       "steamed carrots",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_green_beans_cooked",
@@ -3835,7 +4380,9 @@
       "steamed green beans",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_peas_cooked",
@@ -3849,7 +4396,9 @@
       "green peas",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_spinach_cooked",
@@ -3863,7 +4412,9 @@
       "sauteed spinach",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_asparagus_cooked",
@@ -3872,12 +4423,14 @@
       "Reusable ingredient",
       "",
       "1 cup",
-      "135.0",
+      "180",
       "No",
       "grilled asparagus",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_brussels_sprouts_cooked",
@@ -3891,7 +4444,9 @@
       "roasted brussels sprouts",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_zucchini_cooked",
@@ -3905,7 +4460,9 @@
       "sauteed zucchini",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_mushrooms_cooked",
@@ -3919,7 +4476,9 @@
       "sauteed mushrooms",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_onions_cooked",
@@ -3933,7 +4492,9 @@
       "sauteed onions; caramelized onions",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_bell_pepper",
@@ -3947,7 +4508,9 @@
       "sweet pepper; capsicum",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_tomato",
@@ -3961,7 +4524,9 @@
       "raw tomato; fresh tomato",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_cucumber",
@@ -3975,7 +4540,9 @@
       "raw cucumber; sliced cucumber",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_carrots_raw",
@@ -3989,7 +4556,9 @@
       "baby carrots; raw carrots",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_lettuce",
@@ -4003,7 +4572,9 @@
       "romaine lettuce; green lettuce",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_mixed_greens",
@@ -4017,7 +4588,9 @@
       "salad greens; spring mix",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_avocado",
@@ -4026,12 +4599,14 @@
       "Reusable ingredient",
       "",
       "1 avocado",
-      "145.0",
+      "150",
       "Yes",
       "whole avocado",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_broccoli_raw",
@@ -4045,7 +4620,9 @@
       "fresh broccoli",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_celery",
@@ -4059,7 +4636,9 @@
       "celery stalk",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pickle",
@@ -4073,7 +4652,9 @@
       "dill pickle; pickle spear",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_sauerkraut",
@@ -4087,7 +4668,9 @@
       "fermented cabbage",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_roasted_mixed_vegetables",
@@ -4101,7 +4684,9 @@
       "roasted veggies",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_apple",
@@ -4115,7 +4700,9 @@
       "fresh apple",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_banana",
@@ -4129,7 +4716,9 @@
       "fresh banana",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Peanut butter, Granola, Yogurt, Oats"
     ],
     [
       "food_orange",
@@ -4143,7 +4732,9 @@
       "navel orange",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_mandarin_orange",
@@ -4157,7 +4748,9 @@
       "clementine; tangerine; mandarin",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_grapes",
@@ -4171,7 +4764,9 @@
       "red grapes; green grapes",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_strawberries",
@@ -4185,7 +4780,9 @@
       "fresh strawberries",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_blueberries",
@@ -4199,7 +4796,9 @@
       "fresh blueberries",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_raspberries",
@@ -4213,7 +4812,9 @@
       "fresh raspberries",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_blackberries",
@@ -4227,7 +4828,9 @@
       "fresh blackberries",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pineapple",
@@ -4241,7 +4844,9 @@
       "fresh pineapple",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_watermelon",
@@ -4255,7 +4860,9 @@
       "fresh watermelon",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_cantaloupe",
@@ -4269,7 +4876,9 @@
       "melon cantaloupe",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_honeydew_melon",
@@ -4283,7 +4892,9 @@
       "honeydew",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_mango",
@@ -4297,7 +4908,9 @@
       "fresh mango",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_peach",
@@ -4311,7 +4924,9 @@
       "fresh peach",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_nectarine",
@@ -4325,7 +4940,9 @@
       "fresh nectarine",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pear",
@@ -4339,7 +4956,9 @@
       "fresh pear",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_plum",
@@ -4353,7 +4972,9 @@
       "fresh plum",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_kiwi",
@@ -4367,7 +4988,9 @@
       "kiwifruit",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_cherries",
@@ -4381,7 +5004,9 @@
       "fresh cherries",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_lemon",
@@ -4395,7 +5020,9 @@
       "fresh lemon",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_lime",
@@ -4409,7 +5036,9 @@
       "fresh lime",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_grapefruit",
@@ -4423,7 +5052,9 @@
       "fresh grapefruit",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_dates",
@@ -4437,7 +5068,9 @@
       "medjool date",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_raisins",
@@ -4451,7 +5084,9 @@
       "dried grapes",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_dried_cranberries",
@@ -4465,7 +5100,9 @@
       "craisins",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_applesauce",
@@ -4474,12 +5111,14 @@
       "Recipe / assembled",
       "",
       "1 cup",
-      "245.0",
+      "246",
       "No",
       "apple sauce",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_canned_peaches",
@@ -4493,7 +5132,9 @@
       "peaches in juice",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_white_bread",
@@ -4507,7 +5148,9 @@
       "sandwich bread; white bread slice",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_whole_wheat_bread",
@@ -4521,7 +5164,9 @@
       "wheat bread; wholemeal bread",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_sourdough_bread",
@@ -4535,7 +5180,9 @@
       "sourdough slice",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_rye_bread",
@@ -4549,7 +5196,9 @@
       "rye bread slice",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_bagel",
@@ -4557,13 +5206,15 @@
       "Bread, grains & legumes",
       "Reusable ingredient",
       "",
-      "1 bagel",
-      "100.0",
+      "1 medium bagel",
+      105,
       "Yes",
       "plain bagel",
       "Cream cheese; Butter; Peanut butter; Jam",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "USDA medium serving is 105 g; small and large are estimates. Bagel type is exclusive; spreads are optional.",
+      "",
+      "Spreads: Cream cheese, Butter, Peanut butter, Jam · Variants: Plain bagel, Whole wheat bagel, Multigrain bagel, Cinnamon raisin bagel, Egg bagel, Pumpernickel bagel, Sesame bagel, Everything bagel"
     ],
     [
       "food_english_muffin",
@@ -4577,7 +5228,9 @@
       "english muffin bread",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_croissant",
@@ -4591,7 +5244,9 @@
       "plain croissant",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_biscuit",
@@ -4600,12 +5255,14 @@
       "Reusable ingredient",
       "",
       "1 biscuit",
-      "60.0",
+      "45.0",
       "Yes",
       "buttermilk biscuit",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Gravy: Gravy"
     ],
     [
       "food_dinner_roll",
@@ -4619,7 +5276,9 @@
       "bread roll",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_hamburger_bun",
@@ -4633,7 +5292,9 @@
       "burger bun",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_hot_dog_bun",
@@ -4647,7 +5308,9 @@
       "hotdog bun",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pita_bread",
@@ -4661,7 +5324,9 @@
       "pita; flatbread",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pizza_crust",
@@ -4675,7 +5340,9 @@
       "pizza dough crust; cheese pizza crust",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_toast",
@@ -4689,7 +5356,9 @@
       "plain toast; toasted bread",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Bread: White bread, Whole wheat bread, Rye bread, Sourdough bread · Add-ons: Butter, Peanut butter, Jam, Avocado"
     ],
     [
       "food_cornbread",
@@ -4703,7 +5372,9 @@
       "corn bread",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_rice_cake",
@@ -4717,7 +5388,9 @@
       "puffed rice cake",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pretzel",
@@ -4731,7 +5404,9 @@
       "pretzels; pretzel snack",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_cooked_lentils",
@@ -4745,7 +5420,9 @@
       "lentils",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_cooked_chickpeas",
@@ -4759,7 +5436,9 @@
       "garbanzo beans; chickpeas",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_kidney_beans",
@@ -4773,7 +5452,9 @@
       "red kidney beans",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_baked_beans",
@@ -4787,7 +5468,9 @@
       "boston baked beans",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_peanut_butter_sandwich",
@@ -4801,7 +5484,9 @@
       "pb sandwich",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_cheddar_cheese",
@@ -4815,7 +5500,9 @@
       "cheddar; sharp cheddar; mild cheddar",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_american_cheese",
@@ -4829,7 +5516,9 @@
       "american cheese slice; processed cheese",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_swiss_cheese",
@@ -4843,7 +5532,9 @@
       "emmental cheese",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_provolone_cheese",
@@ -4857,7 +5548,9 @@
       "provolone",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_monterey_jack_cheese",
@@ -4871,7 +5564,9 @@
       "jack cheese",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pepper_jack_cheese",
@@ -4885,7 +5580,9 @@
       "pepperjack",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_feta_cheese",
@@ -4899,7 +5596,9 @@
       "feta",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_blue_cheese",
@@ -4913,7 +5612,9 @@
       "bleu cheese; gorgonzola",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_goat_cheese",
@@ -4927,7 +5628,9 @@
       "chevre",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_cream_cheese",
@@ -4941,7 +5644,9 @@
       "plain cream cheese",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_cottage_cheese",
@@ -4955,7 +5660,9 @@
       "curds and whey",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_plain_yogurt",
@@ -4969,7 +5676,9 @@
       "natural yogurt; regular yogurt; plain yogurt",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Yogurt type: Plain, Greek, Flavored, Low-fat · Add-ons: Granola, Blueberries, Honey, Banana"
     ],
     [
       "food_greek_yogurt",
@@ -4983,7 +5692,9 @@
       "strained yogurt",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_flavored_yogurt",
@@ -4997,7 +5708,9 @@
       "fruit yogurt",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_milk_whole",
@@ -5011,7 +5724,9 @@
       "whole milk; regular milk",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_milk_2",
@@ -5025,7 +5740,9 @@
       "2 percent milk; reduced fat milk",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_milk_skim",
@@ -5039,7 +5756,9 @@
       "fat free milk; skim milk",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chocolate_milk",
@@ -5053,7 +5772,9 @@
       "choc milk",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_oat_milk",
@@ -5067,7 +5788,9 @@
       "oat beverage",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_almond_milk",
@@ -5081,7 +5804,9 @@
       "almond beverage",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_soy_milk",
@@ -5095,7 +5820,9 @@
       "soy beverage",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_butter",
@@ -5109,7 +5836,9 @@
       "salted butter; unsalted butter",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_sour_cream",
@@ -5123,7 +5852,9 @@
       "sourcream",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_whipped_cream",
@@ -5137,7 +5868,9 @@
       "whipped topping",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_potato_chips",
@@ -5151,7 +5884,9 @@
       "chips; crisps",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_popcorn",
@@ -5165,7 +5900,9 @@
       "air popped popcorn",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_butter_popcorn",
@@ -5179,7 +5916,9 @@
       "movie theater popcorn",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_cheese_puffs",
@@ -5193,7 +5932,9 @@
       "cheese curls; cheese doodles",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_crackers",
@@ -5207,7 +5948,9 @@
       "saltine crackers; snack crackers",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_goldfish_crackers",
@@ -5221,7 +5964,9 @@
       "goldfish snack crackers",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_graham_crackers",
@@ -5235,7 +5980,9 @@
       "graham cracker sheet",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_mixed_nuts",
@@ -5249,7 +5996,9 @@
       "nuts; nut mix",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_almonds",
@@ -5263,7 +6012,9 @@
       "roasted almonds",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_walnuts",
@@ -5277,7 +6028,9 @@
       "walnut halves",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_cashews",
@@ -5291,7 +6044,9 @@
       "roasted cashews",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_peanuts",
@@ -5305,7 +6060,9 @@
       "roasted peanuts",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pistachios",
@@ -5319,7 +6076,9 @@
       "shelled pistachios",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_peanut_butter",
@@ -5333,7 +6092,9 @@
       "pb; peanut spread",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_almond_butter",
@@ -5347,7 +6108,9 @@
       "nut butter almond",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_trail_mix",
@@ -5361,7 +6124,9 @@
       "nut and fruit trail mix",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_granola_bar",
@@ -5375,7 +6140,9 @@
       "oat bar",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_protein_bar",
@@ -5389,7 +6156,9 @@
       "protein snack bar",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_energy_bar",
@@ -5403,7 +6172,9 @@
       "meal bar; energy snack bar",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_fruit_snacks",
@@ -5417,7 +6188,9 @@
       "fruit gummies",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_hummus_with_crackers",
@@ -5431,7 +6204,9 @@
       "hummus snack pack",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_string_cheese",
@@ -5445,7 +6220,9 @@
       "mozzarella string cheese; cheese stick",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_beef_snack_stick",
@@ -5459,7 +6236,9 @@
       "meat stick; beef stick",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chocolate_chip_cookie",
@@ -5473,7 +6252,9 @@
       "choc chip cookie; cookie",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_sugar_cookie",
@@ -5487,7 +6268,9 @@
       "plain cookie",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_oatmeal_cookie",
@@ -5501,7 +6284,9 @@
       "oat cookie",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_brownie",
@@ -5515,7 +6300,9 @@
       "chocolate brownie",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chocolate_cake",
@@ -5529,7 +6316,9 @@
       "chocolate layer cake",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_vanilla_cake",
@@ -5543,7 +6332,9 @@
       "white cake; yellow cake",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_carrot_cake",
@@ -5557,7 +6348,9 @@
       "carrot layer cake",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_cheesecake",
@@ -5571,7 +6364,9 @@
       "cheese cake",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Berry topping, Whipped cream, Chocolate"
     ],
     [
       "food_apple_pie",
@@ -5585,7 +6380,9 @@
       "slice of apple pie",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pumpkin_pie",
@@ -5599,7 +6396,9 @@
       "slice of pumpkin pie",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pecan_pie",
@@ -5613,7 +6412,9 @@
       "slice of pecan pie",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_fruit_cobbler",
@@ -5627,7 +6428,9 @@
       "peach cobbler; berry cobbler",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_ice_cream",
@@ -5641,7 +6444,9 @@
       "icecream; vanilla ice cream",
       "Chocolate; Whipped cream; Strawberries",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Chocolate, Whipped cream, Strawberries"
     ],
     [
       "food_frozen_yogurt",
@@ -5655,7 +6460,9 @@
       "froyo",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_gelato",
@@ -5669,7 +6476,9 @@
       "gelato ice cream",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_milkshake",
@@ -5683,7 +6492,9 @@
       "shake; ice cream shake",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pudding",
@@ -5697,7 +6508,9 @@
       "chocolate pudding; vanilla pudding",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_jell_o",
@@ -5711,7 +6524,9 @@
       "gelatin dessert; jello",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_doughnut",
@@ -5725,7 +6540,9 @@
       "donut; glazed donut",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_muffin_sweet",
@@ -5739,7 +6556,9 @@
       "blueberry muffin; bakery muffin",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_cinnamon_roll",
@@ -5753,7 +6572,9 @@
       "cinnamon bun",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_danish_pastry",
@@ -5767,7 +6588,9 @@
       "danish",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_cupcake",
@@ -5781,7 +6604,9 @@
       "frosted cupcake",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_candy_bar",
@@ -5795,7 +6620,9 @@
       "chocolate candy bar",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_chocolate",
@@ -5809,7 +6636,9 @@
       "chocolate squares; milk chocolate",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_gummy_candy",
@@ -5823,7 +6652,9 @@
       "gummies; gummy bears",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_hard_candy",
@@ -5837,7 +6668,9 @@
       "boiled sweets",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_marshmallows",
@@ -5851,7 +6684,9 @@
       "marshmallow",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_popsicle",
@@ -5865,7 +6700,9 @@
       "ice pop; freezer pop",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_sorbet",
@@ -5879,7 +6716,9 @@
       "fruit sorbet",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_ketchup",
@@ -5893,7 +6732,9 @@
       "catsup; tomato ketchup",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_yellow_mustard",
@@ -5907,7 +6748,9 @@
       "mustard",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_dijon_mustard",
@@ -5921,7 +6764,9 @@
       "dijon",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_mayonnaise",
@@ -5935,7 +6780,9 @@
       "mayo",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_ranch_dressing",
@@ -5949,7 +6796,9 @@
       "ranch",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_caesar_dressing",
@@ -5963,7 +6812,9 @@
       "caesar salad dressing",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_italian_dressing",
@@ -5977,7 +6828,9 @@
       "italian salad dressing",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_balsamic_vinaigrette",
@@ -5991,7 +6844,9 @@
       "balsamic salad dressing",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_blue_cheese_dressing",
@@ -6005,7 +6860,9 @@
       "blue cheese salad dressing",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_olive_oil",
@@ -6019,7 +6876,9 @@
       "extra virgin olive oil; evoo",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_vegetable_oil",
@@ -6033,7 +6892,9 @@
       "canola oil; neutral cooking oil",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_coconut_oil",
@@ -6047,7 +6908,9 @@
       "coconut cooking oil",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_avocado_oil",
@@ -6061,7 +6924,9 @@
       "avocado cooking oil",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_bbq_sauce",
@@ -6075,7 +6940,9 @@
       "barbecue sauce",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_hot_sauce",
@@ -6089,7 +6956,9 @@
       "buffalo hot sauce",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_buffalo_wing_sauce",
@@ -6103,7 +6972,9 @@
       "buffalo sauce",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_soy_sauce",
@@ -6117,7 +6988,9 @@
       "shoyu",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_teriyaki_sauce",
@@ -6131,7 +7004,9 @@
       "teriyaki glaze",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_honey",
@@ -6145,7 +7020,9 @@
       "raw honey",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_maple_syrup",
@@ -6159,7 +7036,9 @@
       "pancake syrup maple",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pancake_syrup",
@@ -6173,7 +7052,9 @@
       "breakfast syrup",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_jam",
@@ -6187,7 +7068,9 @@
       "fruit jam; jelly; fruit preserves",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_gravy",
@@ -6201,7 +7084,9 @@
       "brown gravy; meat gravy",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_salsa_verde",
@@ -6215,7 +7100,9 @@
       "green salsa",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_cheese_sauce",
@@ -6229,7 +7116,9 @@
       "nacho cheese sauce",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_tartar_sauce",
@@ -6243,7 +7132,9 @@
       "tartar",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_croutons",
@@ -6257,7 +7148,9 @@
       "salad croutons",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_pickle_relish",
@@ -6271,7 +7164,9 @@
       "sweet relish",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_water",
@@ -6285,7 +7180,9 @@
       "plain water; drinking water",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_sparkling_water",
@@ -6299,7 +7196,9 @@
       "seltzer; carbonated water",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_black_coffee",
@@ -6307,13 +7206,15 @@
       "Beverages",
       "Beverage",
       "",
-      "1 cup",
-      "240.0",
+      "Medium · 12 fl oz",
+      "355.0",
       "Yes",
-      "coffee; brewed coffee; black coffee",
+      "brewed coffee; black coffee; coffee with milk",
       "Milk, whole; Oat milk; Almond milk; Honey",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Milk: 2%, Whole milk, 1%, Skim milk, Almond milk, Oat milk · Add-ons: Sugar, Cream, Vanilla syrup"
     ],
     [
       "food_coffee_with_milk",
@@ -6327,7 +7228,9 @@
       "coffee and milk",
       "Milk, whole; Milk, 2%; Oat milk; Almond milk; Honey",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Add-ons: Milk, whole, Milk, 2%, Oat milk, Almond milk, Honey"
     ],
     [
       "food_latte",
@@ -6341,7 +7244,9 @@
       "cafe latte; milk latte",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_cappuccino",
@@ -6355,7 +7260,9 @@
       "cappuccino coffee",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Milk: Whole milk, 2% milk, Skim milk, Almond milk, Oat milk, 1% milk · Add-ons: Sugar, Cocoa powder, Cinnamon, Extra espresso"
     ],
     [
       "food_espresso",
@@ -6369,7 +7276,9 @@
       "espresso shot",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_hot_tea",
@@ -6383,7 +7292,9 @@
       "tea; brewed tea",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_sweet_tea",
@@ -6397,7 +7308,9 @@
       "sweetened iced tea",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_iced_coffee",
@@ -6411,7 +7324,9 @@
       "cold coffee",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_cold_brew_coffee",
@@ -6425,7 +7340,9 @@
       "cold brew",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_orange_juice",
@@ -6439,7 +7356,9 @@
       "oj; fresh orange juice",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_apple_juice",
@@ -6453,7 +7372,9 @@
       "apple fruit juice",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_cranberry_juice_cocktail",
@@ -6467,7 +7388,9 @@
       "cranberry juice drink",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_fruit_smoothie",
@@ -6481,7 +7404,9 @@
       "smoothie; fruit shake",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_protein_shake",
@@ -6495,7 +7420,9 @@
       "ready to drink protein shake; homemade protein shake",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "Protein powder: 1 scoop protein powder · Liquid: Almond milk, 2% milk, Whole milk, Oat milk, Skim milk · Add-ons: Peanut butter, Banana, Coconut oil, Oats"
     ],
     [
       "food_cola_soda",
@@ -6509,7 +7436,9 @@
       "coke; cola; regular cola",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_diet_cola",
@@ -6523,7 +7452,9 @@
       "diet coke; diet soda",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_lemon_lime_soda",
@@ -6537,7 +7468,9 @@
       "sprite; lemon lime soft drink",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_root_beer",
@@ -6551,7 +7484,9 @@
       "rootbeer",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_lemonade",
@@ -6565,7 +7500,9 @@
       "lemon drink",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_sports_drink",
@@ -6579,7 +7516,9 @@
       "electrolyte sports drink",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_energy_drink",
@@ -6593,7 +7532,9 @@
       "caffeinated energy drink",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_hot_chocolate",
@@ -6607,7 +7548,9 @@
       "hot cocoa",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_beer",
@@ -6621,7 +7564,9 @@
       "lager beer; ale beer",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_wine",
@@ -6635,7 +7580,9 @@
       "red wine; white wine",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_cocktail",
@@ -6649,7 +7596,9 @@
       "mixed alcoholic drink",
       "",
       "Draft",
-      "Portion estimate; verify with FNDDS/label"
+      "Portion estimate; verify with FNDDS/label",
+      "",
+      "None"
     ],
     [
       "food_sandwich",
@@ -6663,7 +7612,9 @@
       "sandwich; turkey sandwich; ham sandwich; tuna sandwich; deli sandwich; lunch sandwich",
       "",
       "Draft",
-      "Base estimate; filling and bread are configurable"
+      "Base estimate; filling and bread are configurable",
+      "",
+      "Filling: Turkey, Ham, Tuna salad, Roast beef, Chicken · Bread: White, Whole wheat, Rye, Sourdough · Cheese: Cheddar, American, Swiss, Provolone · Spreads: Mayonnaise, Yellow mustard, Dijon mustard, Ranch dressing · Add-ons: Lettuce, Tomato, Pickle, Bacon, Avocado · Variants: BLT"
     ],
     [
       "food_protein_powder",
@@ -6677,7 +7628,9 @@
       "protein powder; whey protein powder; protein scoop",
       "",
       "Draft",
-      "Generic scoop estimate; verify brand and serving label"
+      "Generic scoop estimate; verify brand and serving label",
+      "",
+      "None"
     ],
     [
       "food_milk_1",
@@ -6691,7 +7644,9 @@
       "1% milk; low-fat milk",
       "",
       "Draft",
-      "USDA match expected"
+      "USDA match expected",
+      "",
+      "None"
     ],
     [
       "food_corn_flakes",
@@ -6705,7 +7660,9 @@
       "corn flakes; cornflake cereal",
       "",
       "Draft",
-      "Generic cereal estimate; brand labels vary"
+      "Generic cereal estimate; brand labels vary",
+      "",
+      "None"
     ],
     [
       "food_oat_ring_cereal",
@@ -6719,7 +7676,9 @@
       "oat ring cereal; toasted oat cereal; Cheerios",
       "",
       "Draft",
-      "Generic cereal estimate; brand labels vary"
+      "Generic cereal estimate; brand labels vary",
+      "",
+      "None"
     ],
     [
       "food_black_olives",
@@ -6733,7 +7692,9 @@
       "black olives; olives",
       "",
       "Draft",
-      "Generic portion estimate"
+      "Generic portion estimate",
+      "",
+      "None"
     ],
     [
       "food_cinnamon",
@@ -6747,7 +7708,9 @@
       "ground cinnamon",
       "",
       "Draft",
-      "Generic spice portion estimate"
+      "Generic spice portion estimate",
+      "",
+      "None"
     ],
     [
       "food_cocoa_powder",
@@ -6761,7 +7724,9 @@
       "unsweetened cocoa powder",
       "",
       "Draft",
-      "Generic powder estimate"
+      "Generic powder estimate",
+      "",
+      "None"
     ],
     [
       "food_cream",
@@ -6775,7 +7740,9 @@
       "cream; coffee cream; heavy cream",
       "",
       "Draft",
-      "Generic cream estimate; label varies"
+      "Generic cream estimate; label varies",
+      "",
+      "None"
     ],
     [
       "food_sugar",
@@ -6789,7 +7756,9 @@
       "granulated sugar; white sugar",
       "",
       "Draft",
-      "Generic spoon estimate"
+      "Generic spoon estimate",
+      "",
+      "None"
     ],
     [
       "food_chili",
@@ -6804,7 +7773,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "Chili type: Beef, Turkey, Vegetarian · Add-ons: Rice, Sour cream, Cheese, Cornbread"
     ],
     [
       "food_roast_turkey",
@@ -6819,7 +7789,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "Add-ons: Mashed potatoes, Gravy, Stuffing, Green bean casserole"
     ],
     [
       "food_chicken_piccata",
@@ -6834,7 +7805,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "Add-ons: Pasta · side, Extra lemon sauce, Rice · side, Capers"
     ],
     [
       "food_food_pizza_crust",
@@ -6849,7 +7821,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
     ],
     [
       "food_pork",
@@ -6864,7 +7837,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
     ],
     [
       "food_vanilla_syrup",
@@ -6879,7 +7853,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
     ],
     [
       "food_oats",
@@ -6894,7 +7869,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
     ],
     [
       "food_yogurt_low_fat",
@@ -6909,7 +7885,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
     ],
     [
       "food_spinach_raw",
@@ -6924,7 +7901,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
     ],
     [
       "food_romaine_lettuce",
@@ -6939,7 +7917,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
     ],
     [
       "food_kale_raw",
@@ -6954,7 +7933,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
     ],
     [
       "food_egg",
@@ -6969,7 +7949,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
     ],
     [
       "food_dill",
@@ -6984,7 +7965,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
     ],
     [
       "food_mixed_vegetables_cooked",
@@ -6999,7 +7981,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
     ],
     [
       "food_turkey_chili",
@@ -7014,7 +7997,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
     ],
     [
       "food_lemon_caper_sauce",
@@ -7029,7 +8013,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
     ],
     [
       "food_orange_sauce",
@@ -7044,7 +8029,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
     ],
     [
       "food_sesame_seeds",
@@ -7059,7 +8045,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
     ],
     [
       "food_stuffing",
@@ -7074,7 +8061,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
     ],
     [
       "food_green_bean_casserole",
@@ -7089,7 +8077,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
     ],
     [
       "food_burnt_style",
@@ -7104,7 +8093,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
     ],
     [
       "food_capers",
@@ -7119,7 +8109,8 @@
       "",
       "Draft",
       "Nutrient match requires review",
-      ""
+      "",
+      "None"
     ],
     [
       "food_regular_cheesecake_style",
@@ -7134,7 +8125,8 @@
       "",
       "Draft",
       "Display-only selector; no diary component or nutrients",
-      ""
+      "",
+      "None"
     ],
     [
       "food_burnt_cheesecake_style",
@@ -7149,7 +8141,8 @@
       "",
       "Draft",
       "Display-only selector; no diary component or nutrients",
-      ""
+      "",
+      "None"
     ],
     [
       "food_frosted_corn_flakes",
@@ -7164,7 +8157,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
     ],
     [
       "food_bran_flakes_cereal",
@@ -7179,7 +8173,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
     ],
     [
       "food_shredded_wheat_cereal",
@@ -7194,7 +8189,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
     ],
     [
       "food_rice_cereal_squares",
@@ -7209,7 +8205,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
     ],
     [
       "food_muesli",
@@ -7224,7 +8221,8 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
     ],
     [
       "food_deep_dish_pizza_crust",
@@ -7239,7 +8237,136 @@
       "",
       "Draft",
       "Portion estimate; review against source nutrient record",
-      ""
+      "",
+      "None"
+    ],
+    [
+      "food_bagel_whole_wheat",
+      "Whole wheat bagel",
+      "Bread, grains & legumes",
+      "Reusable ingredient",
+      "",
+      "100 g",
+      100,
+      "No",
+      "",
+      "",
+      "Draft",
+      "USDA FoodData Central lists a matching whole-wheat bagel profile.",
+      "",
+      "None"
+    ],
+    [
+      "food_bagel_multigrain",
+      "Multigrain bagel",
+      "Bread, grains & legumes",
+      "Reusable ingredient",
+      "",
+      "100 g",
+      100,
+      "No",
+      "",
+      "",
+      "Draft",
+      "USDA FoodData Central lists a matching multigrain bagel profile.",
+      "",
+      "None"
+    ],
+    [
+      "food_bagel_cinnamon_raisin",
+      "Cinnamon raisin bagel",
+      "Bread, grains & legumes",
+      "Reusable ingredient",
+      "",
+      "100 g",
+      100,
+      "No",
+      "",
+      "",
+      "Draft",
+      "USDA FoodData Central lists a matching cinnamon-raisin bagel profile.",
+      "",
+      "None"
+    ],
+    [
+      "food_bagel_egg",
+      "Egg bagel",
+      "Bread, grains & legumes",
+      "Reusable ingredient",
+      "",
+      "100 g",
+      100,
+      "No",
+      "",
+      "",
+      "Draft",
+      "USDA FoodData Central lists a matching egg bagel profile.",
+      "",
+      "None"
+    ],
+    [
+      "food_bagel_pumpernickel",
+      "Pumpernickel bagel",
+      "Bread, grains & legumes",
+      "Reusable ingredient",
+      "",
+      "100 g",
+      100,
+      "No",
+      "",
+      "",
+      "Draft",
+      "USDA record is a named match, but its serving is a miniature; normalized profile is used for other sizes.",
+      "",
+      "None"
+    ],
+    [
+      "food_bagel_sesame",
+      "Sesame bagel",
+      "Bread, grains & legumes",
+      "Reusable ingredient",
+      "",
+      "100 g",
+      100,
+      "No",
+      "",
+      "",
+      "Draft",
+      "No sesame-only profile is present in the local source; plain bagel is a broad analog.",
+      "",
+      "None"
+    ],
+    [
+      "food_bagel_everything",
+      "Everything bagel",
+      "Bread, grains & legumes",
+      "Reusable ingredient",
+      "",
+      "100 g",
+      100,
+      "No",
+      "",
+      "",
+      "Draft",
+      "USDA plain bagel record describes a mix including onion, poppy, and sesame; topping ratios vary.",
+      "",
+      "None"
+    ],
+    [
+      "food_bean_patty",
+      "Bean patty",
+      "Sandwiches & handhelds",
+      "Reusable ingredient",
+      "",
+      "1 patty",
+      "100",
+      "No",
+      "",
+      "",
+      "Internal option component",
+      "USDA veggie burger patty without bun; generic bean-patty analogue, review bean-specific match.",
+      "",
+      "None"
     ]
   ],
   "portions": [
@@ -7522,34 +8649,34 @@
       "prt_food_banana_small",
       "food_banana",
       "Banana",
-      "Small banana",
+      "Small banana (6–6⅞ in)",
       "small",
       "1",
-      "85",
-      "Draft estimate",
-      "Concept portion · draft estimate"
+      "101",
+      "USDA FoodData Central",
+      "USDA SR Legacy small banana (6 to 6-7/8 inches): 101 g."
     ],
     [
       "prt_food_banana_default",
       "food_banana",
       "Banana",
-      "Medium banana",
+      "Medium banana (7–7⅞ in)",
       "medium",
       "1",
       "118",
-      "Draft estimate",
-      "Concept portion · draft estimate"
+      "USDA FoodData Central",
+      "USDA SR Legacy medium banana (7 to 7-7/8 inches): 118 g."
     ],
     [
       "prt_food_banana_large",
       "food_banana",
       "Banana",
-      "Large banana",
+      "Large banana (8–8⅞ in)",
       "large",
       "1",
-      "170",
-      "Draft estimate",
-      "Concept portion · draft estimate"
+      "136",
+      "USDA FoodData Central",
+      "USDA SR Legacy large banana (8 to 8-7/8 inches): 136 g."
     ],
     [
       "prt_food_plain_yogurt_small",
@@ -8350,9 +9477,9 @@
       "1 sandwich",
       "medium",
       "1",
-      "160.",
-      "Draft estimate",
-      "Default"
+      "135.0",
+      "USDA FDC measured household portion",
+      "USDA-aligned default"
     ],
     [
       "prt_food_breakfast_sandwich_small",
@@ -8864,12 +9991,12 @@
       "prt_food_breakfast_sausage_default",
       "food_breakfast_sausage",
       "Breakfast sausage",
-      "1 link",
+      "1 patty",
       "standard",
       "1",
-      "45.",
-      "Draft estimate",
-      "Default"
+      "35.0",
+      "USDA FDC measured household portion",
+      "USDA-aligned default"
     ],
     [
       "prt_food_breakfast_sausage_oz",
@@ -8933,9 +10060,9 @@
       "1 slice",
       "standard",
       "1",
-      "12.",
-      "Draft estimate",
-      "Default"
+      "11.5",
+      "USDA FoodData Central",
+      "USDA SR Legacy cooked pan-fried slice: 11.5 g."
     ],
     [
       "prt_food_bacon_oz",
@@ -9054,9 +10181,9 @@
       "1 bagel",
       "medium",
       "1",
-      "130.",
-      "Draft estimate",
-      "Default"
+      "129",
+      "USDA FoodData Central",
+      "USDA bagel 99 g plus USDA cream cheese 30 g."
     ],
     [
       "prt_food_bagel_with_cream_cheese_small",
@@ -9194,12 +10321,12 @@
       "prt_food_biscuits_and_gravy_default",
       "food_biscuits_and_gravy",
       "Biscuits and gravy",
-      "1 serving",
+      "1 biscuit with gravy",
       "medium",
       "1",
-      "280.",
-      "Draft estimate",
-      "Default"
+      "220.0",
+      "USDA FDC measured household portion",
+      "USDA-aligned default"
     ],
     [
       "prt_food_biscuits_and_gravy_small",
@@ -9802,9 +10929,9 @@
       "1 sandwich",
       "medium",
       "1",
-      "170.",
-      "Draft estimate",
-      "Default"
+      "105.0",
+      "USDA FDC measured household portion",
+      "USDA-aligned default"
     ],
     [
       "prt_food_blt_sandwich_small",
@@ -10242,9 +11369,9 @@
       "1 sandwich",
       "medium",
       "1",
-      "225.",
-      "Draft estimate",
-      "Default"
+      "180",
+      "USDA FoodData Central",
+      "USDA FNDDS regular sandwich serving: 180 g."
     ],
     [
       "prt_food_bbq_beef_sandwich_small",
@@ -10253,9 +11380,9 @@
       "1 small sandwich",
       "small",
       "1",
-      "160.",
-      "Draft estimate",
-      "Contextual size"
+      "90",
+      "USDA FoodData Central",
+      "USDA FNDDS miniature/slider portion: 90 g."
     ],
     [
       "prt_food_bbq_beef_sandwich_large",
@@ -10264,9 +11391,9 @@
       "1 large sandwich",
       "large",
       "1",
-      "320.",
-      "Draft estimate",
-      "Contextual size"
+      "270",
+      "USDA FoodData Central",
+      "USDA FNDDS large sandwich portion: 270 g."
     ],
     [
       "prt_food_bbq_beef_sandwich_oz",
@@ -15211,12 +16338,12 @@
       "prt_food_beef_kebab_default",
       "food_beef_kebab",
       "Beef kebab",
-      "1 skewer",
+      "1 shish kebab",
       "medium",
       "1",
-      "170.",
-      "Draft estimate",
-      "Default"
+      "202.0",
+      "USDA FDC measured household portion",
+      "USDA-aligned default"
     ],
     [
       "prt_food_beef_kebab_small",
@@ -19053,9 +20180,9 @@
       "1 bowl",
       "medium",
       "1",
-      "290.",
-      "Draft estimate",
-      "Default"
+      "255",
+      "USDA FoodData Central",
+      "USDA FNDDS potato soup: 1 cup 255 g; mapped to 1 bowl."
     ],
     [
       "prt_food_baked_potato_soup_small",
@@ -20043,9 +21170,9 @@
       "1 cup",
       "standard",
       "1",
-      "135.",
-      "Draft estimate",
-      "Default"
+      "180",
+      "USDA FoodData Central",
+      "USDA SR Legacy 1/2 cup is 90 g; 1 cup scaled to 180 g."
     ],
     [
       "prt_food_asparagus_cooked_oz",
@@ -20450,9 +21577,9 @@
       "1 avocado",
       "medium",
       "1",
-      "145.",
-      "Draft estimate",
-      "Default"
+      "150",
+      "USDA FoodData Central",
+      "USDA FNDDS fruit portion: 150 g."
     ],
     [
       "prt_food_avocado_small",
@@ -21737,9 +22864,9 @@
       "1 cup",
       "standard",
       "1",
-      "245.",
-      "Draft estimate",
-      "Default"
+      "246",
+      "USDA FoodData Central",
+      "USDA SR Legacy cup measure: 246 g."
     ],
     [
       "prt_food_applesauce_oz",
@@ -21932,12 +23059,12 @@
       "prt_food_bagel_default",
       "food_bagel",
       "Bagel",
-      "1 bagel",
+      "1 medium bagel",
       "medium",
       "1",
-      "100.",
-      "Draft estimate",
-      "Default"
+      105,
+      "USDA FoodData Central, 1 serving (105 g)",
+      "Default medium bagel"
     ],
     [
       "prt_food_bagel_small",
@@ -22078,9 +23205,9 @@
       "1 biscuit",
       "medium",
       "1",
-      "60.",
-      "Draft estimate",
-      "Default"
+      "45.0",
+      "USDA FDC measured household portion",
+      "USDA-aligned default"
     ],
     [
       "prt_food_biscuit_small",
@@ -28241,6 +29368,39 @@
       "4",
       "Draft estimate",
       "Default"
+    ],
+    [
+      "prt_food_bean_patty_default",
+      "food_bean_patty",
+      "Bean patty",
+      "1 patty",
+      "medium",
+      "1",
+      "100",
+      "Draft estimate",
+      "Default"
+    ],
+    [
+      "prt_food_bean_patty_oz",
+      "food_bean_patty",
+      "Bean patty",
+      "oz",
+      "exact",
+      "1",
+      "28.3495",
+      "Exact mass conversion",
+      "Mass"
+    ],
+    [
+      "prt_food_bean_patty_g",
+      "food_bean_patty",
+      "Bean patty",
+      "g",
+      "exact",
+      "1",
+      "1",
+      "Exact mass conversion",
+      "Mass"
     ]
   ],
   "aliases": [
@@ -28742,20 +29902,6 @@
       "Draft"
     ],
     [
-      "bagel with cream cheese",
-      "food",
-      "food_bagel_with_cream_cheese",
-      "Canonical",
-      "Draft"
-    ],
-    [
-      "cream cheese bagel",
-      "food",
-      "food_bagel_with_cream_cheese",
-      "Synonym",
-      "Draft"
-    ],
-    [
       "yogurt parfait",
       "food",
       "food_yogurt_parfait",
@@ -28780,20 +29926,6 @@
       "smoothie bowl",
       "food",
       "food_breakfast_smoothie_bowl",
-      "Synonym",
-      "Draft"
-    ],
-    [
-      "biscuits and gravy",
-      "food",
-      "food_biscuits_and_gravy",
-      "Canonical",
-      "Draft"
-    ],
-    [
-      "sausage gravy and biscuits",
-      "food",
-      "food_biscuits_and_gravy",
       "Synonym",
       "Draft"
     ],
@@ -29015,27 +30147,6 @@
       "Draft"
     ],
     [
-      "blt sandwich",
-      "food",
-      "food_blt_sandwich",
-      "Canonical",
-      "Draft"
-    ],
-    [
-      "bacon lettuce tomato sandwich",
-      "food",
-      "food_blt_sandwich",
-      "Synonym",
-      "Draft"
-    ],
-    [
-      "blt",
-      "food",
-      "food_blt_sandwich",
-      "Synonym",
-      "Draft"
-    ],
-    [
       "club sandwich",
       "food",
       "food_club_sandwich",
@@ -29186,20 +30297,6 @@
       "vegetarian burger",
       "food",
       "food_veggie_burger",
-      "Synonym",
-      "Draft"
-    ],
-    [
-      "bean burger",
-      "food",
-      "food_bean_burger",
-      "Canonical",
-      "Draft"
-    ],
-    [
-      "black bean burger",
-      "food",
-      "food_bean_burger",
       "Synonym",
       "Draft"
     ],
@@ -30690,21 +31787,21 @@
     [
       "beef patty",
       "food",
-      "food_beef_patty",
+      "food_burger",
       "Canonical",
       "Draft"
     ],
     [
       "hamburger patty",
       "food",
-      "food_beef_patty",
+      "food_burger",
       "Synonym",
       "Draft"
     ],
     [
       "ground beef patty",
       "food",
-      "food_beef_patty",
+      "food_burger",
       "Synonym",
       "Draft"
     ],
@@ -31180,8 +32277,8 @@
     [
       "fish and chips",
       "food",
-      "food_fish_and_chips",
-      "Canonical",
+      "food_breaded_fried_fish",
+      "Synonym",
       "Draft"
     ],
     [
@@ -31195,7 +32292,7 @@
       "breaded fried fish",
       "food",
       "food_breaded_fried_fish",
-      "Canonical",
+      "Synonym",
       "Draft"
     ],
     [
@@ -35581,13 +36678,6 @@
       "Draft"
     ],
     [
-      "coffee",
-      "food",
-      "food_black_coffee",
-      "Synonym",
-      "Draft"
-    ],
-    [
       "brewed coffee",
       "food",
       "food_black_coffee",
@@ -35597,8 +36687,8 @@
     [
       "coffee with milk",
       "food",
-      "food_coffee_with_milk",
-      "Canonical",
+      "food_black_coffee",
+      "Synonym",
       "Draft"
     ],
     [
@@ -36804,6 +37894,139 @@
       "food_cold_breakfast_cereal",
       "Brand",
       "Draft"
+    ],
+    [
+      "bagel with cream cheese",
+      "food",
+      "food_bagel",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "cream cheese bagel",
+      "food",
+      "food_bagel",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "sesame bagel",
+      "food",
+      "food_bagel",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "everything bagel",
+      "food",
+      "food_bagel",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "whole wheat bagel",
+      "food",
+      "food_bagel",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "multigrain bagel",
+      "food",
+      "food_bagel",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "cinnamon raisin bagel",
+      "food",
+      "food_bagel",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "egg bagel",
+      "food",
+      "food_bagel",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "pumpernickel bagel",
+      "food",
+      "food_bagel",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "bean burger",
+      "food",
+      "food_burger",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "black bean burger",
+      "food",
+      "food_burger",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "beef biryani",
+      "food",
+      "food_biryani",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "biscuits and gravy",
+      "food",
+      "food_biscuit",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "sausage gravy and biscuits",
+      "food",
+      "food_biscuit",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "blt",
+      "food",
+      "food_sandwich",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "blt sandwich",
+      "food",
+      "food_sandwich",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "bacon lettuce tomato sandwich",
+      "food",
+      "food_sandwich",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "fried fish",
+      "food",
+      "food_breaded_fried_fish",
+      "Canonical",
+      "Draft"
+    ],
+    [
+      "chicken burger",
+      "food",
+      "food_burger",
+      "Synonym",
+      "Draft"
     ]
   ],
   "presets": [
@@ -37083,16 +38306,6 @@
     [
       "food_burger",
       "Burger",
-      "food_beef_patty",
-      "Beef patty",
-      "113",
-      "1",
-      "Example only: verify ingredient weight and cooking yield",
-      "Draft"
-    ],
-    [
-      "food_burger",
-      "Burger",
       "food_hamburger_bun",
       "Hamburger bun",
       "70",
@@ -37175,7 +38388,7 @@
       "Breakfast sandwich",
       "food_whole_egg",
       "Whole egg",
-      "100",
+      "50",
       "2",
       "Example only: verify ingredient weight and cooking yield",
       "Draft"
@@ -37782,58 +38995,6 @@
       "food_french_fries",
       "French fries",
       "7",
-      "Suggested addition",
-      "No",
-      "Draft",
-      "",
-      "",
-      ""
-    ],
-    [
-      "food_breakfast_sandwich",
-      "Breakfast sandwich",
-      "food_american_cheese",
-      "American cheese",
-      "1",
-      "Suggested addition",
-      "No",
-      "Draft",
-      "",
-      "",
-      ""
-    ],
-    [
-      "food_breakfast_sandwich",
-      "Breakfast sandwich",
-      "food_bacon",
-      "Bacon",
-      "2",
-      "Suggested addition",
-      "No",
-      "Draft",
-      "",
-      "",
-      ""
-    ],
-    [
-      "food_breakfast_sandwich",
-      "Breakfast sandwich",
-      "food_breakfast_sausage",
-      "Breakfast sausage",
-      "3",
-      "Suggested addition",
-      "No",
-      "Draft",
-      "",
-      "",
-      ""
-    ],
-    [
-      "food_breakfast_sandwich",
-      "Breakfast sandwich",
-      "food_ham",
-      "Ham",
-      "4",
       "Suggested addition",
       "No",
       "Draft",
@@ -38500,9 +39661,9 @@
       "Suggested addition",
       "No",
       "Draft",
-      "",
-      "",
-      ""
+      "Spreads",
+      "multiple",
+      30
     ],
     [
       "food_bagel",
@@ -38513,8 +39674,8 @@
       "Suggested addition",
       "No",
       "Draft",
-      "",
-      "",
+      "Spreads",
+      "multiple",
       ""
     ],
     [
@@ -38526,8 +39687,8 @@
       "Suggested addition",
       "No",
       "Draft",
-      "",
-      "",
+      "Spreads",
+      "multiple",
       ""
     ],
     [
@@ -38539,8 +39700,8 @@
       "Suggested addition",
       "No",
       "Draft",
-      "",
-      "",
+      "Spreads",
+      "multiple",
       ""
     ],
     [
@@ -39224,7 +40385,7 @@
       "Burger",
       "food_cheddar_cheese",
       "Cheese",
-      "3",
+      "4",
       "Suggested addition",
       "No",
       "Draft",
@@ -39237,7 +40398,7 @@
       "Burger",
       "food_ketchup",
       "Ketchup",
-      "4",
+      "5",
       "Suggested addition",
       "No",
       "Draft",
@@ -39250,7 +40411,7 @@
       "Burger",
       "food_bacon",
       "Bacon",
-      "5",
+      "6",
       "Suggested addition",
       "No",
       "Draft",
@@ -39263,7 +40424,7 @@
       "Burger",
       "food_mayonnaise",
       "Mayonnaise",
-      "6",
+      "7",
       "Suggested addition",
       "No",
       "Draft",
@@ -39276,7 +40437,7 @@
       "Burger",
       "food_french_fries",
       "Fries · side",
-      "12",
+      "13",
       "Suggested addition",
       "No",
       "Draft",
@@ -41441,6 +42602,318 @@
       "Milk",
       "exclusive",
       ""
+    ],
+    [
+      "food_bagel",
+      "Bagel",
+      "food_bagel",
+      "Plain bagel",
+      1,
+      "variant",
+      "Yes",
+      "Draft",
+      "Bagel type",
+      "exclusive",
+      100
+    ],
+    [
+      "food_bagel",
+      "Bagel",
+      "food_bagel_whole_wheat",
+      "Whole wheat bagel",
+      2,
+      "variant",
+      "No",
+      "Draft",
+      "Bagel type",
+      "exclusive",
+      100
+    ],
+    [
+      "food_bagel",
+      "Bagel",
+      "food_bagel_multigrain",
+      "Multigrain bagel",
+      3,
+      "variant",
+      "No",
+      "Draft",
+      "Bagel type",
+      "exclusive",
+      100
+    ],
+    [
+      "food_bagel",
+      "Bagel",
+      "food_bagel_cinnamon_raisin",
+      "Cinnamon raisin bagel",
+      4,
+      "variant",
+      "No",
+      "Draft",
+      "Bagel type",
+      "exclusive",
+      100
+    ],
+    [
+      "food_bagel",
+      "Bagel",
+      "food_bagel_egg",
+      "Egg bagel",
+      5,
+      "variant",
+      "No",
+      "Draft",
+      "Bagel type",
+      "exclusive",
+      100
+    ],
+    [
+      "food_bagel",
+      "Bagel",
+      "food_bagel_pumpernickel",
+      "Pumpernickel bagel",
+      6,
+      "variant",
+      "No",
+      "Draft",
+      "Bagel type",
+      "exclusive",
+      100
+    ],
+    [
+      "food_bagel",
+      "Bagel",
+      "food_bagel_sesame",
+      "Sesame bagel",
+      7,
+      "variant",
+      "No",
+      "Draft",
+      "Bagel type",
+      "exclusive",
+      100
+    ],
+    [
+      "food_bagel",
+      "Bagel",
+      "food_bagel_everything",
+      "Everything bagel",
+      8,
+      "variant",
+      "No",
+      "Draft",
+      "Bagel type",
+      "exclusive",
+      100
+    ],
+    [
+      "food_biryani",
+      "Biryani",
+      "food_grilled_chicken_breast",
+      "Chicken",
+      "1",
+      "Protein",
+      "No",
+      "Draft",
+      "Protein",
+      "exclusive",
+      "85"
+    ],
+    [
+      "food_biryani",
+      "Biryani",
+      "food_beef_patty",
+      "Beef",
+      "2",
+      "Protein",
+      "No",
+      "Draft",
+      "Protein",
+      "exclusive",
+      "85"
+    ],
+    [
+      "food_biscuit",
+      "Biscuit",
+      "food_gravy",
+      "Gravy",
+      "1",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "Gravy",
+      "multiple",
+      "60"
+    ],
+    [
+      "food_sandwich",
+      "Sandwich",
+      "food_blt_sandwich",
+      "BLT",
+      "150",
+      "Variant",
+      "No",
+      "Draft",
+      "Sandwich style",
+      "exclusive",
+      "175"
+    ],
+    [
+      "food_breakfast_casserole",
+      "Breakfast casserole",
+      "food_breakfast_sausage",
+      "Sausage",
+      "1",
+      "Contents",
+      "No",
+      "Draft",
+      "Protein",
+      "exclusive",
+      "35"
+    ],
+    [
+      "food_breakfast_casserole",
+      "Breakfast casserole",
+      "food_bacon",
+      "Bacon",
+      "2",
+      "Contents",
+      "No",
+      "Draft",
+      "Protein",
+      "exclusive",
+      "12"
+    ],
+    [
+      "food_breakfast_casserole",
+      "Breakfast casserole",
+      "food_ham",
+      "Ham",
+      "3",
+      "Contents",
+      "No",
+      "Draft",
+      "Protein",
+      "exclusive",
+      "28"
+    ],
+    [
+      "food_breakfast_casserole",
+      "Breakfast casserole",
+      "food_cheddar_cheese",
+      "Cheese",
+      "4",
+      "Contents",
+      "No",
+      "Draft",
+      "Cheese",
+      "multiple",
+      "21"
+    ],
+    [
+      "food_breakfast_casserole",
+      "Breakfast casserole",
+      "food_bell_pepper",
+      "Bell pepper",
+      "7",
+      "Contents",
+      "No",
+      "Draft",
+      "Vegetables",
+      "multiple",
+      "30"
+    ],
+    [
+      "food_breakfast_sandwich",
+      "Breakfast sandwich",
+      "food_bacon",
+      "Bacon",
+      "3",
+      "Filling",
+      "No",
+      "Draft",
+      "Meat",
+      "exclusive",
+      "12"
+    ],
+    [
+      "food_breakfast_sandwich",
+      "Breakfast sandwich",
+      "food_breakfast_sausage",
+      "Sausage",
+      "4",
+      "Filling",
+      "No",
+      "Draft",
+      "Meat",
+      "exclusive",
+      "35"
+    ],
+    [
+      "food_breakfast_sandwich",
+      "Breakfast sandwich",
+      "food_ham",
+      "Ham",
+      "5",
+      "Filling",
+      "No",
+      "Draft",
+      "Meat",
+      "exclusive",
+      "28"
+    ],
+    [
+      "food_breakfast_sandwich",
+      "Breakfast sandwich",
+      "food_american_cheese",
+      "Cheese",
+      "6",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "Cheese",
+      "multiple",
+      "21"
+    ],
+    [
+      "food_burger",
+      "Burger",
+      "food_beef_patty",
+      "Beef",
+      "1",
+      "Protein",
+      "Yes",
+      "Draft",
+      "Protein",
+      "exclusive",
+      "113"
+    ],
+    [
+      "food_burger",
+      "Burger",
+      "food_grilled_chicken_breast",
+      "Chicken",
+      "2",
+      "Protein",
+      "No",
+      "Draft",
+      "Protein",
+      "exclusive",
+      "113"
+    ],
+    [
+      "food_burger",
+      "Burger",
+      "food_bean_patty",
+      "Bean",
+      "3",
+      "Protein",
+      "No",
+      "Draft",
+      "Protein",
+      "exclusive",
+      "100"
     ]
   ],
   "nutritionProfiles": [
@@ -46669,6 +48142,95 @@
       null,
       null,
       "Not sourced"
+    ],
+    [
+      "food_bagel_whole_wheat",
+      "Whole wheat bagel",
+      "USDA FoodData Central direct profile",
+      250.0,
+      10.2,
+      48.9,
+      1.53,
+      "2707732",
+      "Reviewed USDA record"
+    ],
+    [
+      "food_bagel_multigrain",
+      "Multigrain bagel",
+      "USDA FoodData Central direct profile",
+      241.0,
+      9.9,
+      47.5,
+      1.24,
+      "171852",
+      "Reviewed USDA record"
+    ],
+    [
+      "food_bagel_cinnamon_raisin",
+      "Cinnamon raisin bagel",
+      "USDA FoodData Central direct profile",
+      274.0,
+      9.8,
+      55.2,
+      1.7,
+      "172664",
+      "Reviewed USDA record"
+    ],
+    [
+      "food_bagel_egg",
+      "Egg bagel",
+      "USDA FoodData Central direct profile",
+      278.0,
+      10.6,
+      53.0,
+      2.1,
+      "174901",
+      "Reviewed USDA record"
+    ],
+    [
+      "food_bagel_pumpernickel",
+      "Pumpernickel bagel",
+      "USDA FoodData Central direct profile",
+      250.0,
+      10.2,
+      48.9,
+      1.53,
+      "2707762",
+      "Reviewed USDA record"
+    ],
+    [
+      "food_bagel_sesame",
+      "Sesame bagel",
+      "USDA FoodData Central direct profile",
+      264.0,
+      10.6,
+      52.4,
+      1.32,
+      "2707684",
+      "Reviewed USDA record"
+    ],
+    [
+      "food_bagel_everything",
+      "Everything bagel",
+      "USDA FoodData Central direct profile",
+      264.0,
+      10.6,
+      52.4,
+      1.32,
+      "2707684",
+      "Reviewed USDA record"
+    ],
+    [
+      "food_bean_patty",
+      "Bean patty",
+      "USDA FNDDS analogue",
+      177,
+      15.7,
+      14.3,
+      6.3,
+      "2707473",
+      "Medium · generic veggie patty, no bun",
+      "Locally bundled USDA record is a veggie burger patty without bun; not a bean-specific product. Review match."
     ]
   ]
 }

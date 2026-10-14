@@ -28,7 +28,7 @@ def load_rows(kind: str) -> list[list[object]]:
         return [
             ["Chase Food · Nutrition Review", "2026-10-13"],
             [],
-            ["Canonical identities", len(foods)],
+            ["Catalog identities", len(foods)],
             ["High confidence exact-name matches", counts["High"]],
             ["Medium confidence close matches", counts["Medium"]],
             ["Low confidence approximate matches", counts["Low"]],
@@ -49,7 +49,7 @@ def load_rows(kind: str) -> list[list[object]]:
             ["Alias policy", "Brand and restaurant names point to generic canonical identities; no brand-specific nutrient claim."],
         ]
     if kind == "profiles":
-        headers = ["Food ID", "Canonical food", "Category", "Food kind", "Default unit", "Default grams", "Calories / default", "Carbs g / default", "Fat g / default", "Protein g / default", "Fiber g / default", "Confidence", "Refinement needed", "Review reason", "Matched source", "Matched source ID", "Matched catalog name", "Match basis", "Similarity", "Available in search", "Evidence source URL", "Source serving", "Evidence reviewed", "Composition decision", "Baseline match"]
+        headers = ["Food ID", "Canonical food", "Category", "Food kind", "Default unit", "Default grams", "Calories / default", "Carbs g / default", "Fat g / default", "Protein g / default", "Fiber g / default", "Confidence", "Refinement needed", "Review reason", "Matched source", "Matched source ID", "Matched catalog name", "Match basis", "Similarity", "Available in search", "Evidence source URL", "Source serving", "Evidence reviewed", "Composition decision", "Baseline match", "Options (add-ons and variants)"]
         rows = []
         for food in foods:
             nutrients = food.get("nutrients") or {}
@@ -65,7 +65,10 @@ def load_rows(kind: str) -> list[list[object]]:
                 "; ".join(food["reviewReasons"]), match.get("source", ""), match.get("sourceID", ""),
                 match.get("name", ""), match.get("matchBasis", ""), match.get("similarity"),
                 "No" if food.get("searchEnabled") is False else "Yes",
-                source.get("url", ""),
+                "\n".join(dict.fromkeys(filter(None, [
+                    source.get("url", ""),
+                    *(component.get("url", "") for component in source.get("componentSources", [])),
+                ]))),
                 f"{serving['description']} ({serving['grams']} g)" if serving.get("description") and serving.get("grams") else "",
                 source.get("reviewedDate", ""), (evidence.get("compositionEvidence") or {}).get("decision", ""),
                 (
@@ -75,7 +78,7 @@ def load_rows(kind: str) -> list[list[object]]:
                     f"{food['baselineNutritionSource'].get('matchBasis', '')}; "
                     f"{food['baselineNutritionSource'].get('similarity', '')})"
                     if food.get("baselineNutritionSource") else ""
-                ),
+                ), food.get("optionsSummary", "None"),
             ])
         return [headers, *rows]
     if kind == "aliases":

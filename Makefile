@@ -21,7 +21,7 @@ OFF_PAGES ?= 10
 DEBUG_CATALOG_DIR := data/work/catalogs
 DEBUG_REPORT_DIR := data/work/catalog-reports
 
-.PHONY: setup format lint simulator-ready test ui-test-reorder ui-test-fixture build clean catalog catalog-refresh catalog-grouped-report catalog-family-report catalog-debug-off-search-10000 catalog-debug-gap catalog-debug-report catalog-debug sim-compile sim-build sim-runtime-build sim-launch sim-import-fixture phone-build phone-install phone-launch phone-deploy phone-siri-logs phone-diary-performance-logs phone-wifi-check phone-wifi-deploy chase-food-data chase-food-review
+.PHONY: setup format lint simulator-ready test ui-test-reorder ui-test-fixture build clean catalog catalog-refresh catalog-grouped-report catalog-family-report catalog-debug-off-search-10000 catalog-debug-gap catalog-debug-report catalog-debug sim-compile sim-build sim-runtime-build sim-launch sim-import-fixture phone-build phone-install phone-launch phone-deploy phone-siri-logs phone-diary-performance-logs phone-wifi-check phone-wifi-deploy chase-food-data chase-food-review chase-food-bagel-pdf
 
 setup: catalog
 
@@ -113,6 +113,9 @@ chase-food-data:
 
 chase-food-review: chase-food-data
 	/Users/cseibert/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node scripts/build_chase_food_review.mjs
+
+chase-food-bagel-pdf:
+	swift scripts/render_chase_food_bagel_concept.swift docs/chase-food-bagel-concept.pdf
 
 catalog: chase-food-data
 	$(PYTHON) scripts/build_food_catalog.py --output CalorieTracker/Resources/FoodCatalog.sqlite3

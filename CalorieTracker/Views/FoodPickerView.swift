@@ -80,10 +80,6 @@ struct FoodPickerView: View {
                             isSearching: isSearching,
                             onQuickLogFood: quickLog,
                             onEditFood: { editFood($0) },
-                            onCustomizeFood: { food, configuration in
-                                customizingConfiguration = configuration
-                                customizingFood = food
-                            },
                             onQuickLogConfiguration: quickLogConfiguration,
                             onQuickLogMeal: logMeal,
                             onEditMeal: { selectedMeal = $0 },
@@ -337,8 +333,17 @@ struct FoodPickerView: View {
         let options = catalog.chaseFoodOptions(for: food.sourceID)
         let selected = Set(configuration.selectedOptionIDs)
         var nutrients = food.nutrients(for: 1, unit: .serving, portionID: configuration.portionID)
+        let variant = options.first {
+            $0.relationship.caseInsensitiveCompare("variant") == .orderedSame && selected.contains($0.id)
+        }
+        if let variant {
+            let grams = food.portion(id: configuration.portionID)?.grams ?? food.baseAmountGrams
+            nutrients = variant.food.nutrients(for: grams, unit: .grams)
+        }
         for option in options {
-            guard option.relationship.caseInsensitiveCompare("style") != .orderedSame else { continue }
+            guard option.relationship.caseInsensitiveCompare("style") != .orderedSame,
+                  option.relationship.caseInsensitiveCompare("variant") != .orderedSame else { continue }
+            if variant != nil && option.includedByDefault { continue }
             let included = selected.contains(option.id)
             guard (option.includedByDefault && !included) || (!option.includedByDefault && included) else { continue }
             let value = option.food.nutrients(for: option.amountGrams, unit: .grams)
@@ -930,35 +935,23 @@ struct FoodResultRow: View {
     var preference: QuantityPreference? = nil
     var actionTitle: String? = nil
     var action: (() -> Void)? = nil
-    var customizeAction: (() -> Void)? = nil
+    var openAction: (() -> Void)? = nil
 
     var body: some View {
         HStack(spacing: 12) {
             SourceBadge(source: food.source)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(food.name)
-                    .font(.body.weight(.semibold))
-                    .lineLimit(2)
-                HStack(spacing: 4) {
-                    if let brand = food.displayBrand { Text(brand + " ·") }
-                    Text(nutritionDescription)
+            Group {
+                if let openAction {
+                    Button(action: openAction) {
+                        foodDescription
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Customize \(food.name)")
+                } else {
+                    foodDescription
                 }
-                .font(.caption)
-                .foregroundStyle(AppTheme.muted)
-                .lineLimit(1)
             }
             Spacer()
-            if let customizeAction {
-                Button(action: customizeAction) {
-                    Image(systemName: "pencil")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(AppTheme.muted)
-                        .frame(width: 40, height: 40)
-                        .background(AppTheme.controlFill, in: Circle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Customize \(food.name)")
-            }
             if let actionTitle, let action {
                 AddConfirmationButton(
                     actionTitle: actionTitle,
@@ -973,6 +966,22 @@ struct FoodResultRow: View {
             }
         }
         .padding(.vertical, 4)
+    }
+
+    private var foodDescription: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(food.name)
+                .font(.body.weight(.semibold))
+                .lineLimit(2)
+            HStack(spacing: 4) {
+                if let brand = food.displayBrand { Text(brand + " ·") }
+                Text(nutritionDescription)
+            }
+            .font(.caption)
+            .foregroundStyle(AppTheme.muted)
+            .lineLimit(1)
+        }
+        .contentShape(Rectangle())
     }
 
     private var nutritionDescription: String {
@@ -1040,7 +1049,6 @@ private struct SearchResultsList: View {
     let isSearching: Bool
     let onQuickLogFood: (Food) -> Void
     let onEditFood: (Food) -> Void
-    let onCustomizeFood: (Food, SavedFoodConfiguration?) -> Void
     let onQuickLogConfiguration: (Food, SavedFoodConfiguration) -> Void
     let onQuickLogMeal: (SavedMeal) -> Void
     let onEditMeal: (SavedMeal) -> Void
@@ -1082,33 +1090,53 @@ private struct SearchResultsList: View {
                                         onSearchResultSelected(.food(food))
                                         onQuickLogFood(food)
                                     },
-                                    customizeAction: food.source == .chaseFood ? { onCustomizeFood(food, nil) } : nil
+                                    openAction: food.source == .chaseFood ? {
+                                        onSearchResultSelected(.food(food))
+                                        onEditFood(food)
+                                    } : nil
                                 )
                                 .contentShape(Rectangle())
                                 .onTapGesture {
+                                    guard food.source != .chaseFood else { return }
                                     onSearchResultSelected(.food(food))
                                     onEditFood(food)
                                 }
                                 let variations = diary.document.savedFoodConfigurations
                                     .filter { $0.baseFoodID == food.id }
                                     .sorted { $0.lastUsedAt > $1.lastUsedAt }
-                                ForEach(variations) { configuration in
-                                    Button {
-                                        onSearchResultSelected(.food(food))
+                                    .prefix(2)
+                                ForEach(Array(variations)) { configuration in
+                                    HStack(spacing: 8) {
+                                        Button {
+                                            onSearchResultSelected(.food(food))
                                             onQuickLogConfiguration(food, configuration)
-                                    } label: {
-                                        HStack(spacing: 8) {
-                                            Image(systemName: "arrow.turn.down.right")
-                                                .foregroundStyle(AppTheme.muted)
-                                            Text(configuration.label).lineLimit(1)
-                                            Spacer()
-                                            Image(systemName: "plus.circle.fill").foregroundStyle(AppTheme.coral)
+                                        } label: {
+                                            HStack(spacing: 8) {
+                                                Image(systemName: "arrow.turn.down.right")
+                                                    .foregroundStyle(AppTheme.muted)
+                                                Text(displayLabel(configuration, for: food))
+                                                    .lineLimit(2)
+                                                    .multilineTextAlignment(.leading)
+                                                Spacer(minLength: 0)
+                                            }
+                                            .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
+                                            .contentShape(Rectangle())
                                         }
-                                        .font(.caption.weight(.medium))
-                                        .padding(.leading, 50)
-                                        .padding(.vertical, 5)
+                                        .buttonStyle(.plain)
+                                        .accessibilityLabel("Select saved variation: \(displayLabel(configuration, for: food))")
+                                        AddConfirmationButton(
+                                            actionTitle: "Quick add",
+                                            itemName: displayLabel(configuration, for: food),
+                                            action: {
+                                                onSearchResultSelected(.food(food))
+                                                onQuickLogConfiguration(food, configuration)
+                                            }
+                                        )
+                                        .frame(minWidth: 44, minHeight: 44)
                                     }
-                                    .buttonStyle(.plain)
+                                    .font(.subheadline.weight(.medium))
+                                    .padding(.leading, 60)
+                                    .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
                                 }
                             }
                         case .meal(let meal):
@@ -1136,6 +1164,22 @@ private struct SearchResultsList: View {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
         }
+    }
+
+    private func displayLabel(_ configuration: SavedFoodConfiguration, for food: Food) -> String {
+        var label = configuration.label.trimmingCharacters(in: .whitespacesAndNewlines)
+        let foodName = food.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let redundantPrefixes = [" · ", " • ", ", "]
+            .map { foodName + $0 }
+        if let prefix = redundantPrefixes.first(where: {
+            label.range(of: $0, options: .caseInsensitive).map { $0.lowerBound == label.startIndex } ?? false
+        }) {
+            label = String(label.dropFirst(prefix.count))
+        }
+        return label
+            .replacingOccurrences(of: " · ", with: ", ")
+            .replacingOccurrences(of: " • ", with: ", ")
+            .trimmingCharacters(in: CharacterSet(charactersIn: ", "))
     }
 }
 
@@ -1224,8 +1268,12 @@ private struct ChaseFoodCustomizeView: View {
     @State private var selectedOptionIDs: Set<String>
     @State private var selectedExtraFoodIDs: Set<String>
     @State private var portionID: String
+    @State private var amount = 1.0
+    @State private var unitChoice: QuantityUnitChoice
     @State private var ingredientQuery = ""
     @State private var suggestedChanges = ""
+    @State private var showingIngredientSearch = false
+    @FocusState private var amountIsFocused: Bool
 
     init(food: Food, catalog: CatalogStore, date: Date, initialConfiguration: SavedFoodConfiguration?) {
         self.food = food
@@ -1236,10 +1284,19 @@ private struct ChaseFoodCustomizeView: View {
         _selectedOptionIDs = State(initialValue: Set(initialConfiguration?.selectedOptionIDs
             ?? options.filter(\.includedByDefault).map(\.id)))
         _selectedExtraFoodIDs = State(initialValue: Set(initialConfiguration?.components.map(\.food.id) ?? []))
-        _portionID = State(initialValue: initialConfiguration?.portionID ?? food.availablePortions.first?.id ?? "")
+        let initialPortionID = initialConfiguration?.portionID ?? food.availablePortions.first?.id ?? ""
+        _portionID = State(initialValue: initialPortionID)
+        _unitChoice = State(initialValue: initialPortionID.isEmpty ? .ounces : .portion(initialPortionID))
     }
 
     private var options: [ChaseFoodOption] { catalog.chaseFoodOptions(for: food.sourceID) }
+    private var recentConfigurations: [SavedFoodConfiguration] {
+        diary.document.savedFoodConfigurations
+            .filter { $0.baseFoodID == food.id }
+            .sorted { $0.lastUsedAt > $1.lastUsedAt }
+            .prefix(5)
+            .map { $0 }
+    }
     private var optionGroups: [ChaseFoodOptionGroup] {
         var grouped: [String: [ChaseFoodOption]] = [:]
         for option in options {
@@ -1260,7 +1317,8 @@ private struct ChaseFoodCustomizeView: View {
     private var additionOptions: [ChaseFoodOption] { options.filter { $0.optionGroup == nil && !$0.includedByDefault } }
     private var extraFoods: [Food] {
         selectedExtraFoodIDs.compactMap { id in
-            if let saved = initialConfiguration?.components.first(where: { $0.food.id == id }) { return saved.food }
+            if let saved = diary.document.savedFoodConfigurations
+                .lazy.flatMap(\.components).first(where: { $0.food.id == id }) { return saved.food }
             let pieces = id.components(separatedBy: ":")
             guard pieces.count >= 2, let source = FoodSource(rawValue: pieces[0]) else { return nil }
             return catalog.food(sourceID: pieces.dropFirst().joined(separator: ":"), source: source)
@@ -1272,10 +1330,45 @@ private struct ChaseFoodCustomizeView: View {
         return catalog.searchAll(query, limit: 8).filter { $0.id != food.id }
     }
     private var selectedPortionID: String? { portionID.isEmpty ? nil : portionID }
+    private var selectedPortionGrams: Double {
+        food.portion(id: selectedPortionID)?.grams ?? food.baseAmountGrams
+    }
+    private var quantityInSelectedPortions: Double {
+        switch unitChoice {
+        case .portion:
+            max(amount, 0)
+        case .grams:
+            max(amount, 0) / max(selectedPortionGrams, 0.001)
+        case .ounces:
+            max(amount, 0) * 28.349_523_125 / max(selectedPortionGrams, 0.001)
+        }
+    }
+    private var selectedUnit: LogUnit {
+        switch unitChoice {
+        case .portion: .serving
+        case .grams: .grams
+        case .ounces: .ounces
+        }
+    }
     private var totalNutrients: MacroNutrients {
+        configuredPortionNutrients.scaled(by: quantityInSelectedPortions)
+    }
+    private var configuredPortionNutrients: MacroNutrients {
         var total = food.nutrients(for: 1, unit: .serving, portionID: selectedPortionID)
+        // A variant replaces the canonical base at the selected portion size.
+        // It must not be added on top of a second copy of the same food.
+        let selectedVariant = options.first(where: {
+            $0.relationship.caseInsensitiveCompare("variant") == .orderedSame
+                && selectedOptionIDs.contains($0.id)
+        })
+        if let selectedVariant {
+            let grams = food.portion(id: selectedPortionID)?.grams ?? food.baseAmountGrams
+            total = selectedVariant.food.nutrients(for: grams, unit: .grams)
+        }
         for option in options {
-            guard option.relationship.caseInsensitiveCompare("style") != .orderedSame else { continue }
+            guard option.relationship.caseInsensitiveCompare("style") != .orderedSame,
+                  option.relationship.caseInsensitiveCompare("variant") != .orderedSame else { continue }
+            if selectedVariant != nil && option.includedByDefault { continue }
             let selected = selectedOptionIDs.contains(option.id)
             guard (option.includedByDefault && !selected) || (!option.includedByDefault && selected) else { continue }
             let nutrients = option.food.nutrients(for: option.amountGrams, unit: .grams)
@@ -1295,115 +1388,530 @@ private struct ChaseFoodCustomizeView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Size") {
-                    if food.availablePortions.isEmpty {
-                        Text("1 serving · \(food.baseAmountGrams.cleanAmount) g")
-                    } else {
-                        Picker("Portion", selection: $portionID) {
-                            ForEach(food.availablePortions) { portion in
-                                Text("\(portion.label) · \(portion.grams.cleanAmount) g").tag(portion.id)
-                            }
-                        }
-                    }
-                }
-                ForEach(optionGroups) { group in
-                    Section(group.name) {
-                        if group.selectionMode == "exclusive" {
-                            Picker(group.name, selection: exclusiveSelection(for: group)) {
-                                Text("None").tag("")
-                                ForEach(group.options) { option in
-                                    Text(option.displayName).tag(option.id)
+            VStack(spacing: 0) {
+                stickyFoodSummary
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 26) {
+                        if !includedOptions.isEmpty || !additionOptions.isEmpty {
+                            VStack(alignment: .leading, spacing: 12) {
+                                sectionLabel("Add to this food or meal")
+                                Text("Tap any option; totals update instantly.")
+                                    .font(.subheadline)
+                                    .foregroundStyle(AppTheme.muted)
+                                LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+                                    ForEach(includedOptions) { option in
+                                        optionPill(option, defaultSelected: true)
+                                    }
+                                    ForEach(additionOptions) { option in
+                                        optionPill(option, defaultSelected: false)
+                                    }
                                 }
                             }
-                        } else {
-                            ForEach(group.options) { option in
-                                optionToggle(option, defaultSelected: option.includedByDefault)
+                        }
+
+                        ForEach(optionGroups) { group in
+                            optionSection(group.name, options: group.options)
+                        }
+
+                        VStack(alignment: .leading, spacing: 12) {
+                            sectionLabel("Add another ingredient")
+                            Button {
+                                ingredientQuery = ""
+                                showingIngredientSearch = true
+                            } label: {
+                                Label("Add another food", systemImage: "plus")
+                                    .font(.body.weight(.semibold))
+                                    .foregroundStyle(AppTheme.coral)
+                                    .frame(maxWidth: .infinity, minHeight: 54, alignment: .leading)
+                                    .padding(.horizontal, 16)
+                                    .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 16))
+                                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppTheme.controlFill, lineWidth: 1))
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityIdentifier("custom-food-add-ingredient")
+                            if !extraFoods.isEmpty {
+                                LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+                                    ForEach(extraFoods) { ingredient in
+                                        selectionPill(
+                                            title: ingredient.name,
+                                            detail: "Added · tap to remove",
+                                            isSelected: true
+                                        ) { toggleExtraFood(ingredient) }
+                                    }
+                                }
                             }
                         }
-                    }
-                }
-                if !includedOptions.isEmpty {
-                    Section("Included by default · tap to remove") {
-                        ForEach(includedOptions) { option in
-                            optionToggle(option, defaultSelected: true)
+
+                        VStack(alignment: .leading, spacing: 10) {
+                            NavigationLink {
+                                SuggestedChangesEditor(text: $suggestedChanges)
+                            } label: {
+                                Text("Suggest a change")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(AppTheme.coral)
+                                    .underline()
+                                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityIdentifier("custom-food-show-suggestions")
                         }
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 20)
+                    .padding(.bottom, 160)
+                    .frame(maxWidth: 620, alignment: .leading)
+                    .frame(maxWidth: .infinity)
                 }
-                if !additionOptions.isEmpty {
-                    Section("Add to this food or meal") {
-                        ForEach(additionOptions) { option in
-                            optionToggle(option, defaultSelected: false)
-                        }
-                    }
-                }
-                Section("Add another ingredient") {
-                    TextField("Search foods", text: $ingredientQuery)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
+                .scrollIndicators(.hidden)
+            }
+            .background(AppTheme.background.ignoresSafeArea())
+            .safeAreaInset(edge: .bottom, spacing: 0) { nutritionAndLogFooter }
+            .sheet(isPresented: $showingIngredientSearch) { ingredientSearchSheet }
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+
+    private var ingredientSearchSheet: some View {
+        NavigationStack {
+            List {
+                if ingredientQuery.trimmingCharacters(in: .whitespacesAndNewlines).count < 2 {
+                    Text("Search for a food to add it to this meal.")
+                        .foregroundStyle(AppTheme.muted)
+                } else if ingredientSearchResults.isEmpty {
+                    ContentUnavailableView.search(text: ingredientQuery)
+                } else {
                     ForEach(ingredientSearchResults) { ingredient in
                         Button {
-                            if selectedExtraFoodIDs.contains(ingredient.id) {
-                                selectedExtraFoodIDs.remove(ingredient.id)
-                            } else {
-                                selectedExtraFoodIDs.insert(ingredient.id)
+                            if !selectedExtraFoodIDs.contains(ingredient.id) {
+                                toggleExtraFood(ingredient)
                             }
+                            showingIngredientSearch = false
                         } label: {
-                            HStack {
-                                Text(ingredient.name)
+                            HStack(spacing: 12) {
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(ingredient.name)
+                                        .font(.body.weight(.medium))
+                                        .foregroundStyle(AppTheme.ink)
+                                    Text("\(Int(ingredient.nutrients(for: 1, unit: .serving).calories.rounded())) kcal · 1 serving")
+                                        .font(.caption)
+                                        .foregroundStyle(AppTheme.muted)
+                                }
                                 Spacer()
                                 Image(systemName: selectedExtraFoodIDs.contains(ingredient.id) ? "checkmark.circle.fill" : "plus.circle")
                                     .foregroundStyle(AppTheme.coral)
                             }
+                            .contentShape(Rectangle())
                         }
+                        .buttonStyle(.plain)
                     }
-                    ForEach(extraFoods) { ingredient in
-                        LabeledContent("Added", value: ingredient.name)
-                    }
-                }
-                Section("Nutrition · updates as you customize") {
-                    LabeledContent("Calories", value: "\(Int(totalNutrients.calories.rounded())) kcal")
-                    LabeledContent("Protein", value: "\(totalNutrients.protein.cleanAmount) g")
-                    LabeledContent("Carbs", value: "\(totalNutrients.carbs.cleanAmount) g")
-                    LabeledContent("Fat", value: "\(totalNutrients.fat.cleanAmount) g")
-                    LabeledContent("Fiber", value: totalNutrients.fiber.map { "\($0.cleanAmount) g" } ?? "—")
-                }
-                Section("Suggested changes · optional") {
-                    TextEditor(text: $suggestedChanges)
-                        .frame(minHeight: 100)
-                    Text("This feedback is saved with your diary data and sent to your analytics server.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
                 }
             }
-            .scrollContentBackground(.hidden)
-            .background(AppTheme.background)
-            .navigationTitle("Customize \(food.name)")
+            .listStyle(.plain)
+            .searchable(text: $ingredientQuery, prompt: "Search foods")
+            .navigationTitle("Add ingredient")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") { logConfiguration() }
-                        .fontWeight(.semibold)
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") { showingIngredientSearch = false }
                 }
             }
         }
     }
 
-    @ViewBuilder
-    private func optionToggle(_ option: ChaseFoodOption, defaultSelected: Bool) -> some View {
-        Toggle(isOn: Binding(
-            get: { selectedOptionIDs.contains(option.id) },
-            set: { selected in
-                if selected { selectedOptionIDs.insert(option.id) } else { selectedOptionIDs.remove(option.id) }
-            }
-        )) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(option.displayName)
-                Text("\(Int(option.food.nutrients(for: option.amountGrams, unit: .grams).calories.rounded())) cal · \(option.amountGrams.cleanAmount) g")
+    private struct SuggestedChangesEditor: View {
+        @Environment(\.dismiss) private var dismiss
+        @Binding var text: String
+
+        var body: some View {
+            VStack(alignment: .leading, spacing: 12) {
+                TextEditor(text: $text)
+                    .frame(minHeight: 180)
+                    .padding(8)
+                    .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 16))
+                    .accessibilityIdentifier("custom-food-suggested-changes")
+                Text("This feedback is saved with your diary data and sent to your analytics server.")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(AppTheme.muted)
+                Spacer(minLength: 0)
             }
+            .padding(20)
+            .background(AppTheme.background.ignoresSafeArea())
+            .navigationTitle("Suggested changes")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private var stickyFoodSummary: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Button { dismiss() } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(AppTheme.coral)
+                        .frame(width: 36, height: 36, alignment: .leading)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Back")
+                .accessibilityIdentifier("custom-food-back")
+                Text(food.name)
+                    .font(.title2.weight(.bold))
+                    .foregroundStyle(AppTheme.ink)
+                    .lineLimit(1)
+                    .accessibilityIdentifier("custom-food-sticky-title")
+                Spacer(minLength: 0)
+                Menu {
+                    if recentConfigurations.isEmpty {
+                        Text("No saved variations yet")
+                    } else {
+                        Section("Recent variations") {
+                            ForEach(recentConfigurations) { configuration in
+                                Button(displayLabel(configuration)) {
+                                    apply(configuration)
+                                }
+                            }
+                        }
+                    }
+                } label: {
+                    Image(systemName: "line.3.horizontal")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(AppTheme.muted)
+                        .frame(width: 36, height: 36)
+                        .contentShape(Rectangle())
+                }
+                .accessibilityLabel("Recent variations")
+                .accessibilityIdentifier("custom-food-recent-variations")
+            }
+            HStack(spacing: 12) {
+                calorieValue
+                macroValue("Carbs", value: totalNutrients.carbs, color: AppTheme.carbs)
+                Spacer(minLength: 0)
+                macroValue("Fat", value: totalNutrients.fat, color: AppTheme.fat)
+                Spacer(minLength: 0)
+                macroValue("Protein", value: totalNutrients.protein, color: AppTheme.protein)
+            }
+            macroBar
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 12)
+        .padding(.bottom, 14)
+        .frame(maxWidth: 620, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(AppTheme.background)
+        .overlay(alignment: .bottom) { AppTheme.controlFill.frame(height: 1) }
+    }
+
+    private var nutritionAndLogFooter: some View {
+        VStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("PORTION & QUANTITY")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(AppTheme.muted)
+                quantityControls
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 22))
+            .overlay(RoundedRectangle(cornerRadius: 22).stroke(AppTheme.controlFill, lineWidth: 1))
+
+            Button(action: logConfiguration) {
+                Text("Log Food")
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 58)
+                    .background(AppTheme.coral, in: RoundedRectangle(cornerRadius: 20))
+            }
+            .buttonStyle(.plain)
+            .disabled(amount <= 0)
+            .opacity(amount <= 0 ? 0.5 : 1)
+            .shadow(color: AppTheme.coral.opacity(0.24), radius: 10, y: 5)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
+        .background {
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .overlay(AppTheme.background.opacity(0.72))
+                .ignoresSafeArea(edges: .bottom)
+        }
+    }
+
+    private var calorieValue: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 3) {
+            Text("\(Int(totalNutrients.calories.rounded()))")
+                .font(.subheadline.weight(.bold).monospacedDigit())
+                .foregroundStyle(AppTheme.ink)
+                .contentTransition(.numericText())
+            Text("kcal")
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(AppTheme.muted)
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.75)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Calories \(Int(totalNutrients.calories.rounded())) kcal")
+        .accessibilityIdentifier("custom-food-estimate-calories")
+    }
+
+    private var quantityControls: some View {
+        HStack(spacing: 5) {
+            quantityAdjusterButton(
+                title: "−1",
+                accessibilityLabel: "Decrease quantity by one",
+                amountDelta: -1,
+                isDisabled: amount <= 1
+            )
+            amountField
+            quantityAdjusterButton(
+                title: "+1",
+                accessibilityLabel: "Increase quantity by one",
+                amountDelta: 1,
+                isDisabled: false
+            )
+            Menu {
+                Picker("Unit", selection: unitSelection) {
+                    ForEach(availableChoices, id: \.self) { choice in
+                        Text(label(for: choice)).tag(choice)
+                    }
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Text(label(for: unitChoice))
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
+                    Image(systemName: "chevron.down")
+                        .font(.caption2.weight(.bold))
+                }
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(AppTheme.coral)
+                .padding(.horizontal, 9)
+                .frame(minWidth: 76, minHeight: 40, maxHeight: 40)
+                .background(AppTheme.coral.opacity(0.10), in: Capsule())
+            }
+            .fixedSize(horizontal: true, vertical: false)
+            .layoutPriority(1)
+            .accessibilityLabel("Portion or unit")
+            .accessibilityValue(label(for: unitChoice))
+            .accessibilityIdentifier("custom-food-unit-picker")
+        }
+    }
+
+    private var availableChoices: [QuantityUnitChoice] {
+        food.availablePortions.map { .portion($0.id) } + [.ounces, .grams]
+    }
+
+    private var unitSelection: Binding<QuantityUnitChoice> {
+        Binding(
+            get: { unitChoice },
+            set: { choice in
+                switch choice {
+                case .portion(let id):
+                    if case .portion = unitChoice {
+                        portionID = id
+                    } else {
+                        portionID = id
+                        amount = 1
+                    }
+                case .grams, .ounces:
+                    let grams = currentQuantityInGrams
+                    unitChoice = choice
+                    amount = choice == .grams ? grams : grams / 28.349_523_125
+                }
+                unitChoice = choice
+                amountIsFocused = false
+            }
+        )
+    }
+
+    private var currentQuantityInGrams: Double {
+        switch unitChoice {
+        case .portion: amount * selectedPortionGrams
+        case .grams: amount
+        case .ounces: amount * 28.349_523_125
+        }
+    }
+
+    private var amountField: some View {
+        TextField("Amount", value: $amount, format: .number.precision(.fractionLength(0...2)))
+            .keyboardType(.decimalPad)
+            .focused($amountIsFocused)
+            .font(.subheadline.weight(.bold).monospacedDigit())
+            .multilineTextAlignment(.center)
+            .frame(width: 48)
+            .padding(.horizontal, 4)
+            .padding(.vertical, 9)
+            .background(AppTheme.controlFill, in: RoundedRectangle(cornerRadius: 10))
+            .accessibilityLabel("Quantity")
+            .accessibilityIdentifier("custom-food-quantity-value")
+    }
+
+    private func quantityAdjusterButton(
+        title: String,
+        accessibilityLabel: String,
+        amountDelta: Double,
+        isDisabled: Bool
+    ) -> some View {
+        Button {
+            let adjustedAmount = amount + amountDelta
+            guard adjustedAmount > 0 else { return }
+            amount = adjustedAmount
+            amountIsFocused = false
+        } label: {
+            Text(title)
+                .font(.caption.weight(.bold).monospacedDigit())
+                .frame(width: 30, height: 36)
+                .background(AppTheme.controlFill, in: Circle())
+                .overlay(Circle().stroke(AppTheme.coral, lineWidth: 1.25))
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(AppTheme.coral)
+        .disabled(isDisabled)
+        .opacity(isDisabled ? 0.4 : 1)
+        .accessibilityLabel(accessibilityLabel)
+        .accessibilityIdentifier(amountDelta < 0 ? "custom-food-quantity-minus" : "custom-food-quantity-plus")
+    }
+
+    private func label(for choice: QuantityUnitChoice) -> String {
+        return switch choice {
+        case .ounces: "ounces"
+        case .grams: "grams"
+        case .portion(let id):
+            if let portion = food.portion(id: id) { portionDisplayLabel(portion) }
+            else { "serving" }
+        }
+    }
+
+    private func portionDisplayLabel(_ portion: FoodPortion) -> String {
+        var label = portion.label.trimmingCharacters(in: .whitespacesAndNewlines)
+        let suffix = food.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        if suffix.caseInsensitiveCompare("Taco") == .orderedSame,
+           let qualifier = label.range(of: " (", options: .backwards) {
+            label = String(label[..<qualifier.lowerBound])
+        }
+        guard !suffix.isEmpty,
+              label.lowercased().hasSuffix(" " + suffix.lowercased()) else { return label }
+        return String(label.dropLast(suffix.count)).trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var macroBar: some View {
+        let carbs = max(totalNutrients.carbs, 0)
+        let fat = max(totalNutrients.fat, 0)
+        let protein = max(totalNutrients.protein, 0)
+        let total = carbs + fat + protein
+        return GeometryReader { geometry in
+            HStack(spacing: 0) {
+                if total > 0 {
+                    Rectangle().fill(AppTheme.carbs).frame(width: geometry.size.width * CGFloat(carbs / total))
+                    Rectangle().fill(AppTheme.fat).frame(width: geometry.size.width * CGFloat(fat / total))
+                    Rectangle().fill(AppTheme.protein).frame(width: geometry.size.width * CGFloat(protein / total))
+                } else {
+                    Rectangle().fill(AppTheme.controlFill)
+                }
+            }
+            .clipShape(Capsule())
+        }
+        .frame(height: 9)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Carbs \(carbs.cleanAmount) grams, fat \(fat.cleanAmount) grams, protein \(protein.cleanAmount) grams")
+        .accessibilityIdentifier("custom-food-macro-bar")
+    }
+
+    private func macroValue(_ title: String, value: Double, color: Color) -> some View {
+        HStack(spacing: 5) {
+            Text(title).foregroundStyle(AppTheme.muted)
+            Text("\(value.cleanAmount) g").foregroundStyle(color)
+        }
+        .font(.caption.weight(.medium))
+        .lineLimit(1)
+        .minimumScaleFactor(0.8)
+    }
+
+    private func sectionLabel(_ title: String) -> some View {
+        Text(title.uppercased())
+            .font(.caption.weight(.bold))
+            .foregroundStyle(AppTheme.muted)
+    }
+
+    private func optionSection(_ title: String, options: [ChaseFoodOption]) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionLabel(title)
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+                ForEach(options) { option in optionPill(option, defaultSelected: option.includedByDefault) }
+            }
+        }
+    }
+
+    private func optionPill(_ option: ChaseFoodOption, defaultSelected: Bool) -> some View {
+        let selected = selectedOptionIDs.contains(option.id)
+        let calories = Int(option.food.nutrients(for: option.amountGrams, unit: .grams).calories.rounded())
+        return selectionPill(
+            title: option.displayName,
+            detail: defaultSelected ? "\(calories) kcal" : "+\(calories) kcal",
+            isSelected: selected
+        ) { setOption(option, selected: !selected) }
+    }
+
+    private func selectionPill(title: String, detail: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 9) {
+                Circle()
+                    .fill(isSelected ? AppTheme.coral : AppTheme.muted.opacity(0.45))
+                    .frame(width: 10, height: 10)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(.subheadline.weight(isSelected ? .semibold : .regular))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.78)
+                    Text(detail)
+                        .font(.caption)
+                        .foregroundStyle(isSelected ? AppTheme.coral : AppTheme.muted)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+                Spacer(minLength: 0)
+                if isSelected {
+                    Image(systemName: "checkmark")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(AppTheme.coral)
+                }
+            }
+            .padding(.horizontal, 12)
+            .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
+            .background(isSelected ? AppTheme.coral.opacity(0.13) : AppTheme.card, in: RoundedRectangle(cornerRadius: 16))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(isSelected ? AppTheme.coral : AppTheme.controlFill, lineWidth: 1.25))
+            .contentShape(RoundedRectangle(cornerRadius: 16))
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(AppTheme.ink)
+        .accessibilityLabel(title)
+        .accessibilityValue("\(isSelected ? "Selected" : "Not selected"), \(detail)")
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+
+    private func setOption(_ option: ChaseFoodOption, selected: Bool) {
+        guard let group = option.optionGroup,
+              let definition = optionGroups.first(where: { $0.name == group }),
+              definition.selectionMode == "exclusive" else {
+            if selected { selectedOptionIDs.insert(option.id) } else { selectedOptionIDs.remove(option.id) }
+            return
+        }
+        for candidate in definition.options { selectedOptionIDs.remove(candidate.id) }
+        if selected { selectedOptionIDs.insert(option.id) }
+    }
+
+    private func toggleExtraFood(_ ingredient: Food) {
+        if selectedExtraFoodIDs.contains(ingredient.id) {
+            selectedExtraFoodIDs.remove(ingredient.id)
+        } else {
+            selectedExtraFoodIDs.insert(ingredient.id)
         }
     }
 
@@ -1418,29 +1926,68 @@ private struct ChaseFoodCustomizeView: View {
     }
 
     private var configuredComponents: [MealItem] {
+        let hasVariant = options.contains {
+            $0.relationship.caseInsensitiveCompare("variant") == .orderedSame
+                && selectedOptionIDs.contains($0.id)
+        }
         var selected = options.filter {
             selectedOptionIDs.contains($0.id) && $0.food.id != food.id
                 && $0.relationship.caseInsensitiveCompare("style") != .orderedSame
+                && (!hasVariant || !$0.includedByDefault || $0.relationship.caseInsensitiveCompare("variant") == .orderedSame)
         }.map { option in
-            MealItem(id: UUID(), food: option.food, amount: option.amountGrams, unit: .grams)
+            let amount = option.relationship.caseInsensitiveCompare("variant") == .orderedSame
+                ? (food.portion(id: selectedPortionID)?.grams ?? food.baseAmountGrams)
+                : option.amountGrams
+            return MealItem(id: UUID(), food: option.food, amount: amount, unit: .grams)
         }
         selected += extraFoods.map { MealItem(id: UUID(), food: $0, amount: 1, unit: .serving) }
         return selected
     }
 
     private var variationLabel: String {
+        let hasVariant = options.contains {
+            $0.relationship.caseInsensitiveCompare("variant") == .orderedSame
+                && selectedOptionIDs.contains($0.id)
+        }
         let details = options.filter {
             selectedOptionIDs.contains($0.id) && $0.food.id != food.id
                 && $0.relationship.caseInsensitiveCompare("style") != .orderedSame
         }.map(\.displayName)
             + extraFoods.map(\.name)
-            + includedOptions.filter { !selectedOptionIDs.contains($0.id) }.map { "no \($0.food.name.lowercased())" }
+            + (hasVariant ? [] : includedOptions.filter { !selectedOptionIDs.contains($0.id) }.map { "no \($0.food.name.lowercased())" })
         let style = options.first {
             $0.optionGroup == "Style" && selectedOptionIDs.contains($0.id) && !$0.includedByDefault
         }?.displayName
         let namedDetails = details + (style.map { [$0] } ?? [])
-        let portion = food.portion(id: selectedPortionID)?.label ?? "serving"
-        return "\(food.name) · \(portion)" + (namedDetails.isEmpty ? "" : ", \(namedDetails.joined(separator: ", "))")
+        let portion = food.portion(id: selectedPortionID).map(portionDisplayLabel) ?? "serving"
+        let normalizedPortion = portion.replacingOccurrences(of: " · ", with: ", ")
+        return ([normalizedPortion] + namedDetails).joined(separator: ", ")
+    }
+
+    private func displayLabel(_ configuration: SavedFoodConfiguration) -> String {
+        var label = configuration.label.trimmingCharacters(in: .whitespacesAndNewlines)
+        let foodName = food.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        for separator in [" · ", " • ", ", "] {
+            let prefix = foodName + separator
+            if label.range(of: prefix, options: .caseInsensitive).map({ $0.lowerBound == label.startIndex }) == true {
+                label = String(label.dropFirst(prefix.count))
+                break
+            }
+        }
+        return label.replacingOccurrences(of: " · ", with: ", ")
+            .replacingOccurrences(of: " • ", with: ", ")
+            .trimmingCharacters(in: CharacterSet(charactersIn: ", "))
+    }
+
+    private func apply(_ configuration: SavedFoodConfiguration) {
+        selectedOptionIDs = Set(configuration.selectedOptionIDs)
+        selectedExtraFoodIDs = Set(configuration.components.map(\.food.id))
+        if let portionID = configuration.portionID, food.portion(id: portionID) != nil {
+            self.portionID = portionID
+            unitChoice = .portion(portionID)
+            amount = 1
+        }
+        amountIsFocused = false
     }
 
     private func logConfiguration() {
@@ -1459,7 +2006,8 @@ private struct ChaseFoodCustomizeView: View {
             try await diary.logConfiguredFood(
                 food, nutrients: totalNutrients, selectedOptionIDs: Array(selectedOptionIDs).sorted(),
                 components: configuredComponents, suggestedChanges: note.isEmpty ? nil : note,
-                portionID: selectedPortionID, configuration: configuration, suggestion: suggestion, on: date,
+                portionID: selectedPortionID, amount: amount, unit: selectedUnit,
+                configuration: configuration, suggestion: suggestion, on: date,
                 allowCheatDay: true
             )
             if diary.entries(on: date).count > previousCount {

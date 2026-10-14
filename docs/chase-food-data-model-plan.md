@@ -4,7 +4,8 @@
 source toggles, configurable logging, saved variations, and food feedback.
 
 **Visual reference:** [Chase Food customization concepts](chase-food-concepts.pdf)
-is saved alongside the project documentation. It shows the source settings,
+and the [Bagel customization concept](chase-food-bagel-concept.pdf) are saved
+alongside the project documentation. They show the source settings,
 canonical search, customization screens, and example foods. Its nutrition
 figures are mock values and must not be imported as catalog data.
 
@@ -57,15 +58,18 @@ Do not make the app fetch the workbook or cookbook at runtime.
 | `chase_food_metadata` | One row per Chase Food identity with category, food kind, confidence, review reasons, and matched source provenance. |
 | `chase_food_aliases` | Stable target food ID, alias text, and alias kind (`canonical`, `synonym`, or `brand`). FTS indexes canonical names and approved aliases; results deduplicate by target ID. |
 | `chase_food_options` | Parent/option/component IDs, component label and grams, relationship, default-selected flag, order, optional group name, and selection mode (`exclusive` or `multiple`). Component references point to reusable catalog foods. |
+| Food table options summary | A human-readable `Options (add-ons and variants)` column derived from structured option and included-composition rows. Regenerate it during every catalog preparation and in the nutrition review workbook. |
 | `metadata` | Dataset revision and identity count, alongside the existing catalog metadata. |
 
 `foods` remains the compatibility surface used by existing search, logging,
 portion, and diary code. The options table defines removable included foods,
-single-choice groups, multi-choice groups, and suggested additions. Each option
-points to a reusable nutrient-bearing `Food` record and an amount; do not store
-ad hoc calorie deltas for modifiers. The builder stores the matched profile as
-the canonical default. Searchable options adjust that total by the difference
-from their default-selected state.
+single-choice groups, multi-choice groups, suggested additions, and food
+variants. Each option points to a reusable nutrient-bearing `Food` record and
+an amount; do not store ad hoc calorie deltas for modifiers. The builder stores
+the matched profile as the canonical default. Additions adjust that total by
+the difference from their default-selected state. A `variant` option replaces
+the canonical profile at the selected portion weight, then appears as a logged
+component when it is not the canonical base itself.
 
 The stable catalog identity is `chaseFood:<sourceID>` (for example,
 `chaseFood:food_burger`). Add Chase Food to `FoodCatalogIdentity` wherever
@@ -148,8 +152,8 @@ review rather than silently dropping it.
 
 ### Nutrition quality and initial data
 
-The source workbook now contains 514 food identities, 1,908 portions, 1,210
-deduplicated aliases, 313 configurable component options, and 28 presets. Its nutrition values are screening estimates matched to the
+The source workbook now contains 521 catalog identities, 1,908 portions, 1,217
+alias records, 321 configurable component options, and 28 presets. Its nutrition values are screening estimates matched to the
 existing catalog; they are not recipe analyses or product-label values. The
 first pass matches each identity to the existing bundled USDA/Open Food Facts catalog and scales the selected
 record to the workbook's default grams. Every match records its source ID,
@@ -162,9 +166,10 @@ builder.
 The data build should consume checked-in, reviewable source files under a
 dedicated `data/chase-food/` directory and produce the Chase Food rows and
 metadata as part of `FoodCatalog.sqlite3`. Keep source IDs stable across builds.
-Expose all 514 searchable taxonomy identities, including the generic Sandwich and
-protein-powder/cereal/milk components added for customization; keep category and food-kind metadata in
-the data if useful for curation, but do not include them in result rows.
+Expose searchable canonical identities while keeping legacy history records and
+nutrient-bearing option components available by stable ID but out of search.
+Keep category and food-kind metadata in the data if useful for curation, but do
+not include them in result rows.
 
 ### Storage migration
 
@@ -214,8 +219,9 @@ used as nutrient sources.
 
 ## Approved implementation decisions
 
-- Expose all 514 workbook identities in Chase Food. Confidence and review
-  reasons are tracked per identity in the synchronized review spreadsheet.
+- Expose searchable canonical identities in Chase Food. Keep history-only and
+  internal option-component records resolvable by stable ID. Confidence and
+  review reasons are tracked per identity in the synchronized review spreadsheet.
 - Keep USDA and Open Food Facts enabled and Chase Food disabled by default;
   disabling a source only filters new catalog discovery and leaves diary
   snapshots intact.
@@ -233,3 +239,8 @@ used as nutrient sources.
   additions (such as sandwich spreads), removable base ingredients, portion
   sizes, and relevant side dishes. Keep internal style choices out of diary
   constituent foods.
+- Use one searchable `Bagel` identity. Cream cheese is an optional spread, and
+  bagel types are mutually exclusive nutrient-bearing variants; selecting a
+  type replaces the base profile at the chosen portion size. Keep the former
+  `food_bagel_with_cream_cheese` identity history-only and route its search
+  aliases to `food_bagel`.

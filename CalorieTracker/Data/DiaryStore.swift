@@ -555,6 +555,8 @@ class DiaryStore: ObservableObject {
         components: [MealItem],
         suggestedChanges: String?,
         portionID: String?,
+        amount: Double = 1,
+        unit: LogUnit = .serving,
         configuration: SavedFoodConfiguration,
         suggestion: FoodSuggestion?,
         on date: Date,
@@ -563,7 +565,8 @@ class DiaryStore: ObservableObject {
         try await perform(scope: .day(date)) { engine in
             engine.logConfiguredFood(food, nutrients: nutrients, selectedOptionIDs: selectedOptionIDs,
                                      components: components, suggestedChanges: suggestedChanges,
-                                     portionID: portionID, on: date, allowCheatDay: allowCheatDay)
+                                     portionID: portionID, amount: amount, unit: unit,
+                                     on: date, allowCheatDay: allowCheatDay)
             engine.saveFoodConfiguration(configuration)
             if let suggestion { engine.saveFoodSuggestion(suggestion) }
         }

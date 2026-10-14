@@ -12,11 +12,19 @@ evaluate Chase Food on its own.
 
 The workbook is [Canonical U.S. Food Taxonomy — Review Draft](https://docs.google.com/spreadsheets/d/16Y1Uc0jldJ4tGO_vf5mgjT0n8pwJxO13W54zR5M_wWo/edit).
 The preceding [Canonical Food List Criteria conversation](https://chatgpt.com/share/6ace459c-9910-83e8-b7db-44bcaa4894be)
-provides the rationale and initial model. The current review dataset has 514 food
-identities, 1,908 portion mappings, 1,210 deduplicated search terms, 313 reusable component
-options, and 28 presets. Portion and option amounts are first-pass estimates;
-nutrition values are matched from the bundled USDA/Open Food Facts catalog and
-still need review when confidence or preparation notes flag them.
+provides the rationale and initial model. The current review dataset has 521
+catalog identities (506 search-enabled), 1,908 portion mappings, 1,217 alias
+records, 321 configurable component options, and 28 presets. Portion and option
+amounts are first-pass estimates; nutrition values are matched from the bundled
+USDA/Open Food Facts catalog and still need review when confidence or
+preparation notes flag them. The 2026-10-14 local enrichment revision adds source-level nutrition and
+composition evidence for 20 previously lowest-confidence searchable foods;
+the generated review workbook is rebuilt from the same catalog projection.
+
+The [Bagel customization concept](chase-food-bagel-concept.pdf) documents the
+single canonical Bagel result, portion-aware bagel type choices, and optional
+spreads. The former Bagel with cream cheese ID remains history-only so old diary
+entries continue resolving; its search aliases now point to Bagel.
 
 The personal-food coverage pass also reviewed [Chase Seibert's Cookbook](https://chase-cookbook.s3.us-west-2.amazonaws.com/cookbook.html),
 last updated September 15, 2026. Cookbook recipe titles should usually become
@@ -131,6 +139,10 @@ rewrite history.
 - Model choices such as bread type, cereal type, sauce, milk type, and yogurt
   type as mutually exclusive selections. Use a compact menu/dropdown when a
   list is long, and chips for a short list.
+- Model bagel type as a nutrient-bearing variant of the canonical Bagel. A
+  selected type replaces the base profile at the current portion weight and is
+  retained as a constituent of the logged item; optional spreads such as cream
+  cheese add their own portioned nutrition.
 - Let each screen combine portion controls with the food-specific choices. For
   coffee, show “Medium · 12 fl oz” so the size label and amount are both clear.
 - Keep calories and all three macros live as portion, included items, and
@@ -138,8 +150,10 @@ rewrite history.
 
 ## Size and food-specific directions
 
-- **Burger:** The base includes a bun, which can be removed. Offer cheese,
-  bacon, mayonnaise, ketchup, and related sides such as fries. Keep garnish
+- **Burger:** Include a bun by default. Offer one exclusive protein choice—beef,
+  chicken, or bean—with beef selected by default; users can clear the selection
+  for a patty-free burger. Offer cheese, bacon, mayonnaise, ketchup, and related
+  sides such as fries. Keep garnish
   ingredients out of quick controls; they remain searchable through Add
   ingredient. Use a visual size cue as well
   as weight: draft cues could be a small slider/hockey-puck-scale patty, a
@@ -232,20 +246,20 @@ which ones deserve first-class coverage.
 
 ## Food customization
 
-Selecting **Customize** opens a full-screen takeover, not a small quantity
-sheet. It should keep a compact, scannable control surface with:
+Selecting **Customize** opens a full-screen screen. A back arrow and canonical
+food name stay pinned above the scrolling choices, followed by calories, the
+carbohydrate, fat, and protein totals, and their stacked horizontal macro bar.
+The ungrouped ingredient choices begin in a two-column **Add to this food or
+meal** grid; **Add another food** opens a dedicated catalog search screen.
+Specialized option groups follow and retain their single- or multiple-selection
+behavior as two-column, tap-to-toggle pills. A collapsed **Suggest a change**
+link opens its own editor screen. Fries and similar foods keep their own
+reusable identity when logged alongside another food.
 
-- the canonical food name and portion selector;
-- small, medium, and large choices when those portions are meaningful, with
-  other foods using natural quantity choices such as slices, cups, or bananas;
-- quick buttons for common optional ingredients and related foods;
-- a clear distinction between additions to the selected food and a related
-  food logged alongside it (for example, fries beside a burger);
-- live calories, carbohydrate, fat, and protein totals that update as controls
-  change;
-- one final action to add the configured food or food set to the diary.
-- an optional food-search action for adding a catalog ingredient that is not
-  among the quick buttons.
+A pinned quantity card offers the food's portion sizes plus ounces and grams;
+changing between weight units preserves the entered mass, and quantity can be
+adjusted directly. Calories remain with the pinned macro summary, and a single
+**Log Food** button sits below the quantity card.
 
 For Burger, the first concept exposes size plus cheese, bacon, and fries. Fries
 remain a separately reusable food, even when selected from the burger screen.
@@ -301,6 +315,37 @@ Doritos points toward a tortilla-chip food and Lay's toward a potato-chip food;
 if both are collapsed under a broad Chips canonical, retain the chip type as a
 mutually exclusive choice or saved variation.
 
+## Canonical grouping and option refinements
+
+- **Burger:** Use one exclusive Protein selector for Beef (default), Chicken,
+  or Bean. Each protein is a reusable component and selecting another replaces
+  the prior patty; clearing the group allows a patty-free burger. Keep the old
+  Bean burger ID hidden but available so existing history remains resolvable.
+  Search aliases for patty and bean-burger terms resolve to the Burger canonical.
+- **Biryani:** Add a mutually exclusive Protein choice for Chicken and Beef.
+  The current generic USDA meat-biryani profile can overlap the added protein,
+  so treat these combinations as draft until their base recipes are refined.
+- **Biscuit:** Searches for Biscuits and gravy resolve to Biscuit, with Gravy
+  as a reusable add-on. Preserve the combined food ID for history.
+- **Coffee:** Coffee is the single canonical result; “black coffee” is an
+  alias. Milk types are exclusive choices; sugar, cream, and syrup are
+  add-ons.
+- **Sandwich:** BLT is a named full-food variant under Sandwich. Keep the
+  former BLT ID as a hidden component for history and saved configurations.
+- **Fried fish:** Use the canonical display name Fried fish and map “breaded
+  fried fish,” “fried fish fillet,” and “fish and chips” to it.
+- **Breakfast casserole:** Include common contents choices for sausage, bacon,
+  ham, cheese, and bell pepper. The generic USDA profile already contains meat
+  and cheese, so ingredient-level totals need recipe-specific refinement.
+- **Breakfast sandwich:** Keep the English muffin and one egg as removable
+  included components. Offer sausage, bacon, or ham as exclusive meat choices
+  and cheese as an optional addition.
+
+Both the taxonomy source and the generated review workbook expose an **Options
+(add-ons and variants)** food-table column. Generate it from structured
+included-composition and addition records on every catalog preparation run so
+the summary cannot drift from selectable options.
+
 ## Data and history boundaries for implementation
 
 - Give every Chase Food record a stable ID and a source identity that remains
@@ -335,3 +380,8 @@ It includes Cappuccino, Protein shake, Sandwich, Caesar salad, Salad, Potato sal
 piccata, Orange chicken, Roast turkey, Cheesecake, and Pancake. All nutrition
 figures in that packet are illustrative placeholders, not values from the
 workbook or verified nutrient data.
+
+
+### Burger Protein selector
+
+Burger uses one exclusive Protein group: Beef (default), Chicken, or Bean. Selecting another protein replaces the selected patty; clearing the choice logs the burger without a patty. The hamburger bun remains an included base component. Patty components stay internal and searchable aliases resolve to Burger. The Bean patty nutrition estimate uses locally bundled USDA FoodData Central record 2707473 (“Veggie burger patty, no bun”) as a medium-confidence analogue pending bean-specific refinement.

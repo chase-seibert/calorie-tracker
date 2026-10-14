@@ -58,46 +58,47 @@ final class DiaryReorderingUITests: XCTestCase {
         let sandwichCustomize = app.buttons["Customize Sandwich"]
         XCTAssertTrue(sandwichCustomize.waitForExistence(timeout: 10))
         sandwichCustomize.tap()
-        XCTAssertTrue(app.navigationBars["Customize Sandwich"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["custom-food-sticky-title"].waitForExistence(timeout: 5))
         XCTAssertTrue(hasAccessibilityLabel(containing: "Turkey"))
         attachScreenshot(named: "Chase Food Sandwich Customization")
-        openPicker(matching: "Filling")
+        app.swipeUp()
         let hamOption = app.buttons["Ham"]
         XCTAssertTrue(hamOption.waitForExistence(timeout: 5))
         hamOption.tap()
-        openPicker(matching: "Bread")
-        let wheatBreadOption = app.buttons["Whole wheat bread"]
+        let wheatBreadOption = app.buttons["Whole wheat"]
+        for _ in 0..<8 where !wheatBreadOption.exists {
+            app.swipeUp()
+        }
         XCTAssertTrue(wheatBreadOption.waitForExistence(timeout: 5))
         wheatBreadOption.tap()
-        openPicker(matching: "Cheese")
-        let cheddarOption = app.buttons["Cheddar cheese"]
-        XCTAssertTrue(cheddarOption.waitForExistence(timeout: 5))
-        cheddarOption.tap()
+        let cheddar = app.buttons["Cheddar"]
+        XCTAssertTrue(cheddar.waitForExistence(timeout: 5))
+        cheddar.tap()
         attachScreenshot(named: "Chase Food Sandwich with Cheese")
         app.swipeUp()
         attachScreenshot(named: "Chase Food Sandwich Spreads and Cheese")
-        app.buttons["Cancel"].tap()
+        app.buttons["custom-food-back"].tap()
         XCTAssertTrue(searchField.waitForExistence(timeout: 5))
         replaceSearchQuery("protein shake", in: searchField)
         let shakeCustomize = app.buttons["Customize Protein shake"]
         XCTAssertTrue(shakeCustomize.waitForExistence(timeout: 10))
         shakeCustomize.tap()
-        XCTAssertTrue(app.navigationBars["Customize Protein shake"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["custom-food-sticky-title"].waitForExistence(timeout: 5))
         attachScreenshot(named: "Chase Food Protein Shake Customization")
-        openPicker(matching: "Protein powder")
-        let proteinPowderOption = app.buttons["Protein powder"]
+        let proteinPowderOption = app.buttons.matching(
+            NSPredicate(format: "label CONTAINS[c] %@", "protein powder")
+        ).firstMatch
         XCTAssertTrue(proteinPowderOption.waitForExistence(timeout: 5))
         proteinPowderOption.tap()
-        openPicker(matching: "Liquid")
         XCTAssertTrue(app.buttons["Almond milk"].waitForExistence(timeout: 5))
         app.buttons["Almond milk"].tap()
-        app.buttons["Cancel"].tap()
+        app.buttons["custom-food-back"].tap()
         XCTAssertTrue(searchField.waitForExistence(timeout: 5))
         replaceSearchQuery("protein shake", in: searchField)
         let customizeAgain = app.buttons["Customize Protein shake"]
         XCTAssertTrue(customizeAgain.waitForExistence(timeout: 10))
         customizeAgain.tap()
-        XCTAssertTrue(app.navigationBars["Customize Protein shake"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["custom-food-sticky-title"].waitForExistence(timeout: 5))
         app.swipeUp()
         attachScreenshot(named: "Chase Food Protein Shake Add-ons")
     }
@@ -107,6 +108,113 @@ final class DiaryReorderingUITests: XCTestCase {
             ("omelet", "Omelet"), ("toast", "Toast"), ("cereal", "Cereal"),
             ("coffee", "Coffee"), ("banana", "Banana"), ("yogurt", "Yogurt")
         ])
+    }
+
+    func testChaseFoodTacoStickySummaryAndQuantityPicker() {
+        app.launchArguments = [
+            "--show-food-search",
+            "-foodSource.enabled.chaseFood", "YES",
+            "-onboarding.focus.v1.completed", "YES"
+        ]
+        app.launch()
+        let searchField = app.textFields["Search foods"]
+        XCTAssertTrue(searchField.waitForExistence(timeout: 10))
+        replaceSearchQuery("taco", in: searchField)
+        let customize = app.buttons["Customize Taco"]
+        XCTAssertTrue(customize.waitForExistence(timeout: 10))
+        for _ in 0..<6 where !customize.isHittable { app.swipeUp() }
+        XCTAssertTrue(customize.isHittable)
+        customize.tap()
+
+        let stickyTitle = app.staticTexts["custom-food-sticky-title"]
+        XCTAssertTrue(stickyTitle.waitForExistence(timeout: 5))
+        XCTAssertEqual(stickyTitle.label, "Taco")
+        let backButton = app.buttons["custom-food-back"]
+        XCTAssertTrue(backButton.exists)
+        XCTAssertLessThan(backButton.frame.maxX, stickyTitle.frame.minX)
+        XCTAssertTrue(app.otherElements["custom-food-estimate-calories"].exists)
+        let unitPicker = app.buttons["custom-food-unit-picker"]
+        XCTAssertTrue(unitPicker.exists)
+        XCTAssertEqual(unitPicker.value as? String, "Small")
+        XCTAssertTrue(app.descendants(matching: .any)["custom-food-macro-bar"].exists)
+        attachScreenshot(named: "Chase Food Taco Sticky Summary and Quantity")
+
+        let titleY = stickyTitle.frame.minY
+        app.swipeUp()
+        XCTAssertTrue(stickyTitle.exists)
+        XCTAssertEqual(stickyTitle.frame.minY, titleY, accuracy: 1)
+
+        unitPicker.tap()
+        for choice in ["Small", "Medium", "Large", "ounces", "grams"] {
+            XCTAssertTrue(app.buttons[choice].waitForExistence(timeout: 3), "Missing quantity choice: \(choice).")
+        }
+        attachScreenshot(named: "Chase Food Taco Portion and Weight Choices")
+        let gramsChoice = app.buttons["grams"]
+        XCTAssertTrue(gramsChoice.waitForExistence(timeout: 5))
+        gramsChoice.tap()
+        let quantity = app.textFields["custom-food-quantity-value"]
+        XCTAssertEqual(quantity.value as? String, "50")
+        app.buttons["custom-food-quantity-plus"].tap()
+        XCTAssertEqual(quantity.value as? String, "51")
+
+        let addIngredient = app.buttons["custom-food-add-ingredient"]
+        for _ in 0..<8 where !addIngredient.isHittable { app.swipeUp() }
+        XCTAssertTrue(addIngredient.isHittable)
+        addIngredient.tap()
+        XCTAssertTrue(app.navigationBars["Add ingredient"].waitForExistence(timeout: 5))
+        let ingredientSearch = app.searchFields["Search foods"]
+        XCTAssertTrue(ingredientSearch.waitForExistence(timeout: 5))
+        replaceSearchQuery("salsa", in: ingredientSearch)
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS[c] %@", "Salsa")).firstMatch.waitForExistence(timeout: 10))
+        attachScreenshot(named: "Chase Food Ingredient Search")
+        app.buttons.matching(NSPredicate(format: "label CONTAINS[c] %@", "Salsa")).firstMatch.tap()
+        XCTAssertTrue(addIngredient.waitForExistence(timeout: 5))
+        let suggestChange = app.buttons["custom-food-show-suggestions"]
+        let footerControl = app.buttons["custom-food-quantity-plus"]
+        for _ in 0..<12 where suggestChange.frame.maxY > footerControl.frame.minY - 80 { app.swipeUp() }
+        XCTAssertTrue(suggestChange.isHittable)
+        suggestChange.tap()
+        XCTAssertTrue(app.navigationBars["Suggested changes"].waitForExistence(timeout: 5))
+        attachScreenshot(named: "Chase Food Suggested Changes")
+    }
+
+    func testChaseFoodSavedVariationsInSearch() {
+        app.launchArguments = [
+            "--show-food-search",
+            "-foodSource.enabled.chaseFood", "YES",
+            "-onboarding.focus.v1.completed", "YES"
+        ]
+        app.launch()
+
+        let searchField = app.textFields["Search foods"]
+        XCTAssertTrue(searchField.waitForExistence(timeout: 10))
+        replaceSearchQuery("cappuccino", in: searchField)
+        let customize = app.buttons["Customize Cappuccino"]
+        XCTAssertTrue(customize.waitForExistence(timeout: 10))
+        customize.tap()
+        XCTAssertTrue(app.staticTexts["custom-food-sticky-title"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["custom-food-recent-variations"].exists)
+        attachScreenshot(named: "Chase Food Cappuccino Recent Variations Menu")
+
+        app.buttons["Log Food"].tap()
+        XCTAssertTrue(searchField.waitForExistence(timeout: 5))
+        replaceSearchQuery("cappuccino", in: searchField)
+        let savedVariation = app.buttons.matching(
+            NSPredicate(format: "label CONTAINS[c] %@", "Small, 8 fl oz")
+        ).firstMatch
+        XCTAssertTrue(savedVariation.waitForExistence(timeout: 10))
+        XCTAssertFalse(savedVariation.label.localizedCaseInsensitiveContains("Cappuccino"))
+        attachScreenshot(named: "Chase Food Cappuccino Compact Saved Variation")
+
+        customize.tap()
+        let recentVariations = app.buttons["custom-food-recent-variations"]
+        XCTAssertTrue(recentVariations.waitForExistence(timeout: 5))
+        recentVariations.tap()
+        let recentCappuccino = app.buttons.matching(
+            NSPredicate(format: "label CONTAINS[c] %@", "Small, 8 fl oz")
+        ).firstMatch
+        XCTAssertTrue(recentCappuccino.waitForExistence(timeout: 5))
+        attachScreenshot(named: "Chase Food Cappuccino Recent Variations Menu Open")
     }
 
     func testChaseFoodConceptScreensMeals() {
@@ -148,9 +256,20 @@ final class DiaryReorderingUITests: XCTestCase {
             replaceSearchQuery(query, in: searchField)
             let customize = app.buttons["Customize \(title)"]
             XCTAssertTrue(customize.waitForExistence(timeout: 10), "No Chase Food result for \(title).")
+            for _ in 0..<6 where !customize.isHittable {
+                app.swipeUp()
+            }
+            XCTAssertTrue(customize.isHittable, "Customize action for \(title) is not visible.")
             customize.tap()
-            XCTAssertTrue(app.navigationBars["Customize \(title)"].waitForExistence(timeout: 5))
+            let stickyTitle = app.staticTexts["custom-food-sticky-title"]
+            XCTAssertTrue(stickyTitle.waitForExistence(timeout: 5))
+            XCTAssertTrue(app.descendants(matching: .any)["custom-food-macro-bar"].exists)
+            XCTAssertTrue(app.buttons["custom-food-unit-picker"].exists)
+            let originalTitleY = stickyTitle.frame.minY
             attachScreenshot(named: "Chase Food Concept - \(title)")
+            app.swipeUp()
+            XCTAssertTrue(stickyTitle.exists, "The food title should stay visible when scrolling.")
+            XCTAssertEqual(stickyTitle.frame.minY, originalTitleY, accuracy: 1)
             app.buttons["Cancel"].tap()
             XCTAssertTrue(searchField.waitForExistence(timeout: 5))
         }
@@ -171,12 +290,6 @@ final class DiaryReorderingUITests: XCTestCase {
             .matching(NSPredicate(format: "label CONTAINS[c] %@", value))
             .firstMatch
         return match.waitForExistence(timeout: 5)
-    }
-
-    private func openPicker(matching value: String) {
-        let picker = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] %@", value)).firstMatch
-        XCTAssertTrue(picker.waitForExistence(timeout: 5), "Picker for \(value) was not found.")
-        picker.tap()
     }
 
     private func attachScreenshot(named name: String) {

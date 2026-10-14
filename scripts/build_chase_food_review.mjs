@@ -14,9 +14,9 @@ for (const sheet of [summary, foods, aliases, options, portions, cerealResearch]
 const counts = Object.fromEntries(["High", "Medium", "Low", "Unavailable"].map(level => [level, source.foods.filter(f => f.confidence === level).length]));
 const reviewCount = source.foods.filter(f => f.reviewRequired).length;
 const optionCount = source.suggestedAdditions.length + source.baseCompositions.length;
-summary.getRange("A1:B1").values = [["Chase Food · Nutrition Review", "2026-10-13"]];
+summary.getRange("A1:B1").values = [["Chase Food · Nutrition Review", "2026-10-14"]];
 summary.getRange("A3:B14").values = [
-  ["Canonical identities", source.foods.length],
+  ["Catalog identities", source.foods.length],
   ["High confidence exact-name matches", counts.High],
   ["Medium confidence close matches", counts.Medium],
   ["Low confidence approximate matches", counts.Low],
@@ -43,7 +43,7 @@ summary.getRange("A:A").format.columnWidth = 34;
 summary.getRange("B:B").format.columnWidth = 100;
 summary.getRange("B16:B21").format.wrapText = true;
 
-const headers = ["Food ID", "Canonical food", "Category", "Food kind", "Default unit", "Default grams", "Calories / default", "Carbs g / default", "Fat g / default", "Protein g / default", "Fiber g / default", "Confidence", "Refinement needed", "Review reason", "Matched source", "Matched source ID", "Matched catalog name", "Match basis", "Similarity", "Available in search", "Evidence source URL", "Source serving", "Evidence reviewed", "Composition decision", "Baseline match"];
+const headers = ["Food ID", "Canonical food", "Category", "Food kind", "Default unit", "Default grams", "Calories / default", "Carbs g / default", "Fat g / default", "Protein g / default", "Fiber g / default", "Confidence", "Refinement needed", "Review reason", "Matched source", "Matched source ID", "Matched catalog name", "Match basis", "Similarity", "Available in search", "Evidence source URL", "Source serving", "Evidence reviewed", "Composition decision", "Baseline match", "Options (add-ons and variants)"];
 const records = source.foods.map(f => [
   f.id, f.name, f.category, f.foodKind, f.defaultUnit, f.defaultGrams,
   f.nutrients?.calories ?? null, f.nutrients?.carbs ?? null, f.nutrients?.fat ?? null,
@@ -53,7 +53,10 @@ const records = source.foods.map(f => [
   f.nutritionSource?.name ?? "", f.nutritionSource?.matchBasis ?? "",
   f.nutritionSource?.similarity ?? null,
   f.searchEnabled === false ? "No" : "Yes",
-  f.nutritionEvidence?.source?.url ?? "",
+  [
+    f.nutritionEvidence?.source?.url,
+    ...(f.nutritionEvidence?.source?.componentSources ?? []).map(source => source.url),
+  ].filter(Boolean).join("\n"),
   f.nutritionEvidence?.source?.serving
     ? `${f.nutritionEvidence.source.serving.description} (${f.nutritionEvidence.source.serving.grams} g)` : "",
   f.nutritionEvidence?.source?.reviewedDate ?? "",
@@ -61,12 +64,13 @@ const records = source.foods.map(f => [
   f.baselineNutritionSource
     ? `${f.baselineNutritionSource.name} (${f.baselineNutritionSource.source}:${f.baselineNutritionSource.sourceID}; ${f.baselineNutritionSource.matchBasis}; ${f.baselineNutritionSource.similarity})`
     : "",
+  f.optionsSummary || "None",
 ]);
 foods.getRangeByIndexes(0, 0, 1, headers.length).values = [headers];
 foods.getRangeByIndexes(1, 0, records.length, headers.length).values = records;
 foods.freezePanes.freezeRows(1);
 foods.freezePanes.freezeColumns(2);
-foods.tables.add(`A1:Y${records.length + 1}`, true, "ChaseFoodProfiles").style = "TableStyleMedium2";
+foods.tables.add(`A1:Z${records.length + 1}`, true, "ChaseFoodProfiles").style = "TableStyleMedium2";
 foods.getRange(`F2:K${records.length + 1}`).format.numberFormat = "0.00";
 foods.getRange(`S2:S${records.length + 1}`).format.numberFormat = "0.00";
 foods.getRange("A:A").format.columnWidth = 26;
@@ -83,8 +87,9 @@ foods.getRange("V:V").format.columnWidth = 18;
 foods.getRange("W:W").format.columnWidth = 70;
 foods.getRange("X:X").format.columnWidth = 28;
 foods.getRange("Y:Y").format.columnWidth = 18;
+foods.getRange("Z:Z").format.columnWidth = 72;
 foods.getRange(`N2:N${records.length + 1}`).format.wrapText = true;
-foods.getRange(`T2:X${records.length + 1}`).format.wrapText = true;
+foods.getRange(`T2:Z${records.length + 1}`).format.wrapText = true;
 
 const aliasHeaders = ["Canonical food ID", "Canonical food", "Search alias", "Alias kind"];
 const names = new Map(source.foods.map(f => [f.id, f.name]));

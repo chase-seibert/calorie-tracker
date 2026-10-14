@@ -65,6 +65,2012 @@
           "fiber": 2.2
         }
       }
+    },
+    "food_applesauce": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 68,
+        "carbs": 17.5,
+        "fat": 0.17,
+        "protein": 0.16,
+        "fiber": 1.2
+      },
+      "source": {
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "SR Legacy",
+        "recordID": "171696",
+        "recordName": "Applesauce, canned, sweetened, without salt",
+        "releaseDate": "2018-04-01",
+        "url": "https://fdc.nal.usda.gov/food-details/171696/nutrients",
+        "reviewedDate": "2026-10-13",
+        "serving": {
+          "description": "1 cup",
+          "grams": 246
+        }
+      },
+      "compositionEvidence": {
+        "decision": "Keep Applesauce as one generic canonical food. Use the USDA sweetened applesauce profile as the default and leave product sweetening variation as an unresolved label-level difference.",
+        "confidence": "Medium",
+        "reason": "Direct generic applesauce record and matched 1-cup weight, but generic applesauce may be sweetened or unsweetened; the selected catalog default follows the common sweetened USDA profile.",
+        "sources": [
+          {
+            "name": "Existing local USDA catalog",
+            "sourceID": "171696",
+            "recordName": "Applesauce, canned, sweetened, without salt"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "USDA profile is for sweetened applesauce; unsweetened products are materially lower in calories and carbohydrates."
+      ],
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2707901",
+        "name": "Cookie, applesauce",
+        "matchBasis": "canonical",
+        "similarity": 0.7407
+      }
+    },
+    "food_asparagus_cooked": {
+      "confidence": "High",
+      "nutritionPer100g": {
+        "calories": 22,
+        "carbs": 4.11,
+        "fat": 0.22,
+        "protein": 2.4,
+        "fiber": 2.0
+      },
+      "source": {
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "SR Legacy",
+        "recordID": "168390",
+        "recordName": "Asparagus, cooked, boiled, drained",
+        "releaseDate": "2018-04-01",
+        "url": "https://fdc.nal.usda.gov/food-details/168390/nutrients",
+        "reviewedDate": "2026-10-13",
+        "serving": {
+          "description": "1/2 cup",
+          "grams": 90
+        }
+      },
+      "compositionEvidence": {
+        "decision": "Keep cooked asparagus as a reusable ingredient. Use boiled and drained asparagus without added fat as the canonical plain preparation.",
+        "confidence": "High",
+        "reason": "Direct USDA cooked preparation; the catalog one-cup portion is 180 g, calculated as two directly measured 90 g half-cup portions. Added oil is a separate component when used.",
+        "sources": [
+          {
+            "name": "Existing local USDA catalog",
+            "sourceID": "168390",
+            "recordName": "Asparagus, cooked, boiled, drained"
+          }
+        ]
+      },
+      "reviewReasons": [],
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2709871",
+        "name": "Bean sprouts, cooked",
+        "matchBasis": "canonical",
+        "similarity": 0.7429
+      }
+    },
+    "food_avocado": {
+      "confidence": "High",
+      "nutritionPer100g": {
+        "calories": 160,
+        "carbs": 8.53,
+        "fat": 14.7,
+        "protein": 2.0,
+        "fiber": 6.7
+      },
+      "source": {
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "recordID": "2709223",
+        "recordName": "Avocado, raw",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2709223/nutrients",
+        "reviewedDate": "2026-10-13",
+        "serving": {
+          "description": "1 fruit",
+          "grams": 150
+        }
+      },
+      "compositionEvidence": {
+        "decision": "Keep raw avocado as one reusable ingredient; the default whole-fruit portion is aligned to the USDA FNDDS fruit measure.",
+        "confidence": "High",
+        "reason": "Direct generic raw-avocado record with a 150 g fruit portion matching the updated default.",
+        "sources": [
+          {
+            "name": "Existing local USDA catalog",
+            "sourceID": "2709223",
+            "recordName": "Avocado, raw"
+          }
+        ]
+      },
+      "reviewReasons": [],
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2709223",
+        "name": "Avocado, raw",
+        "matchBasis": "canonical",
+        "similarity": 0.7778
+      }
+    },
+    "food_bacon": {
+      "confidence": "High",
+      "nutritionPer100g": {
+        "calories": 468,
+        "carbs": 1.7,
+        "fat": 35.1,
+        "protein": 33.9,
+        "fiber": 0.0
+      },
+      "source": {
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "SR Legacy",
+        "recordID": "168322",
+        "recordName": "Pork, cured, bacon, pre-sliced, cooked, pan-fried",
+        "releaseDate": "2018-04-01",
+        "url": "https://fdc.nal.usda.gov/food-details/168322/nutrients",
+        "reviewedDate": "2026-10-13",
+        "serving": {
+          "description": "1 slice",
+          "grams": 11.5
+        }
+      },
+      "compositionEvidence": {
+        "decision": "Keep cooked bacon as one reusable ingredient, using pan-fried pork bacon as the default preparation.",
+        "confidence": "High",
+        "reason": "Direct cooked pan-fried USDA profile; default slice set to the USDA 11.5 g slice measure. Bacon style and thickness vary by package, so packaged alternatives should use labels when available.",
+        "sources": [
+          {
+            "name": "Existing local USDA catalog",
+            "sourceID": "168322",
+            "recordName": "Pork, cured, bacon, pre-sliced, cooked, pan-fried"
+          }
+        ]
+      },
+      "reviewReasons": [],
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2707466",
+        "name": "Bacon bits",
+        "matchBasis": "canonical",
+        "similarity": 0.6667
+      }
+    },
+    "food_bagel_with_cream_cheese": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 282.3721,
+        "carbs": 41.2744,
+        "fat": 8.8037,
+        "protein": 9.4814,
+        "fiber": 1.2279
+      },
+      "source": {
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "SR Legacy",
+        "recordID": "174899",
+        "recordName": "Bagels, plain, enriched, with calcium propionate",
+        "releaseDate": "2018-04-01",
+        "url": "https://fdc.nal.usda.gov/food-details/174899/nutrients",
+        "reviewedDate": "2026-10-13",
+        "serving": {
+          "description": "1 bagel (99 g) + 1 serving cream cheese (30 g)",
+          "grams": 129
+        },
+        "componentSources": [
+          {
+            "recordID": "174899",
+            "recordName": "Bagels, plain, enriched, with calcium propionate (includes onion, poppy, sesame)",
+            "organization": "USDA Agricultural Research Service",
+            "database": "FoodData Central",
+            "dataType": "SR Legacy",
+            "releaseDate": "2018-04-01",
+            "url": "https://fdc.nal.usda.gov/food-details/174899/nutrients",
+            "serving": {
+              "description": "1 bagel",
+              "grams": 99
+            },
+            "reviewedDate": "2026-10-13"
+          },
+          {
+            "recordID": "2705760",
+            "recordName": "Cream cheese, regular, plain",
+            "organization": "USDA Agricultural Research Service",
+            "database": "FoodData Central",
+            "dataType": "SR Legacy",
+            "releaseDate": "2024-10-31",
+            "url": "https://fdc.nal.usda.gov/food-details/2705760/nutrients",
+            "serving": {
+              "description": "1 serving",
+              "grams": 30
+            },
+            "reviewedDate": "2026-10-13"
+          }
+        ]
+      },
+      "compositionEvidence": {
+        "decision": "History-only legacy identity retained so existing diary entries keep their stable food ID. New searches resolve to canonical Bagel, with cream cheese as a configurable spread.",
+        "confidence": "Medium",
+        "reason": "The prior 99 g bagel plus 30 g cream cheese estimate remains useful for interpreting old entries; new logs should choose the bagel and spread independently.",
+        "components": [
+          {
+            "sourceID": "174899",
+            "name": "Plain enriched bagel",
+            "grams": 99
+          },
+          {
+            "sourceID": "2705760",
+            "name": "Regular plain cream cheese",
+            "grams": 30
+          }
+        ],
+        "sources": [
+          {
+            "name": "USDA FoodData Central SR Legacy",
+            "sourceID": "174899",
+            "recordName": "Bagels, plain, enriched, with calcium propionate (includes onion, poppy, sesame)"
+          },
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2705760",
+            "recordName": "Cream cheese, regular, plain"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "The 30 g cream-cheese amount is a standard serving estimate; actual spreads and bagel sizes vary."
+      ],
+      "baselineNutritionSource": {
+        "source": "off",
+        "sourceID": "6111246721278",
+        "name": "Cream cheese",
+        "matchBasis": "canonical",
+        "similarity": 0.6857
+      }
+    },
+    "food_baked_potato_soup": {
+      "confidence": "Low",
+      "nutritionPer100g": {
+        "calories": 90.0,
+        "carbs": 10.5,
+        "fat": 4.71,
+        "protein": 1.51,
+        "fiber": 1.2
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2709556",
+        "recordName": "Soup, potato",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2709556/nutrients",
+        "serving": {
+          "description": "1 cup",
+          "grams": 255.0
+        },
+        "dataType": "Survey (FNDDS)",
+        "reviewedDate": "2026-10-14",
+        "recordID": "2709556"
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Bread, potato",
+        "similarity": 0.6897,
+        "source": "usda",
+        "sourceID": "167943"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Baked potato soup as a distinct prepared soup. Use USDA potato soup only as a broad base analog; loaded toppings such as bacon, cheese, and sour cream should remain identifiable optional components when modeled.",
+        "confidence": "Low",
+        "reason": "The USDA record directly describes potato soup and provides a one-cup serving, but it does not identify baked-potato toppings or a specific recipe. The 255 g catalog bowl matches the USDA cup measure; calories may be understated for loaded versions.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2709556",
+            "recordName": "Soup, potato",
+            "url": "https://fdc.nal.usda.gov/food-details/2709556/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "FDC potato soup does not establish whether the recipe includes bacon, cheese, sour cream, or other loaded-potato ingredients."
+      ],
+      "catalogPortion": {
+        "label": "1 bowl",
+        "grams": 255.0,
+        "nutrients": {
+          "calories": 229.5,
+          "carbs": 26.77,
+          "fat": 12.01,
+          "protein": 3.85,
+          "fiber": 3.06
+        }
+      }
+    },
+    "food_baked_ziti": {
+      "confidence": "Low",
+      "nutritionPer100g": {
+        "calories": 133.5333,
+        "carbs": 20.333,
+        "fat": 2.8863,
+        "protein": 6.356,
+        "fiber": 1.43
+      },
+      "source": {
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "Composite from FoodData Central source records",
+        "dataType": "USDA ingredient-weighted estimate",
+        "recordID": "composite",
+        "recordName": "Baked ziti estimate from USDA ingredient records",
+        "releaseDate": "multiple releases",
+        "url": "https://fdc.nal.usda.gov/food-search/?query=baked%20ziti",
+        "reviewedDate": "2026-10-14",
+        "serving": {
+          "description": "1 estimated 300 g plate: 180 g cooked pasta, 70 g tomato sauce, 30 g part-skim ricotta, 20 g whole-milk mozzarella",
+          "grams": 300
+        },
+        "method": "USDA ingredient-weighted estimate; no measured prepared-food record is used.",
+        "componentSources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2708357",
+            "recordName": "Pasta, cooked",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "database": "Survey (FNDDS)",
+            "releaseDate": "2024-10-31",
+            "url": "https://fdc.nal.usda.gov/food-details/2708357/nutrients",
+            "serving": {
+              "description": "180 g component",
+              "grams": 180
+            },
+            "recordID": "2708357"
+          },
+          {
+            "name": "USDA FoodData Central SR Legacy",
+            "sourceID": "169074",
+            "recordName": "Tomato sauce, canned, no salt added",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "database": "SR Legacy",
+            "releaseDate": "2018-04-01",
+            "url": "https://fdc.nal.usda.gov/food-details/169074/nutrients",
+            "serving": {
+              "description": "70 g component",
+              "grams": 70
+            },
+            "recordID": "169074"
+          },
+          {
+            "name": "USDA FoodData Central SR Legacy",
+            "sourceID": "171248",
+            "recordName": "Cheese, ricotta, part skim milk",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "database": "SR Legacy",
+            "releaseDate": "2018-04-01",
+            "url": "https://fdc.nal.usda.gov/food-details/171248/nutrients",
+            "serving": {
+              "description": "30 g component",
+              "grams": 30
+            },
+            "recordID": "171248"
+          },
+          {
+            "name": "USDA FoodData Central SR Legacy",
+            "sourceID": "170845",
+            "recordName": "Cheese, mozzarella, whole milk",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "database": "SR Legacy",
+            "releaseDate": "2018-04-01",
+            "url": "https://fdc.nal.usda.gov/food-details/170845/nutrients",
+            "serving": {
+              "description": "20 g component",
+              "grams": 20
+            },
+            "recordID": "170845"
+          }
+        ]
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Baked Original",
+        "similarity": 0.6667,
+        "source": "off",
+        "sourceID": "0028400183826"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Baked ziti as one prepared-food identity. The default profile is a documented tomato-cheese pasta composition; meat and oil are not assumed. Continue to represent optional meat and sides separately.",
+        "confidence": "Low",
+        "reason": "USDA ingredient-weighted estimate; no measured prepared-food record is used. The default is a draft profile; exact cheese ratios, oil, meat, and serving size vary.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2708357",
+            "recordName": "Pasta, cooked",
+            "url": "https://fdc.nal.usda.gov/food-details/2708357/nutrients"
+          },
+          {
+            "name": "USDA FoodData Central SR Legacy",
+            "sourceID": "169074",
+            "recordName": "Tomato sauce, canned, no salt added",
+            "url": "https://fdc.nal.usda.gov/food-details/169074/nutrients"
+          },
+          {
+            "name": "USDA FoodData Central SR Legacy",
+            "sourceID": "171248",
+            "recordName": "Cheese, ricotta, part skim milk",
+            "url": "https://fdc.nal.usda.gov/food-details/171248/nutrients"
+          },
+          {
+            "name": "USDA FoodData Central SR Legacy",
+            "sourceID": "170845",
+            "recordName": "Cheese, mozzarella, whole milk",
+            "url": "https://fdc.nal.usda.gov/food-details/170845/nutrients"
+          }
+        ],
+        "components": [
+          {
+            "sourceID": "2708357",
+            "name": "Pasta, cooked",
+            "grams": 180
+          },
+          {
+            "sourceID": "169074",
+            "name": "Tomato sauce, canned, no salt added",
+            "grams": 70
+          },
+          {
+            "sourceID": "171248",
+            "name": "Cheese, ricotta, part skim milk",
+            "grams": 30
+          },
+          {
+            "sourceID": "170845",
+            "name": "Cheese, mozzarella, whole milk",
+            "grams": 20
+          }
+        ]
+      },
+      "reviewReasons": [
+        "No exact prepared-food nutrition record is used; ingredient proportions, optional meat, oil, and serving size require refinement."
+      ],
+      "catalogPortion": {
+        "label": "1 plate",
+        "grams": 300.0,
+        "nutrients": {
+          "calories": 400.6,
+          "carbs": 61.0,
+          "fat": 8.66,
+          "protein": 19.07,
+          "fiber": 4.29
+        }
+      }
+    },
+    "food_balsamic_vinaigrette": {
+      "confidence": "Low",
+      "nutritionPer100g": {
+        "calories": 656.4,
+        "carbs": 5.1,
+        "fat": 70.0,
+        "protein": 0.147,
+        "fiber": null
+      },
+      "source": {
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "Composite from FoodData Central source records",
+        "dataType": "USDA ingredient-weighted estimate",
+        "recordID": "composite",
+        "recordName": "Balsamic vinaigrette estimate from USDA ingredient records",
+        "releaseDate": "multiple releases",
+        "url": "https://fdc.nal.usda.gov/food-search/?query=balsamic%20vinaigrette",
+        "reviewedDate": "2026-10-14",
+        "serving": {
+          "description": "1 estimated 15 g tablespoon: 10.5 g olive oil + 4.5 g balsamic vinegar",
+          "grams": 15.0
+        },
+        "method": "USDA ingredient-weighted estimate using an assumed 3:1 oil-to-vinegar volume blend and estimated component weights; no measured prepared-food record is used.",
+        "componentSources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2710186",
+            "recordName": "Olive oil",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "database": "Survey (FNDDS)",
+            "releaseDate": "2024-10-31",
+            "url": "https://fdc.nal.usda.gov/food-details/2710186/nutrients",
+            "serving": {
+              "description": "10.5 g component",
+              "grams": 10.5
+            },
+            "recordID": "2710186"
+          },
+          {
+            "name": "USDA FoodData Central SR Legacy",
+            "sourceID": "172241",
+            "recordName": "Vinegar, balsamic",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "database": "SR Legacy",
+            "releaseDate": "2018-04-01",
+            "url": "https://fdc.nal.usda.gov/food-details/172241/nutrients",
+            "serving": {
+              "description": "4.5 g component",
+              "grams": 4.5
+            },
+            "recordID": "172241"
+          }
+        ]
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Vinegar, balsamic",
+        "similarity": 0.4444,
+        "source": "usda",
+        "sourceID": "172241"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Balsamic vinaigrette as one reusable dressing identity. Treat oil-to-vinegar ratio as an explicit recipe estimate; do not use vinegar-alone nutrition as the dressing profile.",
+        "confidence": "Low",
+        "reason": "USDA ingredient-weighted estimate using an assumed 3:1 oil-to-vinegar volume blend and estimated component weights; no measured prepared-food record is used. Fiber is unavailable because the balsamic-vinegar record does not report it; it is not represented as zero.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2710186",
+            "recordName": "Olive oil",
+            "url": "https://fdc.nal.usda.gov/food-details/2710186/nutrients"
+          },
+          {
+            "name": "USDA FoodData Central SR Legacy",
+            "sourceID": "172241",
+            "recordName": "Vinegar, balsamic",
+            "url": "https://fdc.nal.usda.gov/food-details/172241/nutrients"
+          }
+        ],
+        "components": [
+          {
+            "sourceID": "2710186",
+            "name": "Olive oil",
+            "grams": 10.5
+          },
+          {
+            "sourceID": "172241",
+            "name": "Vinegar, balsamic",
+            "grams": 4.5
+          }
+        ]
+      },
+      "reviewReasons": [
+        "Oil-to-vinegar ratio is an assumed recipe; commercial dressings may include sugar or stabilizers.",
+        "Fiber is unavailable in the balsamic-vinegar source record."
+      ],
+      "catalogPortion": {
+        "label": "1 tbsp",
+        "grams": 15.0,
+        "nutrients": {
+          "calories": 98.46,
+          "carbs": 0.77,
+          "fat": 10.5,
+          "protein": 0.02,
+          "fiber": null
+        }
+      }
+    },
+    "food_banana": {
+      "confidence": "High",
+      "nutritionPer100g": {
+        "calories": 89,
+        "carbs": 22.8,
+        "fat": 0.33,
+        "protein": 1.09,
+        "fiber": 2.6
+      },
+      "source": {
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "SR Legacy",
+        "recordID": "173944",
+        "recordName": "Bananas, raw",
+        "releaseDate": "2018-04-01",
+        "url": "https://fdc.nal.usda.gov/food-details/173944/nutrients",
+        "reviewedDate": "2026-10-13",
+        "serving": {
+          "description": "1 medium banana (7 to 7-7/8 inches)",
+          "grams": 118
+        }
+      },
+      "compositionEvidence": {
+        "decision": "Keep Banana as a standalone canonical food and reusable ingredient. Use USDA medium banana as the default, with size portions aligned to USDA length classes.",
+        "confidence": "High",
+        "reason": "Direct USDA SR Legacy raw-banana profile and matching 118 g medium fruit portion.",
+        "sources": [
+          {
+            "name": "Existing local USDA catalog",
+            "sourceID": "173944",
+            "recordName": "Bananas, raw"
+          }
+        ]
+      },
+      "reviewReasons": [],
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2709224",
+        "name": "Banana, raw",
+        "matchBasis": "canonical",
+        "similarity": 0.75
+      }
+    },
+    "food_bbq_beef_sandwich": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 245,
+        "carbs": 24.9,
+        "fat": 8.5,
+        "protein": 16.5,
+        "fiber": 0.8
+      },
+      "source": {
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "recordID": "2706885",
+        "recordName": "Barbecue beef sandwich, on white bun",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2706885/nutrients",
+        "reviewedDate": "2026-10-13",
+        "serving": {
+          "description": "1 regular sandwich",
+          "grams": 180
+        }
+      },
+      "compositionEvidence": {
+        "decision": "Keep BBQ beef sandwich as a prepared canonical sandwich. Use the generic USDA white-bun regular sandwich as the default profile; bun type and barbecue sauce amount remain recipe variables.",
+        "confidence": "Medium",
+        "reason": "Direct prepared-sandwich match and exact 180 g regular portion. The catalog name omits bun type and local recipes vary in sauce and beef amount, so the national generic record is a close rather than exact household recipe match.",
+        "sources": [
+          {
+            "name": "Existing local USDA catalog",
+            "sourceID": "2706885",
+            "recordName": "Barbecue beef sandwich, on white bun"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "USDA profile specifies a white bun; bun type, beef amount, and sauce vary in household or restaurant sandwiches."
+      ],
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2705852",
+        "name": "Beef, sandwich steak",
+        "matchBasis": "canonical",
+        "similarity": 0.7222
+      }
+    },
+    "food_bagel": {
+      "confidence": "High",
+      "nutritionPer100g": {
+        "calories": 264.0,
+        "carbs": 52.4,
+        "fat": 1.32,
+        "protein": 10.6,
+        "fiber": 1.6
+      },
+      "source": {
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "USDA local catalog record",
+        "recordID": "2707684",
+        "recordName": "Bagel",
+        "url": "https://fdc.nal.usda.gov/food-details/2707684/nutrients",
+        "reviewedDate": "2026-10-13",
+        "serving": {
+          "description": "1 serving",
+          "grams": 105.0
+        }
+      },
+      "reviewReasons": [],
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2707684",
+        "name": "Bagel",
+        "matchBasis": "reviewed FDC record",
+        "similarity": null
+      }
+    },
+    "food_bagel_whole_wheat": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 250.0,
+        "carbs": 48.9,
+        "fat": 1.53,
+        "protein": 10.2,
+        "fiber": 4.1
+      },
+      "source": {
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "USDA local catalog record",
+        "recordID": "2707733",
+        "recordName": "Bagel, whole wheat",
+        "url": "https://fdc.nal.usda.gov/food-details/2707733/nutrients",
+        "reviewedDate": "2026-10-13",
+        "serving": {
+          "description": "1 miniature",
+          "grams": 26.0
+        }
+      },
+      "reviewReasons": [
+        "USDA named whole-wheat bagel profile is for a 26 g miniature; normalized values are scaled to the selected bagel portion."
+      ],
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2707733",
+        "name": "Bagel, whole wheat",
+        "matchBasis": "reviewed FDC record",
+        "similarity": null
+      }
+    },
+    "food_bagel_multigrain": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 241.0,
+        "carbs": 47.5,
+        "fat": 1.24,
+        "protein": 9.9,
+        "fiber": 6.2
+      },
+      "source": {
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "USDA local catalog record",
+        "recordID": "171852",
+        "recordName": "Bagels, multigrain",
+        "url": "https://fdc.nal.usda.gov/food-details/171852/nutrients",
+        "reviewedDate": "2026-10-13",
+        "serving": {
+          "description": "1 piece bagel",
+          "grams": 81.0
+        }
+      },
+      "reviewReasons": [
+        "USDA multigrain bagel profile is for an 81 g serving; normalized values are scaled to the selected bagel portion."
+      ],
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "171852",
+        "name": "Bagels, multigrain",
+        "matchBasis": "reviewed FDC record",
+        "similarity": null
+      }
+    },
+    "food_bagel_cinnamon_raisin": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 274.0,
+        "carbs": 55.2,
+        "fat": 1.7,
+        "protein": 9.8,
+        "fiber": 2.3
+      },
+      "source": {
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "USDA local catalog record",
+        "recordID": "172664",
+        "recordName": "Bagels, cinnamon-raisin",
+        "url": "https://fdc.nal.usda.gov/food-details/172664/nutrients",
+        "reviewedDate": "2026-10-13",
+        "serving": {
+          "description": "1 mini bagel (2-1/2\" dia)",
+          "grams": 26.0
+        }
+      },
+      "reviewReasons": [
+        "USDA cinnamon-raisin bagel profile is for a 26 g miniature; normalized values are scaled to the selected bagel portion."
+      ],
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "172664",
+        "name": "Bagels, cinnamon-raisin",
+        "matchBasis": "reviewed FDC record",
+        "similarity": null
+      }
+    },
+    "food_bagel_egg": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 278.0,
+        "carbs": 53.0,
+        "fat": 2.1,
+        "protein": 10.6,
+        "fiber": 2.3
+      },
+      "source": {
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "USDA local catalog record",
+        "recordID": "174901",
+        "recordName": "Bagels, egg",
+        "url": "https://fdc.nal.usda.gov/food-details/174901/nutrients",
+        "reviewedDate": "2026-10-13",
+        "serving": {
+          "description": "1 oz",
+          "grams": 28.35
+        }
+      },
+      "reviewReasons": [
+        "USDA egg bagel profile is per 28.35 g ounce; normalized values are scaled to the selected bagel portion."
+      ],
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "174901",
+        "name": "Bagels, egg",
+        "matchBasis": "reviewed FDC record",
+        "similarity": null
+      }
+    },
+    "food_bagel_pumpernickel": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 250.0,
+        "carbs": 48.9,
+        "fat": 1.53,
+        "protein": 10.2,
+        "fiber": 4.1
+      },
+      "source": {
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "USDA local catalog record",
+        "recordID": "2707762",
+        "recordName": "Bagel, pumpernickel",
+        "url": "https://fdc.nal.usda.gov/food-details/2707762/nutrients",
+        "reviewedDate": "2026-10-13",
+        "serving": {
+          "description": "1 miniature",
+          "grams": 26.0
+        }
+      },
+      "reviewReasons": [
+        "USDA record is a named match, but its serving is a miniature; normalized profile is used for other sizes."
+      ],
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2707762",
+        "name": "Bagel, pumpernickel",
+        "matchBasis": "reviewed FDC record",
+        "similarity": null
+      }
+    },
+    "food_bagel_sesame": {
+      "confidence": "Low",
+      "nutritionPer100g": {
+        "calories": 264.0,
+        "carbs": 52.4,
+        "fat": 1.32,
+        "protein": 10.6,
+        "fiber": 1.6
+      },
+      "source": {
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "USDA local catalog record",
+        "recordID": "2707684",
+        "recordName": "Bagel",
+        "url": "https://fdc.nal.usda.gov/food-details/2707684/nutrients",
+        "reviewedDate": "2026-10-13",
+        "serving": {
+          "description": "1 serving",
+          "grams": 105.0
+        }
+      },
+      "reviewReasons": [
+        "No sesame-only profile is present in the local source; plain bagel is a broad analog."
+      ],
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2707684",
+        "name": "Bagel",
+        "matchBasis": "reviewed FDC record",
+        "similarity": null
+      }
+    },
+    "food_bagel_everything": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 264.0,
+        "carbs": 52.4,
+        "fat": 1.32,
+        "protein": 10.6,
+        "fiber": 1.6
+      },
+      "source": {
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "USDA local catalog record",
+        "recordID": "2707684",
+        "recordName": "Bagel",
+        "url": "https://fdc.nal.usda.gov/food-details/2707684/nutrients",
+        "reviewedDate": "2026-10-13",
+        "serving": {
+          "description": "1 serving",
+          "grams": 105.0
+        }
+      },
+      "reviewReasons": [
+        "USDA plain bagel record describes a mix including onion, poppy, and sesame; topping ratios vary."
+      ],
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2707684",
+        "name": "Bagel",
+        "matchBasis": "reviewed FDC record",
+        "similarity": null
+      }
+    },
+    "food_bbq_ribs": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 254.0,
+        "carbs": 12.1,
+        "fat": 15.1,
+        "protein": 16.2,
+        "fiber": 0.3
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2705894",
+        "recordName": "Pork, ribs",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2705894/nutrients",
+        "serving": {
+          "description": "1 rib (yield after cooking, bone removed)",
+          "grams": 35.0
+        },
+        "dataType": "Survey (FNDDS)",
+        "reviewedDate": "2026-10-14",
+        "recordID": "2705894"
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Pork, ribs",
+        "similarity": 0.5882,
+        "source": "usda",
+        "sourceID": "2705894"
+      },
+      "compositionEvidence": {
+        "decision": "Keep BBQ ribs as a prepared-food canonical item. Use the USDA pork-ribs survey profile as the default and represent extra sauce separately if the user adds it; beef ribs and sauce-heavy preparations may differ.",
+        "confidence": "Medium",
+        "reason": "The generic USDA pork-ribs record has a cooked, bone-removed rib measure and includes carbohydrate consistent with a sauced preparation, but it does not identify the barbecue style, sauce quantity, or whether the serving is pork versus beef.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2705894",
+            "recordName": "Pork, ribs",
+            "url": "https://fdc.nal.usda.gov/food-details/2705894/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "USDA pork-ribs profile is a close match, but rib cut, edible yield, and barbecue-sauce amount vary."
+      ],
+      "catalogPortion": {
+        "label": "1 serving",
+        "grams": 240.0,
+        "nutrients": {
+          "calories": 609.6,
+          "carbs": 29.04,
+          "fat": 36.24,
+          "protein": 38.88,
+          "fiber": 0.72
+        }
+      }
+    },
+    "food_bean_burger": {
+      "confidence": "Low",
+      "nutritionPer100g": {
+        "calories": 224.0,
+        "carbs": 30.8,
+        "fat": 5.2,
+        "protein": 13.0,
+        "fiber": 3.5
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2707481",
+        "recordName": "Veggie burger, on bun",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2707481/nutrients",
+        "serving": {
+          "description": "1 sandwich",
+          "grams": 160.0
+        },
+        "dataType": "Survey (FNDDS)",
+        "reviewedDate": "2026-10-14",
+        "recordID": "2707481"
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Bean cake",
+        "similarity": 0.6,
+        "source": "usda",
+        "sourceID": "2707409"
+      },
+      "compositionEvidence": {
+        "decision": "Retain this stable ID for diary history and use it as the full-food Bean patty variant under Burger; searches target Burger.",
+        "confidence": "Low",
+        "reason": "No exact black-bean burger record was present in the local USDA catalog. FNDDS veggie burger on bun is the closest assembled-food record; bean content, binder, oil, bun, and toppings vary materially.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2707481",
+            "recordName": "Veggie burger, on bun",
+            "url": "https://fdc.nal.usda.gov/food-details/2707481/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "Closest local FNDDS record is generic veggie burger on bun, not a black-bean-specific recipe; recipe-level data are needed."
+      ],
+      "catalogPortion": {
+        "label": "1 burger",
+        "grams": 190.0,
+        "nutrients": {
+          "calories": 425.6,
+          "carbs": 58.52,
+          "fat": 9.88,
+          "protein": 24.7,
+          "fiber": 6.65
+        }
+      }
+    },
+    "food_beef_kebab": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 122.0,
+        "carbs": 5.06,
+        "fat": 4.88,
+        "protein": 14.8,
+        "fiber": 0.8
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2706730",
+        "recordName": "Beef shish kabob with vegetables, excluding potatoes",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2706730/nutrients",
+        "serving": {
+          "description": "1 shishkabob",
+          "grams": 202.0
+        },
+        "dataType": "Survey (FNDDS)",
+        "reviewedDate": "2026-10-14",
+        "recordID": "2706730"
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Beef, brisket",
+        "similarity": 0.6364,
+        "source": "usda",
+        "sourceID": "2705851"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Beef kebab as one canonical food. Use a beef shish kebab with vegetables (excluding potatoes) as its default survey preparation; preserve the skewer as one logged food rather than separate diary entries for its mixed ingredients.",
+        "confidence": "Medium",
+        "reason": "USDA FNDDS has a directly relevant beef shish-kebab record and a measured 202 g skewer. The catalog portion is aligned to that measure; marinades and meat-to-vegetable ratio still vary.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2706730",
+            "recordName": "Beef shish kabob with vegetables, excluding potatoes",
+            "url": "https://fdc.nal.usda.gov/food-details/2706730/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "FNDDS beef shish kebab includes vegetables and excludes potatoes; meat cut, marinade, and skewer composition vary."
+      ],
+      "catalogPortion": {
+        "label": "1 shish kebab",
+        "grams": 202.0,
+        "nutrients": {
+          "calories": 246.44,
+          "carbs": 10.22,
+          "fat": 9.86,
+          "protein": 29.9,
+          "fiber": 1.62
+        }
+      }
+    },
+    "food_beef_patty": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 272.0,
+        "carbs": 0.0,
+        "fat": 18.2,
+        "protein": 25.4,
+        "fiber": 0.0
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2705855",
+        "recordName": "Beef, ground, patty",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2705855/nutrients",
+        "serving": {
+          "description": "1 miniature patty",
+          "grams": 30.0
+        },
+        "dataType": "Survey (FNDDS)",
+        "reviewedDate": "2026-10-14",
+        "recordID": "2705855"
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Beef, ground, patty",
+        "similarity": 0.7407,
+        "source": "usda",
+        "sourceID": "2705855"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Beef patty as a reusable cooked patty identity. Fat percentage and cooked size are meaningful sources of variation; avoid duplicating burger nutrition by keeping bun and toppings separate.",
+        "confidence": "Medium",
+        "reason": "The USDA FNDDS record is a direct ground-beef patty profile. The catalog 113 g patty is substantially larger than the miniature 30 g household measure in the source, so the per-100-g profile is scaled to the catalog amount.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2705855",
+            "recordName": "Beef, ground, patty",
+            "url": "https://fdc.nal.usda.gov/food-details/2705855/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "FNDDS source portion is a 30 g miniature patty; the 113 g catalog patty is a scaled larger serving and beef leanness is unspecified."
+      ],
+      "catalogPortion": {
+        "label": "1 patty",
+        "grams": 113.0,
+        "nutrients": {
+          "calories": 307.36,
+          "carbs": 0.0,
+          "fat": 20.57,
+          "protein": 28.7,
+          "fiber": 0.0
+        }
+      }
+    },
+    "food_beef_snack_stick": {
+      "confidence": "High",
+      "nutritionPer100g": {
+        "calories": 550.0,
+        "carbs": 5.4,
+        "fat": 49.6,
+        "protein": 21.5,
+        "fiber": null
+      },
+      "source": {
+        "name": "USDA FoodData Central SR Legacy",
+        "sourceID": "168850",
+        "recordName": "Snacks, beef sticks, smoked",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "SR Legacy",
+        "releaseDate": "2018-04-01",
+        "url": "https://fdc.nal.usda.gov/food-details/168850/nutrients",
+        "serving": {
+          "description": "1 oz",
+          "grams": 28.35
+        },
+        "dataType": "SR Legacy",
+        "reviewedDate": "2026-10-14",
+        "recordID": "168850"
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Beef, sandwich steak",
+        "similarity": 0.6857,
+        "source": "usda",
+        "sourceID": "2705852"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Beef snack stick as one generic reusable packaged-food identity. Use smoked beef sticks as the generic profile and retain named brand searches as aliases only.",
+        "confidence": "High",
+        "reason": "USDA SR Legacy provides a direct smoked beef-stick nutrient profile and a 28.35 g ounce serving, matching the catalog 28 g stick closely. Fiber is not reported by the source and remains unavailable.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central SR Legacy",
+            "sourceID": "168850",
+            "recordName": "Snacks, beef sticks, smoked",
+            "url": "https://fdc.nal.usda.gov/food-details/168850/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "The USDA SR Legacy beef-stick record does not report fiber; fiber is intentionally left unavailable."
+      ],
+      "catalogPortion": {
+        "label": "1 stick",
+        "grams": 28.0,
+        "nutrients": {
+          "calories": 154.0,
+          "carbs": 1.51,
+          "fat": 13.89,
+          "protein": 6.02,
+          "fiber": null
+        }
+      }
+    },
+    "food_bell_pepper": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 22.9,
+        "carbs": 4.78,
+        "fat": 0.106,
+        "protein": 0.715,
+        "fiber": 0.942
+      },
+      "source": {
+        "name": "USDA FoodData Central Foundation Foods",
+        "sourceID": "2258588",
+        "recordName": "Peppers, bell, green, raw",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "Foundation Foods",
+        "releaseDate": "2021-11-17",
+        "url": "https://fdc.nal.usda.gov/food-details/2258588/nutrients",
+        "serving": {
+          "description": "1 RACC",
+          "grams": 85.0
+        },
+        "dataType": "Foundation Foods",
+        "reviewedDate": "2026-10-14",
+        "recordID": "2258588"
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Dr Pepper",
+        "similarity": 0.7,
+        "source": "off",
+        "sourceID": "07831504"
+      },
+      "compositionEvidence": {
+        "decision": "Keep one Bell pepper canonical food, using raw green bell pepper as the provisional default. Color can be a future exclusive variant if the catalog needs that distinction; do not map pepper searches to soft drinks or hot peppers.",
+        "confidence": "Medium",
+        "reason": "The local USDA Foundation Foods record is a direct raw green bell pepper profile and fixes the previous Open Food Facts Dr Pepper false match. The canonical name does not specify color; this record is a transparent green-pepper default.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Foundation Foods",
+            "sourceID": "2258588",
+            "recordName": "Peppers, bell, green, raw",
+            "url": "https://fdc.nal.usda.gov/food-details/2258588/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "The default uses raw green pepper; red, yellow, and orange bell peppers have different nutrient profiles and the canonical identity does not specify color."
+      ],
+      "catalogPortion": {
+        "label": "1 pepper",
+        "grams": 150.0,
+        "nutrients": {
+          "calories": 34.35,
+          "carbs": 7.17,
+          "fat": 0.16,
+          "protein": 1.07,
+          "fiber": 1.41
+        }
+      }
+    },
+    "food_biryani": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 145.0,
+        "carbs": 12.2,
+        "fat": 6.79,
+        "protein": 8.5,
+        "fiber": 1.0
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2706490",
+        "recordName": "Biryani with meat",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2706490/nutrients",
+        "serving": {
+          "description": "1 cup",
+          "grams": 196.0
+        },
+        "dataType": "Survey (FNDDS)",
+        "reviewedDate": "2026-10-14",
+        "recordID": "2706490"
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Biryani with meat",
+        "similarity": 0.5833,
+        "source": "usda",
+        "sourceID": "2706490"
+      },
+      "compositionEvidence": {
+        "decision": "Expose Chicken and Beef protein choices under Biryani. The reviewed generic meat-biryani profile may already include protein, so the current baseline-plus-protein model is only a draft and needs recipe-level nutrition review.",
+        "confidence": "Medium",
+        "reason": "USDA FNDDS provides a direct meat-biryani record with a measured one-cup portion. The catalog plate is a larger 360 g estimate, and the dish varies by protein, rice ratio, oil, and recipe.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2706490",
+            "recordName": "Biryani with meat",
+            "url": "https://fdc.nal.usda.gov/food-details/2706490/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "FNDDS meat biryani is a useful direct generic profile, but a 360 g plate is scaled from one cup and biryani recipes vary materially."
+      ],
+      "catalogPortion": {
+        "label": "1 plate",
+        "grams": 360.0,
+        "nutrients": {
+          "calories": 522.0,
+          "carbs": 43.92,
+          "fat": 24.44,
+          "protein": 30.6,
+          "fiber": 3.6
+        }
+      }
+    },
+    "food_biscuit": {
+      "confidence": "High",
+      "nutritionPer100g": {
+        "calories": 350.0,
+        "carbs": 44.9,
+        "fat": 16.0,
+        "protein": 7.03,
+        "fiber": 1.4
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2707804",
+        "recordName": "Biscuit, home recipe",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2707804/nutrients",
+        "serving": {
+          "description": "1 biscuit",
+          "grams": 45.0
+        },
+        "dataType": "Survey (FNDDS)",
+        "reviewedDate": "2026-10-14",
+        "recordID": "2707804"
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Biscuit, NFS",
+        "similarity": 0.7778,
+        "source": "usda",
+        "sourceID": "2707801"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Biscuit as a single southern-style bread identity. Use a home-recipe biscuit as the default; toppings such as butter or honey remain separate reusable additions.",
+        "confidence": "High",
+        "reason": "USDA FNDDS home-recipe biscuit is a direct preparation match and its 45 g one-biscuit household measure is used for the catalog default.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2707804",
+            "recordName": "Biscuit, home recipe",
+            "url": "https://fdc.nal.usda.gov/food-details/2707804/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [],
+      "catalogPortion": {
+        "label": "1 biscuit",
+        "grams": 45.0,
+        "nutrients": {
+          "calories": 157.5,
+          "carbs": 20.2,
+          "fat": 7.2,
+          "protein": 3.16,
+          "fiber": 0.63
+        }
+      }
+    },
+    "food_biscuits_and_gravy": {
+      "confidence": "High",
+      "nutritionPer100g": {
+        "calories": 224.0,
+        "carbs": 17.0,
+        "fat": 14.7,
+        "protein": 6.2,
+        "fiber": 0.8
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2708744",
+        "recordName": "Biscuit with gravy",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2708744/nutrients",
+        "serving": {
+          "description": "1 biscuit with gravy",
+          "grams": 220.0
+        },
+        "dataType": "Survey (FNDDS)",
+        "reviewedDate": "2026-10-14",
+        "recordID": "2708744"
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Biscuit with gravy",
+        "similarity": 0.7778,
+        "source": "usda",
+        "sourceID": "2708744"
+      },
+      "compositionEvidence": {
+        "decision": "Retain this combined prepared-food ID for diary history; new Biscuits and gravy searches target Biscuit with reusable Gravy selected as an optional add-on.",
+        "confidence": "High",
+        "reason": "USDA FNDDS directly reports one biscuit with gravy at 220 g; the catalog default is aligned to that measured serving.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2708744",
+            "recordName": "Biscuit with gravy",
+            "url": "https://fdc.nal.usda.gov/food-details/2708744/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [],
+      "catalogPortion": {
+        "label": "1 biscuit with gravy",
+        "grams": 220.0,
+        "nutrients": {
+          "calories": 492.8,
+          "carbs": 37.4,
+          "fat": 32.34,
+          "protein": 13.64,
+          "fiber": 1.76
+        }
+      }
+    },
+    "food_black_coffee": {
+      "confidence": "High",
+      "nutritionPer100g": {
+        "calories": 1.0,
+        "carbs": 0.0,
+        "fat": 0.02,
+        "protein": 0.12,
+        "fiber": 0.0
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2710375",
+        "recordName": "Coffee, brewed",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2710375/nutrients",
+        "serving": {
+          "description": "1 fl oz",
+          "grams": 30.0
+        },
+        "dataType": "Survey (FNDDS)",
+        "reviewedDate": "2026-10-14",
+        "recordID": "2710375"
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Coffee, Cuban",
+        "similarity": 0.6667,
+        "source": "usda",
+        "sourceID": "2710381"
+      },
+      "compositionEvidence": {
+        "decision": "Keep the user-facing canonical name Coffee. Use plain brewed coffee as the zero/near-zero base; milk, sugar, cream, and syrup remain distinct selectable additions in the existing option model.",
+        "confidence": "High",
+        "reason": "The USDA FNDDS brewed-coffee profile directly matches plain coffee. The catalog default is aligned to the approved medium 12 fl oz portion (355 g); milk and sweeteners are excluded from the base.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2710375",
+            "recordName": "Coffee, brewed",
+            "url": "https://fdc.nal.usda.gov/food-details/2710375/nutrients"
+          },
+          {
+            "name": "Chase Food customization concepts",
+            "path": "docs/chase-food-concepts.pdf",
+            "pages": [
+              9
+            ]
+          }
+        ]
+      },
+      "reviewReasons": [],
+      "catalogPortion": {
+        "label": "Medium · 12 fl oz",
+        "grams": 355.0,
+        "nutrients": {
+          "calories": 3.55,
+          "carbs": 0.0,
+          "fat": 0.07,
+          "protein": 0.43,
+          "fiber": 0.0
+        }
+      }
+    },
+    "food_blt_sandwich": {
+      "confidence": "High",
+      "nutritionPer100g": {
+        "calories": 231.0,
+        "carbs": 29.7,
+        "fat": 7.54,
+        "protein": 10.9,
+        "fiber": 1.7
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2706979",
+        "recordName": "Bacon, lettuce, tomato sandwich on white",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2706979/nutrients",
+        "serving": {
+          "description": "1 sandwich, any size",
+          "grams": 105.0
+        },
+        "dataType": "Survey (FNDDS)",
+        "reviewedDate": "2026-10-14",
+        "recordID": "2706979"
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Cuban sandwich",
+        "similarity": 0.7692,
+        "source": "usda",
+        "sourceID": "2706973"
+      },
+      "compositionEvidence": {
+        "decision": "Retain this stable ID for history and use it as a full-food BLT variant under Sandwich; new BLT searches target Sandwich.",
+        "confidence": "High",
+        "reason": "USDA FNDDS has a direct bacon-lettuce-tomato-on-white sandwich profile and a measured 105 g sandwich portion used for the catalog default. The wheat profile is a close alternative but not the default.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2706979",
+            "recordName": "Bacon, lettuce, tomato sandwich on white",
+            "url": "https://fdc.nal.usda.gov/food-details/2706979/nutrients"
+          },
+          {
+            "name": "Chase Food customization concepts",
+            "path": "docs/chase-food-concepts.pdf",
+            "pages": [
+              14
+            ]
+          }
+        ]
+      },
+      "reviewReasons": [],
+      "catalogPortion": {
+        "label": "1 sandwich",
+        "grams": 105.0,
+        "nutrients": {
+          "calories": 242.55,
+          "carbs": 31.18,
+          "fat": 7.92,
+          "protein": 11.45,
+          "fiber": 1.78
+        }
+      }
+    },
+    "food_blue_cheese_dressing": {
+      "confidence": "High",
+      "nutritionPer100g": {
+        "calories": 484.0,
+        "carbs": 4.77,
+        "fat": 51.1,
+        "protein": 1.37,
+        "fiber": 0.4
+      },
+      "source": {
+        "name": "USDA FoodData Central SR Legacy",
+        "sourceID": "173562",
+        "recordName": "Salad dressing, blue or roquefort cheese dressing, commercial, regular",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "SR Legacy",
+        "releaseDate": "2018-04-01",
+        "url": "https://fdc.nal.usda.gov/food-details/173562/nutrients",
+        "serving": {
+          "description": "1 tbsp",
+          "grams": 15.0
+        },
+        "dataType": "SR Legacy",
+        "reviewedDate": "2026-10-14",
+        "recordID": "173562"
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Blue or roquefort cheese dressing",
+        "similarity": 0.7547,
+        "source": "usda",
+        "sourceID": "2710197"
+      },
+      "compositionEvidence": {
+        "decision": "Keep regular blue-cheese dressing as a reusable condiment. Light and fat-free dressings remain distinct records rather than modifiers to this profile.",
+        "confidence": "High",
+        "reason": "USDA SR Legacy provides a direct regular commercial blue/roquefort cheese dressing profile and a 15 g tablespoon serving matching the catalog default.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central SR Legacy",
+            "sourceID": "173562",
+            "recordName": "Salad dressing, blue or roquefort cheese dressing, commercial, regular",
+            "url": "https://fdc.nal.usda.gov/food-details/173562/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [],
+      "catalogPortion": {
+        "label": "1 tbsp",
+        "grams": 15.0,
+        "nutrients": {
+          "calories": 72.6,
+          "carbs": 0.72,
+          "fat": 7.67,
+          "protein": 0.21,
+          "fiber": 0.06
+        }
+      }
+    },
+    "food_boiled_egg": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 155.0,
+        "carbs": 1.12,
+        "fat": 10.6,
+        "protein": 12.6,
+        "fiber": 0.0
+      },
+      "source": {
+        "name": "USDA FoodData Central SR Legacy",
+        "sourceID": "173424",
+        "recordName": "Egg, whole, cooked, hard-boiled",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "SR Legacy",
+        "releaseDate": "2018-04-01",
+        "url": "https://fdc.nal.usda.gov/food-details/173424/nutrients",
+        "serving": {
+          "description": "1 cup, chopped",
+          "grams": 136.0
+        },
+        "dataType": "SR Legacy",
+        "reviewedDate": "2026-10-14",
+        "recordID": "173424"
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Bread, egg",
+        "similarity": 0.7368,
+        "source": "usda",
+        "sourceID": "172673"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Boiled egg as a canonical single-ingredient food. Use a large hard-boiled egg portion; soft-boiled preparation can reuse the same basic egg identity if later needed.",
+        "confidence": "Medium",
+        "reason": "USDA SR Legacy directly profiles hard-boiled whole egg. The source lists a 136 g cup of chopped egg, while the catalog uses a common 50 g single-egg portion derived from the USDA portion convention; the per-100-g nutrients are direct.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central SR Legacy",
+            "sourceID": "173424",
+            "recordName": "Egg, whole, cooked, hard-boiled",
+            "url": "https://fdc.nal.usda.gov/food-details/173424/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "The direct USDA record reports a cup of chopped egg rather than a one-egg serving; the 50 g egg portion is a standard serving estimate."
+      ],
+      "catalogPortion": {
+        "label": "1 egg",
+        "grams": 50.0,
+        "nutrients": {
+          "calories": 77.5,
+          "carbs": 0.56,
+          "fat": 5.3,
+          "protein": 6.3,
+          "fiber": 0.0
+        }
+      }
+    },
+    "food_breaded_fried_fish": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 229.0,
+        "carbs": 8.04,
+        "fat": 13.3,
+        "protein": 18.1,
+        "fiber": 0.7
+      },
+      "source": {
+        "name": "USDA FoodData Central SR Legacy",
+        "sourceID": "174187",
+        "recordName": "Fish, catfish, channel, cooked, breaded and fried",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "SR Legacy",
+        "releaseDate": "2018-04-01",
+        "url": "https://fdc.nal.usda.gov/food-details/174187/nutrients",
+        "serving": {
+          "description": "1 fillet",
+          "grams": 87.0
+        },
+        "dataType": "SR Legacy",
+        "reviewedDate": "2026-10-14",
+        "recordID": "174187"
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Rice, fried, NFS",
+        "similarity": 0.6875,
+        "source": "usda",
+        "sourceID": "2708952"
+      },
+      "compositionEvidence": {
+        "decision": "Display this stable identity as Fried fish. “Breaded fried fish,” “fried fish fillet,” and “fish and chips” are search aliases; the last refers to the fish entrée only, not a side of chips.",
+        "confidence": "Medium",
+        "reason": "USDA SR Legacy directly describes cooked, breaded, fried catfish and includes a measured 87 g fillet. The canonical identity does not specify fish species; 150 g remains a larger fillet estimate.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central SR Legacy",
+            "sourceID": "174187",
+            "recordName": "Fish, catfish, channel, cooked, breaded and fried",
+            "url": "https://fdc.nal.usda.gov/food-details/174187/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "The direct USDA preparation is catfish; other species and restaurant breading/oil uptake can materially change nutrients."
+      ],
+      "catalogPortion": {
+        "label": "1 fillet",
+        "grams": 150.0,
+        "nutrients": {
+          "calories": 343.5,
+          "carbs": 12.06,
+          "fat": 19.95,
+          "protein": 27.15,
+          "fiber": 1.05
+        }
+      }
+    },
+    "food_breakfast_casserole": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 175.0,
+        "carbs": 10.2,
+        "fat": 9.75,
+        "protein": 11.4,
+        "fiber": 0.4
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2707192",
+        "recordName": "Egg casserole with bread, cheese, milk and meat",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2707192/nutrients",
+        "serving": {
+          "description": "1 cup",
+          "grams": 164.0
+        },
+        "dataType": "Survey (FNDDS)",
+        "reviewedDate": "2026-10-14",
+        "recordID": "2707192"
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Breakfast tart",
+        "similarity": 0.7273,
+        "source": "usda",
+        "sourceID": "2708077"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Breakfast casserole as a broad prepared dish and expose common protein, cheese, and vegetable contents choices. The representative FNDDS recipe already includes meat and cheese, so option totals may overlap until recipe-specific baselines are added.",
+        "confidence": "Medium",
+        "reason": "FNDDS has a close direct breakfast egg-casserole record with one cup at 164 g. It captures a typical egg, bread, cheese, milk, and meat combination but cannot stand in for every breakfast casserole recipe.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2707192",
+            "recordName": "Egg casserole with bread, cheese, milk and meat",
+            "url": "https://fdc.nal.usda.gov/food-details/2707192/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "FNDDS provides one representative casserole recipe; potato, vegetable, meat, and cheese ratios vary between recipes."
+      ],
+      "catalogPortion": {
+        "label": "1 serving",
+        "grams": 200.0,
+        "nutrients": {
+          "calories": 350.0,
+          "carbs": 20.4,
+          "fat": 19.5,
+          "protein": 22.8,
+          "fiber": 0.8
+        }
+      }
+    },
+    "food_breakfast_sandwich": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 230.0,
+        "carbs": 20.6,
+        "fat": 11.2,
+        "protein": 11.7,
+        "fiber": 1.5
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2707315",
+        "recordName": "Egg sandwich on English muffin",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2707315/nutrients",
+        "serving": {
+          "description": "1 regular",
+          "grams": 135.0
+        },
+        "dataType": "Survey (FNDDS)",
+        "reviewedDate": "2026-10-14",
+        "recordID": "2707315"
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Pork sandwich",
+        "similarity": 0.7097,
+        "source": "usda",
+        "sourceID": "2706977"
+      },
+      "compositionEvidence": {
+        "decision": "Use English muffin and one whole egg as removable included components; expose sausage, bacon, or ham as mutually exclusive meat choices and cheese as an add-on. The USDA egg-sandwich profile remains an approximate baseline.",
+        "confidence": "Medium",
+        "reason": "The chosen FNDDS source is a direct egg sandwich on English muffin at 135 g. It is a defensible base preparation, but many breakfast sandwiches include meat or cheese; those choices remain variable.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2707315",
+            "recordName": "Egg sandwich on English muffin",
+            "url": "https://fdc.nal.usda.gov/food-details/2707315/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "The base profile is egg on English muffin without meat or cheese; common meat, cheese, and bread choices alter the finished sandwich."
+      ],
+      "catalogPortion": {
+        "label": "1 sandwich",
+        "grams": 135.0,
+        "nutrients": {
+          "calories": 310.5,
+          "carbs": 27.81,
+          "fat": 15.12,
+          "protein": 15.79,
+          "fiber": 2.02
+        }
+      }
+    },
+    "food_breakfast_sausage": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 325.0,
+        "carbs": 1.42,
+        "fat": 27.2,
+        "protein": 18.5,
+        "fiber": 0.0
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2706191",
+        "recordName": "Pork sausage",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2706191/nutrients",
+        "serving": {
+          "description": "1 patty",
+          "grams": 35.0
+        },
+        "dataType": "Survey (FNDDS)",
+        "reviewedDate": "2026-10-14",
+        "recordID": "2706191"
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Beef sausage",
+        "similarity": 0.7586,
+        "source": "usda",
+        "sourceID": "2706171"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Breakfast sausage as a reusable food identity. Use a cooked pork sausage patty profile; link versus patty shape and pork/beef/turkey formulations are product variations, not separate generic canonicals.",
+        "confidence": "Medium",
+        "reason": "USDA FNDDS directly profiles pork sausage at 325 kcal per 100 g with a 35 g patty household measure. The catalog default is updated from a draft 45 g link to the matching 35 g patty.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2706191",
+            "recordName": "Pork sausage",
+            "url": "https://fdc.nal.usda.gov/food-details/2706191/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "The USDA profile is pork patty; breakfast sausage may be a link or a different meat formulation."
+      ],
+      "catalogPortion": {
+        "label": "1 patty",
+        "grams": 35.0,
+        "nutrients": {
+          "calories": 113.75,
+          "carbs": 0.5,
+          "fat": 9.52,
+          "protein": 6.47,
+          "fiber": 0.0
+        }
+      }
+    },
+    "food_bean_patty": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 177,
+        "carbs": 14.3,
+        "fat": 6.3,
+        "protein": 15.7,
+        "fiber": 4.9
+      },
+      "source": {
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "recordID": "2707473",
+        "recordName": "Veggie burger patty, no bun",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2707473/nutrients",
+        "reviewedDate": "2026-10-14",
+        "serving": {
+          "description": "1 patty",
+          "grams": 100
+        }
+      },
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2707473",
+        "name": "Veggie burger patty, no bun",
+        "matchBasis": "generic veggie patty analogue for bean patty",
+        "similarity": 0.72
+      },
+      "reviewReasons": [
+        "USDA source is a generic veggie burger patty, not a bean-specific patty; confirm representative nutrient profile."
+      ]
     }
   }
 }

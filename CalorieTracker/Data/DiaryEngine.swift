@@ -36,13 +36,17 @@ final class DiaryEngine {
         components: [MealItem],
         suggestedChanges: String?,
         portionID: String?,
+        amount: Double = 1,
+        unit: LogUnit = .serving,
         on date: Date,
         allowCheatDay: Bool = false
     ) {
         let previousCount = document.entries.count
-        log(food, amount: 1, unit: .serving, portionID: portionID, on: date, allowCheatDay: allowCheatDay)
+        log(food, amount: amount, unit: unit, portionID: portionID, on: date, allowCheatDay: allowCheatDay)
         guard document.entries.count > previousCount, let index = document.entries.indices.last else { return }
         document.entries[index].nutrients = nutrients
+        let loggedGrams = max(unit.grams(for: amount, food: food, portionID: portionID), 0.001)
+        document.entries[index].food.nutrients = nutrients.scaled(by: food.baseAmountGrams / loggedGrams)
         document.entries[index].foodConfigurationSnapshot = FoodConfigurationSnapshot(
             selectedOptionIDs: selectedOptionIDs,
             components: components,
