@@ -22,11 +22,15 @@ struct TrendsView: View {
             return TrendPoint(
                 date: total.date,
                 nutrients: total.nutrients,
-                calories: diary.caloriesExcludingAlcohol(on: total.date),
+                calories: total.nutrients.calories,
                 alcoholDrinks: alcohol?.drinks ?? 0,
                 status: diary.status(on: total.date)?.kind
             )
         }
+    }
+
+    private var actualCalorieAverage: Double? {
+        CalorieTrendAverage.calculate(points.map { (calories: $0.calories, status: $0.status) })
     }
 
     private var trendDateRange: ClosedRange<Date> {
@@ -298,6 +302,16 @@ struct TrendsView: View {
                     .foregroundStyle(AppTheme.muted)
             }
             Chart {
+                if let goal = diary.dailyCalorieGoal {
+                    RuleMark(y: .value("Daily calorie target", goal))
+                        .foregroundStyle(Color.purple)
+                        .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, dash: [1, 4], dashPhase: 2.5))
+                }
+                if let average = actualCalorieAverage {
+                    RuleMark(y: .value("Actual 30-day calorie average", average))
+                        .foregroundStyle(Color.blue)
+                        .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, dash: [1, 4]))
+                }
                 ForEach(points) { point in
                     LineMark(
                         x: .value("Date", point.date),
@@ -318,11 +332,6 @@ struct TrendsView: View {
                     )
                     .interpolationMethod(.catmullRom)
                 }
-                if let goal = diary.dailyCalorieGoal {
-                    RuleMark(y: .value("Daily calorie target", goal))
-                        .foregroundStyle(AppTheme.coral.opacity(0.75))
-                        .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
-                }
             }
             .chartXScale(domain: trendDateRange)
             .chartXAxis {
@@ -332,9 +341,35 @@ struct TrendsView: View {
                 }
             }
             .frame(height: 220)
+            calorieChartKey
         }
         .padding(18)
         .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 22))
+    }
+
+    private var calorieChartKey: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            if actualCalorieAverage != nil {
+                calorieKeyRow(color: .blue, dashPhase: 0, label: "Actual average · 30 days")
+            }
+            if diary.dailyCalorieGoal != nil {
+                calorieKeyRow(color: .purple, dashPhase: 2.5, label: "Daily target")
+            }
+        }
+        .font(.caption)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Calorie chart reference lines")
+    }
+
+    private func calorieKeyRow(color: Color, dashPhase: CGFloat, label: String) -> some View {
+        HStack(spacing: 8) {
+            CalorieReferenceLineSample(color: color, dashPhase: dashPhase)
+                .frame(width: 30, height: 8)
+                .accessibilityHidden(true)
+            Text(label)
+                .foregroundStyle(AppTheme.muted)
+        }
+        .accessibilityElement(children: .combine)
     }
 
     private var alcoholChart: some View {
@@ -866,4 +901,30 @@ private struct TrendPoint: Identifiable {
     let alcoholDrinks: Int
     let status: DayStatusKind?
     var id: Date { date }
+}
+
+enum CalorieTrendAverage {
+    static func calculate(_ points: [(calories: Double, status: DayStatusKind?)]) -> Double? {
+        let eligiblePoints = points.filter { $0.status != .gap }
+        guard !eligiblePoints.isEmpty else { return nil }
+        return eligiblePoints.reduce(0) { $0 + $1.calories } / Double(eligiblePoints.count)
+    }
+}
+
+private struct CalorieReferenceLineSample: View {
+    let color: Color
+    let dashPhase: CGFloat
+
+    var body: some View {
+        Canvas { context, size in
+            var path = Path()
+            path.move(to: CGPoint(x: 0, y: size.height / 2))
+            path.addLine(to: CGPoint(x: size.width, y: size.height / 2))
+            context.stroke(
+                path,
+                with: .color(color),
+                style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: [1, 4], dashPhase: dashPhase)
+            )
+        }
+    }
 }

@@ -3,6 +3,35 @@ import XCTest
 @testable import CalorieTracker
 
 final class CalorieTrackerTests: XCTestCase {
+    func testCalorieTrendAverageExcludesGapsAndIncludesCheatAndZeroCalorieDays() throws {
+        let average = try XCTUnwrap(CalorieTrendAverage.calculate([
+            (calories: 100, status: nil),
+            (calories: 9_000, status: .gap),
+            (calories: 1_000, status: .cheat),
+            (calories: 0, status: nil)
+        ]))
+
+        XCTAssertEqual(average, 1_100.0 / 3.0, accuracy: 0.0001)
+    }
+
+    func testCalorieTrendAverageHandlesAllZeroAndAllGapWindows() {
+        XCTAssertEqual(
+            CalorieTrendAverage.calculate([(calories: 0, status: nil), (calories: 0, status: .cheat)]),
+            0
+        )
+        XCTAssertNil(CalorieTrendAverage.calculate([(calories: 100, status: .gap), (calories: 0, status: .gap)]))
+    }
+
+    func testCalorieTrendAverageIncludesCaloriesAlreadyPresentInDailyTotals() {
+        let foodCalories = 1_250.0
+        let unspecifiedDrinkCalories = Double(AlcoholType.defaultCaloriesPerDrink)
+
+        XCTAssertEqual(
+            CalorieTrendAverage.calculate([(calories: foodCalories + unspecifiedDrinkCalories, status: nil)]),
+            1_400
+        )
+    }
+
     func testMealAnalysisRequestSupportsDescriptionOnlyPhotoOnlyAndCombinedInputs() throws {
         let jpeg = Data([0xff, 0xd8, 0xff])
         func requestContent(description: String, jpeg: Data?) throws -> (body: [String: Any], content: [[String: Any]]) {

@@ -26,7 +26,8 @@ project names and persistent identifiers remain unchanged for compatibility.
   rows show current values or status so the user's setup is understandable at a
   glance.
 - **Trends**, opened by tapping the diary summary, shows the last 30 days in a
-  food-calorie chart with an optional daily target line, a separate daily alcohol
+  daily-calorie chart with optional daily-target and actual-average references,
+  a separate daily alcohol
   drink chart, an optional daily Fiber chart with its recommendation line, and a
   stacked daily macro area chart. The alcohol chart uses a fixed 0–3 minimum
   scale and a dashed two-drink daily reference; the meat chart shows servings
@@ -69,8 +70,11 @@ carbohydrates, fat, protein, or Fiber. Reopening the sheet edits the same daily
 aggregate, and saving zero removes it. The alcohol action displays the saved
 count. The aggregate also appears as an orange wine-glass row in Logged; tapping
 the row reopens its editor. Trends shows the drink count in a separate daily
-alcohol chart, keeping alcohol calories out of the food-calorie series while
-retaining them in the diary total.
+alcohol chart; logged alcohol calories also appear in the daily-calorie chart.
+That chart's dotted actual average covers its last 30 calendar days, excludes
+gap days, and includes cheat days and non-gap zero-calorie days. A visible key
+names the average and, when configured, the daily target, using distinct colors
+for their dotted lines. If every day is a gap, no average line appears.
 
 The Food & Meals section in Settings contains the Personal Library, AI Food &
 Meal Import, and Food Data Sources rows. The Personal Library row shows separate

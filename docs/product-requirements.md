@@ -137,9 +137,12 @@
   removes it. An unspecified drink uses 150 calories; beer uses 150, wine 125,
   spirits 100, and cocktails 200 calories per drink. A saved aggregate appears
   as an orange wine-glass row in Logged and can be tapped to edit it. Alcohol
-  calories contribute to diary totals. When the Alcohol focus is enabled, Trends
-  shows each day's count in a separate alcohol chart, while the calorie chart
-  shows food calories against the daily target.
+  calories contribute to diary totals and the calorie chart. The chart shows a
+  dotted actual average across its last 30 calendar days, excluding gap days but
+  including cheat days, zero-calorie non-gap days, and logged alcohol calories.
+  Its visible key distinguishes the actual average from the optional daily target.
+  When the Alcohol focus is enabled, Trends also shows each day's count in a
+  separate alcohol chart.
 - Foods carry independent processed-meat and unprocessed-red-meat presence flags.
   Processed meat includes cured, salted, smoked, fermented, dried, or otherwise
   preserved meat from red meat or poultry. Red meat means unprocessed mammalian
@@ -181,7 +184,13 @@
   independent and remains on the now-normal day.
 - Trends summarizes gap-day and cheat-day counts beneath its title for the fixed
   30-day window; those statuses do not add vertical markers to individual charts.
-- Trends overlays a dashed calorie-target line when a daily goal is configured,
+- The calorie chart plots full daily calories and overlays a dotted actual-average
+  line calculated over non-gap days in its last 30 calendar days. Cheat days,
+  non-gap zero-calorie days, and logged alcohol calories are included. Its visible
+  key names the average and, when configured, the daily target; the two dotted
+  reference lines use distinct colors. If all days are gaps, no average line or
+  key entry is shown.
+- Trends overlays a dotted calorie-target line when a daily goal is configured,
   a fiber recommendation based on 14 grams per 1,000 goal calories (28 grams
   when no goal is configured), a dashed two-drink daily alcohol reference, and a
   dashed red-meat reference at three servings per week. The meat chart uses
