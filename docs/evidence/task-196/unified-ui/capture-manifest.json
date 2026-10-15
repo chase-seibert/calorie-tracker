@@ -1,0 +1,194 @@
+{
+  "result_bundle": "/Users/cseibert/projects/calorie-tracker/build/Logs/Test/Test-CalorieTrackerUITests-2026.10.15_13-51-23--0700.xcresult",
+  "captures": {
+    "one-off-meal-edit.png": {
+      "sha256": "8cf235006b956f31952faaaffdebe9bcd2b57848a750a7a62ed1c498f5bbd844",
+      "width": 1206,
+      "height": 2622,
+      "device_id": "74DC16F7-4678-490D-AD86-60CC218F56EB",
+      "device_name": "iPhone 17 Pro",
+      "timestamp": 1792097703.246,
+      "original_attachment": "C9EABDCA-4BAC-4FFC-A643-295CC341A5F0.png"
+    },
+    "saved-meal-edit.png": {
+      "sha256": "0185e94e0fd3f7c9613f0539af2061101039f6521c34bea6a7c3bfca8a33344f",
+      "width": 1206,
+      "height": 2622,
+      "device_id": "74DC16F7-4678-490D-AD86-60CC218F56EB",
+      "device_name": "iPhone 17 Pro",
+      "timestamp": 1792097692.226,
+      "original_attachment": "9CFC4567-8A17-411D-A590-678DAB25A8F6.png"
+    },
+    "yum-chase-configured-edit.png": {
+      "sha256": "f40d35df282e932a0f7440d34b4a19e5ce8e3008f3a61a8aaa9ede12fbbd5ea7",
+      "width": 1206,
+      "height": 2622,
+      "device_id": "74DC16F7-4678-490D-AD86-60CC218F56EB",
+      "device_name": "iPhone 17 Pro",
+      "timestamp": 1792097681.162,
+      "original_attachment": "D5E4816C-F6ED-43F7-B562-DE59E8DA85B7.png"
+    },
+    "off-packaged-edit.png": {
+      "sha256": "4f2af0fcc1064ed846881934199e318984481f8329c7a0ffb9b2392107ffa3a3",
+      "width": 1206,
+      "height": 2622,
+      "device_id": "74DC16F7-4678-490D-AD86-60CC218F56EB",
+      "device_name": "iPhone 17 Pro",
+      "timestamp": 1792097668.26,
+      "original_attachment": "C210B84F-5DC9-46BC-9169-BDDE115ECBAB.png"
+    },
+    "usda-portioned-edit.png": {
+      "sha256": "084169da6c3d3a9a71507b089a719ad2b32874c9929b10e6a5af810c9cbea1e8",
+      "width": 1206,
+      "height": 2622,
+      "device_id": "74DC16F7-4678-490D-AD86-60CC218F56EB",
+      "device_name": "iPhone 17 Pro",
+      "timestamp": 1792097655.474,
+      "original_attachment": "C52703DE-0EBE-4C4A-8021-4DBDB1D5A418.png"
+    },
+    "photo-meal-review-scrolled.png": {
+      "sha256": "76431776c5597694cc0cc081abb925973e2bd2f13d6fb5ddd078b6387aa21f73",
+      "width": 1206,
+      "height": 2622,
+      "device_id": "74DC16F7-4678-490D-AD86-60CC218F56EB",
+      "device_name": "iPhone 17 Pro",
+      "timestamp": 1792097645.928,
+      "original_attachment": "FB6015FB-8528-48F4-B03D-BCE2059E015A.png"
+    },
+    "photo-meal-review-child.png": {
+      "sha256": "a3047054919619c07395f4a44bd045e96c2758212511c99e6329abff043e7aa1",
+      "width": 1206,
+      "height": 2622,
+      "device_id": "74DC16F7-4678-490D-AD86-60CC218F56EB",
+      "device_name": "iPhone 17 Pro",
+      "timestamp": 1792097643.989,
+      "original_attachment": "DDD98D6F-0C8E-47F8-A496-E3D16BAE8ED9.png"
+    },
+    "photo-meal-review.png": {
+      "sha256": "c7120ed01d063933625cdefcd034d336aca4a08dcf7101923a98b52350e16e6a",
+      "width": 1206,
+      "height": 2622,
+      "device_id": "74DC16F7-4678-490D-AD86-60CC218F56EB",
+      "device_name": "iPhone 17 Pro",
+      "timestamp": 1792097639.892,
+      "original_attachment": "13AF5309-3729-4A99-9EDA-4744CFB738B3.png"
+    },
+    "imported-meal-review-scrolled.png": {
+      "sha256": "c7120ed01d063933625cdefcd034d336aca4a08dcf7101923a98b52350e16e6a",
+      "width": 1206,
+      "height": 2622,
+      "device_id": "74DC16F7-4678-490D-AD86-60CC218F56EB",
+      "device_name": "iPhone 17 Pro",
+      "timestamp": 1792097634.933,
+      "original_attachment": "FF87D50F-C304-4857-B10D-E29FE638DBB0.png"
+    },
+    "imported-meal-review-child.png": {
+      "sha256": "11f29aa8fd5d257c2d953b1b77fd8aa9c33a5520cc4b1b27a118ead2b20afb07",
+      "width": 1206,
+      "height": 2622,
+      "device_id": "74DC16F7-4678-490D-AD86-60CC218F56EB",
+      "device_name": "iPhone 17 Pro",
+      "timestamp": 1792097632.995,
+      "original_attachment": "83B29423-19B8-4DCD-8FB3-A0663D5A199E.png"
+    },
+    "imported-meal-review.png": {
+      "sha256": "c7120ed01d063933625cdefcd034d336aca4a08dcf7101923a98b52350e16e6a",
+      "width": 1206,
+      "height": 2622,
+      "device_id": "74DC16F7-4678-490D-AD86-60CC218F56EB",
+      "device_name": "iPhone 17 Pro",
+      "timestamp": 1792097628.975,
+      "original_attachment": "03F7FE77-9A93-4F90-B943-0BB512DED4DC.png"
+    },
+    "saved-meal-log-scrolled.png": {
+      "sha256": "68325a6a96b42d19b9fb4bb05f732433ed3cb08731b8c52eeb1544875166b33e",
+      "width": 1206,
+      "height": 2622,
+      "device_id": "74DC16F7-4678-490D-AD86-60CC218F56EB",
+      "device_name": "iPhone 17 Pro",
+      "timestamp": 1792097624.085,
+      "original_attachment": "CDBA70B3-F59E-47CA-92DE-3B679D0207A6.png"
+    },
+    "saved-meal-log.png": {
+      "sha256": "68325a6a96b42d19b9fb4bb05f732433ed3cb08731b8c52eeb1544875166b33e",
+      "width": 1206,
+      "height": 2622,
+      "device_id": "74DC16F7-4678-490D-AD86-60CC218F56EB",
+      "device_name": "iPhone 17 Pro",
+      "timestamp": 1792097621.576,
+      "original_attachment": "FD0BB575-8687-40FC-AE21-9C054820A15B.png"
+    },
+    "custom-food-log.png": {
+      "sha256": "3bcea746cbf6dd3d549f4ab00de70b9a9fa6c4995740718b854f8d94db49a419",
+      "width": 1206,
+      "height": 2622,
+      "device_id": "74DC16F7-4678-490D-AD86-60CC218F56EB",
+      "device_name": "iPhone 17 Pro",
+      "timestamp": 1792097606.161,
+      "original_attachment": "B899FAB3-21DD-4DB2-90E4-80576BDDCA8E.png"
+    },
+    "yum-chase-configured-log-scrolled.png": {
+      "sha256": "91aa67c7d6d272d053cd0973df07e3209dc320e55dfc7e9bf86d6e734a6d7294",
+      "width": 1206,
+      "height": 2622,
+      "device_id": "74DC16F7-4678-490D-AD86-60CC218F56EB",
+      "device_name": "iPhone 17 Pro",
+      "timestamp": 1792097585.454,
+      "original_attachment": "91264556-1786-498A-A8E5-60E68E282F5E.png"
+    },
+    "yum-chase-configured-log.png": {
+      "sha256": "2d19880fcfa9500e639166fb09aec63a4d3dc2be40d820a4ba1196d4d471fe44",
+      "width": 1206,
+      "height": 2622,
+      "device_id": "74DC16F7-4678-490D-AD86-60CC218F56EB",
+      "device_name": "iPhone 17 Pro",
+      "timestamp": 1792097578.82,
+      "original_attachment": "2392DDD6-948F-4793-8596-BAB416B05677.png"
+    },
+    "yum-chase-configured-child.png": {
+      "sha256": "e117b5b04a8eb4ae154870f785a2cde42dabaacd886db0987d0ead7469b88d69",
+      "width": 1206,
+      "height": 2622,
+      "device_id": "74DC16F7-4678-490D-AD86-60CC218F56EB",
+      "device_name": "iPhone 17 Pro",
+      "timestamp": 1792097572.449,
+      "original_attachment": "646F088D-0671-4CCF-84E1-778B68FD7360.png"
+    },
+    "off-packaged-log.png": {
+      "sha256": "c2c05155f547dbda6d1523ac4fb27020e14905aff788200e582cd077535dd30e",
+      "width": 1206,
+      "height": 2622,
+      "device_id": "74DC16F7-4678-490D-AD86-60CC218F56EB",
+      "device_name": "iPhone 17 Pro",
+      "timestamp": 1792097550.238,
+      "original_attachment": "1E3870EC-271E-4DA3-848E-F04DFB42A5C3.png"
+    },
+    "usda-weight-log.png": {
+      "sha256": "192f5b7784e3594ac96ab17379eefa30114a16e3734cd4f0cf81e641221a1f93",
+      "width": 1206,
+      "height": 2622,
+      "device_id": "74DC16F7-4678-490D-AD86-60CC218F56EB",
+      "device_name": "iPhone 17 Pro",
+      "timestamp": 1792097529.524,
+      "original_attachment": "8A66E850-EA9D-4EC6-8308-D7DAED0538BC.png"
+    },
+    "usda-unit-menu.png": {
+      "sha256": "0af7c0f726543884c5bfb181ef7efcf35da3dd55141d22a59dc61a79f7bf4080",
+      "width": 1206,
+      "height": 2622,
+      "device_id": "74DC16F7-4678-490D-AD86-60CC218F56EB",
+      "device_name": "iPhone 17 Pro",
+      "timestamp": 1792097508.303,
+      "original_attachment": "64BF2256-2024-48F4-928E-82FBAF45BC8D.png"
+    },
+    "usda-portioned-log.png": {
+      "sha256": "8422631bfff978f4c430b7cd021368aeb77b9c2c4a6687286532e99c8b387c37",
+      "width": 1206,
+      "height": 2622,
+      "device_id": "74DC16F7-4678-490D-AD86-60CC218F56EB",
+      "device_name": "iPhone 17 Pro",
+      "timestamp": 1792097505.356,
+      "original_attachment": "2910C861-4C82-42AA-96F6-94F02E0EA732.png"
+    }
+  }
+}

@@ -140,10 +140,10 @@ struct CustomMealFile: Codable, Equatable, Sendable {
                     food: food,
                     amount: 1,
                     unit: .serving,
-                    portionID: food.availablePortions.first?.id
+                    portionID: food.availablePortions.first?.id, notes: definition.notes
                 )
             },
-            origin: .imported
+            origin: .imported, notes: normalizedMeal.notes
         )
     }
 

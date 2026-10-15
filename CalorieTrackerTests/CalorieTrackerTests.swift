@@ -2199,6 +2199,189 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertNotNil(catalog.food(sourceID: "food_turkey_sandwich", source: .chaseFood), "Legacy diary identity should still resolve")
     }
 
+    func testConfiguredDraftRoundTripAndMealConversionKeepProvenance() throws {
+        let catalog = resolutionCatalog
+        let base = try XCTUnwrap(catalog.food(sourceID: "food_sandwich", source: .chaseFood))
+        let options = catalog.chaseFoodOptions(for: base.sourceID)
+        let selected = Set(options.filter(\.includedByDefault).map(\.id))
+        let portion = base.availablePortions.first?.id
+        let extra = testFood(calories: 100, name: "Extra")
+        let extras = [MealItem(id: UUID(), food: extra, amount: 0.25, unit: .serving),
+                      MealItem(id: UUID(), food: extra, amount: 0.75, unit: .serving)]
+        let nutrients = FoodConfigurationCalculator.nutrients(food: base, options: options, selected: selected,
+            extras: extras, portionID: portion)
+        let snapshot = FoodConfigurationSnapshot(selectedOptionIDs: Array(selected).sorted(), components: extras,
+            suggestedChanges: nil, catalogVersion: catalog.catalogVersion, baseFood: base,
+            options: options, extraComponents: extras, portionID: portion)
+        let date = testDate(day: 1)
+        let repository = try DiaryRepository(fileURL: temporaryDiaryURL(), calendar: testCalendar, catalog: catalog)
+        try repository.performSync(scope: .day(date)) {
+            $0.logConfiguredFood(base, nutrients: nutrients, selectedOptionIDs: snapshot.selectedOptionIDs,
+                components: extras, suggestedChanges: nil, portionID: portion, snapshot: snapshot,
+                on: date, allowCheatDay: true)
+        }
+        let original = try XCTUnwrap(repository.snapshotSync().document.entries.first)
+        XCTAssertEqual(original.foodConfigurationSnapshot, snapshot)
+        XCTAssertEqual(original.foodConfigurationSnapshot?.extraComponents?.map(\.amount), [0.25, 0.75])
+        try repository.performSync(scope: .entries([original.id])) {
+            try $0.updateFoodDraft(entryID: original.id, draft: original.foodDraft, original: original)
+        }
+        XCTAssertEqual(try repository.snapshotSync().document.entries.first, original, "Opening/unchanged Save preserves exact history")
+        var draft = original.foodDraft
+        draft.amount = 1.5
+        try repository.performSync(scope: .entries([original.id])) {
+            try $0.updateFoodDraft(entryID: original.id, draft: draft, original: original)
+        }
+        let updated = try XCTUnwrap(repository.snapshotSync().document.entries.first)
+        XCTAssertEqual(updated.id, original.id)
+        XCTAssertEqual(updated.date, original.date)
+        XCTAssertEqual(updated.loggedAt, original.loggedAt)
+        XCTAssertEqual(updated.displayOrder, original.displayOrder)
+        XCTAssertEqual(updated.nutrients.calories, original.nutrients.calories * 1.5, accuracy: 0.0001)
+        XCTAssertEqual(updated.foodConfigurationSnapshot, snapshot)
+        try repository.performSync(scope: .day(date)) { $0.saveMeal(name: "Configured meal", replacing: [original.id], on: date) }
+        let mealEntry = try XCTUnwrap(repository.snapshotSync().document.entries.first)
+        XCTAssertEqual(mealEntry.mealItems?.first?.foodConfigurationSnapshot, snapshot)
+        try repository.performSync(scope: .entries([mealEntry.id])) { $0.breakApartMeal(entryID: mealEntry.id) }
+        let expanded = try XCTUnwrap(repository.snapshotSync().document.entries.first)
+        XCTAssertEqual(expanded.foodConfigurationSnapshot, snapshot)
+        XCTAssertEqual(expanded.nutrients, updated.nutrients)
+    }
+
+    func testConfigurationCalculatorDoesNotCountVariantOrDuplicateExtrasTwice() throws {
+        let base = try XCTUnwrap(resolutionCatalog.food(sourceID: "food_sandwich", source: .chaseFood))
+        let variantFood = testFood(calories: 200, name: "Variant")
+        let topping = testFood(calories: 100, name: "Topping")
+        let options = [
+            ChaseFoodOption(id: "variant", food: variantFood, displayName: "Variant", amountGrams: 100,
+                relationship: "variant", includedByDefault: false, displayOrder: 0, optionGroup: nil, selectionMode: "exclusive"),
+            ChaseFoodOption(id: "included", food: topping, displayName: "Included", amountGrams: 10,
+                relationship: "included", includedByDefault: true, displayOrder: 1, optionGroup: nil, selectionMode: "multiple"),
+            ChaseFoodOption(id: "extra", food: topping, displayName: "Extra", amountGrams: 20,
+                relationship: "addition", includedByDefault: false, displayOrder: 2, optionGroup: nil, selectionMode: "multiple")]
+        let extras = [MealItem(id: UUID(), food: topping, amount: 0.25, unit: .serving),
+                      MealItem(id: UUID(), food: topping, amount: 0.75, unit: .serving)]
+        let portion = base.availablePortions.first?.id
+        let total = FoodConfigurationCalculator.nutrients(food: base, options: options, selected: ["variant", "extra"],
+            extras: extras, portionID: portion)
+        let expected = variantFood.nutrients(for: base.portion(id: portion)?.grams ?? base.baseAmountGrams, unit: .grams)
+            + topping.nutrients(for: 20, unit: .grams) + topping.nutrients(for: 1, unit: .serving)
+        XCTAssertEqual(total, expected)
+        let configured = FoodConfigurationCalculator.configuredFood(base: base, portionNutrients: total, portionID: portion)
+        XCTAssertEqual(configured.nutrients(for: 1, unit: .serving, portionID: portion).calories, total.calories, accuracy: 0.0001)
+    }
+
+    func testNonChaseConfiguredFoodsKeepFractionalExtrasThroughWeightEditAndReload() throws {
+        let catalog = resolutionCatalog
+        let sources: [(FoodSource, String)] = [(.usda, "2709265"), (.openFoodFacts, "0096619483556")]
+        for (source, sourceID) in sources {
+            let base = try XCTUnwrap(catalog.food(sourceID: sourceID, source: source))
+            let extra = testFood(calories: 100, name: "Fractional addition")
+            let extras = [MealItem(id: UUID(), food: extra, amount: 0.25, unit: .serving),
+                MealItem(id: UUID(), food: extra, amount: 0.5, unit: .serving)]
+            let portion = base.availablePortions.first?.id
+            let total = FoodConfigurationCalculator.nutrients(food: base, options: [], selected: [], extras: extras, portionID: portion)
+            XCTAssertEqual(total.calories, base.nutrients(for: 1, unit: .serving, portionID: portion).calories + 75, accuracy: 0.0001)
+            let snapshot = FoodConfigurationSnapshot(selectedOptionIDs: [], components: extras, suggestedChanges: nil,
+                catalogVersion: catalog.catalogVersion, baseFood: base, options: [], extraComponents: extras, portionID: portion)
+            let url = temporaryDiaryURL()
+            let repository = try DiaryRepository(fileURL: url, calendar: testCalendar, catalog: catalog)
+            let date = testDate(day: 1)
+            try repository.performSync(scope: .day(date)) {
+                $0.logConfiguredFood(base, nutrients: total, selectedOptionIDs: [], components: extras,
+                    suggestedChanges: nil, portionID: portion, snapshot: snapshot, on: date, allowCheatDay: true)
+            }
+            let entry = try XCTUnwrap(repository.snapshotSync().document.entries.first)
+            var draft = entry.foodDraft
+            draft.amount = base.portion(id: portion)?.grams ?? base.baseAmountGrams
+            draft.unit = .grams
+            try repository.performSync(scope: .entries([entry.id])) { try $0.updateFoodDraft(entryID: entry.id, draft: draft, original: entry) }
+            let reopened = try DiaryRepository(fileURL: url, calendar: testCalendar, catalog: catalog).snapshotSync().document
+            XCTAssertEqual(reopened.entries.count, 1)
+            XCTAssertEqual(reopened.entries[0].id, entry.id)
+            XCTAssertEqual(reopened.entries[0].nutrients.calories, total.calories, accuracy: 0.0001)
+            XCTAssertEqual(reopened.entries[0].foodConfigurationSnapshot, snapshot)
+            XCTAssertEqual(reopened.entries[0].foodConfigurationSnapshot?.extraComponents?.map(\.id), extras.map(\.id))
+        }
+    }
+
+    func testFoodDraftRejectsDeletedOrConcurrentEntryWithoutRecreatingIt() throws {
+        let engine = DiaryEngine(document: DiaryDocument(), calendar: testCalendar)
+        engine.log(testFood(calories: 100, name: "Draft test food"), amount: 1, unit: .serving, on: testDate(day: 1), allowCheatDay: true)
+        let original = try XCTUnwrap(engine.document.entries.first)
+        var draft = original.foodDraft; draft.amount = 2
+        engine.updateEntry(entryID: original.id, amount: 3, unit: .serving, allowCheatDay: true)
+        let concurrent = engine.document
+        XCTAssertThrowsError(try engine.updateFoodDraft(entryID: original.id, draft: draft, original: original))
+        XCTAssertEqual(engine.document.entries, concurrent.entries)
+        engine.document.entries = []
+        XCTAssertThrowsError(try engine.updateFoodDraft(entryID: original.id, draft: draft, original: original))
+        XCTAssertTrue(engine.document.entries.isEmpty)
+    }
+
+    func testLegacyConfigurationCodableAndUnchangedSavePreserveOriginalTotals() throws {
+        let payload = #"{"selectedOptionIDs":["retired"],"components":[],"catalogVersion":"old"}"#
+        let old = try JSONDecoder().decode(FoodConfigurationSnapshot.self, from: Data(payload.utf8))
+        XCTAssertFalse(old.hasEditorInputs)
+        let engine = DiaryEngine(document: DiaryDocument(), calendar: testCalendar)
+        engine.log(testFood(calories: 100, name: "Draft test food"), amount: 1, unit: .serving, on: testDate(day: 1), allowCheatDay: true)
+        engine.document.entries[0].foodConfigurationSnapshot = old
+        engine.document.entries[0].nutrients.calories = 123.456
+        let original = engine.document.entries[0]
+        try engine.updateFoodDraft(entryID: original.id, draft: original.foodDraft, original: original)
+        XCTAssertEqual(engine.document.entries[0], original)
+        var draft = original.foodDraft; draft.amount = 2
+        try engine.updateFoodDraft(entryID: original.id, draft: draft, original: original)
+        XCTAssertEqual(engine.document.entries[0].nutrients.calories, 246.912, accuracy: 0.0001)
+        XCTAssertEqual(engine.document.entries[0].foodConfigurationSnapshot, old)
+    }
+
+    func testSavedVariationsDistinguishComponentAmountsAndKeepDuplicates() {
+        let engine = DiaryEngine(document: DiaryDocument(), calendar: testCalendar)
+        let extra = testFood(calories: 100, name: "Draft test food")
+        let quarter = SavedFoodConfiguration(baseFoodID: "base", label: "Quarter", selectedOptionIDs: [],
+            components: [MealItem(id: UUID(), food: extra, amount: 0.25, unit: .serving)], portionID: nil)
+        let whole = SavedFoodConfiguration(baseFoodID: "base", label: "Whole", selectedOptionIDs: [],
+            components: [MealItem(id: UUID(), food: extra, amount: 1, unit: .serving)], portionID: nil)
+        engine.saveFoodConfiguration(quarter); engine.saveFoodConfiguration(whole)
+        XCTAssertEqual(engine.document.savedFoodConfigurations.count, 2)
+    }
+
+    func testSharedMealDraftKeepsTemplateIsolatedAndImportedNotesSurviveReload() throws {
+        let file = CustomMealFile(format: CustomMealFile.formatIdentifier, version: 1, name: "One-off soup",
+            foods: [CustomFoodDefinition(name: "Soup", servingDescription: "bowl", servingGrams: 300,
+                nutrition: .init(calories: 240, carbohydratesGrams: 38, fatGrams: 5, proteinGrams: 12), notes: "Ingredient note")],
+            notes: "Meal note")
+        try file.validate()
+        let meal = file.makeMeal()
+        let date = testDate(day: 1)
+        let repository = try DiaryRepository(fileURL: temporaryDiaryURL(), calendar: testCalendar)
+        try repository.performSync(scope: .day(date)) { _ = try $0.logImportedMeal(meal, saveForReuse: true, amount: 2, on: date, allowCheatDay: true) }
+        let before = try repository.snapshotSync().document
+        let entry = try XCTUnwrap(before.entries.first)
+        XCTAssertEqual(entry.mealNotes, "Meal note")
+        XCTAssertEqual(entry.amount, 2)
+        XCTAssertEqual(entry.nutrients.calories, 480, accuracy: 0.0001)
+        XCTAssertEqual(entry.mealItems?.first?.notes, "Ingredient note")
+        try repository.performSync(scope: .entries([entry.id])) {
+            try $0.updateMealDraft(original: entry, name: entry.food.name, amount: entry.amount,
+                items: entry.mealItems ?? [], processed: entry.processedMeatOverride, red: entry.redMeatOverride)
+        }
+        XCTAssertEqual(try repository.snapshotSync().document.entries.first, entry)
+        var changedItems = entry.mealItems ?? []; changedItems[0].amount = 0.5
+        try repository.performSync(scope: .entries([entry.id])) {
+            try $0.updateMealDraft(original: entry, name: "Edited soup", amount: entry.amount,
+                items: changedItems, processed: true, red: nil)
+        }
+        let after = try repository.snapshotSync().document
+        XCTAssertEqual(after.meals, before.meals)
+        XCTAssertEqual(after.entries[0].id, entry.id)
+        XCTAssertNil(after.entries[0].savedMealID)
+        XCTAssertEqual(after.entries[0].nutrients.calories, 120, accuracy: 0.0001)
+        XCTAssertEqual(after.entries[0].processedMeatOverride, true)
+        XCTAssertEqual(after.entries[0].mealNotes, "Meal note")
+    }
+
     func testConfiguredFoodSnapshotKeepsSelectedConstituents() throws {
         let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
         let catalog = CatalogStore(url: root.appendingPathComponent("CalorieTracker/Resources/FoodCatalog.sqlite3"))

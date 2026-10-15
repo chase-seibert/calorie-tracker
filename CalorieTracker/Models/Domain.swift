@@ -480,6 +480,7 @@ struct DiaryEntry: Codable, Hashable, Identifiable, Sendable {
     // Optional chart-only correction; nil derives servings from the logged quantity.
     var meatServingsOverride: Double? = nil
     var foodConfigurationSnapshot: FoodConfigurationSnapshot? = nil
+    var mealNotes: String? = nil
 
     var isMeal: Bool {
         savedMealID != nil || !(mealItems?.isEmpty ?? true)
@@ -490,11 +491,29 @@ struct DiaryEntry: Codable, Hashable, Identifiable, Sendable {
     }
 }
 
+struct ChaseFoodOption: Identifiable, Codable, Hashable, Sendable {
+    let id: String
+    let food: Food
+    let displayName: String
+    let amountGrams: Double
+    let relationship: String
+    let includedByDefault: Bool
+    let displayOrder: Int
+    let optionGroup: String?
+    let selectionMode: String
+}
+
 struct FoodConfigurationSnapshot: Codable, Hashable, Sendable {
     var selectedOptionIDs: [String]
     var components: [MealItem]
     var suggestedChanges: String?
     var catalogVersion: String?
+    // Frozen editor inputs. Missing on pre-editor snapshots; never infer them from adjusted nutrition.
+    var baseFood: Food? = nil
+    var options: [ChaseFoodOption]? = nil
+    var extraComponents: [MealItem]? = nil
+    var portionID: String? = nil
+    var hasEditorInputs: Bool { baseFood != nil && options != nil && extraComponents != nil }
 }
 
 struct SavedFoodConfiguration: Codable, Hashable, Identifiable, Sendable {
@@ -506,6 +525,7 @@ struct SavedFoodConfiguration: Codable, Hashable, Identifiable, Sendable {
     var portionID: String?
     var createdAt: Date
     var lastUsedAt: Date
+    var snapshot: FoodConfigurationSnapshot? = nil
 
     init(baseFoodID: String, label: String, selectedOptionIDs: [String], components: [MealItem], portionID: String?) {
         id = UUID()
@@ -551,6 +571,9 @@ struct MealItem: Codable, Hashable, Identifiable, Sendable {
     var unit: LogUnit
     var portionID: String? = nil
     var meatServingsOverride: Double? = nil
+    var foodConfigurationSnapshot: FoodConfigurationSnapshot? = nil
+    var configurationOptionID: String? = nil
+    var notes: String? = nil
     // Nil keeps the logged ingredient's original food classification.
     var processedMeatOverride: Bool? = nil
     var redMeatOverride: Bool? = nil
@@ -567,6 +590,7 @@ struct SavedMeal: Codable, Hashable, Identifiable, Sendable {
     var items: [MealItem]
     var containsProcessedMeat: Bool? = nil
     var containsRedMeat: Bool? = nil
+    var notes: String? = nil
     /// Imported meals are retained as reusable snapshots for Recent and quick logging,
     /// but are kept out of the user's hand-created Personal Library.
     var origin: SavedMealOrigin = .custom
@@ -578,6 +602,7 @@ struct SavedMeal: Codable, Hashable, Identifiable, Sendable {
         case containsProcessedMeat
         case containsRedMeat
         case origin
+        case notes
     }
 
     init(
@@ -586,7 +611,8 @@ struct SavedMeal: Codable, Hashable, Identifiable, Sendable {
         items: [MealItem],
         containsProcessedMeat: Bool? = nil,
         containsRedMeat: Bool? = nil,
-        origin: SavedMealOrigin = .custom
+        origin: SavedMealOrigin = .custom,
+        notes: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -594,6 +620,7 @@ struct SavedMeal: Codable, Hashable, Identifiable, Sendable {
         self.containsProcessedMeat = containsProcessedMeat
         self.containsRedMeat = containsRedMeat
         self.origin = origin
+        self.notes = notes
     }
 
     init(from decoder: Decoder) throws {
@@ -604,6 +631,7 @@ struct SavedMeal: Codable, Hashable, Identifiable, Sendable {
         containsProcessedMeat = try container.decodeIfPresent(Bool.self, forKey: .containsProcessedMeat)
         containsRedMeat = try container.decodeIfPresent(Bool.self, forKey: .containsRedMeat)
         // Files written before imported meal support have no origin key and are custom meals.
+        notes = try container.decodeIfPresent(String.self, forKey: .notes)
         origin = try container.decodeIfPresent(SavedMealOrigin.self, forKey: .origin) ?? .custom
     }
 
@@ -615,16 +643,17 @@ struct SavedMeal: Codable, Hashable, Identifiable, Sendable {
         try container.encodeIfPresent(containsProcessedMeat, forKey: .containsProcessedMeat)
         try container.encodeIfPresent(containsRedMeat, forKey: .containsRedMeat)
         try container.encode(origin, forKey: .origin)
+        try container.encodeIfPresent(notes, forKey: .notes)
     }
 
     var isImported: Bool { origin == .imported }
 
     var resolvedContainsProcessedMeat: Bool {
-        containsProcessedMeat ?? items.contains { $0.food.containsProcessedMeat == true }
+        containsProcessedMeat ?? items.contains { ($0.processedMeatOverride ?? $0.food.containsProcessedMeat) == true }
     }
 
     var resolvedContainsRedMeat: Bool {
-        containsRedMeat ?? items.contains { $0.food.containsRedMeat == true }
+        containsRedMeat ?? items.contains { ($0.redMeatOverride ?? $0.food.containsRedMeat) == true }
     }
 
     var nutrients: MacroNutrients {
@@ -1024,5 +1053,57 @@ extension Double {
     var cleanAmount: String {
         if rounded() == self { return String(Int(self)) }
         return formatted(.number.precision(.fractionLength(0...1)))
+    }
+}
+
+/// One calculator for detail previews, configured commits, and explicit variation quick-add.
+enum FoodConfigurationCalculator {
+    static func nutrients(food: Food, options: [ChaseFoodOption], selected: Set<String>,
+                          extras: [MealItem], portionID: String?) -> MacroNutrients {
+        var total = food.nutrients(for: 1, unit: .serving, portionID: portionID)
+        let variant = options.first { $0.relationship.lowercased() == "variant" && selected.contains($0.id) }
+        if let variant {
+            total = variant.food.nutrients(for: food.portion(id: portionID)?.grams ?? food.baseAmountGrams, unit: .grams)
+        }
+        for option in options where !["style", "variant"].contains(option.relationship.lowercased()) {
+            if variant != nil && option.includedByDefault { continue }
+            let included = selected.contains(option.id)
+            guard included != option.includedByDefault else { continue }
+            let value = option.food.nutrients(for: option.amountGrams, unit: .grams)
+            if included { total = total + value }
+            else {
+                total = MacroNutrients(calories: max(0, total.calories - value.calories),
+                    carbs: max(0, total.carbs - value.carbs), fat: max(0, total.fat - value.fat),
+                    protein: max(0, total.protein - value.protein),
+                    fiber: total.fiber.map { max(0, $0 - (value.fiber ?? 0)) })
+            }
+        }
+        return extras.reduce(total) { $0 + $1.food.nutrients(for: $1.amount, unit: $1.unit, portionID: $1.portionID) }
+    }
+
+    static func configuredFood(base: Food, portionNutrients: MacroNutrients, portionID: String?) -> Food {
+        var food = base
+        let grams = max(base.portion(id: portionID)?.grams ?? base.baseAmountGrams, 0.001)
+        food.nutrients = portionNutrients.scaled(by: base.baseAmountGrams / grams)
+        return food
+    }
+}
+
+enum FoodDraftError: LocalizedError {
+    case missingEntry, invalidDraft, changedEntry
+    var errorDescription: String? {
+        switch self {
+        case .missingEntry: "This logged item no longer exists. Your changes have not been saved."
+        case .invalidDraft: "Enter a name and positive, finite quantities before saving."
+        case .changedEntry: "This item changed while you were editing. Reopen it to use the latest values."
+        }
+    }
+}
+
+extension DiaryEntry {
+    var foodDraft: MealItem {
+        MealItem(id: id, food: food, amount: amount, unit: unit, portionID: portionID,
+                 meatServingsOverride: meatServingsOverride, foodConfigurationSnapshot: foodConfigurationSnapshot,
+                 processedMeatOverride: processedMeatOverride, redMeatOverride: redMeatOverride)
     }
 }

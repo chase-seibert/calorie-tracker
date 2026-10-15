@@ -58,7 +58,7 @@ Do not make the app fetch the workbook or cookbook at runtime.
 | `chase_food_metadata` | One row per Chase Food identity with category, food kind, confidence, review reasons, and matched source provenance. |
 | `chase_food_aliases` | Stable target food ID, alias text, and alias kind (`canonical`, `synonym`, or `brand`). FTS indexes canonical names and approved aliases; results deduplicate by target ID. |
 | `chase_food_options` | Parent/option/component IDs, component label and grams, relationship, default-selected flag, order, optional group name, and selection mode (`exclusive` or `multiple`). Component references point to reusable catalog foods. |
-| Food table options summary | A human-readable `Options (add-ons and variants)` column derived from structured option and included-composition rows. Regenerate it during every catalog preparation and in the nutrition review workbook. |
+| Food table choice summaries | Separate comma-separated `Variations`, `Options`, and `Included components` columns derived from structured variant, suggested-addition, and base-composition rows. Regenerate them during every catalog preparation and in the nutrition review workbook. |
 | `metadata` | Dataset revision and identity count, alongside the existing catalog metadata. |
 
 `foods` remains the compatibility surface used by existing search, logging,

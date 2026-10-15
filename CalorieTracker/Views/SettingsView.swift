@@ -1163,6 +1163,7 @@ struct CustomFoodEditorView: View {
     @Environment(\.dismiss) private var dismiss
 
     private let food: Food?
+    private let savesToLibrary: Bool
     private let onSaved: ((Food) -> Void)?
     private let analyticsOrigin: String
     @State private var name: String
@@ -1202,9 +1203,11 @@ struct CustomFoodEditorView: View {
         food: Food?,
         initialName: String? = nil,
         analyticsOrigin: String = "custom_catalog",
+        savesToLibrary: Bool = true,
         onSaved: ((Food) -> Void)? = nil
     ) {
         self.food = food
+        self.savesToLibrary = savesToLibrary
         self.onSaved = onSaved
         self.analyticsOrigin = analyticsOrigin
         _name = State(initialValue: food?.name ?? initialName ?? "")
@@ -1326,6 +1329,17 @@ struct CustomFoodEditorView: View {
     }
 
     private func save() {
+        guard canSave else { return }
+        if !savesToLibrary {
+            let definition = CustomFoodDefinition(name: name, servingDescription: "serving", servingGrams: servingGrams,
+                nutrition: .init(calories: calories, carbohydratesGrams: carbs, fatGrams: fat, proteinGrams: protein, fiberGrams: fiber),
+                notes: nil, containsProcessedMeat: containsProcessedMeat, containsRedMeat: containsRedMeat)
+            var draft = definition.makeFood()
+            draft.brand = brand.isEmpty ? nil : brand
+            onSaved?(draft)
+            dismiss()
+            return
+        }
         diary.run {
             guard canSave else { return }
             let savedFood: Food?
@@ -1392,340 +1406,7 @@ struct CustomFoodEditorView: View {
 }
 
 private struct SavedMealEditorView: View {
-    @EnvironmentObject private var diary: DiaryStore
-    @Environment(\.dismiss) private var dismiss
-
-    private let meal: SavedMeal?
-    private let catalog: CatalogStore
-    @State private var name: String
-    @State private var items: [MealItem]
-    @State private var containsProcessedMeat: Bool?
-    @State private var containsRedMeat: Bool?
-    @State private var showingFoodPicker = false
-
-    init(meal: SavedMeal?, catalog: CatalogStore) {
-        self.meal = meal
-        self.catalog = catalog
-        _name = State(initialValue: meal?.name ?? "")
-        _items = State(initialValue: meal?.items ?? [])
-        _containsProcessedMeat = State(initialValue: meal?.containsProcessedMeat)
-        _containsRedMeat = State(initialValue: meal?.containsRedMeat)
-    }
-
-    var body: some View {
-        NavigationStack {
-            Form {
-                Section("Meal") {
-                    TextField("Name", text: $name)
-                }
-
-                Section {
-                    if items.isEmpty {
-                        Text("Add at least one food to save this meal.")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                    ForEach($items) { item in
-                        SavedMealItemEditorRow(item: item) {
-                            let itemID = item.wrappedValue.id
-                            items.removeAll { $0.id == itemID }
-                        }
-                    }
-                    Button("Add food", systemImage: "plus") {
-                        showingFoodPicker = true
-                    }
-                } header: {
-                    Text("Foods")
-                } footer: {
-                    Text("Set each ingredient's amount and unit. These quantities are used whenever you log this saved meal.")
-                }
-
-                Section {
-                    FoodMeatFields(name: name, processed: $containsProcessedMeat, red: $containsRedMeat,
-                        derivesFromIngredients: true,
-                        automaticProcessed: items.contains { $0.food.containsProcessedMeat == true } ? true
-                            : (items.allSatisfy { $0.food.containsProcessedMeat == false } ? false : nil),
-                        automaticRed: items.contains { $0.food.containsRedMeat == true } ? true
-                            : (items.allSatisfy { $0.food.containsRedMeat == false } ? false : nil))
-                } header: {
-                    Text("Meat tracking")
-                } footer: {
-                    Text("These meal-level flags control how every logged serving of this meal appears in Trends.")
-                }
-            }
-            .scrollContentBackground(.hidden)
-            .background(AppTheme.background)
-            .navigationTitle(meal == nil ? "Add Saved Meal" : "Edit Saved Meal")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save", action: save)
-                        .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || items.isEmpty)
-                }
-            }
-            .sheet(isPresented: $showingFoodPicker) {
-                MealFoodPickerView(foods: availableFoods, catalog: catalog) { food in
-                    let preference = diary.preference(for: food)
-                    items.append(MealItem(
-                        id: UUID(),
-                        food: food,
-                        amount: preference.amount,
-                        unit: preference.unit,
-                        portionID: preference.portionID
-                    ))
-                }
-            }
-            .analyticsScreen("saved_meal_editor", properties: [
-                "operation": meal == nil ? "create" : "edit",
-                "origin": "custom_catalog"
-            ])
-        }
-    }
-
-    private var availableFoods: [Food] {
-        var seen = Set<String>()
-        let candidates = diary.document.customFoods
-            + diary.document.favorites
-            + diary.document.entries
-                .filter { !$0.isMeal && !$0.isCheatDayAdjustment }
-                .map(\.food)
-            + diary.document.meals.flatMap { $0.items.map(\.food) }
-        return candidates.compactMap { food in
-            guard seen.insert(food.id).inserted else { return nil }
-            return diary.displayedFood(food)
-        }
-        .sorted {
-            let comparison = $0.name.localizedCaseInsensitiveCompare($1.name)
-            return comparison == .orderedSame ? $0.id < $1.id : comparison == .orderedAscending
-        }
-    }
-
-    private func save() {
-        diary.run {
-            guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, !items.isEmpty else { return }
-            if let meal {
-                guard
-                    try await diary.updateSavedMeal(
-                        mealID: meal.id,
-                        name: name,
-                        items: items,
-                        meatOverrides: FoodMeatOverrides(processed: containsProcessedMeat, red: containsRedMeat)
-                    )
-                else { return }
-                AppAnalytics.capture(
-                    "meal.updated",
-                    properties: [
-                        "origin": "custom_catalog",
-                        "item_count": String(items.count),
-                    ])
-            } else {
-                guard
-                    try await diary.saveMeal(
-                        name: name,
-                        items: items,
-                        containsProcessedMeat: containsProcessedMeat,
-                        containsRedMeat: containsRedMeat
-                    ) != nil
-                else { return }
-                AppAnalytics.capture(
-                    "meal.created",
-                    properties: [
-                        "origin": "custom_catalog",
-                        "item_count": String(items.count),
-                    ])
-            }
-            dismiss()
-
-        }
-    }
-}
-
-private struct SavedMealItemEditorRow: View {
-    @Binding var item: MealItem
-    let onDelete: () -> Void
-
-    var body: some View {
-        MealItemEditorRow(item: $item)
-        .swipeActions {
-            Button("Remove", systemImage: "trash", role: .destructive, action: onDelete)
-        }
-    }
-}
-
-private struct MealFoodPickerView: View {
-    @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var diary: DiaryStore
-    let foods: [Food]
+    let meal: SavedMeal?
     let catalog: CatalogStore
-    let onSelect: (Food) -> Void
-
-    private enum Mode: String, CaseIterable, Identifiable {
-        case all = "All foods"
-        case recent = "Recent"
-        case frequent = "Frequent"
-        case favorites = "Favorites"
-
-        var id: String { rawValue }
-    }
-
-    @State private var mode: Mode = .all
-    @State private var query = ""
-    @State private var results: [Food] = []
-    @State private var isSearching = false
-    @FocusState private var searchIsFocused: Bool
-
-    var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                searchControls
-                if query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    modeStrip
-                }
-                Divider()
-                content
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-            .background(AppTheme.background)
-            .navigationTitle("Add Food")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { dismiss() }
-                }
-            }
-            .task(id: query) {
-                let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
-                guard !normalizedQuery.isEmpty else {
-                    results = []
-                    isSearching = false
-                    return
-                }
-                isSearching = true
-                try? await Task.sleep(for: .milliseconds(140))
-                guard !Task.isCancelled else { return }
-                results = diary.searchItems(
-                    normalizedQuery,
-                    catalogFoods: catalog.searchAll(normalizedQuery)
-                ).compactMap { item in
-                    if case .food(let food) = item { return food }
-                    return nil
-                }
-                isSearching = false
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var content: some View {
-        if !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            if isSearching {
-                ProgressView("Searching…")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else if results.isEmpty {
-                ContentUnavailableView.search(text: query)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                foodList(results)
-            }
-        } else if foods.isEmpty {
-            ContentUnavailableView(
-                "No foods available",
-                systemImage: "fork.knife.circle",
-                description: Text("Add a custom food or log a food before creating a saved meal.")
-            )
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else {
-            foodList(foodsForMode)
-        }
-    }
-
-    private var searchControls: some View {
-        HStack {
-            Image(systemName: "magnifyingglass")
-                .foregroundStyle(.secondary)
-            TextField("Search foods", text: $query)
-                .focused($searchIsFocused)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .submitLabel(.search)
-            if !query.isEmpty {
-                Button("Clear", systemImage: "xmark.circle.fill") {
-                    query = ""
-                }
-                .labelStyle(.iconOnly)
-                .foregroundStyle(.secondary)
-            }
-        }
-        .padding(12)
-        .background(AppTheme.controlFill, in: RoundedRectangle(cornerRadius: 14))
-        .padding(.horizontal, 16)
-        .padding(.top, 10)
-    }
-
-    private var modeStrip: some View {
-        FlowLayout(spacing: 6) {
-            ForEach(Mode.allCases) { item in
-                Button {
-                    searchIsFocused = false
-                    mode = item
-                } label: {
-                    Text(item.rawValue)
-                        .font(.caption.weight(.semibold))
-                        .frame(height: 16)
-                        .fixedSize()
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 8)
-                        .foregroundStyle(mode == item ? AppTheme.selectedText : AppTheme.ink)
-                        .background(mode == item ? AppTheme.ink : AppTheme.controlFill, in: Capsule())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(item.rawValue)
-            }
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-    }
-
-    private var foodsForMode: [Food] {
-        switch mode {
-        case .all:
-            foods
-        case .recent:
-            diary.recentFoods
-        case .frequent:
-            diary.frequentFoods
-        case .favorites:
-            diary.document.favorites
-        }
-    }
-
-    private func foodList(_ items: [Food]) -> some View {
-        List {
-            if items.isEmpty {
-                ContentUnavailableView(
-                    mode == .favorites ? "No favorite foods" : "No foods yet",
-                    systemImage: "fork.knife.circle",
-                    description: Text("Foods you log or favorite will appear here.")
-                )
-            } else {
-                ForEach(items) { food in
-                    Button {
-                        onSelect(food)
-                        dismiss()
-                    } label: {
-                        FoodResultRow(
-                            food: food,
-                            preference: diary.preference(for: food)
-                        )
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-        }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
-    }
+    var body: some View { MealDetailView(context: .template(meal), catalog: catalog) }
 }

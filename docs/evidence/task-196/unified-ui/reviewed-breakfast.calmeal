@@ -1,0 +1,47 @@
+{
+  "format": "calorie-tracker-meal",
+  "version": 1,
+  "name": "Reviewed breakfast bowl",
+  "foods": [
+    {
+      "name": "Chase's overnight oats",
+      "servingDescription": "jar",
+      "servingGrams": 250,
+      "nutrition": {
+        "calories": 320,
+        "carbohydratesGrams": 48,
+        "fatGrams": 9,
+        "proteinGrams": 14,
+        "fiberGrams": 8
+      },
+      "notes": "Oats, milk and berries. Review the estimate before logging.",
+      "containsProcessedMeat": false,
+      "containsRedMeat": false
+    },
+    {
+      "name": "Greek yogurt",
+      "servingDescription": "cup",
+      "servingGrams": 170,
+      "nutrition": {
+        "calories": 100,
+        "carbohydratesGrams": 7,
+        "fatGrams": 0,
+        "proteinGrams": 18
+      },
+      "notes": "Plain nonfat yogurt."
+    },
+    {
+      "name": "Mixed berries",
+      "servingDescription": "handful",
+      "servingGrams": 80,
+      "nutrition": {
+        "calories": 40,
+        "carbohydratesGrams": 10,
+        "fatGrams": 0.4,
+        "proteinGrams": 0.6,
+        "fiberGrams": 3
+      }
+    }
+  ],
+  "notes": "Stored demo analysis. Review each ingredient and portion; no AI request is made."
+}

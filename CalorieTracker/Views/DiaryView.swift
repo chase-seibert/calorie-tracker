@@ -300,10 +300,9 @@ struct DiaryView: View {
                     .environmentObject(diary)
                     .presentationDetents([.medium])
             }
-            .sheet(item: $editingEntry) { entry in
-                QuantityEditor(entry: entry)
+            .fullScreenCover(item: $editingEntry) { entry in
+                LoggedItemDetailView(entryID: entry.id, catalog: catalog)
                     .environmentObject(diary)
-                    .presentationDetents([.medium, .large])
             }
             .alert("Save selected foods as a meal", isPresented: $showingMealName) {
                 TextField("Meal name", text: $mealName)

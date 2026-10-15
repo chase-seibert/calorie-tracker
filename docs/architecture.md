@@ -355,3 +355,60 @@ or run it. Run `make ui-test-reorder` when a change affects the logged-food list
 its collection-view adapter, row gestures, drag behavior, deletion behavior, or
 display-order persistence. Unrelated app and catalog changes should use the
 normal unit-test path only.
+
+## Shared food search and editing
+
+`FoodPickerView` is the shared search surface for Log Food and parent component
+selection. Both contexts use the same source preferences, cancellable query,
+ranked catalog/history merge, result rows and Recent/Frequent/Favorites/Meals
+lists. Component mode hides Magic and AI logging tools, excludes the parent,
+and returns configured value drafts without writing a diary or library item.
+Saved variation rows open detail; their explicit plus button remains quick add.
+
+`FoodDetailView` resolves every food source, new log, variation, logged entry and
+component to `FoodCustomizationView`. Its capabilities supply option groups and
+real portions; the source never chooses another screen body. `CustomizationScreen`
+renders the same pinned summary, macro bar, scrolling content and large quantity/
+action footer for foods and meals. `CustomizationQuantityControls` supplies the
+shared controls; meals expose a meal count rather than a synthetic gram weight.
+`SearchItemRow` supplies an explicit, namespaced detail button and an independent
+contextual shortcut in search and all list modes. Diary and
+Trends pass an entry ID through `LoggedItemDetailView`, resolving the current
+snapshot when presenting. `MealDetailView` replaces the former logged-meal and
+Saved Meal forms. It uses the same visual shell and `CustomizationIngredients`
+cards as food extras, while owning component detail and
+Add Food search. File and photo review are thin adapters to that same screen;
+imported ingredient definition fields and validation remain available within
+food detail. Viewing a draft never reruns meal analysis.
+
+Each editor owns a value draft. Child Add/Save returns to the parent; Cancel
+abandons that level. The final context commits a new diary log, an atomic update
+to one existing entry, or an explicit Saved Meal template edit. Logged updates
+preserve UUID/date/logged time/order and unrelated chart overrides, and use the
+repository's existing revisioned HealthKit queue. Missing or concurrently
+changed entries fail visibly without relogging; buttons prevent repeat commits.
+Template editing retains its existing linked-history refresh policy and states
+that scope in the editor. Changed logged compositions detach from the template.
+
+`FoodConfigurationSnapshot` now optionally stores the unmodified base food,
+frozen option definitions, extra components and selected portion. Option
+components carry their association; `MealItem` carries a configuration snapshot
+and import notes. These optional Codable fields live in the existing SQLite
+row payloads and exports and need no SQL table migration. Components retain
+stable IDs, fractional amounts, units, and multiplicity through meal creation,
+logging and break apart. `FoodConfigurationCalculator` supplies the same
+arithmetic for detail preview and variation quick-add. Configured snapshots
+never acquire replacement nutrition during catalog resolution.
+
+Historical configurations without complete editor inputs remain readable and
+retain their exact nutrition. Quantity and tags can be changed safely. Option
+and component edits require an explicit rebuild from current catalog defaults;
+the confirmation explains that it replaces the estimate. Unchanged saves keep
+historical totals, including rounding and unknown fiber, without repricing.
+
+Plain historical foods need no configuration snapshot or rebuild warning. USDA,
+OFF and custom foods can acquire additions through the same calculator and frozen
+snapshot representation, with an empty options array. Viewing, changing units or
+cancelling child drafts does not persist quantity preferences. Simulator-only
+review fixtures exercise real catalog foods, mixed-source meals and stored import/
+analysis output without changing the physical-device diary or calling AI.

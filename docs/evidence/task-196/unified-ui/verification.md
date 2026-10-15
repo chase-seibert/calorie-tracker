@@ -1,0 +1,5 @@
+# Verification for the final screenshot set
+
+The focused iPhone 17 Pro simulator run passed `testMixedCatalogCustomizationAndScreenshotMatrix` and `testSharedMealCompositionUsesFoodSearchAndCancelsParentDraft`. The matrix covers USDA, Open Food Facts, Chase Food and saved meals. The meal test verifies the Delete action is hidden initially, revealed by swiping, and guarded by a confirmation alert. `testMagicGroupedSuggestionItemsOpenCustomization` and `testLoggedFoodReturnsToSharedCustomizationAndNestedCancelIsSafe` also passed in a follow-up run. The detail header has no separate Edit link, and macro labels and values share a text baseline.
+
+The hamburger-menu rename flow and direct parent-add/quantity-edit UI tests passed in focused runs. `make storage-test` passed. `make test` ran 147 tests and failed two catalog tests: `testChaseFoodHasGroupedSandwichAndProteinShakeOptions` and `testSearchEvaluationFixtureIsCatalogPinnedAndRepeatable`. `make phone-deploy` built and installed the app over the existing install; launch was denied because the iPhone was locked.

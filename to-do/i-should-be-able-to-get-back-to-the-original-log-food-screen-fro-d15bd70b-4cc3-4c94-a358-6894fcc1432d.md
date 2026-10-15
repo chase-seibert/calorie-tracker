@@ -1,71 +1,157 @@
 ## User requirements
 
-- As a user, I want to open a logged food in the actual screen used to customize it before logging, so that I can inspect and change it without searching again or learning a second editor.
-- As a user, I want Log Food and Add ingredient/Add food to share the same search experience, so that finding and customizing a food works consistently wherever I start.
-- As a user, I want logging, viewing, and editing food or meals to use shared screens with the appropriate action, so that the ingredients, quantities, and nutrition I see agree across those flows.
-- Reuse the recently implemented Chase Food customization layout: pinned summary, option groups, ingredient selection, and portion/quantity footer. Refactor the existing implementations into shared screens; identify replacements below rather than building parallel lookalikes.
-- Planning assumption: saving a logged item updates that entry; adding a component changes only the parent draft until its final commit. Explicitly editing a Saved Meal remains a separate save destination. This revision expands the earlier navigation-only plan into a shared-screen refactor.
+- Every USDA, Open Food Facts (OFF), Yum Chase/Chase Food, custom-food, and meal result in Log food search must open customization when tapped.
+- All these items must use the Yum Chase customization layout: a pinned name/nutrition summary, a scrolling customization area, and a pinned portion/quantity footer with the primary action.
+- Search, Recent, Frequent, Favorites, Meals, saved variations, logged diary entries, Trends, and ingredient drill-down must use this same interface. Adding an ingredient uses the existing shared search.
+- Available data changes the sections and choices inside the screen. It must not select a different overall interface. Chase Food and meals can add foods; USDA and Open Food Facts items cannot.
+- Log creates a new entry; Save changes updates the existing entry; Add to parent and Use changes return a child draft; Save Saved Meal explicitly updates the reusable template. Cancel discards the current draft.
+
+This is the follow-up plan for task #196, based on the user's review of the first implementation. It replaces the earlier pre-implementation audit. Planning changes only this Markdown file; existing application changes remain in the working tree.
 
 ## Architecture and data model
 
-### Current screen audit
+### Current implementation audit
 
-Source audit of the current working tree on October 14, 2026; several food/import files already contain unrelated local changes. This is a code/navigation audit, not a running-app visual review.
+Source inspection on October 14, 2026, plus the two existing task screenshots. The reported USDA tap failure has not been reproduced in a live UI during this planning pass; its exact hit-testing cause remains to be confirmed during implementation.
 
-| Current surface and code | Current behavior or duplication | Reuse/refactor decision |
+| Current code | Remaining gap | Proposed change |
 | --- | --- | --- |
-| `FoodPickerView`, `SearchResultsList`, `FoodPickerList`, `FoodResultRow` in `Views/FoodPickerView.swift` | Main Log Food search merges enabled catalog sources with history, debounces/cancels searches, and offers quick add and variations. Recent/Frequent/Favorites send foods directly to `QuantityEditor`, bypassing Chase customization. | Extract this real search screen and its result rows/state as the shared search foundation. Route all detail actions through the same food/meal destination resolver. Keep quick add as a distinct shortcut. |
-| `ChaseFoodCustomizeView` in the same file | Full-screen Chase Food editor; currently private and coupled to logging a new entry. Initializes from a saved variation, not a logged entry. | Promote/extract and reuse the existing screen for new logs, logged entries, and components. Inject draft and commit context; retain its established layout. |
-| `ingredientSearchSheet` inside `ChaseFoodCustomizeView` | Separate List/searchable page, catalog-only search capped at eight results, no main-search source toggle/history path. Selecting a result immediately adds one serving, tracked by a set of food IDs. | Replace this page with the shared search in component-selection mode. A result opens the same food detail screen; Add returns the configured component to the parent draft. |
-| `MealFoodPickerView` in `Views/SettingsView.swift` | Another search bar, mode strip, debounce, and result list. Uses synchronous `diary.searchItems` rather than the main screen's history-inclusive search. | Retire this separate picker after moving Saved Meal Add Food to the shared search. Retain useful local-food suggestions through the shared provider. |
-| `QuantityEditor(food:date:)` and `QuantityEditor(entry:)` in `FoodPickerView.swift`; diary route in `Views/DiaryView.swift` | Already share an implementation for simple food quantities, but logged Chase Foods cannot reach their options. Also handles favorites, global rename, meat tags, and meals. | Extract/reuse its simple-food controls and supporting actions in a shared food detail shell. Route Chase Foods to the existing Chase customization body. Remove the parallel logged-food detail route once parity is met. |
-| `QuantityEditor(meal:date:)`, its logged `Edit meal` branch, and `MealItemEditorRow` | New meal logs show read-only ingredients; logged meals allow inline ingredient amounts/tags and break apart, but no shared Add Food flow. | Build one shared meal detail screen by extracting these existing controls and the Saved Meal editor's composition controls. Reuse `MealItemEditorRow`; component selection/detail uses the shared search/food screens. |
-| `SavedMealEditorView`, `SavedMealItemEditorRow` in `SettingsView.swift` | Separate Form for name, component rows, Add/Remove, tags, and saving a template. Already reuses `MealItemEditorRow`. | Move its composition content into the shared meal screen, with an explicit template-edit context. Keep only a thin Settings presentation/commit adapter. |
-| `CustomMealImportView` in `Views/CustomMealImportView.swift`; photo-analysis review | File and photo review already share one screen, but have separate totals/component fields from other meal detail. They edit raw nutrient definitions and preserve import metadata/validation. | Adapt validated import drafts to the shared meal detail/composition screen. Reuse raw-definition fields for imported ingredients; retain import/photo parsing, notes, validation, and Save for reuse semantics in adapters. |
-| `LoggedMeatTagSelectionView` in `Views/TrendsView.swift` | Opens `QuantityEditor(entry:)` directly. | Use the same logged-entry destination as the diary, optionally focusing its classification section. |
+| `SearchResultsList` and `FoodResultRow` in `Views/FoodPickerView.swift` | Only `.chaseFood` results supply `openAction`, which creates a real Button. USDA/OFF result detail relies on an outer `onTapGesture`, while the row also contains a separate action button. This is a likely weak point in the reported USDA failure. | Use an explicit primary detail Button for every source, with the shortcut as a sibling Button. Remove the source condition and outer selection gestures. Verify the reported failure before and after the change. |
+| `FoodPickerList` and `MealListActionRow` in the same file | Recent/Frequent/Favorites foods and meal rows also use selection gestures. Action titles are passed through some callers but currently hard-coded to `Add` in these row bodies. | Extract one `SearchItemRow` for food and meal results and suggestion lists, honoring contextual labels and consistent tap targets. |
+| `FoodDetailView` in `Views/FoodDetailView.swift` | It shares routes and commit contexts but still selects two complete view bodies by source: `ChaseFoodCustomizeView` or `QuantityEditor`. | Keep context adaptation; send every food to one rendered customization screen. Source capabilities supply sections and units. |
+| `ChaseFoodCustomizeView` in the same file | It contains the desired pinned summary, macro bar, option pills, scrolling content, and quantity/action footer, mixed with Chase-specific option loading and commits. | Extract this actual layout and its visual components as the common screen. Keep option calculation and historical reconstruction in adapters. |
+| `QuantityEditor` in the same file | USDA/OFF/custom foods use a different ScrollView, summary, quantity picker and inline primary button. | Move useful quantity/default, rename, classification and imported-definition behavior into adapters and common sections. Retire its separate screen body. |
+| `MealDetailView` in `Views/MealDetailView.swift` | Meals already share composition and commit logic across contexts, but render a Form with a toolbar Save/Log button. | Retain its draft/commit logic and move composition into the same scrolling body, pinned summary and footer as other foods. |
+| `CustomMealImportView`, `SavedMealEditorView`, `LoggedItemDetailView`, and Trends callers | These already adapt import/template/logged contexts to detail views. | Preserve these boundaries and point them at the unified screen; retain specialized definition fields and explicit template/global-edit scope. |
 
-`CustomFoodEditorView`, `ImportedFoodFields`, `FoodMeatFields`, and `CorpusFoodMeatTagEditor` have distinct definition/correction responsibilities. Reuse their applicable fields/actions inside shared detail flows; preserve their explicit scope. Alcohol, calorie adjustments, and Magic's grouped quick-log cards remain specialized entry points; any food/meal detail they expose must use the shared destinations. No new parallel food editor is planned.
+The previous implementation shared search and persistence and added configuration provenance, but did not complete visual unification. The existing UI tests select Yum Chase results with USDA and OFF disabled; they do not establish cross-catalog clickability or visual parity.
 
-### Shared screen and draft boundaries
+### One common screen
 
-- **Search:** extract a shared search view plus query/provider state from `FoodPickerView`. Both Log Food and component selection use its search field, loading/empty states, source filtering, ranking/history merge, rows, and detail navigation. Context supplies the title, eligible item types, suggestions, primary action, and selection callback. Component mode excludes parent/self selections and recursive meal cycles; it never invokes diary logging. Main-only tools such as photo analysis appear only where their destination is valid.
-- **Food detail:** one destination chooses the existing Chase customization body or the extracted simple-food body according to food capabilities. Reuse nutrition summary, portion/unit conversion, quantity controls, and component rows where appropriate; retain Chase-specific option pills. Opening from search, a saved variation, history, a meal component, or the diary must resolve consistently.
-- **Meal detail:** one composition screen owns name, totals, editable component list, Add/Remove, and component drill-down. Context specifies Log Food, Save changes to this entry, Add to parent, or Save Saved Meal. Logged-only actions such as break apart and template-only actions remain contextual. A shared screen does not make a logged-entry edit a template edit.
-- **Drafts:** keep food/configuration/meal edits in a value draft with stable component IDs, quantities, units, portions, overrides, and snapshots. Child Save/Add returns a draft to its parent; Cancel discards that child's changes. Parent Cancel discards the composed changes. Commit destinations stay outside reusable view bodies; await persistence before dismissing and show failures without losing the draft.
-- Extract a common configuration calculator from `ChaseFoodCustomizeView.configuredPortionNutrients` and `FoodPickerView.quickLogConfiguration`, which currently duplicate option/variant arithmetic. Preview and commit use the same calculation and component scaling. The draft must preserve component amounts and multiplicity rather than collapsing components into `Set<String>` or resetting every extra to one serving.
+Extract a `CustomizationScreen` and reusable components from the existing Yum Chase screen, rather than copying its appearance into three editors:
 
-### Persistence and compatibility
+1. **Pinned header:** Back, a meal-circle icon immediately before a meal title, item name, optional brand, and the contextual actions menu. Do not repeat catalog source names or show a separate title Edit link; use Rename in the menu. Center Suggest a change. Show the same calories, Carbs/Fat/Protein values and macro bar in the same position for every item, aligning labels and values on a shared text baseline. Preserve unknown fiber as unknown. Support long names and Dynamic Type.
+2. **Scrolling body:** render capability-driven sections in a consistent order: explanatory/history or save-scope notice when needed; available option groups; ingredients/additions; notes and advanced editing. USDA and OFF foods do not offer Add another food; Yum Chase foods and meals do. Show meat classification only on meals, with Yes/No pills and no Automatic choice. Use the same card spacing, typography, colors and ingredient row components throughout.
+3. **Pinned footer:** one quantity control and portion/unit menu, followed by one large primary button. The footer remains available while scrolling and responds consistently to keyboard presentation. Meals use meal counts; foods use their real portions, grams and ounces. Do not expose a meal's synthetic `baseAmountGrams = 1` as a physical weight.
+4. **Contextual action:** Log Food, Save changes, Add to parent, Use changes, or Save Saved Meal. Keep save-scope explanations near the relevant content. Remove the competing toolbar primary action from meal detail.
 
-- Retain `DiaryStore` → transactional `DiaryRepository`/`DiaryEngine`; no replacement storage architecture is needed. Add a targeted configured-entry update operation; do not delete/relog. Preserve UUID, date, logged time, order, unrelated overrides, and existing HealthKit identity/queue behavior.
-- The existing `FoodConfigurationSnapshot` is a starting point, not a guaranteed lossless editor draft: it has selected option IDs and a flattened component list, but no original base-food snapshot or explicit option-versus-extra mapping. `logConfiguredFood` also replaces `entry.food.nutrients` with configured nutrition. Reapplying toppings to that adjusted food risks double counting. `MealItem` currently has no configuration snapshot, and save-as-meal/break-apart currently copy food/quantity without that provenance.
-- Add backward-compatible optional snapshot provenance where needed: the unmodified base nutrition/portion snapshot, component role/option association, and a configured-food snapshot on meal components. Carry it through saved variations, meal creation, logging, component edits, and break apart. Existing entry/meal JSON payload storage can hold optional additions without a SQL table change; verify Codable defaults, repository validation/round trips, exports, and older fixtures before deciding whether any numbered migration is needed.
-- Open historical entries from their saved values. Opening/canceling or saving an unchanged draft must not reprice history using today's catalog. If an old snapshot lacks enough information, show that limitation, preserve its original totals, and require an explicit choice before rebuilding from current catalog data. Preserve unresolved/retired ingredients instead of silently dropping them or treating them as defaults. Disabled catalog sources still resolve existing history.
-- Logged-meal ingredient edits must retain the current per-entry isolation/detachment behavior. Explicit `updateSavedMeal` currently refreshes linked history; preserve and clearly expose that existing scope when editing the reusable template. Global rename/classification corrections and submitted suggestions are explicit operations, not side effects of opening or canceling a draft.
+| Item | Sections within the common screen |
+| --- | --- |
+| USDA food | Name, known nutrition and actual portions; notes and contextual actions. Do not offer added-food components. |
+| OFF food | Same sections, with optional brand and real serving weight when available. Do not offer added-food components. |
+| Yum Chase food | Existing option groups and pills, saved variations, and added-food components. |
+| Saved or logged meal | Read-only ingredient quantity cards with a Customize modal for unit/value, Add another food, swipe-left-to-reveal Delete with confirmation, notes, and meal-level classifications. |
+| Imported/photo meal | The same meal sections, with ingredient-definition editing, original notes and Save for reuse intent retained. |
+
+Show option pills only when actual options exist. USDA/OFF items must not acquire invented variants, inferred ingredient lists, or fabricated portion weights. Food additions from search use one Plus action that adds the selected food directly to the parent draft and closes search. Added-food quantities and units remain read-only until Customize opens the unit/value modal. Saved meal quantities use the focused quantity editor. Imported nutrient-definition editing can remain a focused child editor. On meals, ingredient amounts and units remain read-only until Customize opens the unit/value modal. Delete stays hidden until the row is swiped left, then asks before removal; omit ingredient reordering controls.
+
+The overflow menu calls the action Rename and contains Favorite, Rename, a divider, and Recent Variations; remove Edit Food Tags Throughout History. When a saved variation is selected, show Delete this variation below Suggest a change. Confirm deletion and remove only the reusable variation; existing diary entries remain unchanged. Foods do not show a pencil or Edit link next to the title. Food screens omit meat-classification controls; meal-level processed-meat and red-meat choices use Yes/No pills.
+
+### Search and navigation
+
+- The primary result button covers the source badge, name, secondary information and remaining row space, with a minimum 44-point target. Its shortcut is an independent sibling; pressing the shortcut must not also open detail or log twice.
+- Use one row implementation for search and list modes, including meals. Keep saved-variation selection and its explicit shortcut independent too.
+- Expose identical Button semantics to VoiceOver, keyboard and pointer users. Stable identifiers must include food source plus source ID, or meal UUID, to distinguish equally named results.
+- Preserve filtering, canonical ranking, history merge, debounce/cancellation and source preferences. Tap handling must not depend on the catalog source.
+- Keep one navigation owner per presented level. Back/Cancel returns to the exact originating search or parent draft, preserving the query, list mode and scroll position where practical.
+
+### Drafts, calculation and persistence
+
+- Preserve `FoodDetailView.Context`, `MealDetailView.Context`, and the existing transactional `DiaryStore`/`DiaryEngine`/`DiaryRepository` commit operations. The shared visual screen receives a draft, capabilities, computed totals, and a contextual commit action.
+- Separate source adapters from presentation. Adapters load real portions/options and create the initial value draft. The shared screen must not contain a catalog-source switch selecting complete alternative layouts.
+- Reuse `FoodConfigurationCalculator` and meal-item scaling. Generalize configured-food drafts to accept a USDA/OFF/custom base plus additions, with no catalog option definitions when none exist. Store the base snapshot separately from configured totals and preserve added-component IDs, quantities, units and multiplicity.
+- Generalize the existing optional `FoodConfigurationSnapshot` and saved-variation flow wherever they assume Chase Food, including capability dispatch, saved-variation lookup and analytics source labels. A configuration snapshot does not imply a Chase Food catalog identity.
+- Plain historical USDA/OFF entries must open as ordinary editable snapshots. Absence of a customization snapshot on an unconfigured food is normal. When an incomplete configured historical item opens, rebuild it from current catalog values in the unsaved draft and show a brief banner only when values change; saving updates only that diary entry.
+- Preserve UUID/date/logged time/order, meat overrides, nullable fiber, imported notes, remembered quantities and the HealthKit queue. Unchanged Save must preserve exact historical totals. Child edits and Cancel must not persist preferences, library items, suggestions or diary entries.
+- Logged meal changes remain entry-scoped and detach modified composition from a linked template. Explicit Saved Meal updates retain their documented linked-history policy. Rename remains deliberate; the item menu omits the corpus-tag editor.
+- Prefer the existing optional row-payload fields; no catalog rewrite or SQL migration is expected. If implementation needs a persisted field, verify old decoding/export/repository round trips before deciding whether a migration is necessary.
 
 ## Basic test cases
 
+Acceptance requires both working interactions and matching rendered layouts; a shared routing wrapper alone is insufficient.
+
 | Scenario | Expected result |
 | --- | --- |
-| Open the same Chase Food from search, Recent, Frequent, Favorites, and a logged row | All use the shared Chase customization screen; logged context restores its snapshot and quantity. |
-| Use Add ingredient from Chase Food and Add Food from a meal | Both use the shared search, source settings, result ordering, states, and food detail. Add changes only the parent draft; Cancel adds nothing to the diary or library. |
-| Choose a saved variation | Row/detail action opens it in the shared editor; the explicit plus retains quick add. Option selection and totals agree with customized logging. |
-| Edit a simple food or a meal from diary and Trends | The appropriate shared detail screen appears; component inspection uses the same food screen, with contextual actions/tags available. |
-| Add/remove/customize components, use fractional amounts, change grams/ounces/portions | Parent totals match preview and persisted values; unit conversion preserves mass, component identity and configured nutrition survive reload. No doubled toppings. |
-| Cancel at each nested level or save an unchanged logged item | No unintended diary/library writes, submitted feedback, nutrition changes, or duplicate entries. Explicit global actions retain their stated scope. |
-| Save logged food/meal changes versus edit a Saved Meal | Logged Save preserves entry identity/date/order and changes only that entry; template Save uses its existing linked-history policy. Log creates exactly one new entry. |
-| Reopen old/retired/missing-option snapshots, disabled-source history, or deleted-template meals | Existing ingredients/nutrition remain readable; uncertainty is visible; no silent fallback that rewrites history. |
-| Import a file or review a photo, then reopen the logged meal | Shared composition UI retains notes, ingredient definitions, validation, classifications, and Save for reuse intent; no new AI request is triggered by viewing/editing. |
-| Save fails, target entry disappears, or repeated Save is tapped | Draft remains available with a clear error; no duplicate/partial commits or silent recreation of a deleted item. |
+| Search for a pinned USDA, OFF, Yum Chase and saved-meal fixture | Each result is an explicit detail Button. Name, source badge and row-space taps open the intended item. |
+| Open those four items and a custom food | Same pinned header/macros, title editor, scrolling body, footer quantity controls, primary-button placement and Back behavior; only capability sections differ. Meals show their icon and Log Meal action. |
+| Press a result's shortcut | Performs only its contextual shortcut; never also opens detail or produces a duplicate log. |
+| Open equally named results from different sources | Correct source identity, portions and nutrition are shown; selectors are unambiguous. |
+| Use Search, Recent, Frequent, Favorites, Meals, Magic suggestions or a saved variation | Each Magic item inside a grouped suggestion opens its own customization screen; the group Add action remains independent. Return preserves the originating search/list context. |
+| Add a food while composing a parent | A Plus action adds it directly to the parent and closes food search; the added ingredient is display-only until Customize opens the quantity/unit modal. |
+| Add a fractional USDA/OFF/custom ingredient to a food or meal | Add affects the parent draft only; totals and component amounts survive parent Save/reload. |
+| Reopen a plain historical USDA/OFF entry | Original quantity, portion and totals remain intact, without an unnecessary rebuild warning. |
+| Edit a meal ingredient | Quantity is display-only until Customize opens its unit/value modal; swipe Delete asks for confirmation. |
+| Edit the main title or meat classification | Edit opens one name modal for foods and meals. Meal-level meat uses Yes/No pills, with no Automatic choice or per-ingredient meat controls. |
+| Reopen an incomplete configured historical food | Open with an unsaved rebuild from current catalog values; show a brief banner only if values changed; Save updates only this diary item. |
+| Reopen a complete configured food or meal | Frozen values remain readable; no doubled additions or unintended catalog repricing. |
+| Cancel child, Cancel parent, or save unchanged | No unintended diary/library/preference changes; historical values remain exact. |
+| Change grams/ounces/real portions or meal count | Physical mass is preserved across compatible food-unit conversions; meal count scales ingredients consistently. |
+| Log versus edit entry versus save template | Creates one new entry, updates one existing entry, or applies the explicit template policy respectively. |
+| Import/photo review and ingredient-definition edit | Same screen chrome; validation, notes, classifications and Save for reuse remain available; viewing/editing never starts another AI request. |
+| Failed save, deleted/concurrently changed entry or repeated press | Clear error, draft retained, no recreation/duplicate/partial commit. |
+| VoiceOver, large text, keyboard, long item names and scrolling | All result buttons work, labels remain legible, the footer stays reachable, and Back returns one level. |
 
-Also cover cheat-day gating, favorites, remembered quantities, accessibility, keyboard/back navigation, meal selection/reordering, break-apart, and HealthKit updates through the refactored entry points.
+Use deterministic fixtures containing USDA, OFF, Yum Chase and meals together; do not make a cross-source test that disables two of the sources. Capture side-by-side simulator evidence at matching device size for all four main item types. Preserve diary reorder and cheat-day checks, and distinguish pre-existing failures from newly introduced failures.
+
+### Required simulator screenshots of the new UI
+
+Screenshot capture is an implementation acceptance deliverable. Capture the actual
+implemented screens in the simulator after the shared UI is connected, using
+repeatable demo fixtures rather than personal diary data. Existing task screenshots
+show the earlier interfaces and must not be used as evidence of the new unified UI.
+
+| Item type | Fixture characteristics and entry point | Required screenshot |
+| --- | --- | --- |
+| USDA food with a natural portion | A fruit or similar food with a real named portion; open from Log food search | `usda-portioned-log.png` |
+| USDA food logged by weight | A food with grams/ounces selected; open from Log food search | `usda-weight-log.png` |
+| OFF packaged food | A branded product with known label nutrition and serving weight; open from Log food search | `off-packaged-log.png` |
+| Yum Chase configurable food | Sandwich or taco with selected option groups and an added ingredient; open from Log food search | `yum-chase-configured-log.png` |
+| Custom food | A manually created food with a custom serving; open from shared search or Favorites | `custom-food-log.png` |
+| Saved meal | At least three ingredients, preferably from different sources; open from search or Meals | `saved-meal-log.png` |
+| Imported meal | A reviewed `.calmeal` fixture with component definitions, notes and Save for reuse | `imported-meal-review.png` |
+| Photo-analysis meal | A stored/demo analysis-result fixture shown in review; capture does not require another AI request | `photo-meal-review.png` |
+| One-off logged meal | A meal snapshot without a saved template, opened from the diary | `one-off-meal-edit.png` |
+
+For each row, capture the initial screen with the pinned name/nutrition summary
+and the quantity/action footer visible. Also capture a scrolled body state for
+configurable foods and meals, showing their options or ingredient cards while
+both pinned regions remain visible. Capture a food unit-menu state and an
+ingredient child-editor state to document the shared controls.
+
+Reopen a logged USDA food, OFF food, Yum Chase food, and saved meal and capture
+an `-edit` screenshot for each. These must show the restored quantities/content
+and the Save changes action in the same screen layout. Add a child-editor
+screenshot showing Add to parent or Use changes as appropriate.
+
+Use the same simulator model, orientation, appearance, text size and viewport
+for the main comparison. Keep the keyboard dismissed and let loading and
+presentation animations settle. Record source/item identity, selected quantity,
+unit/portion, entry point, and simulator/runtime in an evidence index. Identify
+any fixture that cannot be exercised and the exact blocker; do not silently
+omit a source or substitute a mockup.
+
+Save individual, unaltered PNG captures under
+`docs/evidence/task-196/unified-ui/`, using the filenames above plus clear
+`-scrolled`, `-edit`, or `-child` suffixes. Include a Markdown index linking every
+capture and a side-by-side comparison of USDA, OFF, Yum Chase and a saved meal.
+Inspect the screenshots for matching header/footer placement, readable names
+and labels, correct contextual actions, unclipped quantity controls, and
+consistent component cards. Correct visual discrepancies before final capture.
+
+Attach representative screenshots to task #196 through
+`attach_task_screenshot`, using the latest task revision and a fresh operation
+ID for each write. Verify the attachments by reading them back. Link the complete
+screenshot index in the implementation handoff so all food and meal types can be
+reviewed together. Simulator evidence does not replace the required physical
+phone deployment attempt or establish physical-device acceptance.
 
 ## High-level implementation details
 
-1. **Define routes and adapters first.** Map every audited caller to shared search, food detail, or meal detail with a typed destination and save context. Resolve diary entries by ID from current state; use capability-based dispatch so configured Chase Foods are not mistaken for generic meals. Coordinate presentation through one navigation owner to avoid nested independent sheets/stacks.
-2. **Extract existing search intact.** Move the main `FoodPickerView` query/provider, search controls, result rows, and mode presentation into shared units. Preserve async cancellation, source changes, canonical ranking, history inclusion, focus, stable suggestion snapshots, and analytics. Replace `ingredientSearchSheet` and `MealFoodPickerView` with adapters to that screen; selection analytics must not claim a diary log occurred.
-3. **Make draft round trips lossless.** Add optional snapshot provenance and centralize configuration arithmetic before wiring historical editing. Exercise existing configured entries, arbitrary component amounts, meal conversion, and missing options. Preserve old payloads and nutrition when reconstruction is uncertain.
-4. **Reuse food customization.** Extract `ChaseFoodCustomizeView` from the large picker file and give it draft bindings and contextual commit actions. Extract simple-food detail/quantity content from `QuantityEditor`; share its applicable controls with the same detail shell. Connect search/list/variation/diary/Trends callers and component drill-down. Retire the old logged-food branch after functional parity.
-5. **Unify meal composition.** Combine the existing meal branch of `QuantityEditor` and `SavedMealEditorView` into the shared meal screen; connect the shared search and food details. Adapt import/photo review to this composition layer while retaining raw-definition editors and validation. Remove superseded picker/editor bodies after all callers migrate. Keep small context adapters rather than a second UI or a view full of unrelated Boolean flags.
-6. **Verify and document during implementation.** Add focused configuration/draft persistence and destination-isolation tests in `CalorieTrackerTests`; add UI coverage proving callers reach shared screens and nested cancellation is safe. Run `make test` with host permission, `make storage-test`, and applicable `make ui-test-reorder`/cheat-day checks; use `make sim-compile` if host simulator access is unavailable and label unrun tests. Capture simulator evidence for the reused screens and back navigation, then attempt `make phone-deploy` without uninstalling, following `docs/sqlite-storage.md`. Update design/architecture documentation to describe the shared routes and save scopes.
+1. **Reproduce and fix row interaction first.** Add failing USDA/OFF/meal result-button UI coverage using real source identities. Replace gesture-dependent food/meal selection with the common explicit-button row, then check primary/shortcut separation across search and list modes.
+2. **Extract the Yum Chase visual shell.** Move its pinned header, summary/macro bar, quantity controls and footer into reusable components with consistent accessibility identifiers. Preserve the established Yum Chase appearance while separating calculation and commit code.
+3. **Move simple catalog foods into that shell.** Adapt the existing simple-food state/defaults and quantity conversions. Support configured additions with existing snapshot fields. Remove the standalone `QuantityEditor` body after parity is demonstrated.
+4. **Move meals and import/template contexts into the shell.** Replace `MealDetailView`'s Form/toolbar layout with the common summary/body/footer. Reuse one ingredient-card implementation for meal ingredients and added foods. Retain focused raw-definition editors and contextual scope/actions.
+5. **Audit every caller and remove parallel bodies.** Connect search, list modes, variations, logged diary entries, Trends, components, Saved Meals and import/photo review. Verify there is one rendered customization layout, without source-specific skins or independent duplicate quantity controls.
+6. **Verify and hand off.** Add the source/layout acceptance matrix to `make ui-test-food-detail`; run `make test` with host permission, `make storage-test`, and applicable reorder/cheat-day checks. Use `TEST_DIAGNOSTICS=never` if the known post-failure diagnostic collection stalls. Complete the required simulator screenshot matrix and evidence index above, attach representative captures to #196, update design/architecture documentation, and attempt `make phone-deploy` over the existing app following `docs/sqlite-storage.md`. Report installation, launch and physical acceptance separately. Keep task completion user-controlled.
 
-Main implementation risks are historical snapshot reconstruction, configured components losing provenance during meal conversion, existing template/global-edit scope, and dismissing the wrong level of nested navigation. The audit intentionally includes imports and Personal Library so those flows do not retain a separate food/meal editor after this refactor. This planning revision changes only this Markdown file; builds, tests, and device deployment belong to implementation.
+This revision is plan-only. No application source, build, test or device deployment is part of this planning pass.

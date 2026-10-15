@@ -9,6 +9,7 @@ SIM_DEVICE_NAME ?= iPhone 17 Pro
 SIM_DESTINATION ?= platform=iOS Simulator,name=$(SIM_DEVICE_NAME)
 GENERIC_SIM_DESTINATION := generic/platform=iOS Simulator
 SIMULATOR_DESTINATION_TIMEOUT ?= 15
+TEST_DIAGNOSTICS ?= on-failure
 SIMULATOR_FIXTURE ?= device
 SIMULATOR_FIXTURE_RESET ?= 1
 SIMULATOR_GROUP_ID := group.com.cseibert.CalorieTracker
@@ -45,21 +46,21 @@ simulator-ready:
 	fi
 
 test: simulator-ready
-	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -destination-timeout $(SIMULATOR_DESTINATION_TIMEOUT) -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -only-testing:CalorieTrackerTests test
+	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -destination-timeout $(SIMULATOR_DESTINATION_TIMEOUT) -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -collect-test-diagnostics $(TEST_DIAGNOSTICS) -only-testing:CalorieTrackerTests test
 
 ui-test-reorder: simulator-ready
-	xcodebuild -project $(PROJECT) -scheme CalorieTrackerUITests -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -destination-timeout $(SIMULATOR_DESTINATION_TIMEOUT) -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -only-testing:CalorieTrackerUITests/DiaryReorderingUITests/testLongPressDragReordersVisuallyAndPersists test
+	xcodebuild -project $(PROJECT) -scheme CalorieTrackerUITests -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -destination-timeout $(SIMULATOR_DESTINATION_TIMEOUT) -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -collect-test-diagnostics $(TEST_DIAGNOSTICS) -only-testing:CalorieTrackerUITests/DiaryReorderingUITests/testLongPressDragReordersVisuallyAndPersists test
 
 ui-test-fixture: simulator-ready
-	xcodebuild -project $(PROJECT) -scheme CalorieTrackerUITests -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -destination-timeout $(SIMULATOR_DESTINATION_TIMEOUT) -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testDeviceFixtureShowsRelativeDays test
+	xcodebuild -project $(PROJECT) -scheme CalorieTrackerUITests -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -destination-timeout $(SIMULATOR_DESTINATION_TIMEOUT) -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -collect-test-diagnostics $(TEST_DIAGNOSTICS) -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testDeviceFixtureShowsRelativeDays test
 
 .PHONY: ui-test-snacks
 ui-test-snacks: simulator-ready
-	xcodebuild -project $(PROJECT) -scheme CalorieTrackerUITests -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -destination-timeout $(SIMULATOR_DESTINATION_TIMEOUT) -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testSnackSuggestionsSelectionWithoutRemindersAccess test
+	xcodebuild -project $(PROJECT) -scheme CalorieTrackerUITests -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -destination-timeout $(SIMULATOR_DESTINATION_TIMEOUT) -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -collect-test-diagnostics $(TEST_DIAGNOSTICS) -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testSnackSuggestionsSelectionWithoutRemindersAccess test
 
 .PHONY: ui-test-cheat-day
 ui-test-cheat-day: simulator-ready
-	xcodebuild -project $(PROJECT) -scheme CalorieTrackerUITests -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -destination-timeout $(SIMULATOR_DESTINATION_TIMEOUT) -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testCheatDayConfirmationCapsuleAcceptsEdgeTap -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testCheatDayRepeatedConfirmationAndEntryPoints test
+	xcodebuild -project $(PROJECT) -scheme CalorieTrackerUITests -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -destination-timeout $(SIMULATOR_DESTINATION_TIMEOUT) -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -collect-test-diagnostics $(TEST_DIAGNOSTICS) -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testCheatDayConfirmationCapsuleAcceptsEdgeTap -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testCheatDayRepeatedConfirmationAndEntryPoints test
 
 build: sim-build
 
@@ -317,3 +318,12 @@ phone-wifi-check:
 phone-wifi-deploy: phone-wifi-check
 	@echo "Deploying to paired iPhone over Xcode's available device connection..."
 	@$(MAKE) phone-deploy
+
+.PHONY: ui-test-food-detail
+ui-test-food-detail: simulator-ready
+	xcodebuild -project $(PROJECT) -scheme CalorieTrackerUITests -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -destination-timeout $(SIMULATOR_DESTINATION_TIMEOUT) -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -collect-test-diagnostics $(TEST_DIAGNOSTICS) -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testMagicGroupedSuggestionItemsOpenCustomization -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testLoggedFoodReturnsToSharedCustomizationAndNestedCancelIsSafe -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testSharedMealCompositionUsesFoodSearchAndCancelsParentDraft -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testMixedCatalogCustomizationAndScreenshotMatrix -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testMixedCatalogQuickAddIsIndependentFromDetail test
+
+.PHONY: export-food-detail-evidence
+export-food-detail-evidence:
+	@test -n "$(RESULT_BUNDLE)" || (echo 'Usage: make export-food-detail-evidence RESULT_BUNDLE=/path/to/test.xcresult'; exit 1)
+	python3 scripts/export_food_detail_evidence.py "$(RESULT_BUNDLE)"

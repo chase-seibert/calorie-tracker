@@ -12,12 +12,12 @@ evaluate Chase Food on its own.
 
 The workbook is [Canonical U.S. Food Taxonomy — Review Draft](https://docs.google.com/spreadsheets/d/16Y1Uc0jldJ4tGO_vf5mgjT0n8pwJxO13W54zR5M_wWo/edit).
 The preceding [Canonical Food List Criteria conversation](https://chatgpt.com/share/6ace459c-9910-83e8-b7db-44bcaa4894be)
-provides the rationale and initial model. The current review dataset has 521
-catalog identities (506 search-enabled), 1,908 portion mappings, 1,217 alias
-records, 321 configurable component options, and 28 presets. Portion and option
-amounts are first-pass estimates; nutrition values are matched from the bundled
-USDA/Open Food Facts catalog and still need review when confidence or
-preparation notes flag them. The 2026-10-14 local enrichment revision adds source-level nutrition and
+provides the rationale and initial model. The current review dataset has 522
+catalog identities (498 search-enabled), 1,911 portion mappings, 1,219 alias
+records, 354 configurable options/components, and 28 presets. Portion and option amounts are first-pass estimates;
+nutrition values are matched from the bundled USDA/Open Food Facts catalog and
+still need review when confidence or preparation notes flag them. The
+2026-10-15 local enrichment revision adds source-level nutrition and
 composition evidence for 20 previously lowest-confidence searchable foods;
 the generated review workbook is rebuilt from the same catalog projection.
 
@@ -341,10 +341,31 @@ mutually exclusive choice or saved variation.
   included components. Offer sausage, bacon, or ham as exclusive meat choices
   and cheese as an optional addition.
 
-Both the taxonomy source and the generated review workbook expose an **Options
-(add-ons and variants)** food-table column. Generate it from structured
-included-composition and addition records on every catalog preparation run so
-the summary cannot drift from selectable options.
+- **Smoothie:** Use one searchable **Smoothie** canonical, with common fruit,
+  liquid, yogurt, and nutrition-significant add-in choices. Preserve
+  **Breakfast smoothie bowl** as history-only rather than a new search result.
+- **Buffalo chicken dip:** Remove it from new search results because it is too
+  specific; preserve the identity for existing diary history.
+- **Popcorn:** Search returns **Popcorn**. Butter is an optional topping, not a
+  separate canonical result. Route “butter popcorn” and “movie theater popcorn”
+  searches to Popcorn; keep the former Butter popcorn ID history-only.
+- **Soup model (open):** The catalog has 14 clear soup types: Chicken noodle,
+  Tomato, Broccoli cheddar, Clam chowder, Minestrone, Vegetable, French onion,
+  Lentil, Split pea, Miso, Chicken tortilla, Baked potato, Mushroom, and Ramen
+  noodle soup. The Soups & stews category also contains
+  Chicken chili, Vegetarian chili, Gumbo, and Jambalaya. Decide whether those
+  14 soup types should become mutually exclusive variations under Soup, with
+  add-ins in a separate options group, or remain distinct searchable foods.
+  Preserve the distinct Chili, Gumbo, and Jambalaya identities during that
+  discussion; their recipes and meal roles differ from a generic soup.
+
+The taxonomy source and generated review workbook expose separate
+comma-separated **Variations**, **Options**, and **Included components**
+columns. Derive them from structured variant, suggested-addition, and
+base-composition records during every preparation run so the summaries cannot
+drift. In the inline enrichment readout, prioritize Variations and Options;
+show calories, confidence, and evidence, and omit other macros unless requested
+or needed to explain a material discrepancy.
 
 ## Data and history boundaries for implementation
 

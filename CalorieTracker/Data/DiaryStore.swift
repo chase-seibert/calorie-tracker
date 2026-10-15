@@ -110,6 +110,7 @@ class DiaryStore: ObservableObject {
     private var engine = DiaryEngine(document: DiaryDocument())
     private let fileURL: URL
     private let calendar: Calendar
+    var foodCatalog: CatalogStore { catalog ?? CatalogStore() }
     private let catalog: CatalogStore?
     private let healthKit: HealthKitStore?
     private let usesWindow: Bool
@@ -548,6 +549,12 @@ class DiaryStore: ObservableObject {
         }
     }
 
+    func deleteSavedFoodConfiguration(id: UUID) async throws {
+        try await perform(scope: .library) { engine in
+            engine.deleteSavedFoodConfiguration(id: id)
+        }
+    }
+
     func logConfiguredFood(
         _ food: Food,
         nutrients: MacroNutrients,
@@ -557,6 +564,7 @@ class DiaryStore: ObservableObject {
         portionID: String?,
         amount: Double = 1,
         unit: LogUnit = .serving,
+        snapshot: FoodConfigurationSnapshot? = nil,
         configuration: SavedFoodConfiguration,
         suggestion: FoodSuggestion?,
         on date: Date,
@@ -565,7 +573,7 @@ class DiaryStore: ObservableObject {
         try await perform(scope: .day(date)) { engine in
             engine.logConfiguredFood(food, nutrients: nutrients, selectedOptionIDs: selectedOptionIDs,
                                      components: components, suggestedChanges: suggestedChanges,
-                                     portionID: portionID, amount: amount, unit: unit,
+                                     portionID: portionID, amount: amount, unit: unit, snapshot: snapshot,
                                      on: date, allowCheatDay: allowCheatDay)
             engine.saveFoodConfiguration(configuration)
             if let suggestion { engine.saveFoodSuggestion(suggestion) }
@@ -743,6 +751,16 @@ class DiaryStore: ObservableObject {
                 portionID: portionID,
                 allowCheatDay: allowCheatDay
             )
+        }
+    }
+
+    func updateFoodDraft(draft: MealItem, original: DiaryEntry) async throws {
+        try await perform(scope: .entries([original.id])) { try $0.updateFoodDraft(entryID: original.id, draft: draft, original: original) }
+    }
+
+    func updateMealDraft(original: DiaryEntry, name: String, amount: Double, items: [MealItem], processed: Bool?, red: Bool?) async throws {
+        try await perform(scope: .entries([original.id])) {
+            try $0.updateMealDraft(original: original, name: name, amount: amount, items: items, processed: processed, red: red)
         }
     }
 
@@ -948,9 +966,9 @@ class DiaryStore: ObservableObject {
         }
     }
 
-    func logImportedMeal(_ meal: SavedMeal, saveForReuse: Bool = true, on date: Date, allowCheatDay: Bool = false) async throws -> SavedMeal {
+    func logImportedMeal(_ meal: SavedMeal, saveForReuse: Bool = true, amount: Double = 1, on date: Date, allowCheatDay: Bool = false) async throws -> SavedMeal {
         try await perform(scope: .day(date)) {
-            try $0.logImportedMeal(meal, saveForReuse: saveForReuse, on: date, allowCheatDay: allowCheatDay)
+            try $0.logImportedMeal(meal, saveForReuse: saveForReuse, amount: amount, on: date, allowCheatDay: allowCheatDay)
         }
     }
 

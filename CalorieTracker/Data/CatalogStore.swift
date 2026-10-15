@@ -2,17 +2,6 @@ import CryptoKit
 import Foundation
 import SQLite3
 
-struct ChaseFoodOption: Identifiable, Sendable {
-    let id: String
-    let food: Food
-    let displayName: String
-    let amountGrams: Double
-    let relationship: String
-    let includedByDefault: Bool
-    let displayOrder: Int
-    let optionGroup: String?
-    let selectionMode: String
-}
 
 enum FoodSearchRankingVersion: String, CaseIterable, Identifiable {
     case original = "catalog-fts5-v1"

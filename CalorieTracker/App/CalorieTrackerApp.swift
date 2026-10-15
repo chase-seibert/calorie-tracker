@@ -28,7 +28,15 @@ struct CalorieTrackerApp: App {
         WindowGroup {
             Group {
                 if hasPreparedLaunch {
+                    #if DEBUG && targetEnvironment(simulator)
+                    if let route = ProcessInfo.processInfo.environment["CALORIE_TRACKER_CUSTOMIZATION_EVIDENCE"] {
+                        CustomizationEvidenceView(route: route, catalog: catalog)
+                    } else {
+                        RootView(catalog: catalog, pendingOpenURL: $pendingOpenURL)
+                    }
+                    #else
                     RootView(catalog: catalog, pendingOpenURL: $pendingOpenURL)
+                    #endif
                 } else {
                     ProgressView("Opening diary…")
                 }
@@ -100,6 +108,13 @@ private enum LaunchConfiguration {
     static func makeDiaryStore(healthKit: HealthKitStore, catalog: CatalogStore) -> DiaryStore {
 #if DEBUG && targetEnvironment(simulator)
         let environment = ProcessInfo.processInfo.environment
+        if environment["CALORIE_TRACKER_UNIFIED_FIXTURE"] == "1" {
+            let fixtureURL = SharedDiaryStorage.selectFixture("customization", reset: environment["CALORIE_TRACKER_FIXTURE_RESET"] == "1")
+            if FileManager.default.fileExists(atPath: fixtureURL.path) {
+                return DiaryStore(fileURL: fixtureURL, catalog: catalog, healthKit: healthKit)
+            }
+            return DiaryStore(document: CustomizationEvidenceView.document(catalog: catalog), fileURL: fixtureURL, catalog: catalog, healthKit: healthKit)
+        }
         if environment["CALORIE_TRACKER_UI_TEST_FIXTURE"] == "reorder" {
             let fixtureURL = SharedDiaryStorage.selectFixture("reorder", reset: environment["CALORIE_TRACKER_UI_TEST_RESET"] == "1")
             if FileManager.default.fileExists(atPath: fixtureURL.path) {

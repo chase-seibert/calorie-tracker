@@ -81,6 +81,20 @@ final class DeviceFixtureUITests: XCTestCase {
         add(screenshot)
     }
 
+    func testMagicGroupedSuggestionItemsOpenCustomization() {
+        app.launchArguments = ["-onboarding.focus.v1.completed", "YES"]
+        app.launchEnvironment = ["CALORIE_TRACKER_FIXTURE": "device", "CALORIE_TRACKER_FIXTURE_RESET": "1"]
+        app.launch()
+        XCTAssertTrue(app.buttons["Log food"].waitForExistence(timeout: 5))
+        app.buttons["Log food"].tap()
+        let sandwich = app.buttons.matching(NSPredicate(format: "label == %@", "Customize Turkey sandwich")).firstMatch
+        XCTAssertTrue(sandwich.waitForExistence(timeout: 5), "Each item inside a Magic suggestion should be independently tappable")
+        sandwich.tap()
+        XCTAssertTrue(app.staticTexts["custom-food-sticky-title"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["custom-food-sticky-title"].label, "Turkey sandwich")
+        XCTAssertTrue(app.buttons["custom-food-back"].exists)
+    }
+
     func testCheatDayConfirmationCapsuleAcceptsEdgeTap() {
         launchCheatDayFixture(reset: true)
         app.buttons["cheat-day-toolbar"].tap()
@@ -141,6 +155,323 @@ final class DeviceFixtureUITests: XCTestCase {
         app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Tomorrow'"))
             .firstMatch.tap()
         XCTAssertEqual(app.buttons["cheat-day-toolbar"].label, "Mark cheat day")
+    }
+
+    func testLoggedFoodReturnsToSharedCustomizationAndNestedCancelIsSafe() {
+        app.launchArguments = ["-onboarding.focus.v1.completed", "YES",
+            "-foodSource.enabled.chaseFood", "YES", "-foodSource.enabled.usda", "NO", "-foodSource.enabled.off", "NO"]
+        app.launchEnvironment = ["CALORIE_TRACKER_FIXTURE": "device", "CALORIE_TRACKER_FIXTURE_RESET": "1"]
+        app.launch()
+        XCTAssertTrue(app.buttons["Log food"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.descendants(matching: .any).matching(identifier: "logged-foods-reorder-list").firstMatch.waitForExistence(timeout: 10))
+        let logFood = app.buttons["Log food"]
+        logFood.tap()
+        let search = app.textFields["Search foods"]
+        if !search.waitForExistence(timeout: 3), logFood.exists {
+            logFood.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        }
+        XCTAssertTrue(search.exists)
+        search.tap(); search.typeText("sandwich")
+        let customize = app.buttons["Customize Sandwich"]
+        XCTAssertTrue(customize.waitForExistence(timeout: 5))
+        customize.tap()
+        XCTAssertTrue(app.staticTexts["custom-food-sticky-title"].waitForExistence(timeout: 3))
+        let initialCalories = visibleCaloriesLabel()
+        app.buttons["Log Food"].tap()
+        XCTAssertTrue(search.waitForExistence(timeout: 5))
+        app.buttons["Done"].tap()
+        let logged = app.descendants(matching: .any).matching(identifier: "diary-entry-food_sandwich").firstMatch
+        XCTAssertTrue(logged.waitForExistence(timeout: 5))
+        let loggedList = app.descendants(matching: .any).matching(identifier: "logged-foods-reorder-list").firstMatch
+        let loggedOrder = loggedList.value as? String
+        XCTAssertNotNil(loggedOrder)
+        logged.tap()
+        XCTAssertTrue(app.buttons["Save changes"].waitForExistence(timeout: 3))
+        XCTAssertEqual(visibleCaloriesLabel(), initialCalories)
+        XCTAssertFalse(app.buttons["customization-edit-title"].exists)
+        app.buttons["custom-food-recent-variations"].tap()
+        app.buttons["Rename"].tap()
+        let titleField = app.textFields["customization-name-field"]
+        XCTAssertTrue(titleField.waitForExistence(timeout: 3))
+        XCTAssertEqual(titleField.value as? String, "Sandwich")
+        app.buttons["customization-name-save"].tap()
+        XCTAssertTrue(app.buttons["Save changes"].waitForExistence(timeout: 3))
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "Logged Sandwich — Shared customization"
+        attachment.lifetime = .keepAlways; add(attachment)
+        app.buttons["custom-food-add-ingredient"].tap()
+        XCTAssertTrue(search.waitForExistence(timeout: 3))
+        search.tap(); search.typeText("avocado")
+        let avocadoAdd = app.buttons.matching(NSPredicate(format: "label == %@", "Add Avocado")).firstMatch
+        XCTAssertTrue(avocadoAdd.waitForExistence(timeout: 5))
+        avocadoAdd.tap()
+        XCTAssertTrue(app.buttons["Save changes"].waitForExistence(timeout: 5), "Plus should add directly to the parent and close search")
+        XCTAssertNotEqual(visibleCaloriesLabel(), initialCalories)
+        let avocadoCustomize = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'meal-component-edit-'" )).firstMatch
+        XCTAssertTrue(avocadoCustomize.waitForExistence(timeout: 3))
+        avocadoCustomize.tap()
+        XCTAssertTrue(app.textFields["meal-component-quantity-value"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["meal-component-quantity-unit"].exists)
+        app.buttons["Cancel"].tap()
+        XCTAssertTrue(app.buttons["Save changes"].waitForExistence(timeout: 3))
+        // Cancel the parent; its newly added ingredient must not reach the diary.
+        app.buttons["custom-food-add-ingredient"].tap()
+        XCTAssertTrue(search.waitForExistence(timeout: 3))
+        search.tap(); search.typeText("avocado")
+        XCTAssertTrue(avocadoAdd.waitForExistence(timeout: 5)); avocadoAdd.tap()
+        XCTAssertTrue(app.buttons["Save changes"].waitForExistence(timeout: 5))
+        visibleButton("custom-food-back").tap()
+        XCTAssertTrue(logged.waitForExistence(timeout: 5)); logged.tap()
+        XCTAssertTrue(app.buttons["Save changes"].waitForExistence(timeout: 3))
+        XCTAssertEqual(visibleCaloriesLabel(), initialCalories)
+        visibleButton("custom-food-quantity-plus").tap()
+        let changedCalories = visibleCaloriesLabel()
+        XCTAssertNotEqual(changedCalories, initialCalories)
+        app.buttons["Save changes"].tap()
+        XCTAssertTrue(logged.waitForExistence(timeout: 5))
+        XCTAssertEqual(loggedList.value as? String, loggedOrder, "Saving must preserve entry count and order")
+        app.terminate()
+        app.launchEnvironment["CALORIE_TRACKER_FIXTURE_RESET"] = "0"
+        app.launchEnvironment["CALORIE_TRACKER_DISABLE_SIMULATOR_FIXTURE"] = "1"
+        app.launch()
+        XCTAssertTrue(logged.waitForExistence(timeout: 5))
+        logged.tap()
+        XCTAssertTrue(app.buttons["Save changes"].waitForExistence(timeout: 3))
+        XCTAssertEqual(visibleCaloriesLabel(), changedCalories)
+        let savedAttachment = XCTAttachment(screenshot: app.screenshot())
+        savedAttachment.name = "Logged Sandwich — Saved changes after relaunch"
+        savedAttachment.lifetime = .keepAlways; add(savedAttachment)
+        visibleButton("custom-food-back").tap()
+    }
+
+    func testSharedMealCompositionUsesFoodSearchAndCancelsParentDraft() {
+        app.launchArguments = ["-onboarding.focus.v1.completed", "YES",
+            "-foodSource.enabled.chaseFood", "YES", "-foodSource.enabled.usda", "NO", "-foodSource.enabled.off", "NO"]
+        app.launchEnvironment = ["CALORIE_TRACKER_FIXTURE": "device", "CALORIE_TRACKER_FIXTURE_RESET": "1"]
+        app.launch()
+        let loggedList = app.descendants(matching: .any).matching(identifier: "logged-foods-reorder-list").firstMatch
+        XCTAssertTrue(loggedList.waitForExistence(timeout: 10))
+        app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Yesterday'")).firstMatch.tap()
+        let meal = app.descendants(matching: .any).matching(identifier: "diary-entry-saved-meal-32B0CAC9-90A2-4CB1-932A-70F837708E83").firstMatch
+        XCTAssertTrue(meal.waitForExistence(timeout: 5))
+        let originalOrder = loggedList.value as? String
+        meal.tap()
+        XCTAssertTrue(app.buttons["meal-detail-save"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.images["Meal"].exists || app.staticTexts["custom-food-sticky-title"].exists)
+        XCTAssertFalse(app.buttons["customization-edit-title"].exists)
+        app.buttons["custom-food-recent-variations"].tap()
+        app.buttons["Rename"].tap()
+        let mealName = app.textFields["customization-name-field"]
+        XCTAssertTrue(mealName.waitForExistence(timeout: 3))
+        XCTAssertEqual(mealName.value as? String, "Chili, no rice")
+        app.buttons["customization-name-save"].tap()
+        XCTAssertTrue(app.buttons["meal-detail-save"].waitForExistence(timeout: 3))
+        let componentCustomize = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'meal-component-edit-'" )).firstMatch
+        XCTAssertTrue(componentCustomize.waitForExistence(timeout: 3))
+        componentCustomize.tap()
+        XCTAssertTrue(app.textFields["meal-component-quantity-value"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["meal-component-quantity-save"].exists)
+        app.buttons["Cancel"].tap()
+        XCTAssertTrue(app.buttons["meal-detail-save"].waitForExistence(timeout: 3))
+        let ingredientRow = app.descendants(matching: .any).matching(NSPredicate(format: "identifier BEGINSWITH 'meal-component-row-'" )).firstMatch
+        XCTAssertTrue(ingredientRow.waitForExistence(timeout: 3))
+        ingredientRow.swipeLeft()
+        let deleteIngredient = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'meal-component-delete-'" )).firstMatch
+        XCTAssertTrue(deleteIngredient.waitForExistence(timeout: 3))
+        XCTAssertTrue(deleteIngredient.isHittable, "Swipe left should reveal the ingredient delete button")
+        deleteIngredient.tap()
+        XCTAssertTrue(app.buttons["Remove"].waitForExistence(timeout: 3))
+        app.buttons["Cancel"].tap()
+        XCTAssertTrue(app.buttons["meal-detail-save"].waitForExistence(timeout: 3))
+        for _ in 0..<5 where !app.buttons["meal-detail-add-food"].isHittable { scrollCustomizationBody() }
+        XCTAssertTrue(app.buttons["meal-detail-add-food"].waitForExistence(timeout: 3))
+        app.buttons["meal-detail-add-food"].tap()
+        let search = app.textFields["Search foods"]
+        XCTAssertTrue(search.waitForExistence(timeout: 3)); search.tap(); search.typeText("sandwich")
+        let sandwich = app.buttons["customize-food-chaseFood:food_sandwich"]
+        XCTAssertTrue(sandwich.waitForExistence(timeout: 5)); sandwich.tap()
+        XCTAssertTrue(app.buttons["Add to parent"].waitForExistence(timeout: 3))
+        app.buttons["Add to parent"].tap()
+        XCTAssertTrue(app.buttons["meal-component-edit-food_sandwich"].waitForExistence(timeout: 5))
+        app.buttons["meal-component-edit-food_sandwich"].tap()
+        XCTAssertTrue(app.textFields["meal-component-quantity-value"].waitForExistence(timeout: 3))
+        app.buttons["meal-component-quantity-save"].tap()
+        XCTAssertTrue(app.buttons["meal-detail-save"].waitForExistence(timeout: 3))
+        visibleButton("custom-food-back").tap()
+        XCTAssertTrue(meal.waitForExistence(timeout: 5))
+        XCTAssertEqual(loggedList.value as? String, originalOrder)
+        meal.tap()
+        XCTAssertTrue(app.buttons["meal-detail-save"].waitForExistence(timeout: 3))
+        for _ in 0..<5 where !app.buttons["meal-detail-add-food"].isHittable { scrollCustomizationBody() }
+        XCTAssertTrue(app.buttons["meal-detail-add-food"].exists)
+        XCTAssertFalse(app.buttons["meal-component-edit-food_sandwich"].exists)
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "Logged meal — Shared composition"
+        attachment.lifetime = .keepAlways; add(attachment)
+        visibleButton("custom-food-back").tap()
+    }
+
+    func testMixedCatalogCustomizationAndScreenshotMatrix() {
+        let arguments = ["-onboarding.focus.v1.completed", "YES", "-foodSource.enabled.chaseFood", "YES",
+            "-foodSource.enabled.usda", "YES", "-foodSource.enabled.off", "YES", "-AppleInterfaceStyle", "Light"]
+        func launch(_ review: String? = nil) {
+            app.terminate(); app.launchArguments = arguments
+            app.launchEnvironment = ["CALORIE_TRACKER_UNIFIED_FIXTURE": "1", "CALORIE_TRACKER_FIXTURE_RESET": "1"]
+            if let review { app.launchEnvironment["CALORIE_TRACKER_CUSTOMIZATION_EVIDENCE"] = review }
+            app.launch()
+            if review == nil { XCTAssertTrue(app.buttons["Log food"].waitForExistence(timeout: 10)) }
+        }
+        func capture(_ name: String) {
+            XCTAssertTrue(app.staticTexts["custom-food-sticky-title"].waitForExistence(timeout: 5))
+            XCTAssertFalse(app.keyboards.firstMatch.exists)
+            let screenshot = app.screenshot()
+            if ["usda-portioned-log", "off-packaged-log", "yum-chase-configured-log", "saved-meal-log"].contains(name) {
+                let directory = URL(fileURLWithPath: "/tmp/task196-ui-evidence", isDirectory: true)
+                try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+                try? screenshot.pngRepresentation.write(to: directory.appendingPathComponent(name + ".png"))
+            }
+            let attachment = XCTAttachment(screenshot: screenshot)
+            attachment.name = name; attachment.lifetime = .keepAlways; add(attachment)
+        }
+        func open(_ query: String, id: String) {
+            let launchButton = app.buttons["Log food"]
+            launchButton.coordinate(withNormalizedOffset: CGVector(dx: 0.15, dy: 0.5)).tap()
+            if !app.textFields["Search foods"].firstMatch.waitForExistence(timeout: 3) {
+                launchButton.coordinate(withNormalizedOffset: CGVector(dx: 0.15, dy: 0.5)).tap()
+            }
+            let search = visibleTextField("Search foods")
+            XCTAssertTrue(search.waitForExistence(timeout: 5)); search.tap(); search.typeText(query)
+            let row = app.buttons[id]
+            for _ in 0..<6 where !row.isHittable { app.swipeUp() }
+            XCTAssertTrue(row.waitForExistence(timeout: 5)); XCTAssertTrue(row.isHittable)
+            // Badge/name and row space belong to the same explicit primary button.
+            row.coordinate(withNormalizedOffset: CGVector(dx: 0.08, dy: 0.5)).tap()
+            let actionTitle = id.hasPrefix("customize-meal-") ? "Log Meal" : "Log Food"
+            XCTAssertTrue(app.buttons[actionTitle].waitForExistence(timeout: 5))
+        }
+        let foods = [
+            ("plum", "customize-food-usda:2709265", "usda-portioned-log"),
+            ("rice white cooked glutinous", "customize-food-usda:2708422", "usda-weight-log"),
+            ("organic greek yogurt plain", "customize-food-off:0096619483556", "off-packaged-log"),
+            ("sandwich", "customize-food-chaseFood:food_sandwich", "yum-chase-configured-log"),
+            ("Chase's overnight oats", "customize-food-custom:task196-oats", "custom-food-log")]
+        for (query, id, filename) in foods {
+            launch(); open(query, id: id)
+            XCTAssertFalse(app.buttons["customization-edit-title"].exists, "The title should use Rename in the actions menu")
+            if filename == "usda-weight-log" {
+                visibleButton("custom-food-unit-picker").tap(); app.buttons["grams"].tap()
+            }
+            if filename == "off-packaged-log" {
+                visibleButton("custom-food-unit-picker").tap(); app.buttons["0.667 cup (170 g)"].tap()
+                let quantity = app.textFields["custom-food-quantity-value"]
+                quantity.tap(); quantity.typeText("1"); visibleButton("Done").tap()
+            }
+            if filename == "custom-food-log" {
+                visibleButton("custom-food-unit-picker").tap(); app.buttons["jar"].tap()
+                let quantity = app.textFields["custom-food-quantity-value"]
+                quantity.tap(); quantity.typeText("1"); visibleButton("Done").tap()
+            }
+            if filename == "yum-chase-configured-log" {
+                visibleButton("custom-food-add-ingredient").tap()
+                let search = visibleTextField("Search foods")
+                XCTAssertTrue(search.waitForExistence(timeout: 3)); search.tap(); search.typeText("plum")
+                app.buttons["customize-food-usda:2709265"].tap()
+                XCTAssertTrue(app.buttons["Add to parent"].waitForExistence(timeout: 3)); capture("yum-chase-configured-child")
+                app.buttons["Add to parent"].tap()
+                XCTAssertTrue(app.buttons["Log Food"].waitForExistence(timeout: 5))
+                for _ in 0..<8 where !app.staticTexts["FILLING"].isHittable {
+                    app.scrollViews["customization-content"].swipeDown()
+                }
+            }
+            capture(filename)
+            if filename == "usda-portioned-log" {
+                visibleButton("custom-food-unit-picker").tap(); capture("usda-unit-menu")
+                app.buttons["grams"].tap()
+                XCTAssertEqual(visibleCaloriesLabel(), "Calories 35 kcal")
+            }
+            if filename == "yum-chase-configured-log" {
+                for _ in 0..<8 where !app.buttons["meal-component-edit-2709265"].isHittable { scrollCustomizationBody() }
+                capture(filename + "-scrolled")
+            }
+        }
+        launch(); open("Yogurt, fruit and oats", id: "customize-meal-19600000-0000-4000-8000-000000000001")
+        XCTAssertFalse(app.buttons["customization-edit-title"].exists, "The title should use Rename in the actions menu")
+        XCTAssertFalse(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'meal-component-delete-'" )).firstMatch.isHittable,
+            "Meal ingredient deletion should be revealed by swiping the row")
+        capture("saved-meal-log"); scrollCustomizationBody(); capture("saved-meal-log-scrolled")
+        for route in ["imported-meal-review", "photo-meal-review"] {
+            launch(route); capture(route)
+            let child = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'meal-component-edit-'")).firstMatch
+            XCTAssertTrue(child.waitForExistence(timeout: 3)); child.tap()
+            XCTAssertTrue(app.buttons["Use changes"].waitForExistence(timeout: 3)); capture(route + "-child")
+            visibleButton("custom-food-back").tap()
+            XCTAssertTrue(app.switches["Save to Saved meals"].exists)
+            capture(route + "-scrolled")
+        }
+        for (sourceID, filename) in [("2709265", "usda-portioned-edit"), ("0096619483556", "off-packaged-edit"),
+            ("food_sandwich", "yum-chase-configured-edit"), ("task196-meal", "saved-meal-edit"), ("task196-one-off", "one-off-meal-edit")] {
+            launch()
+            let row = app.descendants(matching: .any).matching(identifier: "diary-entry-" + sourceID).firstMatch
+            for _ in 0..<5 {
+                if row.isHittable && row.frame.midY < app.buttons["Log food"].frame.minY - 10 { break }
+                app.coordinate(withNormalizedOffset: CGVector(dx: 0.97, dy: 0.6))
+                    .press(forDuration: 0.01, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.97, dy: 0.3)))
+            }
+            XCTAssertTrue(row.waitForExistence(timeout: 5))
+            row.coordinate(withNormalizedOffset: CGVector(dx: 0.18, dy: 0.5)).tap()
+            XCTAssertTrue(app.buttons["Save changes"].waitForExistence(timeout: 5)); capture(filename)
+            if sourceID == "2709265" || sourceID == "0096619483556" {
+                XCTAssertFalse(app.buttons["Rebuild with current catalog values"].exists)
+                let before = visibleCaloriesLabel()
+                visibleButton("custom-food-quantity-plus").tap()
+                XCTAssertNotEqual(visibleCaloriesLabel(), before)
+                visibleButton("custom-food-back").tap()
+                row.tap(); XCTAssertTrue(app.buttons["Save changes"].waitForExistence(timeout: 5))
+                XCTAssertEqual(visibleCaloriesLabel(), before, "Cancel must preserve historical nutrition")
+            }
+        }
+    }
+
+    func testMixedCatalogQuickAddIsIndependentFromDetail() {
+        app.launchArguments = ["-onboarding.focus.v1.completed", "YES", "-foodSource.enabled.chaseFood", "YES",
+            "-foodSource.enabled.usda", "YES", "-foodSource.enabled.off", "YES"]
+        app.launchEnvironment = ["CALORIE_TRACKER_UNIFIED_FIXTURE": "1", "CALORIE_TRACKER_FIXTURE_RESET": "1"]
+        app.launch()
+        let list = app.descendants(matching: .any).matching(identifier: "logged-foods-reorder-list").firstMatch
+        XCTAssertTrue(list.waitForExistence(timeout: 10))
+        let before = (list.value as? String ?? "").components(separatedBy: "Plum, raw").count
+        app.buttons["Log food"].tap()
+        let search = visibleTextField("Search foods"); search.tap(); search.typeText("plum")
+        let shortcut = app.buttons["Quick add Plum, raw"]
+        XCTAssertTrue(shortcut.waitForExistence(timeout: 5)); shortcut.tap()
+        XCTAssertFalse(app.staticTexts["custom-food-sticky-title"].exists)
+        XCTAssertTrue(search.exists)
+        app.buttons["Done"].tap()
+        XCTAssertTrue(list.waitForExistence(timeout: 5))
+        let after = (list.value as? String ?? "").components(separatedBy: "Plum, raw").count
+        XCTAssertEqual(after, before + 1, "The sibling shortcut must create exactly one entry without opening detail")
+    }
+
+    private func scrollCustomizationBody() {
+        let body = app.scrollViews["customization-content"]
+        body.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.8))
+            .press(forDuration: 0.05, thenDragTo: body.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.2)))
+    }
+
+    private func visibleTextField(_ identifier: String) -> XCUIElement {
+        let query = app.textFields.matching(identifier: identifier)
+        _ = query.firstMatch.waitForExistence(timeout: 5)
+        return query.allElementsBoundByIndex.first(where: { $0.isHittable }) ?? query.firstMatch
+    }
+
+    private func visibleCaloriesLabel() -> String {
+        let matches = app.descendants(matching: .any).matching(identifier: "custom-food-estimate-calories").allElementsBoundByIndex
+        return matches.first(where: { $0.isHittable })?.label ?? ""
+    }
+
+    private func visibleButton(_ identifier: String) -> XCUIElement {
+        let matches = app.buttons.matching(identifier: identifier).allElementsBoundByIndex
+        return matches.first(where: { $0.isHittable }) ?? app.buttons.matching(identifier: identifier).firstMatch
     }
 
     private func confirmCheatDay(expectedCheat: Bool, doubleTap: Bool = false) {

@@ -2071,6 +2071,1189 @@
       "reviewReasons": [
         "USDA source is a generic veggie burger patty, not a bean-specific patty; confirm representative nutrient profile."
       ]
+    },
+    "food_breakfast_smoothie_bowl": {
+      "confidence": "Low",
+      "nutritionPer100g": {
+        "calories": 66.0,
+        "carbs": 12.0,
+        "fat": 1.1,
+        "protein": 2.32,
+        "fiber": 1.1
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2705513",
+        "recordID": "2705513",
+        "recordName": "Fruit smoothie, NFS",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2705513/nutrients",
+        "serving": {
+          "description": "1 fl oz",
+          "grams": 27.0
+        }
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Fruit smoothie, bottled",
+        "similarity": 0.6667,
+        "source": "usda",
+        "sourceID": "2709339"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Breakfast smoothie bowl as a canonical food. No single standard topping composition is specified; use Fruit smoothie, NFS only as a broad base analogue pending a defined bowl recipe.",
+        "confidence": "Low",
+        "reason": "FNDDS fruit smoothie, NFS is a beverage analogue and does not include the typical toppings or establish a standard smoothie-bowl recipe.; The 280 g bowl portion and its likely fruit, yogurt, and topping mix need recipe-level review.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2705513",
+            "recordName": "Fruit smoothie, NFS",
+            "url": "https://fdc.nal.usda.gov/food-details/2705513/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "FNDDS fruit smoothie, NFS is a beverage analogue and does not include the typical toppings or establish a standard smoothie-bowl recipe.",
+        "The 280 g bowl portion and its likely fruit, yogurt, and topping mix need recipe-level review."
+      ]
+    },
+    "food_broccoli_cheddar_soup": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 82.0,
+        "carbs": 6.08,
+        "fat": 4.54,
+        "protein": 4.26,
+        "fiber": 1.3
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2709659",
+        "recordID": "2709659",
+        "recordName": "Soup, broccoli cheese",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2709659/nutrients",
+        "serving": {
+          "description": "1 cup",
+          "grams": 255.0
+        }
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Broccoli, chinese, raw",
+        "similarity": 0.6341,
+        "source": "usda",
+        "sourceID": "169404"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Broccoli cheddar soup as one prepared-food canonical. The source is a generic broccoli-cheese soup and no separate topping is assumed.",
+        "confidence": "Medium",
+        "reason": "FNDDS soup, broccoli cheese is a close generic match; dairy and cheese ratios vary across recipes.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2709659",
+            "recordName": "Soup, broccoli cheese",
+            "url": "https://fdc.nal.usda.gov/food-details/2709659/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "FNDDS soup, broccoli cheese is a close generic match; dairy and cheese ratios vary across recipes."
+      ]
+    },
+    "food_brown_rice": {
+      "confidence": "High",
+      "nutritionPer100g": {
+        "calories": 123.0,
+        "carbs": 25.8,
+        "fat": 1.11,
+        "protein": 2.43,
+        "fiber": 1.0
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2708414",
+        "recordID": "2708414",
+        "recordName": "Rice, brown, cooked, no added fat",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2708414/nutrients",
+        "serving": {
+          "description": "1 cup, cooked",
+          "grams": 195.0
+        }
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Wine, rice",
+        "similarity": 0.7368,
+        "source": "usda",
+        "sourceID": "2710691"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Brown rice as a reusable ingredient. Use the cooked, no-added-fat FNDDS profile, matching the workbook one-cup cooked portion.",
+        "confidence": "High",
+        "reason": "Direct generic USDA record matches the canonical food and portion.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2708414",
+            "recordName": "Rice, brown, cooked, no added fat",
+            "url": "https://fdc.nal.usda.gov/food-details/2708414/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": []
+    },
+    "food_buffalo_chicken_dip": {
+      "confidence": "Low",
+      "nutritionPer100g": {
+        "calories": 274.95,
+        "carbs": 2.5035,
+        "fat": 21.5685,
+        "protein": 16.8155,
+        "fiber": 0.03
+      },
+      "source": {
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "Composite from FoodData Central source records",
+        "dataType": "USDA ingredient-weighted estimate",
+        "recordID": "composite",
+        "recordName": "Buffalo chicken dip estimate from USDA ingredient records",
+        "releaseDate": "multiple releases",
+        "url": "https://fdc.nal.usda.gov/food-search/?query=buffalo%20chicken%20dip",
+        "reviewedDate": "2026-10-15",
+        "serving": {
+          "description": "1 estimated 18 g catalog serving",
+          "grams": 18.0
+        },
+        "method": "Nutrient values are the weight-weighted sums of the listed USDA FoodData Central ingredient records; no measured prepared-food record is used.",
+        "componentSources": [
+          {
+            "name": "USDA FoodData Central SR Legacy",
+            "sourceID": "171477",
+            "recordID": "171477",
+            "recordName": "Chicken, broilers or fryers, breast, meat only, cooked, roasted",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "database": "FoodData Central",
+            "dataType": "SR Legacy",
+            "releaseDate": "2018-04-01",
+            "url": "https://fdc.nal.usda.gov/food-details/171477/nutrients",
+            "serving": {
+              "description": "7.2 g assumed component amount",
+              "grams": 7.2
+            }
+          },
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2705760",
+            "recordID": "2705760",
+            "recordName": "Cream cheese, regular, plain",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "database": "FoodData Central",
+            "dataType": "Survey (FNDDS)",
+            "releaseDate": "2024-10-31",
+            "url": "https://fdc.nal.usda.gov/food-details/2705760/nutrients",
+            "serving": {
+              "description": "5.4 g assumed component amount",
+              "grams": 5.4
+            }
+          },
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2710212",
+            "recordID": "2710212",
+            "recordName": "Ranch dressing",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "database": "FoodData Central",
+            "dataType": "Survey (FNDDS)",
+            "releaseDate": "2024-10-31",
+            "url": "https://fdc.nal.usda.gov/food-details/2710212/nutrients",
+            "serving": {
+              "description": "2.7 g assumed component amount",
+              "grams": 2.7
+            }
+          },
+          {
+            "name": "USDA FoodData Central SR Legacy",
+            "sourceID": "170899",
+            "recordID": "170899",
+            "recordName": "Cheese, cheddar, sharp, sliced",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "database": "FoodData Central",
+            "dataType": "SR Legacy",
+            "releaseDate": "2018-04-01",
+            "url": "https://fdc.nal.usda.gov/food-details/170899/nutrients",
+            "serving": {
+              "description": "1.8 g assumed component amount",
+              "grams": 1.8
+            }
+          },
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2709751",
+            "recordID": "2709751",
+            "recordName": "Buffalo sauce",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "database": "FoodData Central",
+            "dataType": "Survey (FNDDS)",
+            "releaseDate": "2024-10-31",
+            "url": "https://fdc.nal.usda.gov/food-details/2709751/nutrients",
+            "serving": {
+              "description": "0.9 g assumed component amount",
+              "grams": 0.9
+            }
+          }
+        ]
+      },
+      "compositionEvidence": {
+        "decision": "Keep Buffalo chicken dip as one prepared-food identity. Estimate its default 18 g tablespoon from USDA ingredient records; chicken-to-cheese-to-sauce proportions vary by recipe.",
+        "confidence": "Low",
+        "reason": "Ingredient-weighted estimate for a typical dip mixture: cooked chicken, cream cheese, ranch dressing, cheddar, and Buffalo sauce. The recipe proportions are assumptions because no direct generic prepared-food record is used.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central SR Legacy",
+            "sourceID": "171477",
+            "recordName": "Chicken, broilers or fryers, breast, meat only, cooked, roasted",
+            "url": "https://fdc.nal.usda.gov/food-details/171477/nutrients"
+          },
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2705760",
+            "recordName": "Cream cheese, regular, plain",
+            "url": "https://fdc.nal.usda.gov/food-details/2705760/nutrients"
+          },
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2710212",
+            "recordName": "Ranch dressing",
+            "url": "https://fdc.nal.usda.gov/food-details/2710212/nutrients"
+          },
+          {
+            "name": "USDA FoodData Central SR Legacy",
+            "sourceID": "170899",
+            "recordName": "Cheese, cheddar, sharp, sliced",
+            "url": "https://fdc.nal.usda.gov/food-details/170899/nutrients"
+          },
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2709751",
+            "recordName": "Buffalo sauce",
+            "url": "https://fdc.nal.usda.gov/food-details/2709751/nutrients"
+          }
+        ],
+        "components": [
+          {
+            "sourceID": "171477",
+            "name": "Chicken, broilers or fryers, breast, meat only, cooked, roasted",
+            "grams": 7.2
+          },
+          {
+            "sourceID": "2705760",
+            "name": "Cream cheese, regular, plain",
+            "grams": 5.4
+          },
+          {
+            "sourceID": "2710212",
+            "name": "Ranch dressing",
+            "grams": 2.7
+          },
+          {
+            "sourceID": "170899",
+            "name": "Cheese, cheddar, sharp, sliced",
+            "grams": 1.8
+          },
+          {
+            "sourceID": "2709751",
+            "name": "Buffalo sauce",
+            "grams": 0.9
+          }
+        ]
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Almond chicken",
+        "similarity": 0.6667,
+        "source": "usda",
+        "sourceID": "2706797"
+      },
+      "reviewReasons": [
+        "Ingredient-weighted estimate for a typical dip mixture: cooked chicken, cream cheese, ranch dressing, cheddar, and Buffalo sauce. The recipe proportions are assumptions because no direct generic prepared-food record is used."
+      ]
+    },
+    "food_burger": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 289.0,
+        "carbs": 17.1,
+        "fat": 15.6,
+        "protein": 18.4,
+        "fiber": 0.6
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2706934",
+        "recordID": "2706934",
+        "recordName": "Hamburger, on white bun, 1 large patty",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2706934/nutrients",
+        "serving": {
+          "description": "1 hamburger",
+          "grams": 175.0
+        }
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Burger Buns",
+        "similarity": 0.7059,
+        "source": "off",
+        "sourceID": "20836573"
+      },
+      "compositionEvidence": {
+        "decision": "Keep one Burger canonical. The selected default composition is beef patty plus hamburger bun; the mutually exclusive Beef, Chicken, and Bean options remain alternatives. Use the USDA plain large beef burger with white bun for the default beef profile; cheese remains optional.",
+        "confidence": "Medium",
+        "reason": "FNDDS large hamburger with white bun is a close match to the 183 g default, but patty size and cooking yield vary. The source profile contains a plain beef burger and does not include cheese.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2706934",
+            "recordName": "Hamburger, on white bun, 1 large patty",
+            "url": "https://fdc.nal.usda.gov/food-details/2706934/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "FNDDS large hamburger with white bun is a close match to the 183 g default, but patty size and cooking yield vary. The source profile contains a plain beef burger and does not include cheese."
+      ]
+    },
+    "food_burrito": {
+      "confidence": "Low",
+      "nutritionPer100g": {
+        "calories": 219.0,
+        "carbs": 23.9,
+        "fat": 8.54,
+        "protein": 11.1,
+        "fiber": 2.5
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2708534",
+        "recordID": "2708534",
+        "recordName": "Burrito, NFS",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2708534/nutrients",
+        "serving": {
+          "description": "1 miniature",
+          "grams": 110.0
+        }
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Burrito, NFS",
+        "similarity": 0.7778,
+        "source": "usda",
+        "sourceID": "2708534"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Burrito as one canonical with beans, rice, cheese, sour cream, guacamole, and salsa as reusable optional additions. The generic FNDDS profile cannot establish one standard filling or full-burrito size.",
+        "confidence": "Low",
+        "reason": "FNDDS Burrito, NFS is a generic filling analogue with only a miniature serving measure; the 340 g catalog burrito is larger and filling-dependent.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2708534",
+            "recordName": "Burrito, NFS",
+            "url": "https://fdc.nal.usda.gov/food-details/2708534/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "FNDDS Burrito, NFS is a generic filling analogue with only a miniature serving measure; the 340 g catalog burrito is larger and filling-dependent."
+      ]
+    },
+    "food_butter_chicken": {
+      "confidence": "Low",
+      "nutritionPer100g": {
+        "calories": 107.0,
+        "carbs": 6.54,
+        "fat": 6.48,
+        "protein": 6.48,
+        "fiber": 1.4
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2706437",
+        "recordID": "2706437",
+        "recordName": "Chicken curry",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2706437/nutrients",
+        "serving": {
+          "description": "1 cup",
+          "grams": 240.0
+        }
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Butter, stick",
+        "similarity": 0.7692,
+        "source": "usda",
+        "sourceID": "2710155"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Butter chicken as a distinct prepared-food canonical. Use generic Chicken curry only as a broad estimate until a specific butter-chicken recipe or authoritative prepared-food match is selected.",
+        "confidence": "Low",
+        "reason": "The closest bundled FNDDS prepared-food record is generic Chicken curry, not butter chicken; cream, butter, tomato, and chicken proportions differ by recipe.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2706437",
+            "recordName": "Chicken curry",
+            "url": "https://fdc.nal.usda.gov/food-details/2706437/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "The closest bundled FNDDS prepared-food record is generic Chicken curry, not butter chicken; cream, butter, tomato, and chicken proportions differ by recipe."
+      ]
+    },
+    "food_butter_popcorn": {
+      "confidence": "High",
+      "nutritionPer100g": {
+        "calories": 430.0,
+        "carbs": 65.8,
+        "fat": 15.3,
+        "protein": 11.0,
+        "fiber": 12.2
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2708220",
+        "recordID": "2708220",
+        "recordName": "Popcorn, air-popped, with added butter",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2708220/nutrients",
+        "serving": {
+          "description": "1 cup, popped",
+          "grams": 11.0
+        }
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Butter, NFS",
+        "similarity": 0.6667,
+        "source": "usda",
+        "sourceID": "2710154"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Butter popcorn as one snack canonical. The FNDDS air-popped popcorn with added butter record matches the one-cup popped serving weight used by the workbook.",
+        "confidence": "High",
+        "reason": "Direct generic USDA record matches the canonical food and portion.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2708220",
+            "recordName": "Popcorn, air-popped, with added butter",
+            "url": "https://fdc.nal.usda.gov/food-details/2708220/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": []
+    },
+    "food_caesar_salad": {
+      "confidence": "Low",
+      "nutritionPer100g": {
+        "calories": 153.0652,
+        "carbs": 9.41,
+        "fat": 11.0589,
+        "protein": 3.8752,
+        "fiber": 1.7913
+      },
+      "source": {
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "Composite from FoodData Central source records",
+        "dataType": "USDA ingredient-weighted estimate",
+        "recordID": "composite",
+        "recordName": "Caesar salad estimate from USDA ingredient records",
+        "releaseDate": "multiple releases",
+        "url": "https://fdc.nal.usda.gov/food-search/?query=caesar%20salad",
+        "reviewedDate": "2026-10-15",
+        "serving": {
+          "description": "1 estimated 230 g catalog serving",
+          "grams": 230
+        },
+        "method": "Nutrient values are the weight-weighted sums of the listed USDA FoodData Central ingredient records; no measured prepared-food record is used.",
+        "componentSources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2709590",
+            "recordID": "2709590",
+            "recordName": "Romaine lettuce, raw",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "database": "FoodData Central",
+            "dataType": "Survey (FNDDS)",
+            "releaseDate": "2024-10-31",
+            "url": "https://fdc.nal.usda.gov/food-details/2709590/nutrients",
+            "serving": {
+              "description": "165 g assumed component amount",
+              "grams": 165
+            }
+          },
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2710199",
+            "recordID": "2710199",
+            "recordName": "Caesar dressing",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "database": "FoodData Central",
+            "dataType": "Survey (FNDDS)",
+            "releaseDate": "2024-10-31",
+            "url": "https://fdc.nal.usda.gov/food-details/2710199/nutrients",
+            "serving": {
+              "description": "30 g assumed component amount",
+              "grams": 30
+            }
+          },
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2707697",
+            "recordID": "2707697",
+            "recordName": "Croutons",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "database": "FoodData Central",
+            "dataType": "Survey (FNDDS)",
+            "releaseDate": "2024-10-31",
+            "url": "https://fdc.nal.usda.gov/food-details/2707697/nutrients",
+            "serving": {
+              "description": "20 g assumed component amount",
+              "grams": 20
+            }
+          },
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2705728",
+            "recordID": "2705728",
+            "recordName": "Cheese, Parmesan, dry grated",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "database": "FoodData Central",
+            "dataType": "Survey (FNDDS)",
+            "releaseDate": "2024-10-31",
+            "url": "https://fdc.nal.usda.gov/food-details/2705728/nutrients",
+            "serving": {
+              "description": "15 g assumed component amount",
+              "grams": 15
+            }
+          }
+        ]
+      },
+      "compositionEvidence": {
+        "decision": "Keep Caesar salad as a canonical with romaine, dressing, croutons, and Parmesan in its baseline. Existing quick additions represent extra dressing, croutons, Parmesan, or chicken.",
+        "confidence": "Low",
+        "reason": "Ingredient-weighted 230 g salad estimate using romaine, regular Caesar dressing, croutons, and dry-grated Parmesan. The dressing and topping amounts are assumed; no direct dressed-salad record is used.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2709590",
+            "recordName": "Romaine lettuce, raw",
+            "url": "https://fdc.nal.usda.gov/food-details/2709590/nutrients"
+          },
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2710199",
+            "recordName": "Caesar dressing",
+            "url": "https://fdc.nal.usda.gov/food-details/2710199/nutrients"
+          },
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2707697",
+            "recordName": "Croutons",
+            "url": "https://fdc.nal.usda.gov/food-details/2707697/nutrients"
+          },
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2705728",
+            "recordName": "Cheese, Parmesan, dry grated",
+            "url": "https://fdc.nal.usda.gov/food-details/2705728/nutrients"
+          }
+        ],
+        "components": [
+          {
+            "sourceID": "2709590",
+            "name": "Romaine lettuce, raw",
+            "grams": 165
+          },
+          {
+            "sourceID": "2710199",
+            "name": "Caesar dressing",
+            "grams": 30
+          },
+          {
+            "sourceID": "2707697",
+            "name": "Croutons",
+            "grams": 20
+          },
+          {
+            "sourceID": "2705728",
+            "name": "Cheese, Parmesan, dry grated",
+            "grams": 15
+          }
+        ]
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Crab salad",
+        "similarity": 0.7273,
+        "source": "usda",
+        "sourceID": "2706824"
+      },
+      "reviewReasons": [
+        "Ingredient-weighted 230 g salad estimate using romaine, regular Caesar dressing, croutons, and dry-grated Parmesan. The dressing and topping amounts are assumed; no direct dressed-salad record is used."
+      ]
+    },
+    "food_calzone": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 343.0,
+        "carbs": 31.3,
+        "fat": 17.7,
+        "protein": 14.8,
+        "fiber": 1.4
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2708685",
+        "recordID": "2708685",
+        "recordName": "Calzone, with meat and cheese",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2708685/nutrients",
+        "serving": {
+          "description": "1 calzone or stromboli",
+          "grams": 424.0
+        }
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "fallback",
+        "name": "Abalone",
+        "similarity": 0.7143,
+        "source": "usda",
+        "sourceID": "2706337"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Calzone as a canonical food. Use the meat-and-cheese FNDDS version as the generic estimate; meatless and filled varieties can differ materially.",
+        "confidence": "Medium",
+        "reason": "FNDDS meat-and-cheese calzone is a close generic match, but the catalog identity does not specify filling and the USDA serving is larger than the draft 330 g portion.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2708685",
+            "recordName": "Calzone, with meat and cheese",
+            "url": "https://fdc.nal.usda.gov/food-details/2708685/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "FNDDS meat-and-cheese calzone is a close generic match, but the catalog identity does not specify filling and the USDA serving is larger than the draft 330 g portion."
+      ]
+    },
+    "food_canned_peaches": {
+      "confidence": "High",
+      "nutritionPer100g": {
+        "calories": 44.0,
+        "carbs": 11.6,
+        "fat": 0.03,
+        "protein": 0.63,
+        "fiber": 1.3
+      },
+      "source": {
+        "name": "USDA FoodData Central SR Legacy",
+        "sourceID": "169930",
+        "recordID": "169930",
+        "recordName": "Peaches, canned, juice pack, solids and liquids",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "SR Legacy",
+        "releaseDate": "2018-04-01",
+        "url": "https://fdc.nal.usda.gov/food-details/169930/nutrients",
+        "serving": {
+          "description": "1 cup",
+          "grams": 250.0
+        }
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Canned Corn",
+        "similarity": 0.64,
+        "source": "off",
+        "sourceID": "0024000163022"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Canned peaches as a reusable ingredient. The canonical alias specifies peaches in juice; use the USDA juice-pack record with solids and liquid and a one-cup 250 g portion.",
+        "confidence": "High",
+        "reason": "Direct generic USDA record matches the canonical food and portion.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central SR Legacy",
+            "sourceID": "169930",
+            "recordName": "Peaches, canned, juice pack, solids and liquids",
+            "url": "https://fdc.nal.usda.gov/food-details/169930/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": []
+    },
+    "food_canned_tuna": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 86.0,
+        "carbs": 0.0,
+        "fat": 0.96,
+        "protein": 19.4,
+        "fiber": 0.0
+      },
+      "source": {
+        "name": "USDA FoodData Central SR Legacy",
+        "sourceID": "173709",
+        "recordID": "173709",
+        "recordName": "Fish, tuna, light, canned in water, drained solids (Includes foods for USDA's Food Distribution Program)",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "SR Legacy",
+        "releaseDate": "2018-04-01",
+        "url": "https://fdc.nal.usda.gov/food-details/173709/nutrients",
+        "serving": {
+          "description": "1 oz",
+          "grams": 28.35
+        }
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Canned Corn",
+        "similarity": 0.7273,
+        "source": "off",
+        "sourceID": "0024000163022"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Canned tuna as one reusable ingredient. Use light tuna in water, drained, as the default because the search alias specifies tuna in water; preserve package type as a review point.",
+        "confidence": "Medium",
+        "reason": "Use the common light tuna packed in water and drained; oil-packed, white tuna, and drained can weights have different nutrient values. The one-can 140 g portion remains an estimate.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central SR Legacy",
+            "sourceID": "173709",
+            "recordName": "Fish, tuna, light, canned in water, drained solids (Includes foods for USDA's Food Distribution Program)",
+            "url": "https://fdc.nal.usda.gov/food-details/173709/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "Use the common light tuna packed in water and drained; oil-packed, white tuna, and drained can weights have different nutrient values. The one-can 140 g portion remains an estimate."
+      ]
+    },
+    "food_capers": {
+      "confidence": "High",
+      "nutritionPer100g": {
+        "calories": 23.0,
+        "carbs": 4.89,
+        "fat": 0.86,
+        "protein": 2.36,
+        "fiber": 3.2
+      },
+      "source": {
+        "name": "USDA FoodData Central SR Legacy",
+        "sourceID": "172238",
+        "recordID": "172238",
+        "recordName": "Capers, canned",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "SR Legacy",
+        "releaseDate": "2018-04-01",
+        "url": "https://fdc.nal.usda.gov/food-details/172238/nutrients",
+        "serving": {
+          "description": "1 tbsp, drained",
+          "grams": 8.6
+        }
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Capers, canned",
+        "similarity": 0.6316,
+        "source": "usda",
+        "sourceID": "172238"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Capers as a reusable ingredient. The canned, drained USDA record directly matches the one-tablespoon catalog portion.",
+        "confidence": "High",
+        "reason": "Direct generic USDA record matches the canonical food and portion.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central SR Legacy",
+            "sourceID": "172238",
+            "recordName": "Capers, canned",
+            "url": "https://fdc.nal.usda.gov/food-details/172238/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": []
+    },
+    "food_cappuccino": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 27.0,
+        "carbs": 2.75,
+        "fat": 0.99,
+        "protein": 1.71,
+        "fiber": 0.0
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2710472",
+        "recordID": "2710472",
+        "recordName": "Coffee, Cappuccino",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2710472/nutrients",
+        "serving": {
+          "description": "1 fl oz",
+          "grams": 30.0
+        }
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Coffee, Cappuccino",
+        "similarity": 0.7407,
+        "source": "usda",
+        "sourceID": "2710472"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Cappuccino as its own beverage canonical. Retain mutually exclusive milk choices including 1% milk and treat the USDA generic cappuccino as a whole-milk-style baseline estimate.",
+        "confidence": "Medium",
+        "reason": "FNDDS generic cappuccino is a close beverage match; milk type, milk-to-espresso ratio, and cup size vary. The 180 g catalog cup is a six-fluid-ounce estimate.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2710472",
+            "recordName": "Coffee, Cappuccino",
+            "url": "https://fdc.nal.usda.gov/food-details/2710472/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "FNDDS generic cappuccino is a close beverage match; milk type, milk-to-espresso ratio, and cup size vary. The 180 g catalog cup is a six-fluid-ounce estimate."
+      ]
+    },
+    "food_caprese_salad": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 139.0,
+        "carbs": 3.86,
+        "fat": 10.9,
+        "protein": 7.17,
+        "fiber": 0.8
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2705818",
+        "recordID": "2705818",
+        "recordName": "Mozzarella cheese, tomato, and basil, with oil and vinegar dressing",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2705818/nutrients",
+        "serving": {
+          "description": "1 cup",
+          "grams": 160.0
+        }
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Beef salad",
+        "similarity": 0.6957,
+        "source": "usda",
+        "sourceID": "2706749"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Caprese salad as its own canonical. Use the FNDDS tomato-mozzarella-basil salad with dressing as a close prepared-food profile.",
+        "confidence": "Medium",
+        "reason": "FNDDS mozzarella, tomato, and basil with oil-and-vinegar dressing is a close Caprese match; mozzarella and dressing ratios vary.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2705818",
+            "recordName": "Mozzarella cheese, tomato, and basil, with oil and vinegar dressing",
+            "url": "https://fdc.nal.usda.gov/food-details/2705818/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "FNDDS mozzarella, tomato, and basil with oil-and-vinegar dressing is a close Caprese match; mozzarella and dressing ratios vary."
+      ]
+    },
+    "food_carrot_cake": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 374.0,
+        "carbs": 51.8,
+        "fat": 17.5,
+        "protein": 2.49,
+        "fiber": 1.1
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2707859",
+        "recordID": "2707859",
+        "recordName": "Cake or cupcake, carrot",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2707859/nutrients",
+        "serving": {
+          "description": "1 cupcake, any size",
+          "grams": 90.0
+        }
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Crab, cake",
+        "similarity": 0.7,
+        "source": "usda",
+        "sourceID": "2706549"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Carrot cake as a canonical dessert. Use the generic USDA carrot cake profile; frosting and slice weight remain recipe-dependent.",
+        "confidence": "Medium",
+        "reason": "FNDDS carrot cake/cupcake is a close match; frosting amount and the workbook slice weight are not specified by the source serving.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2707859",
+            "recordName": "Cake or cupcake, carrot",
+            "url": "https://fdc.nal.usda.gov/food-details/2707859/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "FNDDS carrot cake/cupcake is a close match; frosting amount and the workbook slice weight are not specified by the source serving."
+      ]
+    },
+    "food_cashews": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 574.0,
+        "carbs": 32.7,
+        "fat": 46.4,
+        "protein": 15.3,
+        "fiber": 3.0
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2707493",
+        "recordID": "2707493",
+        "recordName": "Cashews, NFS",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2707493/nutrients",
+        "serving": {
+          "description": "1 nut",
+          "grams": 1.5
+        }
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Cashews, NFS",
+        "similarity": 0.7778,
+        "source": "usda",
+        "sourceID": "2707493"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Cashews as one reusable ingredient. Use the generic FNDDS cashew profile for the one-ounce default; salted and roasted preparations may vary.",
+        "confidence": "Medium",
+        "reason": "FNDDS Cashews, NFS is a close generic match; roasting method and salt are unspecified.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2707493",
+            "recordName": "Cashews, NFS",
+            "url": "https://fdc.nal.usda.gov/food-details/2707493/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "FNDDS Cashews, NFS is a close generic match; roasting method and salt are unspecified."
+      ]
+    },
+    "food_celery": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 17.0,
+        "carbs": 3.32,
+        "fat": 0.16,
+        "protein": 0.49,
+        "fiber": 1.6
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2709778",
+        "recordID": "2709778",
+        "recordName": "Celery, raw",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2709778/nutrients",
+        "serving": {
+          "description": "1 piece",
+          "grams": 4.0
+        }
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Celery, raw",
+        "similarity": 0.75,
+        "source": "usda",
+        "sourceID": "2346405"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Celery as a reusable raw ingredient. Use the raw celery USDA profile and keep one stalk as an approximate human portion.",
+        "confidence": "Medium",
+        "reason": "FNDDS raw celery directly matches the food identity; the workbook 40 g stalk portion is an estimate because stalk sizes vary.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2709778",
+            "recordName": "Celery, raw",
+            "url": "https://fdc.nal.usda.gov/food-details/2709778/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "FNDDS raw celery directly matches the food identity; the workbook 40 g stalk portion is an estimate because stalk sizes vary."
+      ]
+    },
+    "food_cheesecake": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 399.0,
+        "carbs": 34.8,
+        "fat": 26.5,
+        "protein": 5.29,
+        "fiber": 0.5
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2707861",
+        "recordID": "2707861",
+        "recordName": "Cheesecake, plain",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2707861/nutrients",
+        "serving": {
+          "description": "1 piece/slice, any size",
+          "grams": 175.0
+        }
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Cheesecake, fruit",
+        "similarity": 0.7692,
+        "source": "usda",
+        "sourceID": "2707862"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Cheesecake as a canonical dessert and use plain cheesecake as the baseline. Burnt style is not included; optional toppings remain separate additions.",
+        "confidence": "Medium",
+        "reason": "FNDDS plain cheesecake is a direct generic match, but the source slice measure is 175 g while the workbook default slice is estimated at 125 g.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2707861",
+            "recordName": "Cheesecake, plain",
+            "url": "https://fdc.nal.usda.gov/food-details/2707861/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "FNDDS plain cheesecake is a direct generic match, but the source slice measure is 175 g while the workbook default slice is estimated at 125 g."
+      ]
+    },
+    "food_chicken_and_dumplings": {
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 144.0,
+        "carbs": 8.04,
+        "fat": 5.55,
+        "protein": 15.7,
+        "fiber": 0.3
+      },
+      "source": {
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "sourceID": "2706543",
+        "recordID": "2706543",
+        "recordName": "Chicken or turkey with dumplings",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "url": "https://fdc.nal.usda.gov/food-details/2706543/nutrients",
+        "serving": {
+          "description": "1 cup",
+          "grams": 244.0
+        }
+      },
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Chicken or turkey with dumplings",
+        "similarity": 0.6792,
+        "source": "usda",
+        "sourceID": "2706543"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Chicken and dumplings as one prepared-food canonical. Use the generic chicken/turkey-with-dumplings record; broth, dumpling, and meat ratios vary.",
+        "confidence": "Medium",
+        "reason": "FNDDS chicken or turkey with dumplings is a close generic match; the workbook bowl is 340 g versus a 244 g USDA cup measure and recipes vary.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central Survey (FNDDS)",
+            "sourceID": "2706543",
+            "recordName": "Chicken or turkey with dumplings",
+            "url": "https://fdc.nal.usda.gov/food-details/2706543/nutrients"
+          }
+        ]
+      },
+      "reviewReasons": [
+        "FNDDS chicken or turkey with dumplings is a close generic match; the workbook bowl is 340 g versus a 244 g USDA cup measure and recipes vary."
+      ]
     }
   }
 }

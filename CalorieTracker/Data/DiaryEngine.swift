@@ -19,14 +19,28 @@ final class DiaryEngine {
         if let index = document.savedFoodConfigurations.firstIndex(where: {
             $0.baseFoodID == configuration.baseFoodID && $0.selectedOptionIDs.sorted() == configuration.selectedOptionIDs.sorted()
                 && $0.portionID == configuration.portionID
-                && $0.components.map(\.food.id).sorted() == configuration.components.map(\.food.id).sorted()
+                && $0.components.count == configuration.components.count
+                && zip($0.components, configuration.components).allSatisfy { left, right in
+                    left.food == right.food && left.amount == right.amount && left.unit == right.unit && left.portionID == right.portionID
+                        && left.foodConfigurationSnapshot == right.foodConfigurationSnapshot
+                        && left.processedMeatOverride == right.processedMeatOverride && left.redMeatOverride == right.redMeatOverride
+                }
+                && ($0.snapshot?.baseFood == nil || $0.snapshot?.baseFood == configuration.snapshot?.baseFood)
+                && ($0.snapshot?.options == nil || $0.snapshot?.options == configuration.snapshot?.options)
         }) {
             var updated = document.savedFoodConfigurations[index]
             updated.lastUsedAt = Date()
+            updated.snapshot = configuration.snapshot
+            updated.label = configuration.label
+            updated.components = configuration.components
             document.savedFoodConfigurations[index] = updated
         } else {
             document.savedFoodConfigurations.append(configuration)
         }
+    }
+
+    func deleteSavedFoodConfiguration(id: UUID) {
+        document.savedFoodConfigurations.removeAll { $0.id == id }
     }
 
     func logConfiguredFood(
@@ -38,6 +52,7 @@ final class DiaryEngine {
         portionID: String?,
         amount: Double = 1,
         unit: LogUnit = .serving,
+        snapshot: FoodConfigurationSnapshot? = nil,
         on date: Date,
         allowCheatDay: Bool = false
     ) {
@@ -47,7 +62,7 @@ final class DiaryEngine {
         document.entries[index].nutrients = nutrients
         let loggedGrams = max(unit.grams(for: amount, food: food, portionID: portionID), 0.001)
         document.entries[index].food.nutrients = nutrients.scaled(by: food.baseAmountGrams / loggedGrams)
-        document.entries[index].foodConfigurationSnapshot = FoodConfigurationSnapshot(
+        document.entries[index].foodConfigurationSnapshot = snapshot ?? FoodConfigurationSnapshot(
             selectedOptionIDs: selectedOptionIDs,
             components: components,
             suggestedChanges: suggestedChanges,
@@ -507,6 +522,45 @@ final class DiaryEngine {
         document.entries.removeAll {
             entryIDs.contains($0.id) && !$0.isCheatDayAdjustment
         }
+    }
+
+    /// Commit one value draft atomically. Identity, date, order and HealthKit identity stay intact.
+    func updateFoodDraft(entryID: UUID, draft: MealItem, original: DiaryEntry) throws {
+        guard let index = document.entries.firstIndex(where: { $0.id == entryID }) else { throw FoodDraftError.missingEntry }
+        guard document.entries[index] == original else { throw FoodDraftError.changedEntry }
+        guard !original.isMeal, draft.amount.isFinite, draft.amount > 0 else { throw FoodDraftError.invalidDraft }
+        if draft == original.foodDraft { return }
+        document.entries[index].food = draft.food
+        document.entries[index].amount = draft.amount
+        document.entries[index].unit = draft.unit
+        document.entries[index].portionID = draft.portionID
+        document.entries[index].foodConfigurationSnapshot = draft.foodConfigurationSnapshot
+        document.entries[index].processedMeatOverride = draft.processedMeatOverride
+        document.entries[index].redMeatOverride = draft.redMeatOverride
+        // A tags-only save preserves even historical rounding or manually adjusted totals.
+        if draft.food != original.food || draft.amount != original.amount || draft.unit != original.unit || draft.portionID != original.portionID {
+            if draft.food == original.food {
+                let oldGrams = original.unit.grams(for: original.amount, food: original.food, portionID: original.portionID)
+                let grams = draft.unit.grams(for: draft.amount, food: draft.food, portionID: draft.portionID)
+                document.entries[index].nutrients = original.nutrients.scaled(by: grams / max(oldGrams, 0.001))
+            } else {
+                document.entries[index].nutrients = draft.food.nutrients(for: draft.amount, unit: draft.unit, portionID: draft.portionID)
+            }
+        }
+        rememberPreference(QuantityPreference(amount: draft.amount, unit: draft.unit, portionID: draft.portionID), for: draft.food)
+    }
+
+    func updateMealDraft(original: DiaryEntry, name: String, amount: Double, items: [MealItem], processed: Bool?, red: Bool?) throws {
+        guard let index = document.entries.firstIndex(where: { $0.id == original.id }) else { throw FoodDraftError.missingEntry }
+        guard document.entries[index] == original else { throw FoodDraftError.changedEntry }
+        guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, amount.isFinite, amount > 0,
+              !items.isEmpty, items.allSatisfy({ $0.amount.isFinite && $0.amount > 0 }) else { throw FoodDraftError.invalidDraft }
+        if amount != original.amount || items != original.mealItems {
+            updateMealEntry(entryID: original.id, amount: amount, items: items, allowCheatDay: true)
+        }
+        document.entries[index].food.name = name
+        document.entries[index].processedMeatOverride = processed
+        document.entries[index].redMeatOverride = red
     }
 
     func updateEntry(
@@ -1056,7 +1110,7 @@ final class DiaryEngine {
             items: resolvedItems(items),
             containsProcessedMeat: meatOverrides.map(\.processed) ?? (containsProcessedMeat ?? previousMeal.containsProcessedMeat),
             containsRedMeat: meatOverrides.map(\.red) ?? (containsRedMeat ?? previousMeal.containsRedMeat),
-            origin: previousMeal.origin
+            origin: previousMeal.origin, notes: previousMeal.notes
         )
         for index in document.entries.indices where document.entries[index].savedMealID == mealID {
             var entry = document.entries[index]
@@ -1086,7 +1140,10 @@ final class DiaryEngine {
                     food: $0.food,
                     amount: $0.amount,
                     unit: $0.unit,
-                    portionID: $0.portionID
+                    portionID: $0.portionID,
+                    meatServingsOverride: $0.meatServingsOverride,
+                    foodConfigurationSnapshot: $0.foodConfigurationSnapshot,
+                    processedMeatOverride: $0.processedMeatOverride, redMeatOverride: $0.redMeatOverride
                 )
             }
         )
@@ -1131,7 +1188,9 @@ final class DiaryEngine {
                 unit: $0.unit,
                 nutrients: $0.food.nutrients(for: $0.amount, unit: $0.unit, portionID: $0.portionID),
                 loggedAt: mealEntry.loggedAt,
-                portionID: $0.portionID
+                portionID: $0.portionID,
+                processedMeatOverride: $0.processedMeatOverride, redMeatOverride: $0.redMeatOverride,
+                meatServingsOverride: $0.meatServingsOverride, foodConfigurationSnapshot: $0.foodConfigurationSnapshot
             )
         }
         dayEntries.insert(contentsOf: expandedEntries, at: mealIndex)
@@ -1837,7 +1896,8 @@ final class DiaryEngine {
             savedMealID: meal.id,
             mealItems: scaledItems,
             processedMeatOverride: meal.containsProcessedMeat,
-            redMeatOverride: meal.containsRedMeat
+            redMeatOverride: meal.containsRedMeat,
+            mealNotes: meal.notes
         )
     }
 
@@ -2154,6 +2214,8 @@ final class DiaryEngine {
         items.map { item in
             var result = item
             result.food = displayedFood(item.food)
+            // Configured nutrition is already an authoritative historical estimate.
+            if item.foodConfigurationSnapshot != nil { result.food.nutrients = item.food.nutrients }
             return result
         }
     }
@@ -2178,17 +2240,17 @@ final class DiaryEngine {
         return food
     }
 
-    func logImportedMeal(_ meal: SavedMeal, saveForReuse: Bool = true, on date: Date, allowCheatDay: Bool = false) throws -> SavedMeal {
-        guard (allowCheatDay || canLogFood(on: date)), !meal.items.isEmpty else {
+    func logImportedMeal(_ meal: SavedMeal, saveForReuse: Bool = true, amount: Double = 1, on date: Date, allowCheatDay: Bool = false) throws -> SavedMeal {
+        guard (allowCheatDay || canLogFood(on: date)), !meal.items.isEmpty, amount.isFinite, amount > 0 else {
             throw DiaryDatabaseError.invalidData("The meal cannot be logged on this day.")
         }
         var resolved = meal
         resolved.items = resolvedItems(meal.items)
         if saveForReuse {
             document.meals.insert(resolved, at: 0)
-            logMeal(resolved, on: date, allowCheatDay: allowCheatDay)
+            logMeal(resolved, amount: amount, on: date, allowCheatDay: allowCheatDay)
         } else {
-            logOneOffMeal(resolved, on: date, allowCheatDay: allowCheatDay)
+            logOneOffMeal(resolved, amount: amount, on: date, allowCheatDay: allowCheatDay)
         }
         return resolved
     }

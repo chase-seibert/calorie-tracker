@@ -229,3 +229,25 @@ relationships and contrast hierarchy.
 Every full-screen or sheet-hosted list and form hides its system scroll
 background and exposes the shared adaptive app background, including empty
 states and developer-only screens.
+
+## Returning to food customization
+
+Tap a logged food to reopen the same detail screen used after search. Chase
+Foods restore the pinned summary, option groups, ingredients and quantity footer;
+the action becomes Save changes. USDA, OFF and custom foods use that exact header,
+macro summary, scrolling content and footer too, with only their available sections.
+Brand/source information stays in the header and actual food portions remain in
+the footer menu. Meals use the same layout with meal counts and shared ingredient
+cards; their primary action sits in the footer. Recent, Frequent, Favorites and saved variation rows use
+these destinations too. A variation's plus button remains an explicit shortcut.
+
+Meals use one composition screen for logging, editing a diary entry, Saved Meal
+editing, and imported/photo estimates. Add Food opens the shared search; tapping
+an ingredient opens shared food detail. Child changes remain in the parent draft
+until the parent commits. Cancel at either level discards that level's changes.
+Imported components retain their editable nutrient definitions and notes.
+
+Saving a logged item affects that entry; editing a Saved Meal explicitly states
+that linked history will also be refreshed. Older configured entries with
+incomplete customization provenance show their preserved ingredients/nutrition
+and require confirmation before rebuilding with today's catalog values.

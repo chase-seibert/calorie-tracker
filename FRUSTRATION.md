@@ -147,3 +147,18 @@ rejected, leaving the document partial. For future catalog exports, name the
 exact destination spreadsheet and obtain destination-specific approval before
 sending bulk nutrition data; after approval, rewrite every generated range and
 verify canonical rows, aliases, and summary counts.
+
+## 2026-10-14: SwiftUI macro plugins cannot compile in the restricted sandbox
+
+`make sim-compile` reached source compilation, then Xcode's SwiftUI macro
+plugin returned malformed responses under the restricted sandbox. Run this
+checkout's Make targets with host access; do not treat the plugin failures as
+application source errors or wait for CoreSimulator inside the sandbox.
+
+## 2026-10-14: Xcode failure diagnostics stalled after completed tests
+
+XCTest printed final suite results, but task-owned `simctl diagnose` collectors
+then stalled for minutes while assembling a result bundle. Use the Make test
+targets with `TEST_DIAGNOSTICS=never` to retain test results and screenshots
+without verbose post-failure system diagnostics. Stop only the task-owned
+diagnostic collector if an existing run is stuck, then let Xcode finalize.

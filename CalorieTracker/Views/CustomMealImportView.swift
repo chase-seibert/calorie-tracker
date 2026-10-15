@@ -31,25 +31,27 @@ struct FoodMeatFields: View {
     }
 
     private func field(_ title: String, choice: Binding<Bool?>, suggested: Bool?, source: FoodMetadataSource?) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Picker(title, selection: choice) {
-                Text("Automatic").tag(nil as Bool?)
-                Text("Yes").tag(true as Bool?)
-                Text("No").tag(false as Bool?)
-            }
-            if let suggested {
-                let reason = derivesFromIngredients ? "ingredients" : (source == .catalog ? "catalog match" : "food name")
-                Text("Automatic: \(suggested ? "Yes" : "No") — \(reason)")
-                    .font(.caption).foregroundStyle(.secondary)
-                if let selected = choice.wrappedValue, selected != suggested {
-                    Text("Your value differs from the suggestion. It will be kept unless you choose Automatic.")
-                        .font(.caption).foregroundStyle(.orange)
-                }
-            } else if choice.wrappedValue == nil {
-                Text("Unknown — not counted as confirmed meat. Choose Yes or No if you know.")
-                    .font(.caption).foregroundStyle(.secondary)
+        let selected = choice.wrappedValue ?? suggested
+        return VStack(alignment: .leading, spacing: 7) {
+            Text(title).font(.subheadline.weight(.medium)).foregroundStyle(AppTheme.ink)
+            HStack(spacing: 8) {
+                valuePill("Yes", selected: selected == true, title: title) { choice.wrappedValue = true }
+                valuePill("No", selected: selected == false, title: title) { choice.wrappedValue = false }
             }
         }
+    }
+
+    private func valuePill(_ label: String, selected: Bool, title: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(label)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(selected ? Color.white : AppTheme.ink)
+                .frame(maxWidth: .infinity, minHeight: 38)
+                .background(selected ? AppTheme.coral : AppTheme.controlFill, in: Capsule())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(title): \(label)")
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }
 
@@ -142,141 +144,16 @@ struct CustomMealImportView: View {
         var navigationTitle: String { self == .fileImport ? "Review Imported Meal" : "Review Meal" }
     }
 
+    let file: CustomMealFile
+    let targetDate: Date
+    let source: Source
+    let onLogged: (() -> Void)?
     @EnvironmentObject private var diary: DiaryStore
-    @Environment(\.dismiss) private var dismiss
-
-    private let targetDate: Date
-    private let source: Source
-    private let onLogged: (() -> Void)?
-    private let originalNotes: String?
-    @State private var name: String
-    @State private var foods: [CustomFoodDefinition]
-    @State private var saveForReuse = false
-    @State private var isLogging = false
-
     init(file: CustomMealFile, targetDate: Date = Date(), source: Source = .fileImport, onLogged: (() -> Void)? = nil) {
-        self.targetDate = targetDate
-        self.source = source
-        self.onLogged = onLogged
-        originalNotes = file.notes
-        _name = State(initialValue: file.name)
-        _foods = State(initialValue: file.foods)
+        self.file = file; self.targetDate = targetDate; self.source = source; self.onLogged = onLogged
     }
-
     var body: some View {
-        NavigationStack {
-            Form {
-                Section("Meal") {
-                    TextField("Name", text: $name)
-                    if let originalNotes {
-                        Text(originalNotes)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                Section("Calculated total") {
-                    nutrientTotal("Calories", totalNutrients.calories)
-                    nutrientTotal("Carbohydrates", totalNutrients.carbs, suffix: " g")
-                    nutrientTotal("Fat", totalNutrients.fat, suffix: " g")
-                    nutrientTotal("Protein", totalNutrients.protein, suffix: " g")
-                    if let fiber = totalNutrients.fiber {
-                        nutrientTotal("Fiber", fiber, suffix: " g")
-                    }
-                }
-
-                ForEach(Array(foods.indices), id: \.self) { index in
-                    Section("Food \(index + 1)") {
-                        ImportedFoodFields(food: $foods[index])
-                    }
-                }
-
-                Section {
-                    Toggle("Save to Saved meals", isOn: $saveForReuse)
-                } footer: {
-                    Text(saveForReuse
-                        ? "The meal will be logged on \(targetDate.formatted(date: .abbreviated, time: .omitted)) and saved for reuse."
-                        : "The meal will be logged on \(targetDate.formatted(date: .abbreviated, time: .omitted)) as a one-off. Its food snapshots remain in the diary entry.")
-                }
-
-            }
-            .scrollContentBackground(.hidden)
-            .background(AppTheme.background)
-            .navigationTitle(source.navigationTitle)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(isLogging ? "Logging…" : "Log", action: logMeal)
-                        .disabled(!canLog || isLogging || diary.isSaving)
-                }
-            }
-            .analyticsScreen(source == .fileImport ? "meal_import_review" : "meal_photo_review")
-        }
-    }
-
-    private var reviewedFile: CustomMealFile {
-        CustomMealFile(
-            format: CustomMealFile.formatIdentifier,
-            version: CustomMealFile.currentVersion,
-            name: name,
-            foods: foods,
-            notes: originalNotes
-        )
-    }
-
-    private var totalNutrients: MacroNutrients {
-        reviewedFile.makeMeal().nutrients
-    }
-
-    private var canLog: Bool {
-        (try? reviewedFile.validate()) != nil
-    }
-
-    private func nutrientTotal(_ title: String, _ value: Double, suffix: String = "") -> some View {
-        LabeledContent(title) {
-            Text(value.cleanAmount + suffix)
-                .monospacedDigit()
-        }
-    }
-
-    private func logMeal() {
-        guard !isLogging, !diary.isSaving else { return }
-        isLogging = true
-        diary.run {
-            defer { isLogging = false }
-            guard canLog else { return }
-            let importedMeal = reviewedFile.makeMeal()
-            let previousEntryCount = diary.entries(on: targetDate).count
-            let loggedMeal = try await diary.logImportedMeal(
-                importedMeal,
-                saveForReuse: saveForReuse,
-                on: targetDate,
-                allowCheatDay: true
-            )
-            if saveForReuse {
-                AppAnalytics.capture("meal.created", properties: [
-                    "origin": source.analyticsMethod, "item_count": String(importedMeal.items.count)
-                ])
-            }
-            if diary.entries(on: targetDate).count > previousEntryCount {
-                AppAnalytics.capture(
-                    "food_log.completed",
-                    properties: FoodLogAnalytics.mealProperties(
-                        meal: loggedMeal,
-                        method: source.analyticsMethod,
-                        mode: "import",
-                        isFavorite: saveForReuse && diary.isFavorite(loggedMeal),
-                        foodKind: "imported",
-                        includeLocalID: true,
-                        savedForReuse: saveForReuse
-                    )
-                )
-                onLogged?()
-                dismiss()
-            }
-        }
+        MealDetailView(context: .imported(file, targetDate, source, onLogged), catalog: diary.foodCatalog)
     }
 }
 
@@ -327,7 +204,7 @@ struct CustomImportGuideView: View {
     }
 }
 
-private struct ImportedFoodFields: View {
+struct ImportedFoodFields: View {
     @Binding var food: CustomFoodDefinition
 
     var body: some View {

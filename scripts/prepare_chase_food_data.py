@@ -41,6 +41,10 @@ HISTORY_ONLY_FOODS = {
     # combined identity so diary rows already using it remain resolvable.
     "food_bagel_with_cream_cheese",
     "food_biscuits_and_gravy",
+    # Retired from new searches at the user's request; preserve diary history.
+    "food_breakfast_smoothie_bowl",
+    "food_buffalo_chicken_dip",
+    "food_butter_popcorn",
 }
 
 # These rows are non-searchable, reusable option components. Some are UI-only
@@ -49,6 +53,8 @@ INTERNAL_OPTION_FOODS = {
     "food_bean_burger",
     "food_beef_patty",
     "food_bean_patty",
+    # Retired preparation label; preserve the legacy identity, not as a food result.
+    "food_burnt_style",
     "food_blt_sandwich",
     "food_burnt_cheesecake_style",
     "food_regular_cheesecake_style",
@@ -100,45 +106,56 @@ def load_existing(path: Path) -> list[dict]:
     return rows
 
 
-def refresh_food_options_column(workbook: dict) -> None:
-    """Keep the workbook's visible options column derived from structured choices."""
+def refresh_food_option_columns(workbook: dict) -> None:
+    """Keep review columns derived from structured variants, options and composition."""
     rows = workbook["foods"]
     header = rows[0]
-    if "Options (add-ons and variants)" not in header:
-        header.append("Options (add-ons and variants)")
+    old_header = "Options (add-ons and variants)"
+    new_headers = ["Variations", "Options", "Included components"]
+    if old_header in header:
+        index = header.index(old_header)
+        header[index:index + 1] = new_headers
         for row in rows[1:]:
-            row.append("")
+            while len(row) < index + 1:
+                row.append("")
+            row[index:index + 1] = ["", "", ""]
+    else:
+        for new_header in new_headers:
+            if new_header not in header:
+                header.append(new_header)
+                for row in rows[1:]:
+                    row.append("")
     food_id_index = header.index("food_id")
-    options_index = header.index("Options (add-ons and variants)")
+    variations_index = header.index("Variations")
+    options_index = header.index("Options")
+    included_index = header.index("Included components")
     names = {row[food_id_index]: row[header.index("Canonical food")] for row in rows[1:]}
-    by_parent: dict[str, list[tuple[str, str, str]]] = {}
+    variations_by_parent: dict[str, list[str]] = {}
+    options_by_parent: dict[str, list[str]] = {}
+    included_by_parent: dict[str, list[str]] = {}
+
+    def comma_list(labels: list[str]) -> str:
+        # Avoid confusing punctuation inside a source label with the list delimiter.
+        clean_labels = (label.replace(", ", " ").strip() for label in labels)
+        return ", ".join(dict.fromkeys(label for label in clean_labels if label)) or "None"
+
     for row in workbook.get("suggestedAdditions", [])[1:]:
         if len(row) < 6:
             continue
         parent, component, label, relationship = str(row[0]), str(row[2]), str(row[3]), str(row[5]).lower()
-        group = str(row[8]).strip() if len(row) > 8 else ""
+        label = label or names.get(component, component)
         if relationship == "variant":
-            kind = "variant"
-        elif group:
-            kind = group
+            variations_by_parent.setdefault(parent, []).append(label)
         else:
-            kind = "add-on"
-        by_parent.setdefault(parent, []).append((kind, label or names.get(component, component), relationship))
+            options_by_parent.setdefault(parent, []).append(label)
     for row in workbook.get("baseCompositions", [])[1:]:
         if len(row) >= 4:
-            by_parent.setdefault(str(row[0]), []).append(("included", str(row[3]), "included"))
+            included_by_parent.setdefault(str(row[0]), []).append(str(row[3]))
     for row in rows[1:]:
-        if len(row) < len(header):
-            row.extend([""] * (len(header) - len(row)))
         fid = str(row[food_id_index])
-        groups: dict[str, list[str]] = {}
-        for kind, label, _ in by_parent.get(fid, []):
-            groups.setdefault(kind, []).append(label)
-        parts = []
-        for kind, labels in groups.items():
-            title = "Variants" if kind == "variant" else "Included" if kind == "included" else "Add-ons" if kind == "add-on" else kind
-            parts.append(f"{title}: {', '.join(dict.fromkeys(labels))}")
-        row[options_index] = " · ".join(parts) if parts else "None"
+        row[variations_index] = comma_list(variations_by_parent.get(fid, []))
+        row[options_index] = comma_list(options_by_parent.get(fid, []))
+        row[included_index] = comma_list(included_by_parent.get(fid, []))
 
 
 def main() -> int:
@@ -149,7 +166,7 @@ def main() -> int:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()
     workbook = json.loads(args.workbook.read_text())
-    refresh_food_options_column(workbook)
+    refresh_food_option_columns(workbook)
     args.workbook.write_text(json.dumps(workbook, ensure_ascii=False, indent=2) + "\n")
     enrichment_data = json.loads(args.enrichments.read_text()) if args.enrichments.exists() else {"foods": {}}
     enrichments = enrichment_data.get("foods", {})
@@ -260,7 +277,9 @@ def main() -> int:
             "defaultGrams": grams,
             "sizeAvailable": clean(row[food_index["S/M/L available?"]]).lower() == "yes",
             "aliases": aliases,
-            "optionsSummary": clean(row[food_index["Options (add-ons and variants)"]]),
+            "variationsSummary": clean(row[food_index["Variations"]]),
+            "optionsSummary": clean(row[food_index["Options"]]),
+            "includedComponentsSummary": clean(row[food_index["Included components"]]),
             "nutrients": nutrients,
             "nutritionPer100g": enrichment["nutritionPer100g"] if enrichment else (({key: round(float(match[key] or 0), 4) for key in ("calories", "carbs", "fat", "protein")} | {"fiber": round(float(match["fiber"]), 4) if match["fiber"] is not None else None}) if match else None),
             "nutritionSource": nutrition_source,
@@ -272,7 +291,7 @@ def main() -> int:
         })
     payload = {
         "schemaVersion": 1,
-        "datasetVersion": "chase-food-2026-10-14-13",
+        "datasetVersion": "chase-food-2026-10-15-15",
         "workbookTitle": "Canonical U.S. Food Taxonomy — 522 Catalog Identities (Review Draft)",
         "workbookURL": "https://docs.google.com/spreadsheets/d/16Y1Uc0jldJ4tGO_vf5mgjT0n8pwJxO13W54zR5M_wWo/edit",
         "foods": output_foods,

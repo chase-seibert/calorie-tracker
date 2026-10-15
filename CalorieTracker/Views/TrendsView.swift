@@ -752,15 +752,14 @@ private struct LoggedMeatTagSelectionView: View {
     @EnvironmentObject private var diary: DiaryStore
     @Environment(\.dismiss) private var dismiss
 
+    @State private var selectedEntry: DiaryEntry?
     let item: MeatDayFood
 
     var body: some View {
         NavigationStack {
             List(item.contributions) { contribution in
                 if let entry = diary.document.entries.first(where: { $0.id == contribution.entryID }) {
-                    NavigationLink {
-                        QuantityEditor(entry: entry)
-                    } label: {
+                    Button { selectedEntry = entry } label: {
                         VStack(alignment: .leading, spacing: 3) {
                             Text(contributionName(contribution, entry: entry))
                                 .font(.body.weight(.medium))
@@ -770,6 +769,9 @@ private struct LoggedMeatTagSelectionView: View {
                         }
                     }
                 }
+            }
+            .fullScreenCover(item: $selectedEntry) { entry in
+                LoggedItemDetailView(entryID: entry.id, catalog: diary.foodCatalog)
             }
             .navigationTitle("Logged entries")
             .toolbar {
