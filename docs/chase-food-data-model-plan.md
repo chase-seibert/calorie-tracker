@@ -22,8 +22,8 @@ figures are mock values and must not be imported as catalog data.
   delete the source, break saved configurations, or unlink diary history.
 - A canonical food has a quick-add default and a customization model for
   portions, exclusive choices, included ingredients that can be removed,
-  optional ingredients, related foods, and ingredients selected through
-  search.
+  optional ingredients, companion recommendations, and ingredients selected
+  through search.
 - Logging a customized food saves the selected configuration for reuse under
   its canonical result. A diary entry retains the selected configuration and
   nutrition snapshot so a later catalog update cannot rewrite history.
@@ -58,14 +58,18 @@ Do not make the app fetch the workbook or cookbook at runtime.
 | `chase_food_metadata` | One row per Chase Food identity with category, food kind, confidence, review reasons, and matched source provenance. |
 | `chase_food_aliases` | Stable target food ID, alias text, and alias kind (`canonical`, `synonym`, or `brand`). FTS indexes canonical names and approved aliases; results deduplicate by target ID. |
 | `chase_food_options` | Parent/option/component IDs, component label and grams, relationship, default-selected flag, order, optional group name, and selection mode (`exclusive` or `multiple`). Component references point to reusable catalog foods. |
-| Food table choice summaries | Separate comma-separated `Variations`, `Options`, and `Included components` columns derived from structured variant, suggested-addition, and base-composition rows. Regenerate them during every catalog preparation and in the nutrition review workbook. |
+| `chase_food_companions` | Parent and companion food IDs, display label, and order. These are opt-in recommendations between independent foods; resolve both foods through the catalog rather than duplicating nutrition or modeling the companion as a parent option. |
+| Food table choice summaries | Separate comma-separated `Variations`, `Options`, and `Included components` columns derived from structured variant and base-composition rows. Companion recommendations remain separate and do not contribute to the parent summaries. Regenerate summaries during every catalog preparation and in the nutrition review workbook. |
 | `metadata` | Dataset revision and identity count, alongside the existing catalog metadata. |
 
 `foods` remains the compatibility surface used by existing search, logging,
 portion, and diary code. The options table defines removable included foods,
-single-choice groups, multi-choice groups, suggested additions, and food
+single-choice groups, multi-choice groups, configured additions, and food
 variants. Each option points to a reusable nutrient-bearing `Food` record and
-an amount; do not store ad hoc calorie deltas for modifiers. The builder stores
+an amount; do not store ad hoc calorie deltas for modifiers. The separate
+companions table recommends independently recognizable foods to log alongside
+a parent. A companion does not change the parent configuration or nutrition.
+The builder stores
 the matched profile as the canonical default. Additions adjust that total by
 the difference from their default-selected state. A `variant` option replaces
 the canonical profile at the selected portion weight, then appears as a logged
@@ -225,8 +229,12 @@ used as nutrient sources.
 - Keep USDA and Open Food Facts enabled and Chase Food disabled by default;
   disabling a source only filters new catalog discovery and leaves diary
   snapshots intact.
-- Log configured related foods as components of one diary entry. Store the
-  selected options and component snapshots with that entry.
+- Keep configured additions and components in the primary diary entry with its
+  configuration snapshot. Store companion recommendations as separate
+  parent-to-food relationships; selecting one creates its own ordinary diary
+  entry with its own portion and nutrition. Logging a parent and selected
+  companions together is one atomic day-scoped write, while each entry remains
+  independently editable.
 - Map restaurant and product aliases to generic canonical identities without
   making brand-specific nutrition claims. Keep manufacturer label comparisons
   in separate research evidence with the product, serving size, access date,
@@ -236,9 +244,10 @@ used as nutrient sources.
 - Group saved Chase Food configurations beneath their canonical search result.
 - Match the customization control groups from the concept PDF, including
   exclusive choices (such as bread, filling, milk, or cereal type), multiple
-  additions (such as sandwich spreads), removable base ingredients, portion
-  sizes, and relevant side dishes. Keep internal style choices out of diary
-  constituent foods.
+  configured additions (such as sandwich spreads), removable base ingredients,
+  and portion sizes. Curate relevant side dishes as separate optional companion
+  recommendations, not as configured components. Keep internal style choices
+  out of diary constituent foods.
 - Use one searchable `Bagel` identity. Cream cheese is an optional spread, and
   bagel types are mutually exclusive nutrient-bearing variants; selecting a
   type replaces the base profile at the chosen portion size. Keep the former

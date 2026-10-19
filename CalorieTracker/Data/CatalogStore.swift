@@ -319,6 +319,27 @@ final class CatalogStore: @unchecked Sendable {
         }
     }
 
+    func chaseFoodCompanions(for sourceID: String) -> [ChaseFoodCompanion] {
+        lock.lock()
+        guard let database else { lock.unlock(); return [] }
+        var statement: OpaquePointer?
+        var rows: [(String, String, Int)] = []
+        if sqlite3_prepare_v2(database, "SELECT companion_food_id, display_name, display_order FROM chase_food_companions WHERE parent_food_id = ? ORDER BY display_order", -1, &statement, nil) == SQLITE_OK,
+           let statement {
+            bind(sourceID, at: 1, to: statement)
+            while sqlite3_step(statement) == SQLITE_ROW {
+                guard let companionID = text(statement, 0) else { continue }
+                rows.append((companionID, text(statement, 1) ?? companionID, Int(sqlite3_column_int(statement, 2))))
+            }
+        }
+        sqlite3_finalize(statement)
+        lock.unlock()
+        return rows.compactMap { row in
+            guard let food = food(sourceID: row.0, source: .chaseFood) else { return nil }
+            return ChaseFoodCompanion(id: row.0, food: food, displayName: row.1, displayOrder: row.2)
+        }
+    }
+
     func meatClassification(sourceID: String, source: FoodSource) -> MeatClassification? {
         lock.lock()
         defer { lock.unlock() }

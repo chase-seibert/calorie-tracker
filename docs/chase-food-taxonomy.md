@@ -14,7 +14,8 @@ The workbook is [Canonical U.S. Food Taxonomy — Review Draft](https://docs.goo
 The preceding [Canonical Food List Criteria conversation](https://chatgpt.com/share/6ace459c-9910-83e8-b7db-44bcaa4894be)
 provides the rationale and initial model. The current review dataset has 527
 catalog identities (494 search-enabled), 1,926 portion mappings, 1,212 alias
-records, 463 configurable options/components, and 28 presets. Portion and option amounts are first-pass estimates;
+records, 462 configurable options/components, 3 companion-food pairings, and
+28 presets. Portion and option amounts are first-pass estimates;
 nutrition values are matched from the bundled USDA/Open Food Facts catalog and
 still need review when confidence or preparation notes flag them. The
 2026-10-19 local enrichment revision adds USDA source-level nutrition and
@@ -38,9 +39,10 @@ claim that recipe nutrition is already measured.
    canonical food identity. Names such as “hamburger” and “smash burger” can
    resolve to “Burger”; the result remains the canonical food.
 2. **Keep identity separate from composition.** A burger is one food identity.
-   Cheese, bacon, and fries are reusable foods/components, not duplicate burger
-   nutrition records. Presets such as “Bacon cheeseburger” can be convenient
-   selections built from those existing identities.
+   Cheese, bacon, and mayonnaise configure the burger; fries and a milkshake
+   are optional companion foods with their own diary entries. Presets such as
+   “Bacon cheeseburger” can be convenient selections built from reusable
+   ingredient identities.
 3. **Make a reasonable default fast.** A user can add the canonical food with
    its default portion in one action. Customization is optional.
 4. **Show only useful search information.** Chase Food results show the
@@ -61,13 +63,11 @@ claim that recipe nutrition is already measured.
    compositions are estimates pending review. Nutrient values must be populated
    from an authoritative source or otherwise verified before they are treated
    as production values.
-8. **Reserve quick controls for meaningful nutrition changes.** Show an add-on
-   as a quick choice when a usual serving materially changes calories or one of
-   the tracked macros. For a burger, cheese, bacon, mayonnaise, ketchup, and
-   fries qualify; lettuce, tomato, onion, pickle, and a small mustard serving
-   do not. Keep unlisted ingredients available through Add ingredient when
-   useful. Apply this judgment to the modeled amount rather than a fixed
-   calorie cutoff.
+8. **Reserve quick controls for meaningful nutrition changes.** Show an
+   ingredient as a quick choice when a usual serving materially changes the
+   configured food. Keep unlisted ingredients available through Add ingredient
+   when useful. Curate separate companion suggestions per parent food rather
+   than assuming every side is appropriate everywhere.
 9. **Keep brand searches generic and label evidence separate.** Map cereal
    brands to the closest generic food or to Cereal when the current types do
    not fit. Store manufacturer label values as research evidence with product,
@@ -76,6 +76,15 @@ claim that recipe nutrition is already measured.
    The initial cereal comparison is checked in at
    `data/chase-food/cereal-brand-research.json` and appears as the **Cereal
    Brand Research** tab in the review workbook.
+10. **Classify choices by how people recognize and log them.** Treat an item as
+    part of the configured food when it changes that food's recipe, variant,
+    topping, or condiment (for example, cheddar on a burger or mayonnaise on a
+    sandwich). Treat it as a companion when it remains a recognizable food in
+    its own right, has its own portion and nutrition, and a user could sensibly
+    edit or remove it independently. Context matters: berries can be a yogurt
+    topping or a separate side depending on the parent food and intended use.
+    Define the relationship for each parent instead of assigning a universal
+    role to an ingredient.
 
 ## Source controls
 
@@ -129,9 +138,16 @@ rewrite history.
 
 - Show default ingredients in an **Included** section with selected controls.
   Tapping an included item removes it; Burger starts with its bun included.
-- Show optional ingredients and related foods in **Add to this food or meal**.
-  Keep food identity distinct: selecting fries from Burger's screen adds a
-  separate reusable food alongside the burger.
+- Show optional ingredients, variants, and included components in the food's
+  configuration. A configured component contributes to that food's nutrition
+  and remains part of its saved variation and diary snapshot.
+- Show curated companion recommendations in a separate optional section. A
+  selected companion keeps its own food identity, portion, nutrition, and diary
+  entry; it does not change the primary food's configured nutrition, snapshot,
+  or saved variation. Leave companions unselected by default. When the user
+  logs the parent and companions together, write ordinary separate diary
+  entries for them as one atomic action so a failure cannot leave a partial
+  group.
 - Offer **Add ingredient** where the catalog can provide useful options. It
   opens food search; choosing a food adds its stable identity to this
   configuration and makes the configuration available as a saved variation
@@ -147,6 +163,35 @@ rewrite history.
   coffee, show “Medium · 12 fl oz” so the size label and amount are both clear.
 - Keep calories and all three macros live as portion, included items, and
   additions change.
+
+## Classifying future food choices
+
+Apply the relationship test to each parent food when curating additions:
+
+- If a choice changes the selected food's recipe or recognizable variation,
+  model it as an included component, optional ingredient, topping, condiment,
+  or exclusive variant. Its nutrients belong to that food.
+- If it is still a recognizable food with its own portion and nutrient record,
+  and people may edit or remove it independently, model it as an optional
+  companion recommendation. Its nutrients belong in its own diary entry.
+- If either role is plausible, use the eating context and logging intent to
+  decide, then record that decision for the specific parent. The same food may
+  have different roles in different contexts.
+- Add companion pairings only when they are useful recommendations for that
+  parent. Pairings are opt-in and do not imply a default serving or change the
+  parent food's nutrition. Reuse stable catalog food IDs and each companion's
+  normal portion/nutrition source; do not create duplicate foods or calorie
+  deltas.
+
+Examples to guide future review, not blanket catalog assignments: extra cheese
+or pepperoni can configure Pizza while wings or a side salad can accompany it;
+croutons can configure Soup while bread or crackers can accompany it; relish,
+mustard, or cheese can configure a Hot dog while fries or a drink can accompany
+it; syrup or berries can top Pancakes while eggs or sausage can accompany them;
+and salsa or cheese can configure Tacos while rice or beans can accompany
+them. Confirm each pairing with the food's intended use before adding catalog
+data. The pairings currently implemented remain Burger → Fries and Milkshake,
+and Sandwich → Potato chips.
 
 ## Size and food-specific directions
 
@@ -412,9 +457,9 @@ or needed to explain a material discrepancy.
    which can resolve to a verified variation or branded nutrition record?
 3. Which source's nutrient profile will supply each Chase Food default, and how
    will draft estimates be distinguished from verified values?
-4. When a configuration includes a related food such as fries, should one
-   action create two diary entries or one meal-style entry with component
-   snapshots?
+4. For each proposed companion pairing, does it remain a separately editable
+   food in the diary, with its own portion and nutrition, rather than a
+   configured component of the parent?
 5. Which portion and component amounts should be approved for the first
    release?
 

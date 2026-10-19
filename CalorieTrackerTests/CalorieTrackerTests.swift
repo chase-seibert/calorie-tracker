@@ -2180,10 +2180,12 @@ final class CalorieTrackerTests: XCTestCase {
 
         let sandwich = catalog.chaseFoodOptions(for: "food_sandwich")
         XCTAssertEqual(sandwich.filter { $0.optionGroup == "Filling" && $0.includedByDefault }.map(\.displayName), ["Turkey"])
-        XCTAssertEqual(Set(sandwich.filter { $0.optionGroup == "Filling" }.map(\.displayName)), ["Turkey", "Ham", "Tuna salad", "Roast beef", "Chicken"])
+        XCTAssertEqual(Set(sandwich.filter { $0.optionGroup == "Filling" }.map(\.displayName)), ["Turkey", "Ham", "Tuna salad", "Roast beef", "Chicken", "Fried chicken"])
         XCTAssertEqual(sandwich.filter { $0.optionGroup == "Bread" && $0.includedByDefault }.map(\.food.name), ["White bread"])
         XCTAssertEqual(sandwich.filter { $0.optionGroup == "Cheese" && $0.selectionMode == "exclusive" }.count, 4)
         XCTAssertEqual(sandwich.first { $0.food.name == "Mayonnaise" }?.selectionMode, "multiple")
+        XCTAssertEqual(catalog.chaseFoodCompanions(for: "food_sandwich").map(\.displayName), ["Chips"])
+        XCTAssertEqual(catalog.chaseFoodCompanions(for: "food_sandwich").first?.food.sourceID, "food_potato_chips")
 
         let shake = catalog.chaseFoodOptions(for: "food_protein_shake")
         XCTAssertTrue(shake.contains { $0.food.name == "Protein powder" && $0.includedByDefault })
@@ -2191,12 +2193,80 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertTrue(["Almond milk", "Milk, whole"].allSatisfy { name in shake.contains { $0.food.name == name } })
         XCTAssertTrue(["Peanut butter", "Banana", "Coconut oil"].allSatisfy { name in shake.contains { $0.food.name == name } })
 
-        let burgerBase = catalog.chaseFoodOptions(for: "food_burger").filter { $0.relationship == "included" }
+        let burgerBase = catalog.chaseFoodOptions(for: "food_burger").filter(\.includedByDefault)
         XCTAssertEqual(Set(burgerBase.map(\.food.name)), ["Beef patty", "Hamburger bun"])
         XCTAssertTrue(burgerBase.allSatisfy(\.includedByDefault), "Burger base ingredients should be removable default constituents")
+        XCTAssertFalse(catalog.chaseFoodOptions(for: "food_burger").contains { $0.food.sourceID == "food_french_fries" })
+        XCTAssertEqual(catalog.chaseFoodCompanions(for: "food_burger").map(\.displayName), ["Fries", "Milkshake"])
+        XCTAssertEqual(catalog.chaseFoodCompanions(for: "food_burger").map { $0.food.sourceID }, ["food_french_fries", "food_milkshake"])
 
         XCTAssertEqual(catalog.searchAll("turkey sandwich", limit: 30, enabledSources: [.chaseFood]).first?.sourceID, "food_sandwich")
         XCTAssertNotNil(catalog.food(sourceID: "food_turkey_sandwich", source: .chaseFood), "Legacy diary identity should still resolve")
+    }
+
+    func testBurgerCompanionsPersistAsIndependentEntriesInTheSameTransaction() throws {
+        enum ExpectedRollback: Error { case requested }
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let catalog = CatalogStore(url: root.appendingPathComponent("CalorieTracker/Resources/FoodCatalog.sqlite3"))
+        let burger = try XCTUnwrap(catalog.food(sourceID: "food_burger", source: .chaseFood))
+        let companions = catalog.chaseFoodCompanions(for: burger.sourceID).map(\.food)
+        XCTAssertEqual(companions.map(\.sourceID), ["food_french_fries", "food_milkshake"])
+        let options = catalog.chaseFoodOptions(for: burger.sourceID)
+        let selected = Set(options.filter(\.includedByDefault).map(\.id))
+        let portion = burger.availablePortions.first?.id
+        let nutrients = FoodConfigurationCalculator.nutrients(food: burger, options: options, selected: selected,
+            extras: [], portionID: portion)
+        let snapshot = FoodConfigurationSnapshot(selectedOptionIDs: Array(selected).sorted(), components: [],
+            suggestedChanges: nil, catalogVersion: catalog.catalogVersion, baseFood: burger,
+            options: options, extraComponents: [], portionID: portion)
+        let date = testDate(day: 1)
+        let repository = try DiaryRepository(fileURL: temporaryDiaryURL(), calendar: testCalendar, catalog: catalog)
+
+        XCTAssertThrowsError(try repository.performSync(scope: .day(date)) { engine in
+            engine.logConfiguredFood(burger, nutrients: nutrients, selectedOptionIDs: snapshot.selectedOptionIDs,
+                components: [], suggestedChanges: nil, portionID: portion, snapshot: snapshot,
+                companions: companions, on: date, allowCheatDay: true)
+            throw ExpectedRollback.requested
+        })
+        XCTAssertTrue(try repository.snapshotSync().document.entries.isEmpty)
+
+        try repository.performSync(scope: .day(date)) { engine in
+            engine.logConfiguredFood(burger, nutrients: nutrients, selectedOptionIDs: snapshot.selectedOptionIDs,
+                components: [], suggestedChanges: nil, portionID: portion, snapshot: snapshot,
+                companions: companions, on: date, allowCheatDay: true)
+        }
+        let document = try repository.snapshotSync().document
+        XCTAssertEqual(document.entries.map { $0.food.sourceID }, ["food_burger", "food_french_fries", "food_milkshake"])
+        XCTAssertEqual(document.entries.first?.foodConfigurationSnapshot?.components.map { $0.food.sourceID }, [])
+        XCTAssertEqual(document.entries.dropFirst().map(\.foodConfigurationSnapshot), [nil, nil])
+        XCTAssertEqual(DiaryEngine(document: document, calendar: testCalendar).totals(on: date).calories,
+            document.entries.reduce(0) { $0 + $1.nutrients.calories }, accuracy: 0.0001)
+    }
+
+    func testReusingLegacyBurgerVariationRemovesFriesFromTheNewBurgerConfiguration() throws {
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let catalog = CatalogStore(url: root.appendingPathComponent("CalorieTracker/Resources/FoodCatalog.sqlite3"))
+        let fries = try XCTUnwrap(catalog.food(sourceID: "food_french_fries", source: .chaseFood))
+        let options = catalog.chaseFoodOptions(for: "food_burger")
+        let legacyFries = ChaseFoodOption(id: "addition:food_french_fries", food: fries, displayName: "Fries · side",
+            amountGrams: fries.baseAmountGrams, relationship: "Suggested addition", includedByDefault: false,
+            displayOrder: 13, optionGroup: nil, selectionMode: "multiple")
+        let oldOptions = options + [legacyFries]
+        let selected = Set([legacyFries.id, "addition:food_cheddar_cheese"])
+        let historicalSnapshot = FoodConfigurationSnapshot(selectedOptionIDs: selected.sorted(),
+            components: [MealItem(id: UUID(), food: fries, amount: legacyFries.amountGrams, unit: .grams)],
+            suggestedChanges: nil, catalogVersion: "older-catalog", baseFood: catalog.food(sourceID: "food_burger", source: .chaseFood),
+            options: oldOptions, extraComponents: [], portionID: nil)
+
+        let compatible = FoodConfigurationCompatibility.removingLegacyBurgerFries(
+            baseFoodID: "chaseFood:food_burger", options: historicalSnapshot.options ?? [],
+            selectedOptionIDs: Set(historicalSnapshot.selectedOptionIDs)
+        )
+        XCTAssertTrue(compatible.removedFries)
+        XCTAssertFalse(compatible.options.contains { $0.food.sourceID == "food_french_fries" })
+        XCTAssertEqual(compatible.selectedOptionIDs, ["addition:food_cheddar_cheese"])
+        XCTAssertTrue(historicalSnapshot.options?.contains { $0.food.sourceID == "food_french_fries" } == true)
+        XCTAssertEqual(historicalSnapshot.components.first?.food.sourceID, "food_french_fries")
     }
 
     func testConfiguredDraftRoundTripAndMealConversionKeepProvenance() throws {

@@ -633,6 +633,12 @@ def create_database(output: Path, foods: Iterable[CatalogFood]) -> tuple[int, di
             PRIMARY KEY(parent_food_id, option_id)
         );
         CREATE INDEX chase_food_options_parent ON chase_food_options(parent_food_id, included_by_default, display_order);
+        CREATE TABLE chase_food_companions (
+            parent_food_id TEXT NOT NULL, companion_food_id TEXT NOT NULL,
+            display_name TEXT NOT NULL, display_order INTEGER NOT NULL,
+            PRIMARY KEY(parent_food_id, companion_food_id)
+        );
+        CREATE INDEX chase_food_companions_parent ON chase_food_companions(parent_food_id, display_order);
         """
     )
     insert = """
@@ -835,6 +841,11 @@ def main() -> int:
             database.executemany("INSERT INTO chase_food_metadata VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", database_metadata)
             database.executemany("INSERT OR IGNORE INTO chase_food_aliases VALUES (?, ?, ?)", payload_aliases)
             database.executemany("INSERT OR REPLACE INTO chase_food_options VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", option_rows)
+            database.executemany(
+                "INSERT OR REPLACE INTO chase_food_companions VALUES (?, ?, ?, ?)",
+                [(row[0], row[2], row[3], int(row[4] or index))
+                 for index, row in enumerate(chase.get("companionFoods", [])) if len(row) >= 5],
+            )
             database.executemany(
                 "INSERT INTO metadata VALUES (?, ?)",
                 [("chase_food_dataset_version", chase["datasetVersion"]),

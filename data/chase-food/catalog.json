@@ -6323,6 +6323,29 @@
       "Draft"
     ]
   ],
+  "companionFoods": [
+    [
+      "food_burger",
+      "Burger",
+      "food_french_fries",
+      "Fries",
+      "1"
+    ],
+    [
+      "food_burger",
+      "Burger",
+      "food_milkshake",
+      "Milkshake",
+      "2"
+    ],
+    [
+      "food_sandwich",
+      "Sandwich",
+      "food_potato_chips",
+      "Chips",
+      "1"
+    ]
+  ],
   "datasetVersion": "chase-food-2026-10-19-20",
   "foods": [
     {
@@ -8813,7 +8836,7 @@
         "source": "usda",
         "sourceID": "2706934"
       },
-      "optionsSummary": "Cheese, Ketchup, Bacon, Mayonnaise, Fries · side, Beef, Chicken, Bean",
+      "optionsSummary": "Cheese, Ketchup, Bacon, Mayonnaise, Beef, Chicken, Bean",
       "reviewReasons": [
         "FNDDS large hamburger with white bun is a close match to the 183 g default, but patty size and cooking yield vary. The source profile contains a plain beef burger and does not include cheese."
       ],
@@ -61252,19 +61275,6 @@
       "food_mayonnaise",
       "Mayonnaise",
       "7",
-      "Suggested addition",
-      "No",
-      "Draft",
-      "",
-      "multiple",
-      ""
-    ],
-    [
-      "food_burger",
-      "Burger",
-      "food_french_fries",
-      "Fries · side",
-      "13",
       "Suggested addition",
       "No",
       "Draft",

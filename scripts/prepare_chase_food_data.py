@@ -321,6 +321,7 @@ def main() -> int:
         "portions": workbook["portions"][1:],
         "baseCompositions": workbook["baseCompositions"][1:],
         "suggestedAdditions": workbook["suggestedAdditions"][1:],
+        "companionFoods": workbook.get("companionFoods", [])[1:],
         "presets": workbook["presets"][1:],
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)

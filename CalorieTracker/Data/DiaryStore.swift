@@ -565,6 +565,7 @@ class DiaryStore: ObservableObject {
         amount: Double = 1,
         unit: LogUnit = .serving,
         snapshot: FoodConfigurationSnapshot? = nil,
+        companions: [Food] = [],
         configuration: SavedFoodConfiguration,
         suggestion: FoodSuggestion?,
         on date: Date,
@@ -574,9 +575,26 @@ class DiaryStore: ObservableObject {
             engine.logConfiguredFood(food, nutrients: nutrients, selectedOptionIDs: selectedOptionIDs,
                                      components: components, suggestedChanges: suggestedChanges,
                                      portionID: portionID, amount: amount, unit: unit, snapshot: snapshot,
+                                     companions: companions,
                                      on: date, allowCheatDay: allowCheatDay)
             engine.saveFoodConfiguration(configuration)
             if let suggestion { engine.saveFoodSuggestion(suggestion) }
+        }
+    }
+
+    func logFoodWithCompanions(
+        _ food: Food,
+        amount: Double,
+        unit: LogUnit,
+        portionID: String?,
+        companions: [Food],
+        on date: Date
+    ) async throws {
+        try await perform(scope: .day(date)) { engine in
+            engine.log(food, amount: amount, unit: unit, portionID: portionID, on: date, allowCheatDay: true)
+            for companion in companions {
+                engine.quickLog(companion, on: date, allowCheatDay: true)
+            }
         }
     }
 

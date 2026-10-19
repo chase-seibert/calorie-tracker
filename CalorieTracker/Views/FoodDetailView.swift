@@ -42,6 +42,8 @@ struct FoodCustomizationView: View {
     @State private var unitChoice: QuantityUnitChoice
     @State private var suggestedChanges = ""
     @State private var showingIngredientSearch = false
+    @State private var selectedCompanionFoodIDs: Set<String> = []
+    @State private var removedLegacyBurgerFries = false
 
     init(food: Food, catalog: CatalogStore, date: Date, initialConfiguration: SavedFoodConfiguration? = nil,
          entry: DiaryEntry? = nil, component: MealItem? = nil, isNewComponent: Bool = false, onComponentSaved: ((MealItem) -> Void)? = nil,
@@ -63,15 +65,25 @@ struct FoodCustomizationView: View {
         componentActionTitle = isNewComponent ? "Add to parent" : "Use changes"
         self.onComponentSaved = onComponentSaved
         self.onLogged = onLogged
-        let options = needsLegacyRebuild
+        let loadedOptions = needsLegacyRebuild
             ? (base.source == .chaseFood ? catalog.chaseFoodOptions(for: base.sourceID) : [])
             : snapshot?.options ?? (base.source == .chaseFood ? catalog.chaseFoodOptions(for: base.sourceID) : [])
+        let initialSelectedOptionIDs = Set(initialConfiguration?.selectedOptionIDs
+            ?? snapshot?.selectedOptionIDs
+            ?? loadedOptions.filter(\.includedByDefault).map(\.id))
+        let compatibleConfiguration = FoodConfigurationCompatibility.removingLegacyBurgerFries(
+            baseFoodID: initialConfiguration?.baseFoodID ?? base.sourceID,
+            options: loadedOptions,
+            selectedOptionIDs: initialSelectedOptionIDs
+        )
+        let options = compatibleConfiguration.options
         _optionDefinitions = State(initialValue: options)
+        _removedLegacyBurgerFries = State(initialValue: compatibleConfiguration.removedFries)
         _preservesLegacySnapshot = State(initialValue: needsLegacyRebuild && currentCatalogFood == nil)
         _rebuiltLegacyValues = State(initialValue: needsLegacyRebuild && currentCatalogFood.map { $0 != historicalBase } == true)
         _selectedOptionIDs = State(initialValue: needsLegacyRebuild
             ? Set(options.filter(\.includedByDefault).map(\.id))
-            : Set(initialConfiguration?.selectedOptionIDs ?? snapshot?.selectedOptionIDs ?? options.filter(\.includedByDefault).map(\.id)))
+            : compatibleConfiguration.selectedOptionIDs)
         _extraComponents = State(initialValue: needsLegacyRebuild ? [] : initialConfiguration?.components ?? snapshot?.extraComponents ?? snapshot?.components ?? [])
         let initialPortionID: String
         if let entry {
@@ -92,6 +104,12 @@ struct FoodCustomizationView: View {
     }
 
     private var options: [ChaseFoodOption] { optionDefinitions }
+    private var companionRecommendations: [ChaseFoodCompanion] {
+        food.source == .chaseFood ? catalog.chaseFoodCompanions(for: food.sourceID) : []
+    }
+    private var selectedCompanionFoods: [Food] {
+        companionRecommendations.filter { selectedCompanionFoodIDs.contains($0.id) }.map(\.food)
+    }
     private var recentConfigurations: [SavedFoodConfiguration] {
         diary.document.savedFoodConfigurations
             .filter { $0.baseFoodID == food.id }
@@ -181,6 +199,27 @@ struct FoodCustomizationView: View {
 
                         ForEach(optionGroups) { group in
                             optionSection(group.name, options: group.options)
+                        }
+
+                        if originalEntry == nil, originalComponent == nil, onComponentSaved == nil,
+                           !companionRecommendations.isEmpty {
+                            VStack(alignment: .leading, spacing: 12) {
+                                sectionLabel("Add as separate foods")
+                                Text("Each selected food is logged on its own with its usual portion.")
+                                    .font(.subheadline)
+                                    .foregroundStyle(AppTheme.muted)
+                                LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+                                    ForEach(companionRecommendations) { companion in
+                                        companionPill(companion)
+                                    }
+                                }
+                            }
+                        }
+
+                        if removedLegacyBurgerFries {
+                            Text("Fries from this saved variation are now listed as a separate food above.")
+                                .font(.footnote)
+                                .foregroundStyle(AppTheme.muted)
                         }
 
                         if food.source == .chaseFood || !extraComponents.isEmpty {
@@ -451,6 +490,26 @@ struct FoodCustomizationView: View {
         .disabled(preservesLegacySnapshot)
     }
 
+    private func companionPill(_ companion: ChaseFoodCompanion) -> some View {
+        let selected = selectedCompanionFoodIDs.contains(companion.id)
+        let preference = diary.preference(for: companion.food)
+        let calories = Int(companion.food.nutrients(
+            for: preference.amount,
+            unit: preference.unit,
+            portionID: preference.portionID
+        ).calories.rounded())
+        let amount = preference.amount.formatted(.number.precision(.fractionLength(0...2)))
+        return selectionPill(
+            title: companion.displayName,
+            detail: "\(calories) kcal · \(amount) \(preference.unit.title)",
+            isSelected: selected
+        ) {
+            if selected { selectedCompanionFoodIDs.remove(companion.id) }
+            else { selectedCompanionFoodIDs.insert(companion.id) }
+        }
+        .accessibilityIdentifier("food-companion-\(companion.id)")
+    }
+
     private func selectionPill(title: String, detail: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 9) {
@@ -564,10 +623,18 @@ struct FoodCustomizationView: View {
     }
 
     private func apply(_ configuration: SavedFoodConfiguration) {
-        selectedOptionIDs = Set(configuration.selectedOptionIDs)
+        let loadedOptions = configuration.snapshot?.options
+            ?? (food.source == .chaseFood ? catalog.chaseFoodOptions(for: food.sourceID) : [])
+        let compatibleConfiguration = FoodConfigurationCompatibility.removingLegacyBurgerFries(
+            baseFoodID: configuration.baseFoodID,
+            options: loadedOptions,
+            selectedOptionIDs: Set(configuration.selectedOptionIDs)
+        )
+        optionDefinitions = compatibleConfiguration.options
+        selectedOptionIDs = compatibleConfiguration.selectedOptionIDs
+        removedLegacyBurgerFries = compatibleConfiguration.removedFries
         extraComponents = configuration.components
         if let base = configuration.snapshot?.baseFood { food = base }
-        optionDefinitions = configuration.snapshot?.options ?? (food.source == .chaseFood ? catalog.chaseFoodOptions(for: food.sourceID) : [])
         if let portionID = configuration.portionID, food.portion(id: portionID) != nil {
             self.portionID = portionID
             unitChoice = .portion(portionID)
@@ -610,7 +677,12 @@ struct FoodCustomizationView: View {
             if let originalEntry {
                 try await diary.updateFoodDraft(draft: result, original: originalEntry)
             } else if options.isEmpty && extraComponents.isEmpty && result.foodConfigurationSnapshot == nil {
-                try await diary.log(food, amount: amount, unit: selectedUnit, portionID: selectedPortionID, on: date, allowCheatDay: true)
+                if selectedCompanionFoods.isEmpty {
+                    try await diary.log(food, amount: amount, unit: selectedUnit, portionID: selectedPortionID, on: date, allowCheatDay: true)
+                } else {
+                    try await diary.logFoodWithCompanions(food, amount: amount, unit: selectedUnit,
+                        portionID: selectedPortionID, companions: selectedCompanionFoods, on: date)
+                }
                 onLogged(QuantityPreference(amount: amount, unit: selectedUnit, portionID: selectedPortionID), initialQuantityPreference)
             } else {
                 let note = suggestedChanges.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -621,7 +693,8 @@ struct FoodCustomizationView: View {
                 try await diary.logConfiguredFood(food, nutrients: totalNutrients, selectedOptionIDs: configuration.selectedOptionIDs,
                     components: configuredComponents, suggestedChanges: note.isEmpty ? nil : note,
                     portionID: selectedPortionID, amount: amount, unit: selectedUnit,
-                    snapshot: result.foodConfigurationSnapshot, configuration: configuration, suggestion: suggestion,
+                    snapshot: result.foodConfigurationSnapshot, companions: selectedCompanionFoods,
+                    configuration: configuration, suggestion: suggestion,
                     on: date, allowCheatDay: true)
                 onLogged(QuantityPreference(amount: amount, unit: selectedUnit, portionID: selectedPortionID), initialQuantityPreference)
                 AppAnalytics.capture("food.logged", properties: ["source": food.source.rawValue, "method": "customize"])

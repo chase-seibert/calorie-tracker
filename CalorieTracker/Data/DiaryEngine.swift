@@ -53,6 +53,7 @@ final class DiaryEngine {
         amount: Double = 1,
         unit: LogUnit = .serving,
         snapshot: FoodConfigurationSnapshot? = nil,
+        companions: [Food] = [],
         on date: Date,
         allowCheatDay: Bool = false
     ) {
@@ -68,6 +69,9 @@ final class DiaryEngine {
             suggestedChanges: suggestedChanges,
             catalogVersion: catalog?.catalogVersion
         )
+        for companion in companions {
+            quickLog(companion, on: date, allowCheatDay: allowCheatDay)
+        }
     }
 
     init(document: DiaryDocument, calendar: Calendar = .current, catalog: CatalogStore? = nil) {

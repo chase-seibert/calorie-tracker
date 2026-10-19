@@ -591,7 +591,7 @@
       "Catalog default 1 burger (about 183.0 g); source serving: 1 hamburger. See nutrition evidence and review reason.",
       "",
       "None",
-      "Cheese, Ketchup, Bacon, Mayonnaise, Fries · side, Beef, Chicken, Bean",
+      "Cheese, Ketchup, Bacon, Mayonnaise, Beef, Chicken, Bean",
       "Hamburger bun"
     ],
     [
@@ -41719,19 +41719,6 @@
       ""
     ],
     [
-      "food_burger",
-      "Burger",
-      "food_french_fries",
-      "Fries · side",
-      "13",
-      "Suggested addition",
-      "No",
-      "Draft",
-      "",
-      "multiple",
-      ""
-    ],
-    [
       "food_pizza_slice",
       "Pizza",
       "food_pepperoni",
@@ -51461,6 +51448,36 @@
       null,
       null,
       "Not sourced"
+    ]
+  ],
+  "companionFoods": [
+    [
+      "Parent food_id",
+      "Parent food",
+      "Companion food_id",
+      "Display name",
+      "Display order"
+    ],
+    [
+      "food_burger",
+      "Burger",
+      "food_french_fries",
+      "Fries",
+      "1"
+    ],
+    [
+      "food_burger",
+      "Burger",
+      "food_milkshake",
+      "Milkshake",
+      "2"
+    ],
+    [
+      "food_sandwich",
+      "Sandwich",
+      "food_potato_chips",
+      "Chips",
+      "1"
     ]
   ]
 }

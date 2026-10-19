@@ -503,6 +503,29 @@ struct ChaseFoodOption: Identifiable, Codable, Hashable, Sendable {
     let selectionMode: String
 }
 
+struct ChaseFoodCompanion: Identifiable, Codable, Hashable, Sendable {
+    let id: String
+    let food: Food
+    let displayName: String
+    let displayOrder: Int
+}
+
+enum FoodConfigurationCompatibility {
+    static func removingLegacyBurgerFries(
+        baseFoodID: String,
+        options: [ChaseFoodOption],
+        selectedOptionIDs: Set<String>
+    ) -> (options: [ChaseFoodOption], selectedOptionIDs: Set<String>, removedFries: Bool) {
+        guard baseFoodID == "food_burger" || baseFoodID == "chaseFood:food_burger" else {
+            return (options, selectedOptionIDs, false)
+        }
+        let friesOptionIDs = Set(options.filter { $0.food.sourceID == "food_french_fries" }.map(\.id))
+        guard !friesOptionIDs.isEmpty else { return (options, selectedOptionIDs, false) }
+        return (options.filter { !friesOptionIDs.contains($0.id) },
+                selectedOptionIDs.subtracting(friesOptionIDs), true)
+    }
+}
+
 struct FoodConfigurationSnapshot: Codable, Hashable, Sendable {
     var selectedOptionIDs: [String]
     var components: [MealItem]
