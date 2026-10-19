@@ -1167,7 +1167,7 @@
       "Default maps to USDA FNDDS 1 small/regular taco (100 g); size mappings use the same source record.",
       "",
       "None",
-      "Beef, Chicken, Pork, Cheese, Sour cream, Guacamole, Refried beans, Rice, Salsa, Lettuce",
+      "Beef, Chicken, Pork, Cheese, Sour cream, Guacamole, Salsa, Lettuce",
       "None"
     ],
     [
@@ -1185,7 +1185,7 @@
       "Portion estimate; verify with FNDDS/label",
       "",
       "None",
-      "Beef, Chicken, Refried beans, Rice, Cheddar, Salsa, Lettuce",
+      "Beef, Chicken, Cheddar, Salsa, Lettuce",
       "None"
     ],
     [
@@ -1905,7 +1905,7 @@
       "Portion estimate; verify with FNDDS/label",
       "",
       "None",
-      "Pasta cooked",
+      "None",
       "None"
     ],
     [
@@ -3975,7 +3975,7 @@
       "Portion estimate; verify with FNDDS/label",
       "",
       "None",
-      "Carrots, Cucumber, Celery, Broccoli, Snow peas, Snap peas",
+      "None",
       "None"
     ],
     [
@@ -41953,32 +41953,6 @@
       "30"
     ],
     [
-      "food_taco",
-      "Taco",
-      "food_refried_beans",
-      "Refried beans",
-      "32",
-      "Related food",
-      "No",
-      "Draft",
-      "",
-      "multiple",
-      "118"
-    ],
-    [
-      "food_taco",
-      "Taco",
-      "food_white_rice",
-      "Rice",
-      "33",
-      "Related food",
-      "No",
-      "Draft",
-      "",
-      "multiple",
-      "79"
-    ],
-    [
       "food_penne_pasta_with_sauce",
       "Pasta with sauce",
       "food_tomato_pasta_sauce",
@@ -45411,19 +45385,6 @@
       "50"
     ],
     [
-      "food_eggplant_parmesan",
-      "Eggplant Parmesan",
-      "food_pasta_cooked",
-      "Pasta, cooked",
-      "1",
-      "Suggested addition",
-      "No",
-      "Draft",
-      "",
-      "multiple",
-      "140"
-    ],
-    [
       "food_breaded_fried_fish",
       "Fried fish",
       "food_tartar_sauce",
@@ -45608,32 +45569,6 @@
     [
       "food_hard_shell_taco",
       "Hard-shell taco",
-      "food_refried_beans",
-      "Refried beans",
-      "3",
-      "Related food",
-      "No",
-      "Draft",
-      "",
-      "multiple",
-      "60"
-    ],
-    [
-      "food_hard_shell_taco",
-      "Hard-shell taco",
-      "food_white_rice",
-      "Rice",
-      "4",
-      "Related food",
-      "No",
-      "Draft",
-      "",
-      "multiple",
-      "60"
-    ],
-    [
-      "food_hard_shell_taco",
-      "Hard-shell taco",
       "food_cheddar_cheese",
       "Cheddar",
       "5",
@@ -45760,84 +45695,6 @@
       "",
       "multiple",
       "4"
-    ],
-    [
-      "food_hummus",
-      "Hummus",
-      "food_carrots_raw",
-      "Carrots",
-      "1",
-      "Dipper",
-      "No",
-      "Draft",
-      "",
-      "multiple",
-      "30"
-    ],
-    [
-      "food_hummus",
-      "Hummus",
-      "food_cucumber",
-      "Cucumber",
-      "2",
-      "Dipper",
-      "No",
-      "Draft",
-      "",
-      "multiple",
-      "30"
-    ],
-    [
-      "food_hummus",
-      "Hummus",
-      "food_celery",
-      "Celery",
-      "3",
-      "Dipper",
-      "No",
-      "Draft",
-      "",
-      "multiple",
-      "30"
-    ],
-    [
-      "food_hummus",
-      "Hummus",
-      "food_broccoli_raw",
-      "Broccoli",
-      "4",
-      "Dipper",
-      "No",
-      "Draft",
-      "",
-      "multiple",
-      "30"
-    ],
-    [
-      "food_hummus",
-      "Hummus",
-      "food_snow_peas",
-      "Snow peas",
-      "5",
-      "Dipper",
-      "No",
-      "Draft",
-      "",
-      "multiple",
-      "30"
-    ],
-    [
-      "food_hummus",
-      "Hummus",
-      "food_snap_peas",
-      "Snap peas",
-      "6",
-      "Dipper",
-      "No",
-      "Draft",
-      "",
-      "multiple",
-      "30"
     ],
     [
       "food_taco",
@@ -51478,6 +51335,90 @@
       "food_potato_chips",
       "Chips",
       "1"
+    ],
+    [
+      "food_taco",
+      "Taco",
+      "food_refried_beans",
+      "Refried beans",
+      "1"
+    ],
+    [
+      "food_taco",
+      "Taco",
+      "food_white_rice",
+      "Rice",
+      "2"
+    ],
+    [
+      "food_hard_shell_taco",
+      "Hard-shell taco",
+      "food_refried_beans",
+      "Refried beans",
+      "1"
+    ],
+    [
+      "food_hard_shell_taco",
+      "Hard-shell taco",
+      "food_white_rice",
+      "Rice",
+      "2"
+    ],
+    [
+      "food_breaded_fried_fish",
+      "Fried fish",
+      "food_french_fries",
+      "Fries",
+      "1"
+    ],
+    [
+      "food_eggplant_parmesan",
+      "Eggplant Parmesan",
+      "food_pasta_cooked",
+      "Pasta, cooked",
+      "1"
+    ],
+    [
+      "food_hummus",
+      "Hummus",
+      "food_carrots_raw",
+      "Carrots",
+      "1"
+    ],
+    [
+      "food_hummus",
+      "Hummus",
+      "food_cucumber",
+      "Cucumber",
+      "2"
+    ],
+    [
+      "food_hummus",
+      "Hummus",
+      "food_celery",
+      "Celery",
+      "3"
+    ],
+    [
+      "food_hummus",
+      "Hummus",
+      "food_broccoli_raw",
+      "Broccoli",
+      "4"
+    ],
+    [
+      "food_hummus",
+      "Hummus",
+      "food_snow_peas",
+      "Snow peas",
+      "5"
+    ],
+    [
+      "food_hummus",
+      "Hummus",
+      "food_snap_peas",
+      "Snap peas",
+      "6"
     ]
   ]
 }

@@ -14,7 +14,7 @@ The workbook is [Canonical U.S. Food Taxonomy — Review Draft](https://docs.goo
 The preceding [Canonical Food List Criteria conversation](https://chatgpt.com/share/6ace459c-9910-83e8-b7db-44bcaa4894be)
 provides the rationale and initial model. The current review dataset has 527
 catalog identities (494 search-enabled), 1,926 portion mappings, 1,212 alias
-records, 462 configurable options/components, 3 companion-food pairings, and
+records, 451 configurable options/components, 15 companion-food pairings, and
 28 presets. Portion and option amounts are first-pass estimates;
 nutrition values are matched from the bundled USDA/Open Food Facts catalog and
 still need review when confidence or preparation notes flag them. The
@@ -181,7 +181,9 @@ Apply the relationship test to each parent food when curating additions:
   parent. Pairings are opt-in and do not imply a default serving or change the
   parent food's nutrition. Reuse stable catalog food IDs and each companion's
   normal portion/nutrition source; do not create duplicate foods or calorie
-  deltas.
+  deltas. Current pairings include Burger with Fries and Milkshake, Sandwich
+  with Chips, Taco and Hard-shell taco with Refried beans and Rice, Fried fish
+  with Fries, Eggplant Parmesan with Pasta, and Hummus with vegetable dippers.
 
 Examples to guide future review, not blanket catalog assignments: extra cheese
 or pepperoni can configure Pizza while wings or a side salad can accompany it;
@@ -197,8 +199,8 @@ and Sandwich → Potato chips.
 
 - **Burger:** Include a bun by default. Offer one exclusive protein choice—beef,
   chicken, or bean—with beef selected by default; users can clear the selection
-  for a patty-free burger. Offer cheese, bacon, mayonnaise, ketchup, and related
-  sides such as fries. Keep garnish
+  for a patty-free burger. Offer cheese, bacon, mayonnaise, and ketchup as
+  configured additions; Fries and Milkshake are separate companion foods. Keep garnish
   ingredients out of quick controls; they remain searchable through Add
   ingredient. Use a visual size cue as well
   as weight: draft cues could be a small slider/hockey-puck-scale patty, a
@@ -269,7 +271,7 @@ aliases or saved configurations.
 | Southwest Caesar Salad | Exclude as a standalone catalog food; its base can be Caesar salad, with steak and toppings added when desired. |
 | Salad Dressings; Secret Sauce; vinaigrettes; adobo; chili oil; pickles; stock; plum jam/preserves | Reusable condiments, ingredients, or recipe data. Do not create meal-sized canonical food results for these. |
 | Drive-Thru Burgers | **Burger** with saved composition/alias; restaurant terms should not imply exact branded nutrition. |
-| Taco Night; Red Chile Chicken Enchiladas; Bean and Cheese Tomatillo Enchiladas | **Taco** for taco night, with one exclusive protein choice, meaningful toppings, and refried beans and rice as related foods. Keep low-impact toppings out of quick controls. Enchiladas can share an **Enchiladas** entry with a filling choice if users log them often. |
+| Taco Night; Red Chile Chicken Enchiladas; Bean and Cheese Tomatillo Enchiladas | **Taco** for taco night, with one exclusive protein choice and meaningful toppings; offer refried beans and rice as separate optional companions. Keep low-impact toppings out of quick controls. Enchiladas can share an **Enchiladas** entry with a filling choice if users log them often. |
 | Neopolitan Pizza; Deep Dish Pizza | **Pizza** with mutually exclusive style choices such as Neapolitan/thin crust and deep dish. Search for “deep dish pizza” returns Pizza with Deep dish selected. |
 | Baked Ziti; Broccoli Sausage Orecchiette; Garlic Chili Pasta; Pasta e Ceci; Aperto's Tagliolini Pepati; Pasta Cacio e Uova | Use **Pasta with sauce** and saved configurations/choices for pasta shape, sauce, meatballs, broccoli, sausage, chickpeas, or olive oil. Keep **Lasagna** as its own canonical entry. |
 | Noel's Chili | Own **Chili** entry; exclusive beef, turkey, or vegetarian type, plus rice, sour cream, and cheese. |
@@ -378,7 +380,11 @@ mutually exclusive choice or saved variation.
 - **Sandwich:** BLT is a named full-food variant under Sandwich. Keep the
   former BLT ID as a hidden component for history and saved configurations.
 - **Fried fish:** Use the canonical display name Fried fish and map “breaded
-  fried fish,” “fried fish fillet,” and “fish and chips” to it.
+  fried fish,” “fried fish fillet,” and “fish and chips” to it. Offer Fries as
+  a separate optional companion; keep tartar sauce and ketchup configured on
+  the fish.
+- **Eggplant Parmesan:** Keep Pasta, cooked as a separate optional companion so
+  its portion can be logged and edited independently.
 - **Sandwich:** Fried chicken sandwich searches resolve to Sandwich, with
   fried chicken as a reusable exclusive filling. Preserve the former dedicated
   sandwich ID for diary history.
@@ -394,14 +400,16 @@ mutually exclusive choice or saved variation.
   to Pizza.
 - **Taco:** Keep both Taco and Hard-shell taco as searchable foods, with the
   hard-shell entry offering mutually exclusive beef/chicken protein and
-  optional refried beans, rice, cheddar, salsa, and lettuce. Taco keeps its
-  protein selector and the same common beans, rice, salsa, and lettuce options.
+  cheddar, salsa, and lettuce as configured choices. Taco keeps its protein
+  selector and the same common toppings. Offer refried beans and rice as
+  optional companions for both Taco entries.
 - **Hot dog:** Hot dog sausage remains an internal reusable component and its
   standalone search aliases resolve to Hot dog; preserve its identity for logs.
 - **Cereal, Salad, and Hummus options:** Cereal offers mutually exclusive milk
   choices alongside cereal type. Salad and Greek salad each offer a dressing
-  choice; hummus offers individually selectable vegetable dippers. Dressings,
-  milks, and dippers remain reusable components.
+  choice. Hummus suggests carrots, cucumber, celery, broccoli, snow peas, and
+  snap peas as separate optional companions. Dressings and milks remain
+  configured choices.
 - **Breakfast casserole:** Include common contents choices for sausage, bacon,
   ham, cheese, and bell pepper. The generic USDA profile already contains meat
   and cheese, so ingredient-level totals need recipe-specific refinement.

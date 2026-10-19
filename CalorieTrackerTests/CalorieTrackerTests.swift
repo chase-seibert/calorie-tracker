@@ -2204,6 +2204,32 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertNotNil(catalog.food(sourceID: "food_turkey_sandwich", source: .chaseFood), "Legacy diary identity should still resolve")
     }
 
+    func testOtherRefinedFoodsUseSeparateCompanionRecommendations() throws {
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let catalog = CatalogStore(url: root.appendingPathComponent("CalorieTracker/Resources/FoodCatalog.sqlite3"))
+        let expected: [String: [String]] = [
+            "food_taco": ["food_refried_beans", "food_white_rice"],
+            "food_hard_shell_taco": ["food_refried_beans", "food_white_rice"],
+            "food_breaded_fried_fish": ["food_french_fries"],
+            "food_eggplant_parmesan": ["food_pasta_cooked"],
+            "food_hummus": ["food_carrots_raw", "food_cucumber", "food_celery", "food_broccoli_raw", "food_snow_peas", "food_snap_peas"]
+        ]
+
+        for (parentID, companionIDs) in expected {
+            let companions = catalog.chaseFoodCompanions(for: parentID)
+            XCTAssertEqual(companions.map { $0.food.sourceID }, companionIDs, "Unexpected companions for \(parentID)")
+            let configuredFoodIDs = Set(catalog.chaseFoodOptions(for: parentID).map { $0.food.sourceID })
+            XCTAssertTrue(Set(companionIDs).isDisjoint(with: configuredFoodIDs), "Companions must not also affect \(parentID)'s configuration")
+        }
+
+        let fishOptions = catalog.chaseFoodOptions(for: "food_breaded_fried_fish")
+        XCTAssertTrue(fishOptions.contains { $0.food.sourceID == "food_tartar_sauce" })
+        XCTAssertTrue(fishOptions.contains { $0.food.sourceID == "food_ketchup" })
+        let tacoOptions = catalog.chaseFoodOptions(for: "food_taco")
+        XCTAssertTrue(tacoOptions.contains { $0.food.sourceID == "food_cheddar_cheese" })
+        XCTAssertTrue(tacoOptions.contains { $0.food.sourceID == "food_salsa" })
+    }
+
     func testBurgerCompanionsPersistAsIndependentEntriesInTheSameTransaction() throws {
         enum ExpectedRollback: Error { case requested }
         let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
