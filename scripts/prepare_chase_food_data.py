@@ -45,6 +45,10 @@ HISTORY_ONLY_FOODS = {
     "food_breakfast_smoothie_bowl",
     "food_buffalo_chicken_dip",
     "food_butter_popcorn",
+    "food_fish_and_chips",
+    "food_food_pizza_crust",
+    "food_goldfish_crackers",
+    "food_fried_chicken_sandwich",
 }
 
 # These rows are non-searchable, reusable option components. Some are UI-only
@@ -65,6 +69,11 @@ INTERNAL_OPTION_FOODS = {
     "food_bagel_pumpernickel",
     "food_bagel_sesame",
     "food_bagel_everything",
+    "food_flavored_yogurt",
+    "food_frosted_corn_flakes",
+    "food_pizza_crust",
+    "food_deep_dish_pizza_crust",
+    "food_hot_dog_sausage",
 }
 
 # UI-only preparation labels have no food energy. Nutrient-bearing variant
@@ -191,6 +200,19 @@ def main() -> int:
             alias_by_food.setdefault(food_id, []).append(alias)
             alias_records.append({"foodID": food_id, "alias": alias, "kind": "brand"})
 
+    # Keep one searchable alias per canonical target. If the workbook lists a
+    # restaurant name as a synonym too, retain the more specific brand kind.
+    alias_kind_priority = {"canonical": 0, "synonym": 1, "brand": 2, "restaurant": 3, "product": 4}
+    deduplicated_aliases: dict[tuple[str, str], dict] = {}
+    for record in alias_records:
+        key = (record["foodID"], normalize(record["alias"]))
+        previous = deduplicated_aliases.get(key)
+        if previous is None or alias_kind_priority.get(record["kind"], 0) > alias_kind_priority.get(previous["kind"], 0):
+            deduplicated_aliases[key] = record
+    alias_records = list(deduplicated_aliases.values())
+    for food_id, values in alias_by_food.items():
+        alias_by_food[food_id] = list({normalize(value): value for value in values}.values())
+
     existing = load_existing(args.catalog)
     by_name: dict[str, list[dict]] = {}
     by_token: dict[str, list[dict]] = {}
@@ -261,7 +283,7 @@ def main() -> int:
                 "source": "usda",
                 "sourceID": str(enrichment["source"]["recordID"]),
                 "name": enrichment["source"]["recordName"],
-                "matchBasis": "reviewed FDC record",
+                "matchBasis": enrichment["source"].get("matchBasis", "reviewed FDC record"),
                 "similarity": None,
             }
             nutrition_evidence = enrichment
@@ -291,8 +313,8 @@ def main() -> int:
         })
     payload = {
         "schemaVersion": 1,
-        "datasetVersion": "chase-food-2026-10-15-15",
-        "workbookTitle": "Canonical U.S. Food Taxonomy — 522 Catalog Identities (Review Draft)",
+        "datasetVersion": "chase-food-2026-10-19-20",
+        "workbookTitle": "Canonical U.S. Food Taxonomy — 527 Catalog Identities (Review Draft)",
         "workbookURL": "https://docs.google.com/spreadsheets/d/16Y1Uc0jldJ4tGO_vf5mgjT0n8pwJxO13W54zR5M_wWo/edit",
         "foods": output_foods,
         "aliases": alias_records,

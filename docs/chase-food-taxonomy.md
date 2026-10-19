@@ -12,14 +12,14 @@ evaluate Chase Food on its own.
 
 The workbook is [Canonical U.S. Food Taxonomy — Review Draft](https://docs.google.com/spreadsheets/d/16Y1Uc0jldJ4tGO_vf5mgjT0n8pwJxO13W54zR5M_wWo/edit).
 The preceding [Canonical Food List Criteria conversation](https://chatgpt.com/share/6ace459c-9910-83e8-b7db-44bcaa4894be)
-provides the rationale and initial model. The current review dataset has 522
-catalog identities (498 search-enabled), 1,911 portion mappings, 1,219 alias
-records, 354 configurable options/components, and 28 presets. Portion and option amounts are first-pass estimates;
+provides the rationale and initial model. The current review dataset has 527
+catalog identities (494 search-enabled), 1,926 portion mappings, 1,212 alias
+records, 463 configurable options/components, and 28 presets. Portion and option amounts are first-pass estimates;
 nutrition values are matched from the bundled USDA/Open Food Facts catalog and
 still need review when confidence or preparation notes flag them. The
-2026-10-15 local enrichment revision adds source-level nutrition and
-composition evidence for 20 previously lowest-confidence searchable foods;
-the generated review workbook is rebuilt from the same catalog projection.
+2026-10-19 local enrichment revision adds USDA source-level nutrition and
+composition evidence for 20 previously unreviewed low-confidence foods; the
+generated review workbook is rebuilt from the same catalog projection.
 
 The [Bagel customization concept](chase-food-bagel-concept.pdf) documents the
 single canonical Bagel result, portion-aware bagel type choices, and optional
@@ -334,6 +334,29 @@ mutually exclusive choice or saved variation.
   former BLT ID as a hidden component for history and saved configurations.
 - **Fried fish:** Use the canonical display name Fried fish and map “breaded
   fried fish,” “fried fish fillet,” and “fish and chips” to it.
+- **Sandwich:** Fried chicken sandwich searches resolve to Sandwich, with
+  fried chicken as a reusable exclusive filling. Preserve the former dedicated
+  sandwich ID for diary history.
+- **Yogurt and cereal types:** Flavored yogurt and frosted corn flakes remain
+  nutrient-bearing type components under Yogurt and Cereal; brand/type aliases
+  resolve to those generic canonical foods.
+- **Generic brand aliases:** Goldfish cracker searches resolve to Crackers;
+  retain the former branded ID for history and avoid presenting its label as
+  generic brand-specific nutrition.
+- **Pizza crust:** Keep regular and deep-dish crust IDs as internal Pizza
+  customization components, not standalone search results. The malformed
+  duplicate food_food_pizza_crust ID remains history-only; crust searches route
+  to Pizza.
+- **Taco:** Keep both Taco and Hard-shell taco as searchable foods, with the
+  hard-shell entry offering mutually exclusive beef/chicken protein and
+  optional refried beans, rice, cheddar, salsa, and lettuce. Taco keeps its
+  protein selector and the same common beans, rice, salsa, and lettuce options.
+- **Hot dog:** Hot dog sausage remains an internal reusable component and its
+  standalone search aliases resolve to Hot dog; preserve its identity for logs.
+- **Cereal, Salad, and Hummus options:** Cereal offers mutually exclusive milk
+  choices alongside cereal type. Salad and Greek salad each offer a dressing
+  choice; hummus offers individually selectable vegetable dippers. Dressings,
+  milks, and dippers remain reusable components.
 - **Breakfast casserole:** Include common contents choices for sausage, bacon,
   ham, cheese, and bell pepper. The generic USDA profile already contains meat
   and cheese, so ingredient-level totals need recipe-specific refinement.
@@ -406,3 +429,21 @@ workbook or verified nutrient data.
 ### Burger Protein selector
 
 Burger uses one exclusive Protein group: Beef (default), Chicken, or Bean. Selecting another protein replaces the selected patty; clearing the choice logs the burger without a patty. The hamburger bun remains an included base component. Patty components stay internal and searchable aliases resolve to Burger. The Bean patty nutrition estimate uses locally bundled USDA FoodData Central record 2707473 (“Veggie burger patty, no bun”) as a medium-confidence analogue pending bean-specific refinement.
+
+
+### 2026-10-19 item refinement decisions
+
+- **Hummus with crackers:** Keep one assembled snack identity and expose
+  Hummus (70 g) and Crackers (45 g) as included components. The 115 g serving
+  estimate combines a USDA commercial-hummus serving with an FNDDS small or
+  medium cracker bag; keep Low confidence because package ratios and cracker
+  types vary.
+- **Greek salad:** Use the USDA Greek Salad, no dressing profile. That source
+  recipe already includes romaine, tomato, cucumber, olives, feta, anchovy, and
+  other vegetables; the profile excludes dressing and stays Medium confidence.
+- **Ground beef, cooked:** Use USDA cooked 85/15 beef crumbles as the reusable
+  ingredient default, with Medium confidence because fat ratio and draining
+  vary.
+- The 2026-10-19 enrichment ledger corrects several unrelated baseline matches
+  (including hot chocolate, cooked ground beef, and hard-shell taco) while
+  preserving every food ID and existing diary history.
