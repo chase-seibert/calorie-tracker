@@ -1203,7 +1203,7 @@
       "Catalog default 1 burrito (about 340.0 g); source serving: 1 miniature. See nutrition evidence and review reason.",
       "",
       "None",
-      "Black beans, White rice, Cheddar cheese, Sour cream, Guacamole, Salsa",
+      "Black beans, White rice, Cheddar cheese, Sour cream, Guacamole, Salsa, Beef, Chicken",
       "None"
     ],
     [
@@ -9499,6 +9499,24 @@
       "",
       "Draft",
       "New selectable component; nutrition match requires review",
+      "",
+      "None",
+      "None",
+      "None"
+    ],
+    [
+      "food_ginger_beer",
+      "Ginger beer",
+      "Beverages",
+      "Beverage",
+      "",
+      "1 bottle (375 mL)",
+      "375.0",
+      "No",
+      "non-alcoholic ginger beer",
+      "",
+      "Nutrition reviewed · Low",
+      "Representative full-sugar bottle; vary by recipe and brand.",
       "",
       "None",
       "None",
@@ -30702,6 +30720,39 @@
       "1.",
       "Exact mass conversion",
       "Mass"
+    ],
+    [
+      "prt_food_ginger_beer_default",
+      "food_ginger_beer",
+      "Ginger beer",
+      "1 bottle (375 mL)",
+      "standard",
+      "1",
+      "375.0",
+      "Official label serving",
+      "Default"
+    ],
+    [
+      "prt_food_ginger_beer_oz",
+      "food_ginger_beer",
+      "Ginger beer",
+      "oz",
+      "exact",
+      "1",
+      "28.3495",
+      "Exact mass conversion",
+      "Mass"
+    ],
+    [
+      "prt_food_ginger_beer_g",
+      "food_ginger_beer",
+      "Ginger beer",
+      "g",
+      "exact",
+      "1",
+      "1.0",
+      "Exact mass conversion",
+      "Mass"
     ]
   ],
   "aliases": [
@@ -38386,9 +38437,9 @@
     ],
     [
       "cheeseburger",
-      "preset",
-      "preset_cheeseburger",
-      "Preset name",
+      "food",
+      "food_burger",
+      "Synonym",
       "Draft"
     ],
     [
@@ -39291,6 +39342,20 @@
       "sugar snap peas",
       "food",
       "food_snap_peas",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "ginger beer",
+      "food",
+      "food_ginger_beer",
+      "Canonical",
+      "Draft"
+    ],
+    [
+      "non-alcoholic ginger beer",
+      "food",
+      "food_ginger_beer",
       "Synonym",
       "Draft"
     ]
@@ -45721,6 +45786,32 @@
       "",
       "multiple",
       "15"
+    ],
+    [
+      "food_burrito",
+      "Burrito",
+      "food_ground_beef_cooked",
+      "Beef",
+      "7",
+      "Filling",
+      "No",
+      "Draft",
+      "Filling",
+      "exclusive",
+      "55"
+    ],
+    [
+      "food_burrito",
+      "Burrito",
+      "food_chicken_fajita_filling",
+      "Chicken",
+      "8",
+      "Filling",
+      "No",
+      "Draft",
+      "Filling",
+      "exclusive",
+      "85"
     ]
   ],
   "nutritionProfiles": [
@@ -51305,6 +51396,18 @@
       null,
       null,
       "Not sourced"
+    ],
+    [
+      "food_ginger_beer",
+      "Ginger beer",
+      "Official manufacturer label proxy",
+      43.5,
+      0.0,
+      10.7,
+      0.0,
+      "Bundaberg Ginger Beer (375 mL)",
+      "Low",
+      "Generic canonical uses the official full-sugar product label as a representative analog; brand recipes and sugar levels vary. Fat/protein are label-reported under 1 g per serving; fiber not reported."
     ]
   ],
   "companionFoods": [
@@ -51419,6 +51522,21 @@
       "food_snap_peas",
       "Snap peas",
       "6"
+    ],
+    [
+      "usda:2705864",
+      "Pork, carnitas",
+      "food_mexican_rice",
+      "Mexican rice",
+      "1"
+    ],
+    [
+      "usda:2705864",
+      "Pork, carnitas",
+      "food_black_beans",
+      "Black beans",
+      "2"
     ]
-  ]
+  ],
+  "workbookTitle": "Canonical U.S. Food Taxonomy — 528 Catalog Identities (Review Draft)"
 }

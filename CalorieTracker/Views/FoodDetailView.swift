@@ -105,7 +105,7 @@ struct FoodCustomizationView: View {
 
     private var options: [ChaseFoodOption] { optionDefinitions }
     private var companionRecommendations: [ChaseFoodCompanion] {
-        food.source == .chaseFood ? catalog.chaseFoodCompanions(for: food.sourceID) : []
+        catalog.chaseFoodCompanions(for: food)
     }
     private var selectedCompanionFoods: [Food] {
         companionRecommendations.filter { selectedCompanionFoodIDs.contains($0.id) }.map(\.food)

@@ -401,9 +401,9 @@ private struct PrivacyAnalyticsView: View {
             }
 
             Section("Analytics") {
-                Text("When analytics is enabled, the app sends feature-usage events, catalog or local item identifiers, successful and failed food search terms, searches dismissed without logging, and unmatched barcodes to its private analytics service.")
+                Text("When analytics is enabled, the app sends feature-usage events, catalog or local item identifiers, successful and failed food search terms, searches dismissed without logging, and unmatched barcodes to its private analytics service. If you submit food feedback, the text you enter is also sent with that event.")
                     .foregroundStyle(.secondary)
-                Label("Food names, meal contents, quantities, calorie totals, and Health data are not sent.", systemImage: "checkmark.shield.fill")
+                Label("Diary food names, meal contents, quantities, calorie totals, and Health data are not sent. Food feedback text is sent only when you submit it.", systemImage: "checkmark.shield.fill")
                     .foregroundStyle(AppTheme.protein)
             }
         }

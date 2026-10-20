@@ -192,8 +192,11 @@ mustard, or cheese can configure a Hot dog while fries or a drink can accompany
 it; syrup or berries can top Pancakes while eggs or sausage can accompany them;
 and salsa or cheese can configure Tacos while rice or beans can accompany
 them. Confirm each pairing with the food's intended use before adding catalog
-data. The pairings currently implemented remain Burger → Fries and Milkshake,
-and Sandwich → Potato chips.
+data. The pairings currently implemented include Burger → Fries and Milkshake,
+Sandwich → Potato chips, and USDA Pork, carnitas → Mexican rice and Black beans.
+A companion parent may come from USDA or Chase Food; source-qualify non-Chase
+parent IDs so recommendations attach to the existing catalog identity without
+duplicating the food.
 
 ## Size and food-specific directions
 

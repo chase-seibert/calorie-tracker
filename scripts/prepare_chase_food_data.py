@@ -280,7 +280,7 @@ def main() -> int:
             }
             nutrients["fiber"] = round(float(per_100g["fiber"]) * grams / 100, 2) if per_100g.get("fiber") is not None else None
             nutrition_source = {
-                "source": "usda",
+                "source": enrichment["source"].get("source", "usda"),
                 "sourceID": str(enrichment["source"]["recordID"]),
                 "name": enrichment["source"]["recordName"],
                 "matchBasis": enrichment["source"].get("matchBasis", "reviewed FDC record"),
@@ -313,8 +313,8 @@ def main() -> int:
         })
     payload = {
         "schemaVersion": 1,
-        "datasetVersion": "chase-food-2026-10-19-21",
-        "workbookTitle": "Canonical U.S. Food Taxonomy — 527 Catalog Identities (Review Draft)",
+        "datasetVersion": "chase-food-2026-10-19-22",
+        "workbookTitle": f"Canonical U.S. Food Taxonomy — {len(output_foods)} Catalog Identities (Review Draft)",
         "workbookURL": "https://docs.google.com/spreadsheets/d/16Y1Uc0jldJ4tGO_vf5mgjT0n8pwJxO13W54zR5M_wWo/edit",
         "foods": output_foods,
         "aliases": alias_records,

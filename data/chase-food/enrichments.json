@@ -8261,6 +8261,72 @@
           }
         ]
       }
+    },
+    "food_ginger_beer": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "174846",
+        "name": "Beverages, carbonated, ginger ale",
+        "matchBasis": "weak flavor analogue",
+        "similarity": 0.5
+      },
+      "compositionEvidence": {
+        "confidence": "Low",
+        "decision": "Add Ginger beer as a generic non-alcoholic canonical beverage. Use one full-sugar 375 mL bottle as the default; keep brand-specific nutrition out of the generic identity.",
+        "reason": "No generic ginger-beer nutrient record was available in the local USDA catalog. The official Bundaberg full-sugar label is a representative brewed ginger-beer analogue, but brands and recipes vary; fat/protein are reported as less than 1 g per 375 mL and fiber is not reported.",
+        "sources": [
+          {
+            "name": "Bundaberg Brewed Drinks official nutrition label",
+            "recordName": "Ginger Beer, 375 mL bottle",
+            "sourceID": "Official product label",
+            "url": "https://www.bundaberg.com/en-us/brew/ginger-beer/"
+          }
+        ]
+      },
+      "confidence": "Low",
+      "nutritionPer100g": {
+        "calories": 43.5,
+        "carbs": 10.7,
+        "fat": 0.0,
+        "fiber": null,
+        "protein": 0.0
+      },
+      "reviewReasons": [
+        "Generic ginger beer varies by recipe and brand; nutrients use one official full-sugar product label as a representative analog. Fat and protein are label-rounded to less than 1 g per 375 mL; fiber is not reported."
+      ],
+      "source": {
+        "source": "manufacturer_label",
+        "dataType": "Official product label",
+        "database": "Bundaberg Brewed Drinks",
+        "organization": "Bundaberg Brewed Drinks",
+        "recordID": "Official product label",
+        "recordName": "Ginger Beer, 375 mL bottle",
+        "matchBasis": "Brand label used as a generic analog; no brand alias or branded nutrient claim",
+        "reviewedDate": "2026-10-19",
+        "serving": {
+          "description": "1 bottle (375 mL)",
+          "grams": 375.0
+        },
+        "per100mL": {
+          "energy_kJ": 182,
+          "carbs_g": 10.7,
+          "fat_g": "<1 per 375 mL",
+          "protein_g": "<1 per 375 mL",
+          "fiber": "not reported"
+        },
+        "url": "https://www.bundaberg.com/en-us/brew/ginger-beer/"
+      },
+      "catalogPortion": {
+        "grams": 375.0,
+        "label": "1 bottle (375 mL)",
+        "nutrients": {
+          "calories": 163.12,
+          "carbs": 40.12,
+          "fat": 0.0,
+          "fiber": null,
+          "protein": 0.0
+        }
+      }
     }
   },
   "schemaVersion": 1

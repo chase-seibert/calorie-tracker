@@ -33,7 +33,7 @@ summary.getRange("A3:B14").values = [
   ["Configurable component options", optionCount],
   ["Portion mappings", source.portions.length],
   ["Dataset revision", source.datasetVersion],
-  ["Nutrition source", "Existing bundled catalog plus reviewed USDA FoodData Central enrichments where available"],
+  ["Nutrition source", "Existing bundled catalog plus reviewed USDA FoodData Central and official product-label enrichments where available"],
   ["Workbook source", source.workbookURL],
 ];
 summary.getRange("A16:B21").values = [

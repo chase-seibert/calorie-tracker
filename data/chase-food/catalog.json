@@ -5481,6 +5481,11 @@
       "kind": "synonym"
     },
     {
+      "alias": "cheeseburger",
+      "foodID": "food_burger",
+      "kind": "synonym"
+    },
+    {
       "alias": "other salad",
       "foodID": "food_garden_salad",
       "kind": "synonym"
@@ -5991,6 +5996,16 @@
       "kind": "synonym"
     },
     {
+      "alias": "ginger beer",
+      "foodID": "food_ginger_beer",
+      "kind": "canonical"
+    },
+    {
+      "alias": "non-alcoholic ginger beer",
+      "foodID": "food_ginger_beer",
+      "kind": "synonym"
+    },
+    {
       "alias": "Five Guys",
       "foodID": "food_burger",
       "kind": "brand"
@@ -6428,9 +6443,23 @@
       "food_snap_peas",
       "Snap peas",
       "6"
+    ],
+    [
+      "usda:2705864",
+      "Pork, carnitas",
+      "food_mexican_rice",
+      "Mexican rice",
+      "1"
+    ],
+    [
+      "usda:2705864",
+      "Pork, carnitas",
+      "food_black_beans",
+      "Black beans",
+      "2"
     ]
   ],
-  "datasetVersion": "chase-food-2026-10-19-21",
+  "datasetVersion": "chase-food-2026-10-19-22",
   "foods": [
     {
       "aliases": [
@@ -8825,6 +8854,7 @@
         "beef patty",
         "hamburger patty",
         "ground beef patty",
+        "cheeseburger",
         "five guys burger",
         "McDonalds burger",
         "Burger King burger",
@@ -10986,7 +11016,7 @@
         "source": "usda",
         "sourceID": "2708534"
       },
-      "optionsSummary": "Black beans, White rice, Cheddar cheese, Sour cream, Guacamole, Salsa",
+      "optionsSummary": "Black beans, White rice, Cheddar cheese, Sour cream, Guacamole, Salsa, Beef, Chicken",
       "reviewReasons": [
         "FNDDS Burrito, NFS is a generic filling analogue with only a miniature serving measure; the 340 g catalog burrito is larger and filling-dependent."
       ],
@@ -38399,6 +38429,122 @@
       "searchEnabled": true,
       "sizeAvailable": false,
       "variationsSummary": "None"
+    },
+    {
+      "aliases": [
+        "ginger beer",
+        "non-alcoholic ginger beer"
+      ],
+      "baselineNutritionSource": {
+        "matchBasis": "weak flavor analogue",
+        "name": "Beverages, carbonated, ginger ale",
+        "similarity": 0.5,
+        "source": "usda",
+        "sourceID": "174846"
+      },
+      "category": "Beverages",
+      "confidence": "Low",
+      "defaultGrams": 375.0,
+      "defaultUnit": "1 bottle (375 mL)",
+      "foodKind": "Beverage",
+      "id": "food_ginger_beer",
+      "includedComponentsSummary": "None",
+      "name": "Ginger beer",
+      "nutrients": {
+        "calories": 163.12,
+        "carbs": 40.12,
+        "fat": 0.0,
+        "fiber": null,
+        "protein": 0.0
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "weak flavor analogue",
+          "name": "Beverages, carbonated, ginger ale",
+          "similarity": 0.5,
+          "source": "usda",
+          "sourceID": "174846"
+        },
+        "catalogPortion": {
+          "grams": 375.0,
+          "label": "1 bottle (375 mL)",
+          "nutrients": {
+            "calories": 163.12,
+            "carbs": 40.12,
+            "fat": 0.0,
+            "fiber": null,
+            "protein": 0.0
+          }
+        },
+        "compositionEvidence": {
+          "confidence": "Low",
+          "decision": "Add Ginger beer as a generic non-alcoholic canonical beverage. Use one full-sugar 375 mL bottle as the default; keep brand-specific nutrition out of the generic identity.",
+          "reason": "No generic ginger-beer nutrient record was available in the local USDA catalog. The official Bundaberg full-sugar label is a representative brewed ginger-beer analogue, but brands and recipes vary; fat/protein are reported as less than 1 g per 375 mL and fiber is not reported.",
+          "sources": [
+            {
+              "name": "Bundaberg Brewed Drinks official nutrition label",
+              "recordName": "Ginger Beer, 375 mL bottle",
+              "sourceID": "Official product label",
+              "url": "https://www.bundaberg.com/en-us/brew/ginger-beer/"
+            }
+          ]
+        },
+        "confidence": "Low",
+        "nutritionPer100g": {
+          "calories": 43.5,
+          "carbs": 10.7,
+          "fat": 0.0,
+          "fiber": null,
+          "protein": 0.0
+        },
+        "reviewReasons": [
+          "Generic ginger beer varies by recipe and brand; nutrients use one official full-sugar product label as a representative analog. Fat and protein are label-rounded to less than 1 g per 375 mL; fiber is not reported."
+        ],
+        "source": {
+          "dataType": "Official product label",
+          "database": "Bundaberg Brewed Drinks",
+          "matchBasis": "Brand label used as a generic analog; no brand alias or branded nutrient claim",
+          "organization": "Bundaberg Brewed Drinks",
+          "per100mL": {
+            "carbs_g": 10.7,
+            "energy_kJ": 182,
+            "fat_g": "<1 per 375 mL",
+            "fiber": "not reported",
+            "protein_g": "<1 per 375 mL"
+          },
+          "recordID": "Official product label",
+          "recordName": "Ginger Beer, 375 mL bottle",
+          "reviewedDate": "2026-10-19",
+          "serving": {
+            "description": "1 bottle (375 mL)",
+            "grams": 375.0
+          },
+          "source": "manufacturer_label",
+          "url": "https://www.bundaberg.com/en-us/brew/ginger-beer/"
+        }
+      },
+      "nutritionPer100g": {
+        "calories": 43.5,
+        "carbs": 10.7,
+        "fat": 0.0,
+        "fiber": null,
+        "protein": 0.0
+      },
+      "nutritionSource": {
+        "matchBasis": "Brand label used as a generic analog; no brand alias or branded nutrient claim",
+        "name": "Ginger Beer, 375 mL bottle",
+        "similarity": null,
+        "source": "manufacturer_label",
+        "sourceID": "Official product label"
+      },
+      "optionsSummary": "None",
+      "reviewReasons": [
+        "Generic ginger beer varies by recipe and brand; nutrients use one official full-sugar product label as a representative analog. Fat and protein are label-rounded to less than 1 g per 375 mL; fiber is not reported."
+      ],
+      "reviewRequired": true,
+      "searchEnabled": true,
+      "sizeAvailable": false,
+      "variationsSummary": "None"
     }
   ],
   "portions": [
@@ -59587,6 +59733,39 @@
       "1.",
       "Exact mass conversion",
       "Mass"
+    ],
+    [
+      "prt_food_ginger_beer_default",
+      "food_ginger_beer",
+      "Ginger beer",
+      "1 bottle (375 mL)",
+      "standard",
+      "1",
+      "375.0",
+      "Official label serving",
+      "Default"
+    ],
+    [
+      "prt_food_ginger_beer_oz",
+      "food_ginger_beer",
+      "Ginger beer",
+      "oz",
+      "exact",
+      "1",
+      "28.3495",
+      "Exact mass conversion",
+      "Mass"
+    ],
+    [
+      "prt_food_ginger_beer_g",
+      "food_ginger_beer",
+      "Ginger beer",
+      "g",
+      "exact",
+      "1",
+      "1.0",
+      "Exact mass conversion",
+      "Mass"
     ]
   ],
   "presets": [
@@ -65369,8 +65548,34 @@
       "",
       "multiple",
       "15"
+    ],
+    [
+      "food_burrito",
+      "Burrito",
+      "food_ground_beef_cooked",
+      "Beef",
+      "7",
+      "Filling",
+      "No",
+      "Draft",
+      "Filling",
+      "exclusive",
+      "55"
+    ],
+    [
+      "food_burrito",
+      "Burrito",
+      "food_chicken_fajita_filling",
+      "Chicken",
+      "8",
+      "Filling",
+      "No",
+      "Draft",
+      "Filling",
+      "exclusive",
+      "85"
     ]
   ],
-  "workbookTitle": "Canonical U.S. Food Taxonomy — 527 Catalog Identities (Review Draft)",
+  "workbookTitle": "Canonical U.S. Food Taxonomy — 528 Catalog Identities (Review Draft)",
   "workbookURL": "https://docs.google.com/spreadsheets/d/16Y1Uc0jldJ4tGO_vf5mgjT0n8pwJxO13W54zR5M_wWo/edit"
 }

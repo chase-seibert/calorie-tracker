@@ -31,6 +31,7 @@ platform, version, and audience). Event properties are strings.
 | `food_search.no_match` | A completed text search returns no results | `query`, `result_count` |
 | `food_search.nothing_selected` | A completed search with results ends without a diary log | `query`, `result_count` |
 | `food_search.result_selected` | A user taps or quick-adds a search result | `query`, `selected_item_id`, `selected_rank`, `result_ids_above` |
+| `food.suggestion_submitted` | A user submits new-food or catalog-change feedback | `kind`, `suggested_name`, `suggested_changes`, `search_query` |
 | `barcode_search.no_match` | A camera or manual barcode lookup returns no result | `barcode`, `input_source` |
 | `siri.quick_log.resolution_attempted` | Siri asks Yum Chase to resolve a spoken recent-food or meal query | `query`, `result_count` |
 | `siri.quick_log.started` | Siri invokes the recent-food or meal logging intent | `selection_hash` |
@@ -53,7 +54,11 @@ types, Health samples, dates, and error descriptions. Counts are used only for
 coarse workflow context. Search events are explicit exceptions: failed and
 successful searches send the normalized query, and barcode misses send the
 normalized barcode, to improve the catalog and search ranking. Queries are
-bounded to 200 characters.
+bounded to 200 characters. When a user submits catalog feedback, that explicit
+action also sends their suggested food name and change description, along with
+the search query that opened the form. These fields are user-authored text;
+`suggested_changes` is bounded to 2,000 characters and the other properties
+are bounded to 256 characters.
 
 Siri quick-log events use the normalized, bounded query only at the resolution
 stage where Siri provides it. Resolved item identifiers are represented by a

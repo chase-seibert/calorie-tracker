@@ -2187,6 +2187,12 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(catalog.chaseFoodCompanions(for: "food_sandwich").map(\.displayName), ["Chips"])
         XCTAssertEqual(catalog.chaseFoodCompanions(for: "food_sandwich").first?.food.sourceID, "food_potato_chips")
 
+        let burritoFilling = catalog.chaseFoodOptions(for: "food_burrito").filter { $0.optionGroup == "Filling" }
+        XCTAssertEqual(Set(burritoFilling.map(\.displayName)), ["Beef", "Chicken"])
+        XCTAssertTrue(burritoFilling.allSatisfy { $0.selectionMode == "exclusive" && !$0.includedByDefault })
+        XCTAssertEqual(catalog.searchAll("cheeseburger", limit: 10, enabledSources: [.chaseFood]).first?.sourceID, "food_burger")
+        XCTAssertEqual(catalog.searchAll("ginger beer", limit: 10, enabledSources: [.chaseFood]).first?.sourceID, "food_ginger_beer")
+
         let shake = catalog.chaseFoodOptions(for: "food_protein_shake")
         XCTAssertTrue(shake.contains { $0.food.name == "Protein powder" && $0.includedByDefault })
         XCTAssertEqual(shake.filter { $0.optionGroup == "Liquid" && $0.includedByDefault }.map(\.food.name), ["Almond milk"])
@@ -2221,6 +2227,12 @@ final class CalorieTrackerTests: XCTestCase {
             let configuredFoodIDs = Set(catalog.chaseFoodOptions(for: parentID).map { $0.food.sourceID })
             XCTAssertTrue(Set(companionIDs).isDisjoint(with: configuredFoodIDs), "Companions must not also affect \(parentID)'s configuration")
         }
+
+        let carnitas = try XCTUnwrap(catalog.food(sourceID: "2705864", source: .usda))
+        let carnitasCompanions = catalog.chaseFoodCompanions(for: carnitas)
+        XCTAssertEqual(carnitasCompanions.map(\.displayName), ["Mexican rice", "Black beans"])
+        XCTAssertEqual(carnitasCompanions.map { $0.food.sourceID }, ["food_mexican_rice", "food_black_beans"])
+        XCTAssertEqual(catalog.chaseFoodCompanions(for: "usda:2705864").map(\.food.sourceID), ["food_mexican_rice", "food_black_beans"])
 
         let fishOptions = catalog.chaseFoodOptions(for: "food_breaded_fried_fish")
         XCTAssertTrue(fishOptions.contains { $0.food.sourceID == "food_tartar_sauce" })
