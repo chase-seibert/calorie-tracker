@@ -268,6 +268,30 @@ struct FoodCustomizationView: View {
                             }
                         }
 
+                        if originalEntry != nil {
+                            VStack(alignment: .leading, spacing: 12) {
+                                sectionLabel("Meat classification")
+                                LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+                                    loggedMeatToggle(
+                                        "Processed Meat",
+                                        selection: Binding(
+                                            get: { processedMeatOverride ?? originalEntry?.food.containsProcessedMeat },
+                                            set: { processedMeatOverride = $0 }
+                                        ),
+                                        identifier: "logged-food-processed-meat"
+                                    )
+                                    loggedMeatToggle(
+                                        "Red Meat",
+                                        selection: Binding(
+                                            get: { redMeatOverride ?? originalEntry?.food.containsRedMeat },
+                                            set: { redMeatOverride = $0 }
+                                        ),
+                                        identifier: "logged-food-red-meat"
+                                    )
+                                }
+                            }
+                        }
+
                         if let notes { Text(notes).font(.subheadline).foregroundStyle(AppTheme.muted) }
                         if food.availablePortions.contains(where: { $0.id == "imported-serving" }) {
                             Button("Edit ingredient definition") { showingDefinitionEditor = true }
@@ -534,7 +558,7 @@ struct FoodCustomizationView: View {
         .accessibilityIdentifier("food-companion-\(companion.id)")
     }
 
-    private func selectionPill(title: String, detail: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+    private func selectionPill(title: String, detail: String? = nil, isSelected: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 9) {
                 Circle()
@@ -545,11 +569,13 @@ struct FoodCustomizationView: View {
                         .font(.subheadline.weight(isSelected ? .semibold : .regular))
                         .lineLimit(1)
                         .minimumScaleFactor(0.78)
-                    Text(detail)
-                        .font(.caption)
-                        .foregroundStyle(isSelected ? AppTheme.coral : AppTheme.muted)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
+                    if let detail {
+                        Text(detail)
+                            .font(.caption)
+                            .foregroundStyle(isSelected ? AppTheme.coral : AppTheme.muted)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                    }
                 }
                 Spacer(minLength: 0)
                 if isSelected {
@@ -567,8 +593,19 @@ struct FoodCustomizationView: View {
         .buttonStyle(.plain)
         .foregroundStyle(AppTheme.ink)
         .accessibilityLabel(title)
-        .accessibilityValue("\(isSelected ? "Selected" : "Not selected"), \(detail)")
+        .accessibilityValue(detail.map { "\(isSelected ? "Selected" : "Not selected"), \($0)" } ?? (isSelected ? "Selected" : "Not selected"))
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+
+    private func loggedMeatToggle(
+        _ title: String,
+        selection: Binding<Bool?>,
+        identifier: String
+    ) -> some View {
+        selectionPill(title: title, isSelected: selection.wrappedValue == true) {
+            selection.wrappedValue = selection.wrappedValue != true
+        }
+        .accessibilityIdentifier(identifier)
     }
 
     private func setOption(_ option: ChaseFoodOption, selected: Bool) {

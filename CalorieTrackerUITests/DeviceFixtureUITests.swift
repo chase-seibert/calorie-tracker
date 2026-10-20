@@ -274,6 +274,52 @@ final class DeviceFixtureUITests: XCTestCase {
         visibleButton("custom-food-back").tap()
     }
 
+    func testLoggedFoodMeatClassificationChoicesPersistIndependently() {
+        app.launchArguments = ["-onboarding.focus.v1.completed", "YES"]
+        app.launchEnvironment = ["CALORIE_TRACKER_FIXTURE": "device", "CALORIE_TRACKER_FIXTURE_RESET": "1"]
+        app.launch()
+
+        let entry = app.descendants(matching: .any).matching(identifier: "diary-entry-2709265").firstMatch
+        XCTAssertTrue(entry.waitForExistence(timeout: 5))
+        entry.tap()
+        XCTAssertTrue(app.buttons["Save changes"].waitForExistence(timeout: 5))
+
+        let processedMeat = app.buttons["logged-food-processed-meat"]
+        let redMeat = app.buttons["logged-food-red-meat"]
+        for _ in 0..<8 where !processedMeat.isHittable { app.swipeUp() }
+        XCTAssertTrue(processedMeat.waitForExistence(timeout: 5))
+        XCTAssertTrue(redMeat.waitForExistence(timeout: 5))
+        XCTAssertEqual(processedMeat.frame.minY, redMeat.frame.minY, accuracy: 1, "Meat checkboxes should share one row")
+        XCTAssertEqual(processedMeat.frame.width, redMeat.frame.width, accuracy: 1, "Meat checkboxes should each use half the row")
+        XCTAssertLessThan(processedMeat.frame.maxX, redMeat.frame.minX)
+        if !processedMeat.isSelected { processedMeat.tap() }
+        if !redMeat.isSelected { redMeat.tap() }
+        XCTAssertTrue(processedMeat.isSelected)
+        XCTAssertTrue(redMeat.isSelected)
+        app.buttons["Save changes"].tap()
+
+        XCTAssertTrue(entry.waitForExistence(timeout: 5))
+        entry.tap()
+        for _ in 0..<8 where !processedMeat.isHittable { app.swipeUp() }
+        XCTAssertTrue(processedMeat.waitForExistence(timeout: 5))
+        XCTAssertTrue(processedMeat.isSelected)
+        XCTAssertTrue(redMeat.isSelected)
+        redMeat.tap()
+        XCTAssertFalse(redMeat.isSelected, "The red-meat checkbox should toggle off independently")
+        XCTAssertTrue(processedMeat.isSelected)
+        visibleButton("custom-food-back").tap()
+        XCTAssertTrue(entry.waitForExistence(timeout: 5))
+        entry.tap()
+        for _ in 0..<8 where !processedMeat.isHittable { app.swipeUp() }
+        XCTAssertTrue(processedMeat.waitForExistence(timeout: 5))
+        XCTAssertTrue(processedMeat.isSelected)
+        XCTAssertTrue(redMeat.isSelected, "Leaving without saving must discard the pending red-meat change")
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Logged Food Meat Classification"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+    }
+
     func testSharedMealCompositionUsesFoodSearchAndCancelsParentDraft() {
         app.launchArguments = ["-onboarding.focus.v1.completed", "YES",
             "-foodSource.enabled.chaseFood", "YES", "-foodSource.enabled.usda", "NO", "-foodSource.enabled.off", "NO"]
