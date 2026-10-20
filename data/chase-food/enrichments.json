@@ -8327,6 +8327,985 @@
           "protein": 0.0
         }
       }
+    },
+    "food_jasmine_rice": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2710691",
+        "name": "Wine, rice",
+        "matchBasis": "canonical",
+        "similarity": 0.7619
+      },
+      "nutritionPer100g": {
+        "calories": 130.0,
+        "carbs": 28.2,
+        "fat": 0.28,
+        "fiber": 0.4,
+        "protein": 2.69
+      },
+      "confidence": "Medium",
+      "reviewReasons": [
+        "Cooked generic long-grain white rice is the closest USDA plain-rice record; USDA has no cultivar-specific jasmine rice profile in the bundled reference. Portion matches 158 g cooked cup."
+      ],
+      "source": {
+        "source": "usda",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "SR Legacy",
+        "recordID": "168878",
+        "recordName": "Rice, white, long-grain, regular, enriched, cooked",
+        "releaseDate": "2018-04-01",
+        "reviewedDate": "2026-10-20",
+        "serving": {
+          "description": "1 cup",
+          "grams": 158.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/168878/nutrients"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Jasmine rice as a distinct generic food identity.",
+        "reason": "Cooked generic long-grain white rice is the closest USDA plain-rice record; USDA has no cultivar-specific jasmine rice profile in the bundled reference. Portion matches 158 g cooked cup.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central record in the existing bundled U.S. food catalog",
+            "recordName": "Rice, white, long-grain, regular, enriched, cooked",
+            "sourceID": "168878"
+          }
+        ]
+      }
+    },
+    "food_kiwi": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2709239",
+        "name": "Kiwi fruit, raw",
+        "matchBasis": "canonical",
+        "similarity": 0.4444
+      },
+      "nutritionPer100g": {
+        "calories": 64.0,
+        "carbs": 14.0,
+        "fat": 0.44,
+        "fiber": 3.0,
+        "protein": 1.06
+      },
+      "confidence": "High",
+      "reviewReasons": [],
+      "source": {
+        "source": "usda",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "recordID": "2709239",
+        "recordName": "Kiwi fruit, raw",
+        "releaseDate": "2024-10-31",
+        "reviewedDate": "2026-10-20",
+        "serving": {
+          "description": "1 fruit",
+          "grams": 75.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2709239/nutrients"
+      },
+      "compositionEvidence": {
+        "confidence": "High",
+        "decision": "Keep Kiwi as a distinct generic food identity.",
+        "reason": "Direct FNDDS raw kiwi record and 75 g single-fruit portion match the catalog default.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central record in the existing bundled U.S. food catalog",
+            "recordName": "Kiwi fruit, raw",
+            "sourceID": "2709239"
+          }
+        ]
+      }
+    },
+    "food_lamb_kebab": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2705906",
+        "name": "Lamb, chop",
+        "matchBasis": "canonical",
+        "similarity": 0.5263
+      },
+      "nutritionPer100g": {
+        "calories": 223.0,
+        "carbs": 0.0,
+        "fat": 8.8,
+        "fiber": 0.0,
+        "protein": 33.7
+      },
+      "confidence": "Low",
+      "reviewReasons": [
+        "Cooked braised lamb cubes are a meat-only analog for a kebab; cut, cooking method, marinade, and added oil remain uncertain."
+      ],
+      "source": {
+        "source": "usda",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "SR Legacy",
+        "recordID": "172509",
+        "recordName": "Lamb, cubed for stew or kabob (leg and shoulder), separable lean only, trimmed to 1/4\" fat, cooked, braised",
+        "releaseDate": "2018-04-01",
+        "reviewedDate": "2026-10-20",
+        "serving": {
+          "description": "1 3 oz",
+          "grams": 85.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/172509/nutrients"
+      },
+      "compositionEvidence": {
+        "confidence": "Low",
+        "decision": "Keep Lamb kebab as a distinct generic food identity.",
+        "reason": "Cooked braised lamb cubes are a meat-only analog for a kebab; cut, cooking method, marinade, and added oil remain uncertain.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central record in the existing bundled U.S. food catalog",
+            "recordName": "Lamb, cubed for stew or kabob (leg and shoulder), separable lean only, trimmed to 1/4\" fat, cooked, braised",
+            "sourceID": "172509"
+          }
+        ]
+      }
+    },
+    "food_lasagna": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2708758",
+        "name": "Lasagna, meatless",
+        "matchBasis": "canonical",
+        "similarity": 0.6087
+      },
+      "nutritionPer100g": {
+        "calories": 206.0,
+        "carbs": 13.1,
+        "fat": 10.9,
+        "fiber": 1.1,
+        "protein": 13.6
+      },
+      "confidence": "Medium",
+      "reviewReasons": [
+        "Direct FNDDS home-recipe meat lasagna; recipe and meat/cheese proportions vary. USDA reference piece is 206 g; catalog portion is 260 g."
+      ],
+      "source": {
+        "source": "usda",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "recordID": "2708753",
+        "recordName": "Lasagna with meat, home recipe",
+        "releaseDate": "2024-10-31",
+        "reviewedDate": "2026-10-20",
+        "serving": {
+          "description": "1 piece (1/6 of 8\" square, approx 2-1/2\" x 4\")",
+          "grams": 206.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2708753/nutrients"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Lasagna as a distinct generic food identity.",
+        "reason": "Direct FNDDS home-recipe meat lasagna; recipe and meat/cheese proportions vary. USDA reference piece is 206 g; catalog portion is 260 g.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central record in the existing bundled U.S. food catalog",
+            "recordName": "Lasagna with meat, home recipe",
+            "sourceID": "2708753"
+          }
+        ]
+      }
+    },
+    "food_latte": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2710386",
+        "name": "Coffee, Latte",
+        "matchBasis": "canonical",
+        "similarity": 0.5882
+      },
+      "nutritionPer100g": {
+        "calories": 43.0,
+        "carbs": 4.35,
+        "fat": 1.61,
+        "fiber": 0.0,
+        "protein": 2.81
+      },
+      "confidence": "Medium",
+      "reviewReasons": [
+        "Direct FNDDS latte profile; milk fat, espresso-to-milk ratio, and cup size vary. Scaled from a 30 g fluid-ounce reference to the 240 g catalog cup."
+      ],
+      "source": {
+        "source": "usda",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "recordID": "2710386",
+        "recordName": "Coffee, Latte",
+        "releaseDate": "2024-10-31",
+        "reviewedDate": "2026-10-20",
+        "serving": {
+          "description": "1 fl oz",
+          "grams": 30.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2710386/nutrients"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Latte as a distinct generic food identity.",
+        "reason": "Direct FNDDS latte profile; milk fat, espresso-to-milk ratio, and cup size vary. Scaled from a 30 g fluid-ounce reference to the 240 g catalog cup.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central record in the existing bundled U.S. food catalog",
+            "recordName": "Coffee, Latte",
+            "sourceID": "2710386"
+          }
+        ]
+      }
+    },
+    "food_lemon": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2709168",
+        "name": "Lemon, raw",
+        "matchBasis": "canonical",
+        "similarity": 0.7143
+      },
+      "nutritionPer100g": {
+        "calories": 29.0,
+        "carbs": 9.32,
+        "fat": 0.3,
+        "fiber": 2.8,
+        "protein": 1.1
+      },
+      "confidence": "Medium",
+      "reviewReasons": [
+        "USDA raw lemon profile is direct, but the catalog 85 g whole-lemon estimate differs from the source 65 g fruit portion."
+      ],
+      "source": {
+        "source": "usda",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "recordID": "2709168",
+        "recordName": "Lemon, raw",
+        "releaseDate": "2024-10-31",
+        "reviewedDate": "2026-10-20",
+        "serving": {
+          "description": "1 fruit",
+          "grams": 65.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2709168/nutrients"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Lemon as a distinct generic food identity.",
+        "reason": "Direct FNDDS raw lemon profile; the USDA source measures 65 g per fruit while the catalog default estimates one lemon at 85 g, so calories are scaled to the catalog weight.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central record in the existing bundled U.S. food catalog",
+            "recordName": "Lemon, raw",
+            "sourceID": "2709168"
+          }
+        ]
+      }
+    },
+    "food_lemonade": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2710665",
+        "name": "Vodka and lemonade",
+        "matchBasis": "canonical",
+        "similarity": 0.6154
+      },
+      "nutritionPer100g": {
+        "calories": 46.0,
+        "carbs": 12.1,
+        "fat": 0.0,
+        "fiber": 0.0,
+        "protein": 0.0
+      },
+      "confidence": "Medium",
+      "reviewReasons": [
+        "Direct FNDDS regular fruit-juice lemonade; sweetness and dilution vary by recipe. Scaled from 31 g fluid ounce to 240 g cup."
+      ],
+      "source": {
+        "source": "usda",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "recordID": "2710570",
+        "recordName": "Lemonade, fruit juice drink",
+        "releaseDate": "2024-10-31",
+        "reviewedDate": "2026-10-20",
+        "serving": {
+          "description": "1 fl oz (no ice)",
+          "grams": 31.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2710570/nutrients"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Lemonade as a distinct generic food identity.",
+        "reason": "Direct FNDDS regular fruit-juice lemonade; sweetness and dilution vary by recipe. Scaled from 31 g fluid ounce to 240 g cup.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central record in the existing bundled U.S. food catalog",
+            "recordName": "Lemonade, fruit juice drink",
+            "sourceID": "2710570"
+          }
+        ]
+      }
+    },
+    "food_lettuce": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2709789",
+        "name": "Lettuce, raw",
+        "matchBasis": "canonical",
+        "similarity": 0.7778
+      },
+      "nutritionPer100g": {
+        "calories": 20.0,
+        "carbs": 3.69,
+        "fat": 0.1,
+        "fiber": 1.3,
+        "protein": 0.92
+      },
+      "confidence": "Medium",
+      "reviewReasons": [
+        "Direct FNDDS generic raw lettuce; lettuce variety and packed-cup density vary. Catalog uses a 50 g cup estimate."
+      ],
+      "source": {
+        "source": "usda",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "recordID": "2709789",
+        "recordName": "Lettuce, raw",
+        "releaseDate": "2024-10-31",
+        "reviewedDate": "2026-10-20",
+        "serving": {
+          "description": "1 leaf",
+          "grams": 8.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2709789/nutrients"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Lettuce as a distinct generic food identity.",
+        "reason": "Direct FNDDS generic raw lettuce; lettuce variety and packed-cup density vary. Catalog uses a 50 g cup estimate.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central record in the existing bundled U.S. food catalog",
+            "recordName": "Lettuce, raw",
+            "sourceID": "2709789"
+          }
+        ]
+      }
+    },
+    "food_lime": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2709170",
+        "name": "Lime, raw",
+        "matchBasis": "canonical",
+        "similarity": 0.6667
+      },
+      "nutritionPer100g": {
+        "calories": 30.0,
+        "carbs": 10.5,
+        "fat": 0.2,
+        "fiber": 2.8,
+        "protein": 0.7
+      },
+      "confidence": "High",
+      "reviewReasons": [],
+      "source": {
+        "source": "usda",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "recordID": "2709170",
+        "recordName": "Lime, raw",
+        "releaseDate": "2024-10-31",
+        "reviewedDate": "2026-10-20",
+        "serving": {
+          "description": "1 fruit",
+          "grams": 65.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2709170/nutrients"
+      },
+      "compositionEvidence": {
+        "confidence": "High",
+        "decision": "Keep Lime as a distinct generic food identity.",
+        "reason": "Direct FNDDS raw lime profile with a 65 g fruit portion matching the catalog default.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central record in the existing bundled U.S. food catalog",
+            "recordName": "Lime, raw",
+            "sourceID": "2709170"
+          }
+        ]
+      }
+    },
+    "food_lo_mein": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2708798",
+        "name": "Lo mein, NFS",
+        "matchBasis": "canonical",
+        "similarity": 0.7778
+      },
+      "nutritionPer100g": {
+        "calories": 121.0,
+        "carbs": 20.2,
+        "fat": 2.35,
+        "fiber": 1.3,
+        "protein": 4.77
+      },
+      "confidence": "Medium",
+      "reviewReasons": [
+        "Direct FNDDS lo mein, not further specified; protein and sauce ingredients vary. Scaled from 200 g cup to 300 g plate."
+      ],
+      "source": {
+        "source": "usda",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "recordID": "2708798",
+        "recordName": "Lo mein, NFS",
+        "releaseDate": "2024-10-31",
+        "reviewedDate": "2026-10-20",
+        "serving": {
+          "description": "1 cup",
+          "grams": 200.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2708798/nutrients"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Lo mein as a distinct generic food identity.",
+        "reason": "Direct FNDDS lo mein, not further specified; protein and sauce ingredients vary. Scaled from 200 g cup to 300 g plate.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central record in the existing bundled U.S. food catalog",
+            "recordName": "Lo mein, NFS",
+            "sourceID": "2708798"
+          }
+        ]
+      }
+    },
+    "food_macaroni_and_cheese": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2707679",
+        "name": "Croissant, cheese",
+        "matchBasis": "canonical",
+        "similarity": 0.7429
+      },
+      "nutritionPer100g": {
+        "calories": 223.0,
+        "carbs": 23.1,
+        "fat": 10.5,
+        "fiber": 1.2,
+        "protein": 8.68
+      },
+      "confidence": "Medium",
+      "reviewReasons": [
+        "Direct FNDDS generic macaroni or noodles with cheese; recipes and packaged/restaurant preparations differ. Scaled from 230 g cup to 200 g catalog cup."
+      ],
+      "source": {
+        "source": "usda",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "recordID": "2708811",
+        "recordName": "Macaroni or noodles with cheese",
+        "releaseDate": "2024-10-31",
+        "reviewedDate": "2026-10-20",
+        "serving": {
+          "description": "1 cup",
+          "grams": 230.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2708811/nutrients"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Macaroni and cheese as a distinct generic food identity.",
+        "reason": "Direct FNDDS generic macaroni or noodles with cheese; recipes and packaged/restaurant preparations differ. Scaled from 230 g cup to 200 g catalog cup.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central record in the existing bundled U.S. food catalog",
+            "recordName": "Macaroni or noodles with cheese",
+            "sourceID": "2708811"
+          }
+        ]
+      }
+    },
+    "food_macaroni_salad": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2706826",
+        "name": "Salmon salad",
+        "matchBasis": "canonical",
+        "similarity": 0.6923
+      },
+      "nutritionPer100g": {
+        "calories": 221.0,
+        "carbs": 24.6,
+        "fat": 11.5,
+        "fiber": 1.4,
+        "protein": 4.46
+      },
+      "confidence": "Medium",
+      "reviewReasons": [
+        "Direct FNDDS mayonnaise-style macaroni salad, the common deli preparation; dressing, vegetables, and recipe vary."
+      ],
+      "source": {
+        "source": "usda",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "recordID": "2708932",
+        "recordName": "Macaroni or pasta salad, made with mayonnaise",
+        "releaseDate": "2024-10-31",
+        "reviewedDate": "2026-10-20",
+        "serving": {
+          "description": "1 cup",
+          "grams": 204.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2708932/nutrients"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Macaroni salad as a distinct generic food identity.",
+        "reason": "Direct FNDDS mayonnaise-style macaroni salad, the common deli preparation; dressing, vegetables, and recipe vary.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central record in the existing bundled U.S. food catalog",
+            "recordName": "Macaroni or pasta salad, made with mayonnaise",
+            "sourceID": "2708932"
+          }
+        ]
+      }
+    },
+    "food_mandarin_orange": {
+      "baselineNutritionSource": {
+        "source": "off",
+        "sourceID": "0889392000313",
+        "name": "SPARKLING ORANGE",
+        "matchBasis": "canonical",
+        "similarity": 0.7097
+      },
+      "nutritionPer100g": {
+        "calories": 62.0,
+        "carbs": 13.4,
+        "fat": 0.458,
+        "fiber": 1.33,
+        "protein": 1.04
+      },
+      "confidence": "Medium",
+      "reviewReasons": [
+        "Direct FNDDS raw peeled mandarin profile; cultivar and edible fruit size vary. USDA reference is for a 140 g RACC, while catalog uses an 85 g fruit estimate."
+      ],
+      "source": {
+        "source": "usda",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "recordID": "2710832",
+        "recordName": "Mandarin, seedless, peeled, raw",
+        "releaseDate": "2024-10-31",
+        "reviewedDate": "2026-10-20",
+        "serving": {
+          "description": "1 RACC",
+          "grams": 140.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2710832/nutrients"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Mandarin orange as a distinct generic food identity.",
+        "reason": "Direct FNDDS raw peeled mandarin profile; cultivar and edible fruit size vary. USDA reference is for a 140 g RACC, while catalog uses an 85 g fruit estimate.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central record in the existing bundled U.S. food catalog",
+            "recordName": "Mandarin, seedless, peeled, raw",
+            "sourceID": "2710832"
+          }
+        ]
+      }
+    },
+    "food_mango": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2709242",
+        "name": "Mango, raw",
+        "matchBasis": "canonical",
+        "similarity": 0.7143
+      },
+      "nutritionPer100g": {
+        "calories": 60.0,
+        "carbs": 15.0,
+        "fat": 0.38,
+        "fiber": 1.6,
+        "protein": 0.82
+      },
+      "confidence": "Medium",
+      "reviewReasons": [
+        "Direct FNDDS raw mango profile; cultivar and edible portion vary. Catalog one-fruit weight is estimated at 200 g."
+      ],
+      "source": {
+        "source": "usda",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "recordID": "2709242",
+        "recordName": "Mango, raw",
+        "releaseDate": "2024-10-31",
+        "reviewedDate": "2026-10-20",
+        "serving": {
+          "description": "1 slice/chunk",
+          "grams": 25.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2709242/nutrients"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Mango as a distinct generic food identity.",
+        "reason": "Direct FNDDS raw mango profile; cultivar and edible portion vary. Catalog one-fruit weight is estimated at 200 g.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central record in the existing bundled U.S. food catalog",
+            "recordName": "Mango, raw",
+            "sourceID": "2709242"
+          }
+        ]
+      }
+    },
+    "food_marshmallows": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "167995",
+        "name": "Candies, marshmallows",
+        "matchBasis": "canonical",
+        "similarity": 0.75
+      },
+      "nutritionPer100g": {
+        "calories": 318.0,
+        "carbs": 81.3,
+        "fat": 0.2,
+        "fiber": 0.1,
+        "protein": 1.8
+      },
+      "confidence": "High",
+      "reviewReasons": [],
+      "source": {
+        "source": "usda",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "SR Legacy",
+        "recordID": "167995",
+        "recordName": "Candies, marshmallows",
+        "releaseDate": "2018-04-01",
+        "reviewedDate": "2026-10-20",
+        "serving": {
+          "description": "1 cup of miniature",
+          "grams": 50.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/167995/nutrients"
+      },
+      "compositionEvidence": {
+        "confidence": "High",
+        "decision": "Keep Marshmallows as a distinct generic food identity.",
+        "reason": "Direct SR Legacy marshmallow record; source includes a 50 g cup measure matching the catalog default.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central record in the existing bundled U.S. food catalog",
+            "recordName": "Candies, marshmallows",
+            "sourceID": "167995"
+          }
+        ]
+      }
+    },
+    "food_meatball_sub": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2707472",
+        "name": "Meatball, meatless",
+        "matchBasis": "canonical",
+        "similarity": 0.6897
+      },
+      "nutritionPer100g": {
+        "calories": 207.0,
+        "carbs": 21.3,
+        "fat": 8.23,
+        "fiber": 1.2,
+        "protein": 11.3
+      },
+      "confidence": "Medium",
+      "reviewReasons": [
+        "Direct FNDDS meatball sandwich/sub; bread size, meatball count, and sauce vary. USDA regular sub is 180 g; catalog portion is a larger 285 g sandwich."
+      ],
+      "source": {
+        "source": "usda",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "recordID": "2706945",
+        "recordName": "Meatball sandwich or sub",
+        "releaseDate": "2024-10-31",
+        "reviewedDate": "2026-10-20",
+        "serving": {
+          "description": "1 regular",
+          "grams": 180.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2706945/nutrients"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Meatball sub as a distinct generic food identity.",
+        "reason": "Direct FNDDS meatball sandwich/sub; bread size, meatball count, and sauce vary. USDA regular sub is 180 g; catalog portion is a larger 285 g sandwich.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central record in the existing bundled U.S. food catalog",
+            "recordName": "Meatball sandwich or sub",
+            "sourceID": "2706945"
+          }
+        ]
+      }
+    },
+    "food_meatballs": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "169067",
+        "name": "Meatballs, meatless",
+        "matchBasis": "canonical",
+        "similarity": 0.6667
+      },
+      "nutritionPer100g": {
+        "calories": 286.0,
+        "carbs": 8.06,
+        "fat": 22.2,
+        "fiber": 2.3,
+        "protein": 14.4
+      },
+      "confidence": "Medium",
+      "reviewReasons": [
+        "USDA SR Legacy Italian-style frozen meatballs are a close meat-based prepared-food proxy; meat blend, size, sauce, and recipe vary."
+      ],
+      "source": {
+        "source": "usda",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "SR Legacy",
+        "recordID": "171638",
+        "recordName": "Meatballs, frozen, Italian style",
+        "releaseDate": "2018-04-01",
+        "reviewedDate": "2026-10-20",
+        "serving": {
+          "description": "1 3 oz",
+          "grams": 85.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/171638/nutrients"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Meatballs as a distinct generic food identity.",
+        "reason": "USDA SR Legacy Italian-style frozen meatballs are a close meat-based prepared-food proxy; meat blend, size, sauce, and recipe vary.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central record in the existing bundled U.S. food catalog",
+            "recordName": "Meatballs, frozen, Italian style",
+            "sourceID": "171638"
+          }
+        ]
+      }
+    },
+    "food_meatloaf": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2706946",
+        "name": "Meatloaf sandwich",
+        "matchBasis": "canonical",
+        "similarity": 0.64
+      },
+      "nutritionPer100g": {
+        "calories": 202.0,
+        "carbs": 7.2,
+        "fat": 11.0,
+        "fiber": 0.4,
+        "protein": 17.5
+      },
+      "confidence": "Medium",
+      "reviewReasons": [
+        "Direct FNDDS meatloaf with unspecified meat type; recipe and slice size vary. USDA source uses an 86 g small/thin slice; catalog portion is 150 g."
+      ],
+      "source": {
+        "source": "usda",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "recordID": "2706579",
+        "recordName": "Meat loaf, NS as to type of meat",
+        "releaseDate": "2024-10-31",
+        "reviewedDate": "2026-10-20",
+        "serving": {
+          "description": "1 small or thin slice",
+          "grams": 86.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2706579/nutrients"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Meatloaf as a distinct generic food identity.",
+        "reason": "Direct FNDDS meatloaf with unspecified meat type; recipe and slice size vary. USDA source uses an 86 g small/thin slice; catalog portion is 150 g.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central record in the existing bundled U.S. food catalog",
+            "recordName": "Meat loaf, NS as to type of meat",
+            "sourceID": "2706579"
+          }
+        ]
+      }
+    },
+    "food_mexican_rice": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2708507",
+        "name": "Mexican pizza",
+        "matchBasis": "canonical",
+        "similarity": 0.72
+      },
+      "nutritionPer100g": {
+        "calories": 185.0,
+        "carbs": 31.2,
+        "fat": 5.29,
+        "fiber": 1.2,
+        "protein": 3.28
+      },
+      "confidence": "Medium",
+      "reviewReasons": [
+        "Direct FNDDS restaurant Spanish rice is the closest generic Mexican-style rice record; recipe, fat, and tomato content vary."
+      ],
+      "source": {
+        "source": "usda",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "recordID": "2709084",
+        "recordName": "Spanish rice, from restaurant",
+        "releaseDate": "2024-10-31",
+        "reviewedDate": "2026-10-20",
+        "serving": {
+          "description": "1 cup",
+          "grams": 243.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2709084/nutrients"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Mexican rice as a distinct generic food identity.",
+        "reason": "Direct FNDDS restaurant Spanish rice is the closest generic Mexican-style rice record; recipe, fat, and tomato content vary.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central record in the existing bundled U.S. food catalog",
+            "recordName": "Spanish rice, from restaurant",
+            "sourceID": "2709084"
+          }
+        ]
+      }
+    },
+    "food_milk_1": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2705384",
+        "name": "Milk, NFS",
+        "matchBasis": "canonical",
+        "similarity": 0.7143
+      },
+      "nutritionPer100g": {
+        "calories": 43.0,
+        "carbs": 5.18,
+        "fat": 0.95,
+        "fiber": 0.0,
+        "protein": 3.38
+      },
+      "confidence": "High",
+      "reviewReasons": [],
+      "source": {
+        "source": "usda",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "recordID": "2705387",
+        "recordName": "Milk, low fat (1%)",
+        "releaseDate": "2024-10-31",
+        "reviewedDate": "2026-10-20",
+        "serving": {
+          "description": "1 cup",
+          "grams": 244.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2705387/nutrients"
+      },
+      "compositionEvidence": {
+        "confidence": "High",
+        "decision": "Keep Milk, 1% as a distinct generic food identity.",
+        "reason": "Direct FNDDS low-fat 1% milk profile; 244 g cup matches the catalog default.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central record in the existing bundled U.S. food catalog",
+            "recordName": "Milk, low fat (1%)",
+            "sourceID": "2705387"
+          }
+        ]
+      }
+    },
+    "food_kebabs": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "172509",
+        "name": "Lamb, cubed for stew or kabob (leg and shoulder), separable lean only, trimmed to 1/4\" fat, cooked, braised",
+        "matchBasis": "default lamb protein variant",
+        "similarity": null
+      },
+      "nutritionPer100g": {
+        "calories": 223.0,
+        "carbs": 0.0,
+        "fat": 8.8,
+        "fiber": 0.0,
+        "protein": 33.7
+      },
+      "confidence": "Low",
+      "reviewReasons": [
+        "The default lamb variant uses cooked braised lamb cubes for stew or kabob as a meat-only analog; cut, cooking method, marinade, and added oil remain uncertain. Chicken and beef variants replace this default using their linked component profiles."
+      ],
+      "source": {
+        "source": "usda",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "SR Legacy",
+        "recordID": "172509",
+        "recordName": "Lamb, cubed for stew or kabob (leg and shoulder), separable lean only, trimmed to 1/4\" fat, cooked, braised",
+        "releaseDate": "2018-04-01",
+        "reviewedDate": "2026-10-20",
+        "serving": {
+          "description": "1 3 oz",
+          "grams": 85.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/172509/nutrients"
+      },
+      "compositionEvidence": {
+        "confidence": "Low",
+        "decision": "Replace separate new lamb and beef kebab search results with one Kebabs parent and exclusive lamb, chicken, and beef protein variants. Preserve the old lamb and beef kebab IDs for history.",
+        "reason": "The user wants one kebab food with mutually exclusive protein choices. Lamb is the default so the parent has a useful one-tap serving; selecting another protein replaces its nutrition.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central record in the existing bundled U.S. food catalog",
+            "recordName": "Lamb, cubed for stew or kabob (leg and shoulder), separable lean only, trimmed to 1/4\" fat, cooked, braised",
+            "sourceID": "172509"
+          }
+        ]
+      }
     }
   },
   "schemaVersion": 1

@@ -217,6 +217,126 @@ final class DiaryReorderingUITests: XCTestCase {
         attachScreenshot(named: "Chase Food Cappuccino Recent Variations Menu Open")
     }
 
+    func testSavedVariationQuickAddCenterCoordinateUsesTheTappedProteinShake() {
+        verifySavedVariationQuickAddUsesPeanutButter(at: CGVector(dx: 0.5, dy: 0.5))
+    }
+
+    func testSavedVariationQuickAddLowerEdgeUsesTheTappedProteinShake() {
+        verifySavedVariationQuickAddUsesPeanutButter(at: CGVector(dx: 0.5, dy: 0.9))
+    }
+
+    func testSavedVariationQuickAddRightSideUsesTheTappedProteinShake() {
+        verifySavedVariationQuickAddUsesPeanutButter(at: CGVector(dx: 0.9, dy: 0.5))
+    }
+
+    private func verifySavedVariationQuickAddUsesPeanutButter(at point: CGVector) {
+        app.launchArguments = [
+            "--show-food-search",
+            "-foodSource.enabled.chaseFood", "YES",
+            "-onboarding.focus.v1.completed", "YES"
+        ]
+        app.launchEnvironment = [
+            "CALORIE_TRACKER_FIXTURE": "device",
+            "CALORIE_TRACKER_FIXTURE_RESET": "1",
+            "CALORIE_TRACKER_DISABLE_SIMULATOR_FIXTURE": "1"
+        ]
+        app.launch()
+
+        let searchField = app.textFields["Search foods"]
+        XCTAssertTrue(searchField.waitForExistence(timeout: 10))
+        replaceSearchQuery("protein shake", in: searchField)
+        let customize = app.buttons["customize-food-chaseFood:food_protein_shake"]
+
+        // Save two variations whose visible ingredient labels distinguish the log.
+        for ingredient in ["Peanut butter", "Banana"] {
+            XCTAssertTrue(customize.waitForExistence(timeout: 10))
+            customize.tap()
+            let option = app.buttons[ingredient]
+            for _ in 0..<8 where !option.isHittable { app.swipeUp() }
+            XCTAssertTrue(option.waitForExistence(timeout: 5))
+            option.tap()
+            app.buttons["Log Food"].tap()
+            XCTAssertTrue(searchField.waitForExistence(timeout: 5))
+        }
+
+        // Reopen search with saved variations already present, before any detail has opened.
+        app.terminate()
+        app.launchEnvironment["CALORIE_TRACKER_FIXTURE_RESET"] = "0"
+        app.launch()
+        XCTAssertTrue(searchField.waitForExistence(timeout: 10))
+        replaceSearchQuery("protein shake", in: searchField)
+
+        let bananaAdd = app.buttons.matching(NSPredicate(
+            format: "label BEGINSWITH %@ AND label CONTAINS[c] %@", "Quick add", "Banana"
+        )).firstMatch
+        let peanutButterAdd = app.buttons.matching(NSPredicate(
+            format: "label BEGINSWITH %@ AND label CONTAINS[c] %@", "Quick add", "Peanut butter"
+        )).firstMatch
+        XCTAssertTrue(bananaAdd.waitForExistence(timeout: 5))
+        XCTAssertTrue(peanutButterAdd.waitForExistence(timeout: 5))
+        XCTAssertLessThan(bananaAdd.frame.midY, peanutButterAdd.frame.midY)
+        let bananaVariation = app.buttons.matching(NSPredicate(
+            format: "label BEGINSWITH %@ AND label CONTAINS[c] %@", "Select saved variation:", "Banana"
+        )).firstMatch
+        let peanutButterVariation = app.buttons.matching(NSPredicate(
+            format: "label BEGINSWITH %@ AND label CONTAINS[c] %@", "Select saved variation:", "Peanut butter"
+        )).firstMatch
+        XCTAssertTrue(bananaVariation.waitForExistence(timeout: 5))
+        XCTAssertTrue(peanutButterVariation.waitForExistence(timeout: 5))
+
+        let targetScreenshot = app.screenshot()
+        let targetImage = XCTAttachment(screenshot: targetScreenshot)
+        targetImage.name = "Protein shake simulator tap targets"
+        targetImage.lifetime = .keepAlways
+        add(targetImage)
+        let image = targetScreenshot.image.cgImage!
+        let targetGeometry = """
+        image_pixels: \(image.width)x\(image.height)
+        image_scale: \(targetScreenshot.image.scale)
+        app_frame: \(app.frame)
+        banana_variation_row: \(bananaVariation.frame)
+        peanut_butter_variation_row: \(peanutButterVariation.frame)
+        banana_quick_add: \(bananaAdd.frame)
+        peanut_butter_quick_add: \(peanutButterAdd.frame)
+        """
+        let geometryAttachment = XCTAttachment(string: targetGeometry)
+        geometryAttachment.name = "Protein shake simulator hit-area geometry"
+        geometryAttachment.lifetime = .keepAlways
+        add(geometryAttachment)
+
+        // Tap the rendered button using a coordinate event, not its AX action.
+        // The current picker should keep its original order while the next visit
+        // should reflect the variation that was most recently used.
+        peanutButterAdd.coordinate(withNormalizedOffset: point).tap()
+        let currentPeanutButterVariation = app.buttons.matching(NSPredicate(
+            format: "label BEGINSWITH %@ AND label CONTAINS[c] %@", "Select saved variation:", "Peanut butter"
+        )).firstMatch
+        let currentBananaVariation = app.buttons.matching(NSPredicate(
+            format: "label BEGINSWITH %@ AND label CONTAINS[c] %@", "Select saved variation:", "Banana"
+        )).firstMatch
+        XCTAssertTrue(currentPeanutButterVariation.waitForExistence(timeout: 5))
+        XCTAssertTrue(currentBananaVariation.exists)
+        XCTAssertLessThan(currentBananaVariation.frame.midY, currentPeanutButterVariation.frame.midY)
+        app.buttons["Done"].tap()
+        let loggedPeanutButter = app.staticTexts.matching(NSPredicate(
+            format: "label CONTAINS[c] %@", "Contains Protein powder, Almond milk, Peanut butter"
+        )).firstMatch
+        XCTAssertTrue(loggedPeanutButter.waitForExistence(timeout: 5))
+
+        app.buttons["Log food"].tap()
+        XCTAssertTrue(searchField.waitForExistence(timeout: 5))
+        replaceSearchQuery("protein shake", in: searchField)
+        let nextPeanutButterVariation = app.buttons.matching(NSPredicate(
+            format: "label BEGINSWITH %@ AND label CONTAINS[c] %@", "Select saved variation:", "Peanut butter"
+        )).firstMatch
+        let nextBananaVariation = app.buttons.matching(NSPredicate(
+            format: "label BEGINSWITH %@ AND label CONTAINS[c] %@", "Select saved variation:", "Banana"
+        )).firstMatch
+        XCTAssertTrue(nextPeanutButterVariation.waitForExistence(timeout: 5))
+        XCTAssertTrue(nextBananaVariation.exists)
+        XCTAssertLessThan(nextPeanutButterVariation.frame.midY, nextBananaVariation.frame.midY)
+    }
+
     func testChaseFoodConceptScreensMeals() {
         captureChaseFoodConceptScreens([
             ("burger", "Burger"), ("pizza", "Pizza"), ("taco", "Taco"),

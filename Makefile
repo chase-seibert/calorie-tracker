@@ -323,6 +323,10 @@ phone-wifi-deploy: phone-wifi-check
 ui-test-food-detail: simulator-ready
 	xcodebuild -project $(PROJECT) -scheme CalorieTrackerUITests -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -destination-timeout $(SIMULATOR_DESTINATION_TIMEOUT) -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -collect-test-diagnostics $(TEST_DIAGNOSTICS) -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testMagicGroupedSuggestionItemsOpenCustomization -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testLoggedFoodReturnsToSharedCustomizationAndNestedCancelIsSafe -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testSharedMealCompositionUsesFoodSearchAndCancelsParentDraft -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testMixedCatalogCustomizationAndScreenshotMatrix -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testMixedCatalogQuickAddIsIndependentFromDetail test
 
+.PHONY: ui-test-saved-variations
+ui-test-saved-variations: simulator-ready
+	xcodebuild -project $(PROJECT) -scheme CalorieTrackerUITests -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -destination-timeout $(SIMULATOR_DESTINATION_TIMEOUT) -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -collect-test-diagnostics $(TEST_DIAGNOSTICS) -only-testing:CalorieTrackerUITests/DiaryReorderingUITests/testSavedVariationQuickAddCenterCoordinateUsesTheTappedProteinShake -only-testing:CalorieTrackerUITests/DiaryReorderingUITests/testSavedVariationQuickAddLowerEdgeUsesTheTappedProteinShake -only-testing:CalorieTrackerUITests/DiaryReorderingUITests/testSavedVariationQuickAddRightSideUsesTheTappedProteinShake test
+
 .PHONY: export-food-detail-evidence
 export-food-detail-evidence:
 	@test -n "$(RESULT_BUNDLE)" || (echo 'Usage: make export-food-detail-evidence RESULT_BUNDLE=/path/to/test.xcresult'; exit 1)

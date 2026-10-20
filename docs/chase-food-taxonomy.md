@@ -12,15 +12,17 @@ evaluate Chase Food on its own.
 
 The workbook is [Canonical U.S. Food Taxonomy — Review Draft](https://docs.google.com/spreadsheets/d/16Y1Uc0jldJ4tGO_vf5mgjT0n8pwJxO13W54zR5M_wWo/edit).
 The preceding [Canonical Food List Criteria conversation](https://chatgpt.com/share/6ace459c-9910-83e8-b7db-44bcaa4894be)
-provides the rationale and initial model. The current review dataset has 527
-catalog identities (494 search-enabled), 1,926 portion mappings, 1,212 alias
-records, 451 configurable options/components, 15 companion-food pairings, and
+provides the rationale and initial model. The current review dataset has 529
+catalog identities (494 search-enabled), 1,934 portion mappings, 1,220 alias
+records, 465 configurable options/components, 25 companion-food pairings, and
 28 presets. Portion and option amounts are first-pass estimates;
 nutrition values are matched from the bundled USDA/Open Food Facts catalog and
 still need review when confidence or preparation notes flag them. The
-2026-10-19 local enrichment revision adds USDA source-level nutrition and
-composition evidence for 20 previously unreviewed low-confidence foods; the
-generated review workbook is rebuilt from the same catalog projection.
+2026-10-20 local revision adds a single Kebabs search identity with exclusive
+lamb, chicken, and beef protein variants; the former Lamb kebab and Beef kebab
+IDs remain history-resolvable and serve as reusable variant components. Approved
+companion suggestions are separate foods logged independently. The generated
+review workbook is rebuilt from the same catalog projection.
 
 The [Bagel customization concept](chase-food-bagel-concept.pdf) documents the
 single canonical Bagel result, portion-aware bagel type choices, and optional
@@ -181,9 +183,12 @@ Apply the relationship test to each parent food when curating additions:
   parent. Pairings are opt-in and do not imply a default serving or change the
   parent food's nutrition. Reuse stable catalog food IDs and each companion's
   normal portion/nutrition source; do not create duplicate foods or calorie
-  deltas. Current pairings include Burger with Fries and Milkshake, Sandwich
-  with Chips, Taco and Hard-shell taco with Refried beans and Rice, Fried fish
-  with Fries, Eggplant Parmesan with Pasta, and Hummus with vegetable dippers.
+  deltas. Current pairings include Burger with Fries and Milkshake, Sandwich with
+  Chips, Taco and Hard-shell taco with Refried beans and Rice, Fried fish with
+  Fries, Eggplant Parmesan with Pasta, Hummus with vegetable dippers, Kebabs
+  with Pita bread, Hummus, and Rice, Lo mein with Spring roll and Fried rice,
+  and Meatball sub with Fries, Salad, and Chips. Foods without a useful
+  companion recommendation keep no companion rows.
 
 Examples to guide future review, not blanket catalog assignments: extra cheese
 or pepperoni can configure Pizza while wings or a side salad can accompany it;
@@ -192,8 +197,10 @@ mustard, or cheese can configure a Hot dog while fries or a drink can accompany
 it; syrup or berries can top Pancakes while eggs or sausage can accompany them;
 and salsa or cheese can configure Tacos while rice or beans can accompany
 them. Confirm each pairing with the food's intended use before adding catalog
-data. The pairings currently implemented include Burger → Fries and Milkshake,
-Sandwich → Potato chips, and USDA Pork, carnitas → Mexican rice and Black beans.
+data. The pairings currently implemented also include Kebabs → Pita bread, Hummus,
+and Rice; Lo mein → Spring roll and Fried rice; and Meatball sub → Fries, Salad,
+and Chips. USDA Pork, carnitas → Mexican rice and Black beans remains a
+source-qualified pairing.
 A companion parent may come from USDA or Chase Food; source-qualify non-Chase
 parent IDs so recommendations attach to the existing catalog identity without
 duplicating the food.

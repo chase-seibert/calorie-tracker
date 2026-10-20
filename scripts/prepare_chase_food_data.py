@@ -49,6 +49,9 @@ HISTORY_ONLY_FOODS = {
     "food_food_pizza_crust",
     "food_goldfish_crackers",
     "food_fried_chicken_sandwich",
+    # Lamb and beef kebab histories resolve to their original records; new searches use Kebabs.
+    "food_lamb_kebab",
+    "food_beef_kebab",
 }
 
 # These rows are non-searchable, reusable option components. Some are UI-only
@@ -313,7 +316,7 @@ def main() -> int:
         })
     payload = {
         "schemaVersion": 1,
-        "datasetVersion": "chase-food-2026-10-19-22",
+        "datasetVersion": "chase-food-2026-10-20-25",
         "workbookTitle": f"Canonical U.S. Food Taxonomy — {len(output_foods)} Catalog Identities (Review Draft)",
         "workbookURL": "https://docs.google.com/spreadsheets/d/16Y1Uc0jldJ4tGO_vf5mgjT0n8pwJxO13W54zR5M_wWo/edit",
         "foods": output_foods,

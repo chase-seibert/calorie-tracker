@@ -2,6 +2,14 @@ import SwiftUI
 import UIKit
 
 struct FoodPickerView: View {
+    // Keep every input in the presentation item: separate state can be stale
+    // when the cover first creates the customization view's State values.
+    private struct FoodSelection: Identifiable {
+        let id = UUID()
+        let food: Food
+        var configuration: SavedFoodConfiguration? = nil
+    }
+
     enum Mode: String, CaseIterable, Identifiable {
         case magic = "Magic"
         case recent = "Recent"
@@ -27,12 +35,12 @@ struct FoodPickerView: View {
     @State private var magicHasExcludedMatchesSnapshot = false
     @State private var magicTimeRange = MagicFoodTimeRange(date: Date(), calendar: .current)
     @State private var didLoadInitialSnapshot = false
-    @State private var selectedFood: Food?
-    @State private var customizingConfiguration: SavedFoodConfiguration?
+    @State private var selectedFood: FoodSelection?
     @State private var selectedMeal: SavedMeal?
     @State private var query = ProcessInfo.processInfo.arguments.contains("--show-food-search") ? "banana" : ""
     @State private var results: [FoodPickerItem] = []
     @State private var isSearching = false
+    @State private var savedConfigurationIDsByFood: [String: [UUID]] = [:]
     @State private var showingCustomFoodEditor = false
     @State private var showingFoodSuggestionEditor = false
     @State private var showingMealAnalysis = false
@@ -87,6 +95,7 @@ struct FoodPickerView: View {
                             onQuickLogMeal: logMeal,
                             onEditMeal: editMeal,
                             onSearchResultSelected: captureSearchResultSelection,
+                            savedConfigurationIDsByFood: savedConfigurationIDsByFood,
                             onAddCustomFood: {
                                 finishSearchAttempt(recordNothingSelected: false)
                                 showingCustomFoodEditor = true
@@ -161,17 +170,18 @@ struct FoodPickerView: View {
                     }
                 }
             }
-            .fullScreenCover(item: $selectedFood, onDismiss: { customizingConfiguration = nil }) { food in
+            .fullScreenCover(item: $selectedFood) { selection in
+                let food = selection.food
                 if let componentSelection {
                     FoodDetailView(item: MealItem(id: UUID(), food: food, amount: 1, unit: .serving,
                         portionID: food.availablePortions.first?.id), catalog: catalog, date: date,
-                        initialConfiguration: customizingConfiguration, isNewSelection: true) { item in
+                        initialConfiguration: selection.configuration, isNewSelection: true) { item in
                         componentSelection.onSelect([item])
                         selectedFood = nil
                         dismiss()
                     }
                 } else {
-                    FoodDetailView(food: food, catalog: catalog, date: date, initialConfiguration: customizingConfiguration) { preference, defaultPreference in
+                    FoodDetailView(food: food, catalog: catalog, date: date, initialConfiguration: selection.configuration) { preference, defaultPreference in
                         markCurrentSearchLogged()
                         captureFoodLog(food: food, method: "quantity_editor", unit: preference.unit, portionID: preference.portionID,
                             defaultUnit: defaultPreference?.unit, defaultPortionID: defaultPreference?.portionID)
@@ -287,6 +297,35 @@ struct FoodPickerView: View {
             properties: [
                 "initial_mode": mode?.analyticsValue ?? "search"
             ])
+        .onAppear(perform: refreshSavedConfigurationOrder)
+        .onChange(of: diary.document.savedFoodConfigurations) { _, _ in
+            refreshSavedConfigurationOrder()
+        }
+    }
+
+    private func refreshSavedConfigurationOrder() {
+        let configurations = Dictionary(grouping: diary.document.savedFoodConfigurations, by: \.baseFoodID)
+        var updatedOrder = savedConfigurationIDsByFood
+
+        for (foodID, foodConfigurations) in configurations {
+            let currentIDs = Set(foodConfigurations.map(\.id))
+            let existingIDs = (updatedOrder[foodID] ?? []).filter { currentIDs.contains($0) }
+            let existingIDSet = Set(existingIDs)
+            let newIDs = foodConfigurations
+                .filter { !existingIDSet.contains($0.id) }
+                .sorted {
+                    if $0.lastUsedAt != $1.lastUsedAt { return $0.lastUsedAt > $1.lastUsedAt }
+                    if $0.createdAt != $1.createdAt { return $0.createdAt > $1.createdAt }
+                    return $0.id.uuidString < $1.id.uuidString
+                }
+                .map(\.id)
+            updatedOrder[foodID] = existingIDs + newIDs
+        }
+
+        for foodID in Array(updatedOrder.keys) where configurations[foodID] == nil {
+            updatedOrder.removeValue(forKey: foodID)
+        }
+        savedConfigurationIDsByFood = updatedOrder
     }
 
     private var searchControls: some View {
@@ -349,8 +388,7 @@ struct FoodPickerView: View {
 
     private func editFood(_ food: Food) {
         searchIsFocused = false
-        customizingConfiguration = nil
-        selectedFood = food
+        selectedFood = FoodSelection(food: food)
     }
 
     private func editMeal(_ meal: SavedMeal) {
@@ -371,8 +409,7 @@ struct FoodPickerView: View {
 
     private func editConfiguration(_ food: Food, _ configuration: SavedFoodConfiguration) {
         searchIsFocused = false
-        customizingConfiguration = configuration
-        selectedFood = food
+        selectedFood = FoodSelection(food: food, configuration: configuration)
     }
 
     private func quickLogConfiguration(_ food: Food, _ configuration: SavedFoodConfiguration) {
@@ -1059,6 +1096,7 @@ private struct AddConfirmationButton: View {
     let actionTitle: String
     let itemName: String
     let action: () -> Void
+    var accessibilityID: String? = nil
 
     @State private var isAdded = false
     @State private var feedbackID = UUID()
@@ -1081,14 +1119,16 @@ private struct AddConfirmationButton: View {
         } label: {
             Image(systemName: isAdded ? "checkmark" : "plus")
                 .font(.headline.weight(.bold))
+                .foregroundStyle(.white)
+                .frame(width: 44, height: 44)
+                .background(isAdded ? AppTheme.protein : AppTheme.coral, in: Circle())
                 .contentTransition(.symbolEffect(.replace))
                 .symbolEffect(.bounce, value: feedbackID)
         }
-        .buttonStyle(.borderedProminent)
-        .buttonBorderShape(.circle)
-        .tint(isAdded ? AppTheme.protein : AppTheme.coral)
+        .buttonStyle(.plain)
         .accessibilityLabel(isAdded ? "Added \(itemName)" : "\(actionTitle) \(itemName)")
         .accessibilityHint(isAdded ? "Ready to add again" : actionTitle == "Add" ? "Adds this food to the parent draft" : "Adds the displayed quantity")
+        .accessibilityIdentifier(accessibilityID ?? "add-confirmation-\(itemName)")
     }
 }
 
@@ -1104,6 +1144,7 @@ private struct SearchResultsList: View {
     let onQuickLogMeal: (SavedMeal) -> Void
     let onEditMeal: (SavedMeal) -> Void
     let onSearchResultSelected: (FoodPickerItem) -> Void
+    let savedConfigurationIDsByFood: [String: [UUID]]
     let onAddCustomFood: () -> Void
     let onSuggestCanonical: () -> Void
     var componentMode = false
@@ -1147,11 +1188,7 @@ private struct SearchResultsList: View {
                                         onEditFood(food)
                                     }
                                 )
-                                let variations = diary.document.savedFoodConfigurations
-                                    .filter { $0.baseFoodID == food.id }
-                                    .sorted { $0.lastUsedAt > $1.lastUsedAt }
-                                    .prefix(2)
-                                ForEach(Array(variations)) { configuration in
+                                ForEach(savedVariations(for: food)) { configuration in
                                     HStack(spacing: 8) {
                                         Button {
                                             onSearchResultSelected(.food(food))
@@ -1176,7 +1213,8 @@ private struct SearchResultsList: View {
                                             action: {
                                                 onSearchResultSelected(.food(food))
                                                 onQuickLogConfiguration(food, configuration)
-                                            }
+                                            },
+                                            accessibilityID: "saved-variation-quick-add-\(configuration.id.uuidString)"
                                         )
                                         .frame(minWidth: 44, minHeight: 44)
                                     }
@@ -1210,6 +1248,20 @@ private struct SearchResultsList: View {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
         }
+    }
+
+    private func savedVariations(for food: Food) -> [SavedFoodConfiguration] {
+        let configurations = diary.document.savedFoodConfigurations.filter { $0.baseFoodID == food.id }
+        let configurationsByID = Dictionary(uniqueKeysWithValues: configurations.map { ($0.id, $0) })
+        let orderedIDs = savedConfigurationIDsByFood[food.id] ?? configurations
+            .sorted { $0.lastUsedAt > $1.lastUsedAt }
+            .map(\.id)
+        let ordered = orderedIDs.compactMap { configurationsByID[$0] }
+        let includedIDs = Set(ordered.map(\.id))
+        let newlyAdded = configurations
+            .filter { !includedIDs.contains($0.id) }
+            .sorted { $0.lastUsedAt > $1.lastUsedAt }
+        return Array((ordered + newlyAdded).prefix(2))
     }
 
     private func displayLabel(_ configuration: SavedFoodConfiguration, for food: Food) -> String {
