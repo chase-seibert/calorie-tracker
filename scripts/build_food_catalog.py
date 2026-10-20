@@ -787,12 +787,21 @@ def main() -> int:
             option_group = str(row[8]).strip() if len(row) > 8 and row[8] else None
             selection_mode = str(row[9]).strip().lower() if len(row) > 9 and row[9] else "multiple"
             component = canonical_by_id.get(component_id)
-            default_amount = float(component.get("defaultGrams") or 30) if component else 30.0
             try:
                 amount_value = row[10] if len(row) > 10 else None
-                amount = float(amount_value) if amount_value else default_amount
+                if amount_value is None or not str(amount_value).strip():
+                    raise ValueError("amount is required")
+                amount = float(amount_value)
             except (TypeError, ValueError):
-                amount = default_amount
+                raise ValueError(
+                    f"suggestedAdditions row {index + 2} for {parent_id}/{component_id} "
+                    "must define a numeric Amount (g) per parent serving"
+                )
+            if amount <= 0:
+                raise ValueError(
+                    f"suggestedAdditions row {index + 2} for {parent_id}/{component_id} "
+                    "must define a positive Amount (g) per parent serving"
+                )
             option_rows.append((parent_id, f"addition:{component_id}", component_id, component_name, amount,
                                 str(row[5] or "addition"), int(included), int(display_order or index),
                                 option_group, selection_mode))

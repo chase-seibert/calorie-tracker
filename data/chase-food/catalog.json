@@ -6153,26 +6153,6 @@
       "Draft"
     ],
     [
-      "food_pizza_slice",
-      "Pizza",
-      "food_tomato_pasta_sauce",
-      "Tomato pasta sauce",
-      "20",
-      "2",
-      "Example only: verify ingredient weight and cooking yield",
-      "Draft"
-    ],
-    [
-      "food_pizza_slice",
-      "Pizza",
-      "food_mozzarella_cheese",
-      "Mozzarella cheese",
-      "35",
-      "3",
-      "Example only: verify ingredient weight and cooking yield",
-      "Draft"
-    ],
-    [
       "food_breakfast_sandwich",
       "Breakfast sandwich",
       "food_english_muffin",
@@ -6540,7 +6520,7 @@
       "3"
     ]
   ],
-  "datasetVersion": "chase-food-2026-10-20-25",
+  "datasetVersion": "chase-food-2026-10-20-27",
   "foods": [
     {
       "aliases": [
@@ -32491,44 +32471,111 @@
         "Papa John's pizza",
         "Little Caesars pizza"
       ],
-      "category": "Pizza & pasta",
-      "confidence": "Low",
-      "defaultGrams": 125.0,
-      "defaultUnit": "1 slice",
-      "foodKind": "Recipe / assembled",
-      "id": "food_pizza_slice",
-      "includedComponentsSummary": "Tomato pasta sauce, Mozzarella cheese",
-      "name": "Pizza",
-      "nutrients": {
-        "calories": 431.25,
-        "carbs": 66.75,
-        "fat": 13.12,
-        "fiber": 1.62,
-        "protein": 11.49
-      },
-      "nutritionPer100g": {
-        "calories": 345.0,
-        "carbs": 53.4,
-        "fat": 10.5,
-        "fiber": 1.3,
-        "protein": 9.19
-      },
-      "nutritionSource": {
+      "baselineNutritionSource": {
         "matchBasis": "canonical",
         "name": "Pizza rolls",
         "similarity": 0.625,
         "source": "usda",
         "sourceID": "2708686"
       },
-      "optionsSummary": "Regular crust, Deep dish crust, Pepperoni, Extra cheese, Mushrooms, Sausage, Green peppers, Black olives, Onion, Bacon, Pineapple",
+      "category": "Pizza & pasta",
+      "confidence": "Medium",
+      "defaultGrams": 125.0,
+      "defaultUnit": "1 slice",
+      "foodKind": "Recipe / assembled",
+      "id": "food_pizza_slice",
+      "includedComponentsSummary": "None",
+      "name": "Pizza",
+      "nutrients": {
+        "calories": 332.5,
+        "carbs": 41.62,
+        "fat": 12.12,
+        "fiber": 2.88,
+        "protein": 14.25
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Pizza rolls",
+          "similarity": 0.625,
+          "source": "usda",
+          "sourceID": "2708686"
+        },
+        "catalogPortion": {
+          "grams": 125.0,
+          "label": "1 pizza portion (125 g)",
+          "nutrients": {
+            "calories": 332.5,
+            "carbs": 41.62,
+            "fat": 12.12,
+            "fiber": 2.88,
+            "protein": 14.25
+          }
+        },
+        "compositionEvidence": {
+          "confidence": "Medium",
+          "decision": "Use prepared cheese pizza as the canonical base. Its sauce and cheese are included in the prepared-food nutrition profile; topping additions are measured per 125 g parent serving.",
+          "reason": "Prepared restaurant/fast-food cheese pizza is a close match, though recipes vary by restaurant and homemade preparation.",
+          "sources": [
+            {
+              "name": "Chase Food pizza composition and option structure",
+              "path": "data/chase-food/workbook.json",
+              "section": "Foods, nutritionProfiles, and suggestedAdditions"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 266.0,
+          "carbs": 33.3,
+          "fat": 9.7,
+          "fiber": 2.3,
+          "protein": 11.4
+        },
+        "reviewReasons": [
+          "Generic restaurant/fast-food cheese pizza is a close preparation match; homemade and chain recipes vary.",
+          "Topping options are separately modeled in grams per 125 g parent serving."
+        ],
+        "source": {
+          "accessDate": "2026-10-20",
+          "dataType": "Survey (FNDDS)",
+          "database": "FoodData Central",
+          "name": "USDA FoodData Central Survey (FNDDS)",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2708616",
+          "recordName": "Pizza, cheese, from restaurant or fast food, medium crust",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-20",
+          "serving": {
+            "description": "1 piece, medium pizza",
+            "grams": 86
+          },
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708616/nutrients"
+        }
+      },
+      "nutritionPer100g": {
+        "calories": 266.0,
+        "carbs": 33.3,
+        "fat": 9.7,
+        "fiber": 2.3,
+        "protein": 11.4
+      },
+      "nutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Pizza, cheese, from restaurant or fast food, medium crust",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2708616"
+      },
+      "optionsSummary": "Pepperoni, Extra cheese, Mushrooms, Sausage, Green peppers, Black olives, Onion, Bacon, Pineapple",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "Generic restaurant/fast-food cheese pizza is a close preparation match; homemade and chain recipes vary.",
+        "Topping options are separately modeled in grams per 125 g parent serving."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
       "sizeAvailable": true,
-      "variationsSummary": "None"
+      "variationsSummary": "Deep dish"
     },
     {
       "aliases": [],
@@ -39776,6 +39823,112 @@
       ],
       "reviewRequired": true,
       "searchEnabled": true,
+      "sizeAvailable": false,
+      "variationsSummary": "None"
+    },
+    {
+      "aliases": [],
+      "baselineNutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Pizza, cheese, from restaurant or fast food, thick crust",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2708617"
+      },
+      "category": "Pizza & pasta",
+      "confidence": "Medium",
+      "defaultGrams": 125.0,
+      "defaultUnit": "1 pizza portion",
+      "foodKind": "Reusable ingredient",
+      "id": "food_pizza_variant_deep_dish",
+      "includedComponentsSummary": "None",
+      "name": "Deep dish cheese pizza",
+      "nutrients": {
+        "calories": 338.75,
+        "carbs": 41.5,
+        "fat": 13.12,
+        "fiber": 2.75,
+        "protein": 13.5
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "reviewed FDC record",
+          "name": "Pizza, cheese, from restaurant or fast food, thick crust",
+          "similarity": null,
+          "source": "usda",
+          "sourceID": "2708617"
+        },
+        "catalogPortion": {
+          "grams": 125.0,
+          "label": "1 pizza portion (125 g)",
+          "nutrients": {
+            "calories": 338.75,
+            "carbs": 41.5,
+            "fat": 13.12,
+            "fiber": 2.75,
+            "protein": 13.5
+          }
+        },
+        "compositionEvidence": {
+          "confidence": "Medium",
+          "decision": "Use the full prepared thick-crust cheese-pizza profile as the Deep dish style variant. This is not a crust-only component.",
+          "reason": "USDA record matches the selected prepared thick-crust cheese-pizza style; restaurant and homemade recipes vary.",
+          "sources": [
+            {
+              "name": "Chase Food pizza composition and option structure",
+              "path": "data/chase-food/workbook.json",
+              "section": "Foods, nutritionProfiles, and suggestedAdditions"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 271.0,
+          "carbs": 33.2,
+          "fat": 10.5,
+          "fiber": 2.2,
+          "protein": 10.8
+        },
+        "reviewReasons": [
+          "Direct thick-crust cheese pizza match for the prepared style; restaurant and homemade recipes vary."
+        ],
+        "source": {
+          "accessDate": "2026-10-20",
+          "dataType": "Survey (FNDDS)",
+          "database": "FoodData Central",
+          "name": "USDA FoodData Central Survey (FNDDS)",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2708617",
+          "recordName": "Pizza, cheese, from restaurant or fast food, thick crust",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-20",
+          "serving": {
+            "description": "1 piece of thick-crust cheese pizza",
+            "grams": 132
+          },
+          "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708617/nutrients"
+        }
+      },
+      "nutritionPer100g": {
+        "calories": 271.0,
+        "carbs": 33.2,
+        "fat": 10.5,
+        "fiber": 2.2,
+        "protein": 10.8
+      },
+      "nutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Pizza, cheese, from restaurant or fast food, thick crust",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2708617"
+      },
+      "optionsSummary": "None",
+      "reviewReasons": [
+        "Direct thick-crust cheese pizza match for the prepared style; restaurant and homemade recipes vary."
+      ],
+      "reviewRequired": true,
+      "searchEnabled": false,
       "sizeAvailable": false,
       "variationsSummary": "None"
     }
@@ -61154,7 +61307,7 @@
       "Pizza",
       "Addition preset; no separate nutrition profile",
       "Draft",
-      "Review whether ingredients are additions or substitutions (especially recipes with pre-existing inclusions)."
+      "Applies an estimated per-slice topping amount to the prepared cheese-pizza base."
     ],
     [
       "preset_mushroom_pizza",
@@ -61163,7 +61316,7 @@
       "Pizza",
       "Addition preset; no separate nutrition profile",
       "Draft",
-      "Review whether ingredients are additions or substitutions (especially recipes with pre-existing inclusions)."
+      "Applies an estimated per-slice topping amount to the prepared cheese-pizza base."
     ],
     [
       "preset_sausage_pizza",
@@ -61172,7 +61325,7 @@
       "Pizza",
       "Addition preset; no separate nutrition profile",
       "Draft",
-      "Review whether ingredients are additions or substitutions (especially recipes with pre-existing inclusions)."
+      "Applies an estimated per-slice topping amount to the prepared cheese-pizza base."
     ],
     [
       "preset_bacon_egg_and_cheese_sandwich",
@@ -61323,7 +61476,7 @@
       "Draft",
       "",
       "",
-      ""
+      "5.0"
     ],
     [
       "food_hot_dog",
@@ -61336,7 +61489,7 @@
       "Draft",
       "",
       "",
-      ""
+      "17.0"
     ],
     [
       "food_hot_dog",
@@ -61349,7 +61502,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15.0"
     ],
     [
       "food_hot_dog",
@@ -61362,7 +61515,7 @@
       "Draft",
       "",
       "",
-      ""
+      "20"
     ],
     [
       "food_hot_dog",
@@ -61375,7 +61528,7 @@
       "Draft",
       "",
       "",
-      ""
+      "50"
     ],
     [
       "food_hot_dog",
@@ -61388,7 +61541,7 @@
       "Draft",
       "",
       "",
-      ""
+      "10"
     ],
     [
       "food_hot_dog",
@@ -61401,7 +61554,7 @@
       "Draft",
       "",
       "",
-      ""
+      "115.0"
     ],
     [
       "food_breakfast_sandwich",
@@ -61414,7 +61567,7 @@
       "Draft",
       "",
       "",
-      ""
+      "8"
     ],
     [
       "food_breakfast_burrito",
@@ -61427,7 +61580,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15"
     ],
     [
       "food_breakfast_burrito",
@@ -61440,7 +61593,7 @@
       "Draft",
       "",
       "",
-      ""
+      "11.5"
     ],
     [
       "food_breakfast_burrito",
@@ -61453,7 +61606,7 @@
       "Draft",
       "",
       "",
-      ""
+      "16.0"
     ],
     [
       "food_breakfast_burrito",
@@ -61466,7 +61619,7 @@
       "Draft",
       "",
       "",
-      ""
+      "30"
     ],
     [
       "food_breakfast_burrito",
@@ -61479,7 +61632,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15.0"
     ],
     [
       "food_burrito",
@@ -61492,7 +61645,7 @@
       "Draft",
       "",
       "",
-      ""
+      "60"
     ],
     [
       "food_burrito",
@@ -61505,7 +61658,7 @@
       "Draft",
       "",
       "",
-      ""
+      "70"
     ],
     [
       "food_burrito",
@@ -61518,7 +61671,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15"
     ],
     [
       "food_burrito",
@@ -61531,7 +61684,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15.0"
     ],
     [
       "food_burrito",
@@ -61544,7 +61697,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15.0"
     ],
     [
       "food_burrito",
@@ -61557,7 +61710,7 @@
       "Draft",
       "",
       "",
-      ""
+      "16.0"
     ],
     [
       "food_burrito_bowl",
@@ -61570,7 +61723,7 @@
       "Draft",
       "",
       "",
-      ""
+      "90"
     ],
     [
       "food_burrito_bowl",
@@ -61583,7 +61736,7 @@
       "Draft",
       "",
       "",
-      ""
+      "60"
     ],
     [
       "food_burrito_bowl",
@@ -61596,7 +61749,7 @@
       "Draft",
       "",
       "",
-      ""
+      "90"
     ],
     [
       "food_burrito_bowl",
@@ -61609,7 +61762,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15.0"
     ],
     [
       "food_burrito_bowl",
@@ -61622,7 +61775,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15"
     ],
     [
       "food_quesadilla",
@@ -61635,7 +61788,7 @@
       "Draft",
       "",
       "",
-      ""
+      "60"
     ],
     [
       "food_quesadilla",
@@ -61648,7 +61801,7 @@
       "Draft",
       "",
       "",
-      ""
+      "20"
     ],
     [
       "food_quesadilla",
@@ -61661,7 +61814,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15.0"
     ],
     [
       "food_quesadilla",
@@ -61674,7 +61827,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15.0"
     ],
     [
       "food_quesadilla",
@@ -61687,7 +61840,7 @@
       "Draft",
       "",
       "",
-      ""
+      "16.0"
     ],
     [
       "food_nachos",
@@ -61700,7 +61853,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15"
     ],
     [
       "food_nachos",
@@ -61713,7 +61866,7 @@
       "Draft",
       "",
       "",
-      ""
+      "18.0"
     ],
     [
       "food_nachos",
@@ -61726,7 +61879,7 @@
       "Draft",
       "",
       "",
-      ""
+      "16.0"
     ],
     [
       "food_nachos",
@@ -61739,7 +61892,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15.0"
     ],
     [
       "food_nachos",
@@ -61752,7 +61905,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15.0"
     ],
     [
       "food_grilled_cheese",
@@ -61765,7 +61918,7 @@
       "Draft",
       "",
       "",
-      ""
+      "11.5"
     ],
     [
       "food_grilled_cheese",
@@ -61778,7 +61931,7 @@
       "Draft",
       "",
       "",
-      ""
+      "20"
     ],
     [
       "food_grilled_cheese",
@@ -61791,7 +61944,7 @@
       "Draft",
       "",
       "",
-      ""
+      "20"
     ],
     [
       "food_grilled_cheese",
@@ -61804,7 +61957,7 @@
       "Draft",
       "",
       "",
-      ""
+      "14.0"
     ],
     [
       "food_blt_sandwich",
@@ -61817,7 +61970,7 @@
       "Draft",
       "",
       "",
-      ""
+      "30"
     ],
     [
       "food_blt_sandwich",
@@ -61830,7 +61983,7 @@
       "Draft",
       "",
       "",
-      ""
+      "14.0"
     ],
     [
       "food_blt_sandwich",
@@ -61843,7 +61996,7 @@
       "Draft",
       "",
       "",
-      ""
+      "115.0"
     ],
     [
       "food_chicken_sandwich",
@@ -61856,7 +62009,7 @@
       "Draft",
       "",
       "",
-      ""
+      "20"
     ],
     [
       "food_chicken_sandwich",
@@ -61869,7 +62022,7 @@
       "Draft",
       "",
       "",
-      ""
+      "14.0"
     ],
     [
       "food_chicken_sandwich",
@@ -61882,7 +62035,7 @@
       "Draft",
       "",
       "",
-      ""
+      "10"
     ],
     [
       "food_chicken_sandwich",
@@ -61895,7 +62048,7 @@
       "Draft",
       "",
       "",
-      ""
+      "20"
     ],
     [
       "food_chicken_sandwich",
@@ -61908,7 +62061,7 @@
       "Draft",
       "",
       "",
-      ""
+      "10"
     ],
     [
       "food_fried_chicken_sandwich",
@@ -61921,7 +62074,7 @@
       "Draft",
       "",
       "",
-      ""
+      "14.0"
     ],
     [
       "food_fried_chicken_sandwich",
@@ -61934,7 +62087,7 @@
       "Draft",
       "",
       "",
-      ""
+      "10"
     ],
     [
       "food_fried_chicken_sandwich",
@@ -61947,7 +62100,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15"
     ],
     [
       "food_fried_chicken_sandwich",
@@ -61960,7 +62113,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15.0"
     ],
     [
       "food_waffles",
@@ -61973,7 +62126,7 @@
       "Draft",
       "",
       "",
-      ""
+      "7"
     ],
     [
       "food_waffles",
@@ -61986,7 +62139,7 @@
       "Draft",
       "",
       "",
-      ""
+      "30"
     ],
     [
       "food_waffles",
@@ -61999,7 +62152,7 @@
       "Draft",
       "",
       "",
-      ""
+      "5.0"
     ],
     [
       "food_waffles",
@@ -62012,7 +62165,7 @@
       "Draft",
       "",
       "",
-      ""
+      "30"
     ],
     [
       "food_french_toast",
@@ -62025,7 +62178,7 @@
       "Draft",
       "",
       "",
-      ""
+      "7"
     ],
     [
       "food_french_toast",
@@ -62038,7 +62191,7 @@
       "Draft",
       "",
       "",
-      ""
+      "30"
     ],
     [
       "food_french_toast",
@@ -62051,7 +62204,7 @@
       "Draft",
       "",
       "",
-      ""
+      "30"
     ],
     [
       "food_bagel",
@@ -62077,7 +62230,7 @@
       "Draft",
       "Spreads",
       "multiple",
-      ""
+      "14.0"
     ],
     [
       "food_bagel",
@@ -62090,7 +62243,7 @@
       "Draft",
       "Spreads",
       "multiple",
-      ""
+      "16.0"
     ],
     [
       "food_bagel",
@@ -62103,7 +62256,7 @@
       "Draft",
       "Spreads",
       "multiple",
-      ""
+      "20.0"
     ],
     [
       "food_baked_potato",
@@ -62116,7 +62269,7 @@
       "Draft",
       "",
       "",
-      ""
+      "14.0"
     ],
     [
       "food_baked_potato",
@@ -62129,7 +62282,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15.0"
     ],
     [
       "food_baked_potato",
@@ -62142,7 +62295,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15"
     ],
     [
       "food_baked_potato",
@@ -62155,7 +62308,7 @@
       "Draft",
       "",
       "",
-      ""
+      "11.5"
     ],
     [
       "food_baked_potato",
@@ -62168,7 +62321,7 @@
       "Draft",
       "",
       "",
-      ""
+      "40"
     ],
     [
       "food_sweet_potato_baked",
@@ -62181,7 +62334,7 @@
       "Draft",
       "",
       "",
-      ""
+      "7"
     ],
     [
       "food_sweet_potato_baked",
@@ -62194,7 +62347,7 @@
       "Draft",
       "",
       "",
-      ""
+      "10"
     ],
     [
       "food_chicken_caesar_salad",
@@ -62207,7 +62360,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15.0"
     ],
     [
       "food_chicken_caesar_salad",
@@ -62220,7 +62373,7 @@
       "Draft",
       "",
       "",
-      ""
+      "5.0"
     ],
     [
       "food_chicken_caesar_salad",
@@ -62233,7 +62386,7 @@
       "Draft",
       "",
       "",
-      ""
+      "10"
     ],
     [
       "food_chicken_caesar_salad",
@@ -62246,7 +62399,7 @@
       "Draft",
       "",
       "",
-      ""
+      "11.5"
     ],
     [
       "food_taco_salad",
@@ -62259,7 +62412,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15"
     ],
     [
       "food_taco_salad",
@@ -62272,7 +62425,7 @@
       "Draft",
       "",
       "",
-      ""
+      "16.0"
     ],
     [
       "food_taco_salad",
@@ -62285,7 +62438,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15.0"
     ],
     [
       "food_taco_salad",
@@ -62298,7 +62451,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15.0"
     ],
     [
       "food_oatmeal",
@@ -62311,7 +62464,7 @@
       "Draft",
       "",
       "",
-      ""
+      "60"
     ],
     [
       "food_oatmeal",
@@ -62324,7 +62477,7 @@
       "Draft",
       "",
       "",
-      ""
+      "30"
     ],
     [
       "food_oatmeal",
@@ -62337,7 +62490,7 @@
       "Draft",
       "",
       "",
-      ""
+      "60"
     ],
     [
       "food_oatmeal",
@@ -62350,7 +62503,7 @@
       "Draft",
       "",
       "",
-      ""
+      "16.0"
     ],
     [
       "food_oatmeal",
@@ -62363,7 +62516,7 @@
       "Draft",
       "",
       "",
-      ""
+      "20.0"
     ],
     [
       "food_oatmeal",
@@ -62376,7 +62529,7 @@
       "Draft",
       "",
       "",
-      ""
+      "21.0"
     ],
     [
       "food_coffee_with_milk",
@@ -62389,7 +62542,7 @@
       "Draft",
       "",
       "",
-      ""
+      "30"
     ],
     [
       "food_coffee_with_milk",
@@ -62402,7 +62555,7 @@
       "Draft",
       "",
       "",
-      ""
+      "30"
     ],
     [
       "food_coffee_with_milk",
@@ -62415,7 +62568,7 @@
       "Draft",
       "",
       "",
-      ""
+      "30"
     ],
     [
       "food_coffee_with_milk",
@@ -62428,7 +62581,7 @@
       "Draft",
       "",
       "",
-      ""
+      "30"
     ],
     [
       "food_coffee_with_milk",
@@ -62441,7 +62594,7 @@
       "Draft",
       "",
       "",
-      ""
+      "21.0"
     ],
     [
       "food_chicken_wings",
@@ -62454,7 +62607,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15.0"
     ],
     [
       "food_chicken_wings",
@@ -62467,7 +62620,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15.0"
     ],
     [
       "food_chicken_wings",
@@ -62480,7 +62633,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15.0"
     ],
     [
       "food_salmon_cooked",
@@ -62493,7 +62646,7 @@
       "Draft",
       "",
       "",
-      ""
+      "13.5"
     ],
     [
       "food_salmon_cooked",
@@ -62506,7 +62659,7 @@
       "Draft",
       "",
       "",
-      ""
+      "14.0"
     ],
     [
       "food_salmon_cooked",
@@ -62519,7 +62672,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15"
     ],
     [
       "food_white_rice",
@@ -62532,7 +62685,7 @@
       "Draft",
       "",
       "",
-      ""
+      "14.0"
     ],
     [
       "food_white_rice",
@@ -62545,7 +62698,7 @@
       "Draft",
       "",
       "",
-      ""
+      "16.0"
     ],
     [
       "food_spaghetti_with_tomato_sauce",
@@ -62558,7 +62711,7 @@
       "Draft",
       "",
       "",
-      ""
+      "5.0"
     ],
     [
       "food_spaghetti_with_tomato_sauce",
@@ -62571,7 +62724,7 @@
       "Draft",
       "",
       "",
-      ""
+      "45.0"
     ],
     [
       "food_spaghetti_with_tomato_sauce",
@@ -62584,7 +62737,7 @@
       "Draft",
       "",
       "",
-      ""
+      "28.4"
     ],
     [
       "food_pasta_cooked",
@@ -62597,7 +62750,7 @@
       "Draft",
       "",
       "",
-      ""
+      "60"
     ],
     [
       "food_pasta_cooked",
@@ -62610,7 +62763,7 @@
       "Draft",
       "",
       "",
-      ""
+      "60"
     ],
     [
       "food_pasta_cooked",
@@ -62623,7 +62776,7 @@
       "Draft",
       "",
       "",
-      ""
+      "16.0"
     ],
     [
       "food_pasta_cooked",
@@ -62636,7 +62789,7 @@
       "Draft",
       "",
       "",
-      ""
+      "5.0"
     ],
     [
       "food_deli_sandwich",
@@ -62649,7 +62802,7 @@
       "Draft",
       "",
       "",
-      ""
+      "14.0"
     ],
     [
       "food_deli_sandwich",
@@ -62662,7 +62815,7 @@
       "Draft",
       "",
       "",
-      ""
+      "5.0"
     ],
     [
       "food_deli_sandwich",
@@ -62675,7 +62828,7 @@
       "Draft",
       "",
       "",
-      ""
+      "28.0"
     ],
     [
       "food_deli_sandwich",
@@ -62688,7 +62841,7 @@
       "Draft",
       "",
       "",
-      ""
+      "20.0"
     ],
     [
       "food_deli_sandwich",
@@ -62701,7 +62854,7 @@
       "Draft",
       "",
       "",
-      ""
+      "15"
     ],
     [
       "food_deli_sandwich",
@@ -62714,7 +62867,7 @@
       "Draft",
       "",
       "",
-      ""
+      "10"
     ],
     [
       "food_ice_cream",
@@ -62727,7 +62880,7 @@
       "Draft",
       "",
       "",
-      ""
+      "10"
     ],
     [
       "food_ice_cream",
@@ -62740,7 +62893,7 @@
       "Draft",
       "",
       "",
-      ""
+      "5.0"
     ],
     [
       "food_ice_cream",
@@ -62753,33 +62906,33 @@
       "Draft",
       "",
       "",
-      ""
+      "30"
     ],
     [
       "food_pizza_slice",
       "Pizza",
-      "food_pizza_crust",
-      "Regular crust",
-      "1",
-      "Crust",
-      "Yes",
-      "Draft",
-      "Crust",
-      "exclusive",
-      "110"
-    ],
-    [
-      "food_pizza_slice",
-      "Pizza",
-      "food_deep_dish_pizza_crust",
-      "Deep dish crust",
-      "2",
-      "Crust",
+      "food_pizza_variant_deep_dish",
+      "Deep dish",
+      1,
+      "variant",
       "No",
       "Draft",
       "Crust",
       "exclusive",
-      "160"
+      "125"
+    ],
+    [
+      "food_pizza_slice",
+      "Pizza",
+      "food_pepperoni",
+      "Pepperoni",
+      13,
+      "Suggested addition",
+      "No",
+      "Draft",
+      "",
+      "multiple",
+      "14"
     ],
     [
       "food_burger",
@@ -62792,7 +62945,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "28.4"
     ],
     [
       "food_burger",
@@ -62805,7 +62958,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "17.0"
     ],
     [
       "food_burger",
@@ -62818,7 +62971,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "11.5"
     ],
     [
       "food_burger",
@@ -62831,124 +62984,111 @@
       "Draft",
       "",
       "multiple",
-      ""
-    ],
-    [
-      "food_pizza_slice",
-      "Pizza",
-      "food_pepperoni",
-      "Pepperoni",
-      "13",
-      "Suggested addition",
-      "No",
-      "Draft",
-      "",
-      "multiple",
-      ""
+      "14.0"
     ],
     [
       "food_pizza_slice",
       "Pizza",
       "food_mozzarella_cheese",
       "Extra cheese",
-      "14",
+      14,
       "Suggested addition",
       "No",
       "Draft",
       "",
       "multiple",
-      ""
+      "14"
     ],
     [
       "food_pizza_slice",
       "Pizza",
       "food_mushrooms_cooked",
       "Mushrooms",
-      "15",
+      15,
       "Suggested addition",
       "No",
       "Draft",
       "",
       "multiple",
-      ""
+      "15"
     ],
     [
       "food_pizza_slice",
       "Pizza",
       "food_italian_sausage",
       "Sausage",
-      "16",
+      16,
       "Suggested addition",
       "No",
       "Draft",
       "",
       "multiple",
-      ""
+      "20"
     ],
     [
       "food_pizza_slice",
       "Pizza",
       "food_bell_pepper",
       "Green peppers",
-      "17",
+      17,
       "Suggested addition",
       "No",
       "Draft",
       "",
       "multiple",
-      ""
+      "15"
     ],
     [
       "food_pizza_slice",
       "Pizza",
       "food_black_olives",
       "Black olives",
-      "18",
+      18,
       "Suggested addition",
       "No",
       "Draft",
       "",
       "multiple",
-      ""
+      "10"
     ],
     [
       "food_pizza_slice",
       "Pizza",
       "food_onions_cooked",
       "Onion",
-      "19",
+      19,
       "Suggested addition",
       "No",
       "Draft",
       "",
       "multiple",
-      ""
+      "15"
     ],
     [
       "food_pizza_slice",
       "Pizza",
       "food_bacon",
       "Bacon",
-      "20",
+      20,
       "Suggested addition",
       "No",
       "Draft",
       "",
       "multiple",
-      ""
+      "10"
     ],
     [
       "food_pizza_slice",
       "Pizza",
       "food_pineapple",
       "Pineapple",
-      "21",
+      21,
       "Suggested addition",
       "No",
       "Draft",
       "",
       "multiple",
-      ""
+      "20"
     ],
     [
       "food_omelet",
@@ -62961,7 +63101,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "28.4"
     ],
     [
       "food_omelet",
@@ -62974,7 +63114,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "28.4"
     ],
     [
       "food_omelet",
@@ -62987,7 +63127,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "11.5"
     ],
     [
       "food_taco",
@@ -63078,7 +63218,7 @@
       "Draft",
       "Sauce",
       "exclusive",
-      ""
+      "180"
     ],
     [
       "food_penne_pasta_with_sauce",
@@ -63091,7 +63231,7 @@
       "Draft",
       "Sauce",
       "exclusive",
-      ""
+      "180"
     ],
     [
       "food_penne_pasta_with_sauce",
@@ -63104,7 +63244,7 @@
       "Draft",
       "Sauce",
       "exclusive",
-      ""
+      "180"
     ],
     [
       "food_penne_pasta_with_sauce",
@@ -63117,7 +63257,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "45.0"
     ],
     [
       "food_penne_pasta_with_sauce",
@@ -63130,7 +63270,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "90.0"
     ],
     [
       "food_penne_pasta_with_sauce",
@@ -63143,7 +63283,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "155.0"
     ],
     [
       "food_penne_pasta_with_sauce",
@@ -63156,7 +63296,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "13.5"
     ],
     [
       "food_toast",
@@ -63221,7 +63361,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "14.0"
     ],
     [
       "food_toast",
@@ -63234,7 +63374,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "16.0"
     ],
     [
       "food_toast",
@@ -63247,7 +63387,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "20.0"
     ],
     [
       "food_toast",
@@ -63260,7 +63400,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "30"
     ],
     [
       "food_cold_breakfast_cereal",
@@ -63273,7 +63413,7 @@
       "Draft",
       "Cereal type",
       "exclusive",
-      ""
+      "35"
     ],
     [
       "food_cold_breakfast_cereal",
@@ -63286,7 +63426,7 @@
       "Draft",
       "Cereal type",
       "exclusive",
-      ""
+      "35"
     ],
     [
       "food_cold_breakfast_cereal",
@@ -63299,7 +63439,7 @@
       "Draft",
       "Cereal type",
       "exclusive",
-      ""
+      "35"
     ],
     [
       "food_cold_breakfast_cereal",
@@ -63312,7 +63452,7 @@
       "Draft",
       "Cereal type",
       "exclusive",
-      ""
+      "35"
     ],
     [
       "food_cold_breakfast_cereal",
@@ -63325,7 +63465,7 @@
       "Draft",
       "Cereal type",
       "exclusive",
-      ""
+      "35"
     ],
     [
       "food_cold_breakfast_cereal",
@@ -63338,7 +63478,7 @@
       "Draft",
       "Cereal type",
       "exclusive",
-      ""
+      "35"
     ],
     [
       "food_cold_breakfast_cereal",
@@ -63351,7 +63491,7 @@
       "Draft",
       "Cereal type",
       "exclusive",
-      ""
+      "35"
     ],
     [
       "food_cold_breakfast_cereal",
@@ -63364,7 +63504,7 @@
       "Draft",
       "Cereal type",
       "exclusive",
-      ""
+      "35"
     ],
     [
       "food_cold_breakfast_cereal",
@@ -63390,7 +63530,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "60"
     ],
     [
       "food_cold_breakfast_cereal",
@@ -63403,7 +63543,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "30"
     ],
     [
       "food_cold_breakfast_cereal",
@@ -63416,7 +63556,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "21.0"
     ],
     [
       "food_black_coffee",
@@ -63429,7 +63569,7 @@
       "Draft",
       "Milk",
       "exclusive",
-      ""
+      "30"
     ],
     [
       "food_black_coffee",
@@ -63442,7 +63582,7 @@
       "Draft",
       "Milk",
       "exclusive",
-      ""
+      "30"
     ],
     [
       "food_black_coffee",
@@ -63455,7 +63595,7 @@
       "Draft",
       "Milk",
       "exclusive",
-      ""
+      "30"
     ],
     [
       "food_black_coffee",
@@ -63468,7 +63608,7 @@
       "Draft",
       "Milk",
       "exclusive",
-      ""
+      "30"
     ],
     [
       "food_black_coffee",
@@ -63481,7 +63621,7 @@
       "Draft",
       "Milk",
       "exclusive",
-      ""
+      "30"
     ],
     [
       "food_black_coffee",
@@ -63494,7 +63634,7 @@
       "Draft",
       "Milk",
       "exclusive",
-      ""
+      "30"
     ],
     [
       "food_black_coffee",
@@ -63507,7 +63647,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "4.0"
     ],
     [
       "food_black_coffee",
@@ -63520,7 +63660,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "15.0"
     ],
     [
       "food_black_coffee",
@@ -63533,7 +63673,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "30.0"
     ],
     [
       "food_banana",
@@ -63546,7 +63686,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "16.0"
     ],
     [
       "food_banana",
@@ -63559,7 +63699,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "20"
     ],
     [
       "food_banana",
@@ -63572,7 +63712,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "60"
     ],
     [
       "food_banana",
@@ -63585,7 +63725,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "30.0"
     ],
     [
       "food_plain_yogurt",
@@ -63598,7 +63738,7 @@
       "Draft",
       "Yogurt type",
       "exclusive",
-      ""
+      "245"
     ],
     [
       "food_plain_yogurt",
@@ -63611,7 +63751,7 @@
       "Draft",
       "Yogurt type",
       "exclusive",
-      ""
+      "245"
     ],
     [
       "food_plain_yogurt",
@@ -63624,7 +63764,7 @@
       "Draft",
       "Yogurt type",
       "exclusive",
-      ""
+      "245"
     ],
     [
       "food_plain_yogurt",
@@ -63637,7 +63777,7 @@
       "Draft",
       "Yogurt type",
       "exclusive",
-      ""
+      "245"
     ],
     [
       "food_plain_yogurt",
@@ -63650,7 +63790,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "20"
     ],
     [
       "food_plain_yogurt",
@@ -63663,7 +63803,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "30"
     ],
     [
       "food_plain_yogurt",
@@ -63676,7 +63816,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "21.0"
     ],
     [
       "food_plain_yogurt",
@@ -63689,7 +63829,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "60"
     ],
     [
       "food_cappuccino",
@@ -63702,7 +63842,7 @@
       "Draft",
       "Milk",
       "exclusive",
-      ""
+      "120"
     ],
     [
       "food_cappuccino",
@@ -63715,7 +63855,7 @@
       "Draft",
       "Milk",
       "exclusive",
-      ""
+      "120"
     ],
     [
       "food_cappuccino",
@@ -63728,7 +63868,7 @@
       "Draft",
       "Milk",
       "exclusive",
-      ""
+      "120"
     ],
     [
       "food_cappuccino",
@@ -63741,7 +63881,7 @@
       "Draft",
       "Milk",
       "exclusive",
-      ""
+      "120"
     ],
     [
       "food_cappuccino",
@@ -63754,7 +63894,7 @@
       "Draft",
       "Milk",
       "exclusive",
-      ""
+      "120"
     ],
     [
       "food_cappuccino",
@@ -63767,7 +63907,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "4.0"
     ],
     [
       "food_cappuccino",
@@ -63780,7 +63920,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "5.0"
     ],
     [
       "food_cappuccino",
@@ -63793,7 +63933,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "2.6"
     ],
     [
       "food_cappuccino",
@@ -63806,7 +63946,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "30.0"
     ],
     [
       "food_protein_shake",
@@ -63897,7 +64037,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "16.0"
     ],
     [
       "food_protein_shake",
@@ -63910,7 +64050,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "60"
     ],
     [
       "food_protein_shake",
@@ -63923,7 +64063,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "14.0"
     ],
     [
       "food_protein_shake",
@@ -63936,7 +64076,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "30.0"
     ],
     [
       "food_sandwich",
@@ -64235,7 +64375,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "170.0"
     ],
     [
       "food_caesar_salad",
@@ -64248,7 +64388,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "28.4"
     ],
     [
       "food_caesar_salad",
@@ -64261,7 +64401,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "15.0"
     ],
     [
       "food_caesar_salad",
@@ -64274,7 +64414,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "5.0"
     ],
     [
       "food_garden_salad",
@@ -64287,7 +64427,7 @@
       "Draft",
       "Greens",
       "exclusive",
-      ""
+      "40"
     ],
     [
       "food_garden_salad",
@@ -64300,7 +64440,7 @@
       "Draft",
       "Greens",
       "exclusive",
-      ""
+      "40"
     ],
     [
       "food_garden_salad",
@@ -64313,7 +64453,7 @@
       "Draft",
       "Greens",
       "exclusive",
-      ""
+      "40"
     ],
     [
       "food_garden_salad",
@@ -64326,7 +64466,7 @@
       "Draft",
       "Greens",
       "exclusive",
-      ""
+      "40"
     ],
     [
       "food_garden_salad",
@@ -64339,7 +64479,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "50.0"
     ],
     [
       "food_garden_salad",
@@ -64352,7 +64492,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "11.5"
     ],
     [
       "food_garden_salad",
@@ -64365,7 +64505,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "20"
     ],
     [
       "food_garden_salad",
@@ -64378,7 +64518,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "50"
     ],
     [
       "food_garden_salad",
@@ -64391,7 +64531,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "40"
     ],
     [
       "food_garden_salad",
@@ -64417,7 +64557,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "14.0"
     ],
     [
       "food_potato_salad",
@@ -64430,7 +64570,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "40"
     ],
     [
       "food_potato_salad",
@@ -64443,7 +64583,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "50.0"
     ],
     [
       "food_potato_salad",
@@ -64456,7 +64596,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "1.0"
     ],
     [
       "food_lasagna",
@@ -64469,7 +64609,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "45"
     ],
     [
       "food_lasagna",
@@ -64482,7 +64622,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "30.0"
     ],
     [
       "food_lasagna",
@@ -64495,7 +64635,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "28.4"
     ],
     [
       "food_lasagna",
@@ -64508,7 +64648,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "50"
     ],
     [
       "food_chili",
@@ -64521,7 +64661,7 @@
       "Draft",
       "Chili type",
       "exclusive",
-      ""
+      "350"
     ],
     [
       "food_chili",
@@ -64534,7 +64674,7 @@
       "Draft",
       "Chili type",
       "exclusive",
-      ""
+      "350"
     ],
     [
       "food_chili",
@@ -64547,7 +64687,7 @@
       "Draft",
       "Chili type",
       "exclusive",
-      ""
+      "350"
     ],
     [
       "food_chili",
@@ -64560,7 +64700,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "120"
     ],
     [
       "food_chili",
@@ -64573,7 +64713,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "15.0"
     ],
     [
       "food_chili",
@@ -64586,7 +64726,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "15"
     ],
     [
       "food_chili",
@@ -64599,7 +64739,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "65.0"
     ],
     [
       "food_beef_stew",
@@ -64612,7 +64752,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "30.0"
     ],
     [
       "food_beef_stew",
@@ -64625,7 +64765,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "100"
     ],
     [
       "food_beef_stew",
@@ -64638,7 +64778,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "60"
     ],
     [
       "food_beef_stew",
@@ -64651,7 +64791,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "50"
     ],
     [
       "food_chicken_parmesan",
@@ -64664,7 +64804,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "150"
     ],
     [
       "food_chicken_parmesan",
@@ -64677,7 +64817,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "30"
     ],
     [
       "food_chicken_parmesan",
@@ -64690,7 +64830,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "15"
     ],
     [
       "food_chicken_parmesan",
@@ -64703,7 +64843,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "100"
     ],
     [
       "food_chicken_piccata",
@@ -64716,7 +64856,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "100"
     ],
     [
       "food_chicken_piccata",
@@ -64729,7 +64869,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "30.0"
     ],
     [
       "food_chicken_piccata",
@@ -64742,7 +64882,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "100"
     ],
     [
       "food_chicken_piccata",
@@ -64755,7 +64895,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "9.0"
     ],
     [
       "food_orange_chicken",
@@ -64768,7 +64908,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "100"
     ],
     [
       "food_orange_chicken",
@@ -64781,7 +64921,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "30.0"
     ],
     [
       "food_orange_chicken",
@@ -64794,7 +64934,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "50"
     ],
     [
       "food_orange_chicken",
@@ -64807,7 +64947,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "3"
     ],
     [
       "food_roast_turkey",
@@ -64820,7 +64960,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "100"
     ],
     [
       "food_roast_turkey",
@@ -64833,7 +64973,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "30"
     ],
     [
       "food_roast_turkey",
@@ -64846,7 +64986,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "60"
     ],
     [
       "food_roast_turkey",
@@ -64859,7 +64999,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "60"
     ],
     [
       "food_cheesecake",
@@ -64872,7 +65012,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "25"
     ],
     [
       "food_cheesecake",
@@ -64885,7 +65025,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "5.0"
     ],
     [
       "food_cheesecake",
@@ -64898,7 +65038,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "10"
     ],
     [
       "food_pancakes",
@@ -64911,7 +65051,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "14.0"
     ],
     [
       "food_pancakes",
@@ -64924,7 +65064,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "30"
     ],
     [
       "food_pancakes",
@@ -64937,7 +65077,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "20.0"
     ],
     [
       "food_pancakes",
@@ -64950,7 +65090,7 @@
       "Draft",
       "",
       "multiple",
-      ""
+      "10"
     ],
     [
       "food_cappuccino",
@@ -64963,7 +65103,7 @@
       "Draft",
       "Milk",
       "exclusive",
-      ""
+      "120"
     ],
     [
       "food_bagel",
@@ -67020,6 +67160,6 @@
       "160"
     ]
   ],
-  "workbookTitle": "Canonical U.S. Food Taxonomy — 529 Catalog Identities (Review Draft)",
+  "workbookTitle": "Canonical U.S. Food Taxonomy — 530 Catalog Identities (Review Draft)",
   "workbookURL": "https://docs.google.com/spreadsheets/d/16Y1Uc0jldJ4tGO_vf5mgjT0n8pwJxO13W54zR5M_wWo/edit"
 }

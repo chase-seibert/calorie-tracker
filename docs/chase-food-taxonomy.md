@@ -87,6 +87,17 @@ claim that recipe nutrition is already measured.
     topping or a separate side depending on the parent food and intended use.
     Define the relationship for each parent instead of assigning a universal
     role to an ingredient.
+11. **Scale configured ingredients with the parent quantity.** Every included
+    ingredient and optional topping amount describes the amount for one
+    explicitly defined parent serving. The full logged quantity determines how
+    many parent-serving equivalents to apply, whether the user enters slices,
+    ounces, grams, cups, or another supported portion. Never use a component's
+    entire default serving as a topping amount just because its recipe amount
+    was left unspecified. Every configurable option must have an explicit
+    `Amount (g)` in the workbook; catalog compilation rejects missing or
+    nonpositive amounts instead of silently substituting the component's
+    standalone serving size. For exclusive full-food substitutions, use the
+    amount of that component within one parent serving.
 
 ## Source controls
 
@@ -165,6 +176,16 @@ rewrite history.
   coffee, show “Medium · 12 fl oz” so the size label and amount are both clear.
 - Keep calories and all three macros live as portion, included items, and
   additions change.
+- Define each included ingredient and optional addition as a component amount
+  per parent serving, then multiply that amount and its nutrients by the
+  quantity of parent servings being logged. Convert weight and other supported
+  units to parent-serving equivalents using the selected parent portion before
+  scaling. A component's own catalog serving is only its nutrient reference;
+  it does not define how much belongs on the parent food.
+- When parent portion sizes represent different physical sizes (for example,
+  small and large slices), specify component amounts for each size or a clear
+  scaling rule. Do not assume a topping amount for one slice fits every slice
+  size. Keep independently logged companion foods on their own portions.
 
 ## Classifying future food choices
 
@@ -218,11 +239,16 @@ duplicating the food.
   diameter and cooked weight before assigning nutrition.
 - **Pizza:** A serving is one slice. Size choices describe the pizza's diameter
   (for example, a slice from a 12-, 14-, or 18-inch pizza), with the number of
-  cuts stated because diameter alone does not define slice area. A proposed
-  first quick set is pepperoni, sausage, mushrooms, extra cheese, onion, and
-  green pepper; consider olives, bacon, ham, chicken, pineapple, and jalapeños
-  as searchable additions. This is a review list, not a measured popularity
-  ranking.
+  cuts stated because diameter alone does not define slice area. The base
+  profile represents prepared cheese pizza, including its sauce and cheese;
+  do not add those ingredients a second time as included components. Crust
+  styles use complete prepared-pizza nutrient profiles as mutually exclusive
+  variants, not crust-only foods as calorie additions. Specify topping grams
+  per parent slice and scale them with the logged slice or weight quantity. A
+  proposed first quick set is pepperoni, sausage, mushrooms, extra cheese,
+  onion, and green pepper; consider olives, bacon, ham, chicken, pineapple,
+  and jalapeños as searchable additions. This is a review list, not a measured
+  popularity ranking.
 - **Omelet:** Include ham with cheese, bacon, and vegetables. Add ingredient
   search for items such as kielbasa so a selected ingredient is retained in the
   logged item and in a reusable variation.
@@ -317,6 +343,14 @@ A pinned quantity card offers the food's portion sizes plus ounces and grams;
 changing between weight units preserves the entered mass, and quantity can be
 adjusted directly. Calories remain with the pinned macro summary, and a single
 **Log Food** button sits below the quantity card.
+
+Configured ingredient amounts are relative to the parent food. For example,
+Pizza toppings are specified as grams per slice (or per another defined pizza
+portion); logging several slices or entering a weight equivalent to several
+slices scales each selected topping by that same parent-serving count. The
+catalog must not assign a full serving of mushrooms, sausage, or onion to each
+slice unless that amount is explicitly supported by the recipe. The same rule
+applies to options on foods logged by weight, volume, count, or named portion.
 
 For Burger, the first concept exposes size plus cheese, bacon, and fries. Fries
 remain a separately reusable food, even when selected from the burger screen.

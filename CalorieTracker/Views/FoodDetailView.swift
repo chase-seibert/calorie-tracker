@@ -481,10 +481,13 @@ struct FoodCustomizationView: View {
 
     private func optionPill(_ option: ChaseFoodOption, defaultSelected: Bool) -> some View {
         let selected = selectedOptionIDs.contains(option.id)
-        let calories = Int(option.food.nutrients(for: option.amountGrams, unit: .grams).calories.rounded())
+        let isVariant = option.relationship.caseInsensitiveCompare("variant") == .orderedSame
+        let optionGrams = isVariant ? selectedPortionGrams : option.amountGrams
+        let calories = Int(option.food.nutrients(for: optionGrams, unit: .grams).calories.rounded())
+        let detail = isVariant ? "\(calories) kcal / portion" : defaultSelected ? "\(calories) kcal" : "+\(calories) kcal"
         return selectionPill(
             title: option.displayName,
-            detail: defaultSelected ? "\(calories) kcal" : "+\(calories) kcal",
+            detail: detail,
             isSelected: selected
         ) { setOption(option, selected: !selected) }
         .disabled(preservesLegacySnapshot)

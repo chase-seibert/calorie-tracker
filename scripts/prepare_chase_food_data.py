@@ -76,6 +76,7 @@ INTERNAL_OPTION_FOODS = {
     "food_frosted_corn_flakes",
     "food_pizza_crust",
     "food_deep_dish_pizza_crust",
+    "food_pizza_variant_deep_dish",
     "food_hot_dog_sausage",
 }
 
@@ -170,6 +171,27 @@ def refresh_food_option_columns(workbook: dict) -> None:
         row[included_index] = comma_list(included_by_parent.get(fid, []))
 
 
+def validate_option_amounts(workbook: dict) -> None:
+    rows = workbook.get("suggestedAdditions", [])
+    if not rows:
+        return
+    headers = rows[0]
+    amount_index = headers.index("Amount (g)")
+    for row_number, row in enumerate(rows[1:], start=2):
+        raw = row[amount_index] if len(row) > amount_index else None
+        try:
+            amount = float(raw)
+        except (TypeError, ValueError):
+            amount = 0
+        if amount <= 0:
+            parent = row[0] if row else "unknown parent"
+            component = row[2] if len(row) > 2 else "unknown component"
+            raise ValueError(
+                f"suggestedAdditions row {row_number} for {parent}/{component} "
+                "must define a positive Amount (g) per parent serving"
+            )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--workbook", type=Path, default=DEFAULT_WORKBOOK)
@@ -178,6 +200,7 @@ def main() -> int:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()
     workbook = json.loads(args.workbook.read_text())
+    validate_option_amounts(workbook)
     refresh_food_option_columns(workbook)
     args.workbook.write_text(json.dumps(workbook, ensure_ascii=False, indent=2) + "\n")
     enrichment_data = json.loads(args.enrichments.read_text()) if args.enrichments.exists() else {"foods": {}}
@@ -316,7 +339,7 @@ def main() -> int:
         })
     payload = {
         "schemaVersion": 1,
-        "datasetVersion": "chase-food-2026-10-20-25",
+        "datasetVersion": "chase-food-2026-10-20-27",
         "workbookTitle": f"Canonical U.S. Food Taxonomy — {len(output_foods)} Catalog Identities (Review Draft)",
         "workbookURL": "https://docs.google.com/spreadsheets/d/16Y1Uc0jldJ4tGO_vf5mgjT0n8pwJxO13W54zR5M_wWo/edit",
         "foods": output_foods,

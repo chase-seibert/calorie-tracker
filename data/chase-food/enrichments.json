@@ -9306,6 +9306,125 @@
           }
         ]
       }
+    },
+    "food_pizza_slice": {
+      "nutritionPer100g": {
+        "calories": 266.0,
+        "protein": 11.4,
+        "carbs": 33.3,
+        "fat": 9.7,
+        "fiber": 2.3
+      },
+      "confidence": "Medium",
+      "reviewReasons": [
+        "Generic restaurant/fast-food cheese pizza is a close preparation match; homemade and chain recipes vary.",
+        "Topping options are separately modeled in grams per 125 g parent serving."
+      ],
+      "source": {
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "reviewedDate": "2026-10-20",
+        "recordID": "2708616",
+        "recordName": "Pizza, cheese, from restaurant or fast food, medium crust",
+        "serving": {
+          "description": "1 piece, medium pizza",
+          "grams": 86
+        },
+        "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708616/nutrients",
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "accessDate": "2026-10-20"
+      },
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2708686",
+        "name": "Pizza rolls",
+        "matchBasis": "canonical",
+        "similarity": 0.625
+      },
+      "catalogPortion": {
+        "grams": 125.0,
+        "label": "1 pizza portion (125 g)",
+        "nutrients": {
+          "calories": 332.5,
+          "carbs": 41.62,
+          "fat": 12.12,
+          "protein": 14.25,
+          "fiber": 2.88
+        }
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Use prepared cheese pizza as the canonical base. Its sauce and cheese are included in the prepared-food nutrition profile; topping additions are measured per 125 g parent serving.",
+        "reason": "Prepared restaurant/fast-food cheese pizza is a close match, though recipes vary by restaurant and homemade preparation.",
+        "sources": [
+          {
+            "name": "Chase Food pizza composition and option structure",
+            "path": "data/chase-food/workbook.json",
+            "section": "Foods, nutritionProfiles, and suggestedAdditions"
+          }
+        ]
+      }
+    },
+    "food_pizza_variant_deep_dish": {
+      "nutritionPer100g": {
+        "calories": 271.0,
+        "protein": 10.8,
+        "carbs": 33.2,
+        "fat": 10.5,
+        "fiber": 2.2
+      },
+      "confidence": "Medium",
+      "reviewReasons": [
+        "Direct thick-crust cheese pizza match for the prepared style; restaurant and homemade recipes vary."
+      ],
+      "source": {
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "database": "FoodData Central",
+        "dataType": "Survey (FNDDS)",
+        "releaseDate": "2024-10-31",
+        "reviewedDate": "2026-10-20",
+        "recordID": "2708617",
+        "recordName": "Pizza, cheese, from restaurant or fast food, thick crust",
+        "serving": {
+          "description": "1 piece of thick-crust cheese pizza",
+          "grams": 132
+        },
+        "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708617/nutrients",
+        "name": "USDA FoodData Central Survey (FNDDS)",
+        "accessDate": "2026-10-20"
+      },
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2708617",
+        "name": "Pizza, cheese, from restaurant or fast food, thick crust",
+        "matchBasis": "reviewed FDC record",
+        "similarity": null
+      },
+      "catalogPortion": {
+        "grams": 125.0,
+        "label": "1 pizza portion (125 g)",
+        "nutrients": {
+          "calories": 338.75,
+          "carbs": 41.5,
+          "fat": 13.12,
+          "protein": 13.5,
+          "fiber": 2.75
+        }
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Use the full prepared thick-crust cheese-pizza profile as the Deep dish style variant. This is not a crust-only component.",
+        "reason": "USDA record matches the selected prepared thick-crust cheese-pizza style; restaurant and homemade recipes vary.",
+        "sources": [
+          {
+            "name": "Chase Food pizza composition and option structure",
+            "path": "data/chase-food/workbook.json",
+            "section": "Foods, nutritionProfiles, and suggestedAdditions"
+          }
+        ]
+      }
     }
   },
   "schemaVersion": 1

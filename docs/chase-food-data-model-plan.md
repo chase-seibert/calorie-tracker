@@ -75,6 +75,17 @@ the difference from their default-selected state. A `variant` option replaces
 the canonical profile at the selected portion weight, then appears as a logged
 component when it is not the canonical base itself.
 
+`amount_grams` on an included component or addition is the component mass for
+one defined parent serving. It is not the component food's default serving
+size. Convert the logged parent quantity to parent-serving equivalents, then
+scale the option nutrients by that factor. This keeps toppings proportional
+when a parent is logged as multiple slices, ounces, grams, cups, or other
+supported units. The selected parent portion supplies the conversion basis; if
+distinct parent sizes have different recipes or topping coverage, store
+size-specific component amounts or a documented size-scaling rule. Do not
+scale companion foods with the parent: each companion retains its own amount
+and diary entry.
+
 The stable catalog identity is `chaseFood:<sourceID>` (for example,
 `chaseFood:food_burger`). Add Chase Food to `FoodCatalogIdentity` wherever
 catalog identities must be resolved or customized. Preserve current USDA and
