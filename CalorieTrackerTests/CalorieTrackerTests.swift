@@ -3362,6 +3362,41 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(store.preference(for: butter), QuantityPreference(amount: 2, unit: .grams))
     }
 
+    func testCustomizationPreferenceKeepsDisplayedUnitsAndRepairsMissingServingPortion() {
+        let food = Food(
+            sourceID: "preference-unit-food",
+            source: .chaseFood,
+            name: "Preference unit food",
+            brand: nil,
+            barcode: nil,
+            nutrients: MacroNutrients(calories: 100, carbs: 10, fat: 2, protein: 5),
+            baseAmountGrams: 100,
+            servingGrams: 50,
+            servingDescription: "small",
+            portions: [
+                FoodPortion(id: "small", label: "small", grams: 50),
+                FoodPortion(id: "large", label: "large", grams: 100)
+            ]
+        )
+
+        XCTAssertEqual(
+            FoodCustomizationPreference.resolved(QuantityPreference(amount: 35, unit: .grams), for: food),
+            QuantityPreference(amount: 35, unit: .grams)
+        )
+        XCTAssertEqual(
+            FoodCustomizationPreference.resolved(QuantityPreference(amount: 2.5, unit: .ounces), for: food),
+            QuantityPreference(amount: 2.5, unit: .ounces)
+        )
+        XCTAssertEqual(
+            FoodCustomizationPreference.resolved(QuantityPreference(amount: 2, unit: .serving, portionID: "large"), for: food),
+            QuantityPreference(amount: 2, unit: .serving, portionID: "large")
+        )
+        XCTAssertEqual(
+            FoodCustomizationPreference.resolved(QuantityPreference(amount: 3, unit: .serving, portionID: "retired"), for: food),
+            QuantityPreference(amount: 3, unit: .serving, portionID: "small")
+        )
+    }
+
     @MainActor
     func testQuickLogUsesDisplayedPreferenceAndFavoritesRemainAvailable() throws {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)

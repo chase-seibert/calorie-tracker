@@ -8,6 +8,7 @@ struct FoodPickerView: View {
         let id = UUID()
         let food: Food
         var configuration: SavedFoodConfiguration? = nil
+        var preference: QuantityPreference? = nil
     }
 
     enum Mode: String, CaseIterable, Identifiable {
@@ -89,7 +90,7 @@ struct FoodPickerView: View {
                             results: results,
                             isSearching: isSearching,
                             onQuickLogFood: quickLog,
-                            onEditFood: { editFood($0) },
+                            onEditFood: { food, preference in editFood(food, preference: preference) },
                             onQuickLogConfiguration: quickLogConfiguration,
                             onEditConfiguration: editConfiguration,
                             onQuickLogMeal: logMeal,
@@ -147,7 +148,7 @@ struct FoodPickerView: View {
                             case .meals:
                                 FoodPickerList(title: "Meals", emptyTitle: "No meals", emptyMessage: "Save a meal to find it here.",
                                     items: eligible(diary.document.meals.map { .meal($0) }), onQuickLogFood: quickLog,
-                                    onEditFood: editFood, onQuickLogMeal: logMeal, onEditMeal: editMeal, onDeleteMeal: deleteMeal, actionTitle: componentSelection == nil ? "Quick add" : "Add", allowsDelete: componentSelection == nil)
+                                    onEditFood: { editFood($0) }, onQuickLogMeal: logMeal, onEditMeal: editMeal, onDeleteMeal: deleteMeal, actionTitle: componentSelection == nil ? "Quick add" : "Add", allowsDelete: componentSelection == nil)
                             }
                         } else {
                             magicSuggestionsContent
@@ -175,13 +176,15 @@ struct FoodPickerView: View {
                 if let componentSelection {
                     FoodDetailView(item: MealItem(id: UUID(), food: food, amount: 1, unit: .serving,
                         portionID: food.availablePortions.first?.id), catalog: catalog, date: date,
-                        initialConfiguration: selection.configuration, isNewSelection: true) { item in
+                        initialConfiguration: selection.configuration, initialPreference: selection.preference,
+                        isNewSelection: true) { item in
                         componentSelection.onSelect([item])
                         selectedFood = nil
                         dismiss()
                     }
                 } else {
-                    FoodDetailView(food: food, catalog: catalog, date: date, initialConfiguration: selection.configuration) { preference, defaultPreference in
+                    FoodDetailView(food: food, catalog: catalog, date: date,
+                        initialConfiguration: selection.configuration, initialPreference: selection.preference) { preference, defaultPreference in
                         markCurrentSearchLogged()
                         captureFoodLog(food: food, method: "quantity_editor", unit: preference.unit, portionID: preference.portionID,
                             defaultUnit: defaultPreference?.unit, defaultPortionID: defaultPreference?.portionID)
@@ -358,7 +361,7 @@ struct FoodPickerView: View {
             suggestions: magicSuggestionsSnapshot,
             hasExcludedMatches: magicHasExcludedMatchesSnapshot,
             onQuickLog: logMagicSuggestion,
-            onOpenFood: editFood,
+            onOpenFood: { editFood($0) },
             onOpenMeal: editMeal
         )
     }
@@ -386,9 +389,9 @@ struct FoodPickerView: View {
         }
     }
 
-    private func editFood(_ food: Food) {
+    private func editFood(_ food: Food, preference: QuantityPreference? = nil) {
         searchIsFocused = false
-        selectedFood = FoodSelection(food: food)
+        selectedFood = FoodSelection(food: food, preference: preference ?? diary.preference(for: food))
     }
 
     private func editMeal(_ meal: SavedMeal) {
@@ -1138,7 +1141,7 @@ private struct SearchResultsList: View {
     let results: [FoodPickerItem]
     let isSearching: Bool
     let onQuickLogFood: (Food) -> Void
-    let onEditFood: (Food) -> Void
+    let onEditFood: (Food, QuantityPreference) -> Void
     let onQuickLogConfiguration: (Food, SavedFoodConfiguration) -> Void
     let onEditConfiguration: (Food, SavedFoodConfiguration) -> Void
     let onQuickLogMeal: (SavedMeal) -> Void
@@ -1174,10 +1177,11 @@ private struct SearchResultsList: View {
                     ForEach(results) { item in
                         switch item {
                         case .food(let food):
+                            let preference = diary.preference(for: food)
                             VStack(alignment: .leading, spacing: 3) {
                                 FoodResultRow(
                                     food: food,
-                                    preference: diary.preference(for: food),
+                                    preference: preference,
                                     actionTitle: componentMode ? "Add" : "Quick add",
                                     action: {
                                         onSearchResultSelected(.food(food))
@@ -1185,7 +1189,7 @@ private struct SearchResultsList: View {
                                     },
                                     openAction: {
                                         onSearchResultSelected(.food(food))
-                                        onEditFood(food)
+                                        onEditFood(food, preference)
                                     }
                                 )
                                 ForEach(savedVariations(for: food)) { configuration in

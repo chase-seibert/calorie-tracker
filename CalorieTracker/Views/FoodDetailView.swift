@@ -1,6 +1,16 @@
 import SwiftUI
 import UIKit
 
+enum FoodCustomizationPreference {
+    static func resolved(_ preference: QuantityPreference, for food: Food) -> QuantityPreference {
+        guard preference.unit == .serving else { return preference }
+        let fallbackPortion = food.availablePortions.first { $0.id == preference.portionID }
+            ?? food.availablePortions.first
+        guard fallbackPortion?.id != preference.portionID else { return preference }
+        return QuantityPreference(amount: preference.amount, unit: .serving, portionID: fallbackPortion?.id)
+    }
+}
+
 private struct ChaseFoodOptionGroup: Identifiable {
     let name: String
     let selectionMode: String
@@ -16,6 +26,7 @@ struct FoodCustomizationView: View {
     let catalog: CatalogStore
     let date: Date
     let initialConfiguration: SavedFoodConfiguration?
+    let initialPreference: QuantityPreference?
     @State private var selectedOptionIDs: Set<String>
     @State private var originalEntry: DiaryEntry?
     private let originalComponent: MealItem?
@@ -46,6 +57,7 @@ struct FoodCustomizationView: View {
     @State private var removedLegacyBurgerFries = false
 
     init(food: Food, catalog: CatalogStore, date: Date, initialConfiguration: SavedFoodConfiguration? = nil,
+         initialPreference: QuantityPreference? = nil,
          entry: DiaryEntry? = nil, component: MealItem? = nil, isNewComponent: Bool = false, onComponentSaved: ((MealItem) -> Void)? = nil,
          onLogged: @escaping (QuantityPreference, QuantityPreference?) -> Void = { _, _ in }) {
         let snapshot = entry?.foodConfigurationSnapshot ?? component?.foodConfigurationSnapshot ?? initialConfiguration?.snapshot
@@ -54,11 +66,16 @@ struct FoodCustomizationView: View {
         let needsLegacyRebuild = isHistorical && (snapshot != nil || historicalBase.source == .chaseFood) && snapshot?.hasEditorInputs != true
         let currentCatalogFood = needsLegacyRebuild ? catalog.food(sourceID: historicalBase.sourceID, source: historicalBase.source) : nil
         let base = currentCatalogFood ?? historicalBase
+        let canUseInitialPreference = entry == nil && initialConfiguration == nil && (component == nil || isNewComponent)
+        let quantityPreference = canUseInitialPreference
+            ? initialPreference.map { FoodCustomizationPreference.resolved($0, for: base) }
+            : nil
         _food = State(initialValue: base)
         _notes = State(initialValue: component?.notes)
         self.catalog = catalog
         self.date = date
         self.initialConfiguration = initialConfiguration
+        self.initialPreference = quantityPreference
         _selectedVariationID = State(initialValue: initialConfiguration?.id)
         _originalEntry = State(initialValue: entry)
         self.originalComponent = component
@@ -91,14 +108,17 @@ struct FoodCustomizationView: View {
             initialPortionID = base.portion(id: historicalPortionID) != nil ? historicalPortionID : base.availablePortions.first?.id ?? historicalPortionID
         }
         else if let configuration = initialConfiguration { initialPortionID = configuration.portionID ?? "" }
+        else if let quantityPreference, quantityPreference.unit == .serving {
+            initialPortionID = quantityPreference.portionID ?? base.availablePortions.first?.id ?? ""
+        }
         else if let component { initialPortionID = component.portionID ?? "" }
         else { initialPortionID = initialConfiguration?.portionID ?? base.availablePortions.first?.id ?? "" }
         _portionID = State(initialValue: initialPortionID)
-        _initialQuantityPreference = State(initialValue: entry == nil && component == nil
-            ? QuantityPreference(amount: 1, unit: .serving, portionID: initialPortionID.isEmpty ? nil : initialPortionID) : nil)
-        let unit = entry?.unit ?? component?.unit ?? .serving
+        _initialQuantityPreference = State(initialValue: quantityPreference ?? (entry == nil && component == nil
+            ? QuantityPreference(amount: 1, unit: .serving, portionID: initialPortionID.isEmpty ? nil : initialPortionID) : nil))
+        let unit = entry?.unit ?? quantityPreference?.unit ?? component?.unit ?? .serving
         _unitChoice = State(initialValue: unit == .grams ? .grams : unit == .ounces ? .ounces : .portion(initialPortionID))
-        _amount = State(initialValue: entry?.amount ?? component?.amount ?? 1)
+        _amount = State(initialValue: entry?.amount ?? quantityPreference?.amount ?? component?.amount ?? 1)
         _processedMeatOverride = State(initialValue: entry?.processedMeatOverride ?? component?.processedMeatOverride)
         _redMeatOverride = State(initialValue: entry?.redMeatOverride ?? component?.redMeatOverride)
     }
@@ -279,9 +299,10 @@ struct FoodCustomizationView: View {
                     }
             }
             .onAppear {
-                guard originalEntry == nil, originalComponent == nil, initialConfiguration == nil, food.source != .chaseFood, !didLoadPreference else { return }
+                guard originalEntry == nil, originalComponent == nil, initialConfiguration == nil,
+                      initialPreference == nil, food.source != .chaseFood, !didLoadPreference else { return }
                 didLoadPreference = true
-                let preference = diary.preference(for: food)
+                let preference = FoodCustomizationPreference.resolved(diary.preference(for: food), for: food)
                 initialQuantityPreference = preference
                 amount = preference.amount; portionID = preference.portionID ?? ""
                 unitChoice = preference.unit == .grams ? .grams : preference.unit == .ounces ? .ounces : .portion(portionID)
@@ -711,36 +732,39 @@ struct FoodCustomizationView: View {
 /// Search, diary, variations and parent drafts all resolve food capabilities here.
 struct FoodDetailView: View {
     enum Context {
-        case log(Food, Date, SavedFoodConfiguration?, (QuantityPreference, QuantityPreference?) -> Void)
+        case log(Food, Date, SavedFoodConfiguration?, QuantityPreference?, (QuantityPreference, QuantityPreference?) -> Void)
         case logged(DiaryEntry)
-        case component(MealItem, Date, SavedFoodConfiguration?, Bool, (MealItem) -> Void)
+        case component(MealItem, Date, SavedFoodConfiguration?, QuantityPreference?, Bool, (MealItem) -> Void)
     }
     let context: Context
     let catalog: CatalogStore
 
     init(food: Food, catalog: CatalogStore, date: Date, initialConfiguration: SavedFoodConfiguration? = nil,
+         initialPreference: QuantityPreference? = nil,
          onLogged: @escaping (QuantityPreference, QuantityPreference?) -> Void = { _, _ in }) {
-        self.context = .log(food, date, initialConfiguration, onLogged)
+        self.context = .log(food, date, initialConfiguration, initialPreference, onLogged)
         self.catalog = catalog
     }
     init(entry: DiaryEntry, catalog: CatalogStore) { context = .logged(entry); self.catalog = catalog }
-    init(item: MealItem, catalog: CatalogStore, date: Date, initialConfiguration: SavedFoodConfiguration? = nil, isNewSelection: Bool = false,
+    init(item: MealItem, catalog: CatalogStore, date: Date, initialConfiguration: SavedFoodConfiguration? = nil,
+         initialPreference: QuantityPreference? = nil, isNewSelection: Bool = false,
          onSave: @escaping (MealItem) -> Void) {
-        context = .component(item, date, initialConfiguration, isNewSelection, onSave)
+        context = .component(item, date, initialConfiguration, initialPreference, isNewSelection, onSave)
         self.catalog = catalog
     }
 
     var body: some View {
         Group {
             switch context {
-            case let .log(food, date, configuration, onLogged):
+            case let .log(food, date, configuration, preference, onLogged):
                 FoodCustomizationView(food: food, catalog: catalog, date: date,
-                    initialConfiguration: configuration, onLogged: onLogged)
+                    initialConfiguration: configuration, initialPreference: preference, onLogged: onLogged)
             case .logged(let entry):
                 FoodCustomizationView(food: entry.food, catalog: catalog, date: entry.date, entry: entry)
-            case let .component(item, date, configuration, isNew, onSave):
+            case let .component(item, date, configuration, preference, isNew, onSave):
                 FoodCustomizationView(food: item.food, catalog: catalog, date: date,
-                    initialConfiguration: configuration, component: item, isNewComponent: isNew, onComponentSaved: onSave)
+                    initialConfiguration: configuration, initialPreference: preference,
+                    component: item, isNewComponent: isNew, onComponentSaved: onSave)
             }
         }
         .draftSaveError()
@@ -1129,6 +1153,7 @@ struct CustomizationEvidenceView: View {
         oneOff.mealItems = meal.items; oneOff.mealNotes = meal.notes
         plum.displayOrder = 0; packaged.displayOrder = 1; configured.displayOrder = 2; saved.displayOrder = 3; oneOff.displayOrder = 4
         document.entries = [plum, packaged, configured, saved, oneOff]
+        document.rememberedQuantities[fixture.sandwich.id] = QuantityPreference(amount: 275, unit: .grams)
         return document
     }
     var body: some View {

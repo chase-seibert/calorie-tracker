@@ -9,6 +9,36 @@ final class DeviceFixtureUITests: XCTestCase {
         app = XCUIApplication()
     }
 
+    func testSearchResultUsesRememberedChaseFoodUnitInCustomization() {
+        app.launchArguments = [
+            "-onboarding.focus.v1.completed", "YES",
+            "-foodSource.enabled.chaseFood", "YES",
+            "-foodSource.enabled.usda", "YES",
+            "-foodSource.enabled.off", "YES"
+        ]
+        app.launchEnvironment = [
+            "CALORIE_TRACKER_UNIFIED_FIXTURE": "1",
+            "CALORIE_TRACKER_FIXTURE_RESET": "1"
+        ]
+        app.launch()
+
+        let logFood = app.buttons["Log food"]
+        XCTAssertTrue(logFood.waitForExistence(timeout: 10))
+        logFood.tap()
+        let search = app.textFields["Search foods"]
+        XCTAssertTrue(search.waitForExistence(timeout: 5))
+        search.tap()
+        search.typeText("sandwich")
+        let result = app.buttons["customize-food-chaseFood:food_sandwich"]
+        XCTAssertTrue(result.waitForExistence(timeout: 10))
+        result.tap()
+
+        let unit = app.buttons["custom-food-unit-picker"]
+        XCTAssertTrue(unit.waitForExistence(timeout: 5))
+        XCTAssertEqual(unit.value as? String, "grams")
+        XCTAssertEqual(app.textFields["custom-food-quantity-value"].value as? String, "275")
+    }
+
     func testDeviceFixtureShowsRelativeDays() {
         app.launchArguments = ["--show-scrolled-diary", "-onboarding.focus.v1.completed", "YES"]
         app.launchEnvironment = [
@@ -358,6 +388,11 @@ final class DeviceFixtureUITests: XCTestCase {
         for (query, id, filename) in foods {
             launch(); open(query, id: id)
             XCTAssertFalse(app.buttons["customization-edit-title"].exists, "The title should use Rename in the actions menu")
+            if filename == "yum-chase-configured-log" {
+                XCTAssertEqual(app.buttons["custom-food-unit-picker"].value as? String, "grams",
+                    "Search customization should start with the same remembered unit as its result row.")
+                XCTAssertEqual(app.textFields["custom-food-quantity-value"].value as? String, "275")
+            }
             if filename == "usda-weight-log" {
                 visibleButton("custom-food-unit-picker").tap(); app.buttons["grams"].tap()
             }
