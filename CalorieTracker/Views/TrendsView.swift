@@ -49,6 +49,10 @@ struct TrendsView: View {
         diary.weeklyMeatServings(numberOfDays: trendDays)
     }
 
+    private var meatWeekLabels: [String] {
+        weeklyMeatPoints.map(meatWeekLabel(for:))
+    }
+
     private var maximumMeatServings: Double {
         max(
             recommendedRedMeatServingsPerWeek,
@@ -163,7 +167,7 @@ struct TrendsView: View {
                 ForEach(weeklyMeatPoints) { point in
                     if tracksProcessedMeat {
                         BarMark(
-                            x: .value("Week", point.weekStart, unit: .weekOfYear),
+                            x: .value("Week", meatWeekLabel(for: point)),
                             y: .value("Servings", point.processedMeatServings)
                         )
                         .position(by: .value("Meat type", "Processed meat"))
@@ -174,7 +178,7 @@ struct TrendsView: View {
 
                     if tracksRedMeat {
                         BarMark(
-                            x: .value("Week", point.weekStart, unit: .weekOfYear),
+                            x: .value("Week", meatWeekLabel(for: point)),
                             y: .value("Servings", point.redMeatServings)
                         )
                         .position(by: .value("Meat type", "Red meat"))
@@ -194,16 +198,29 @@ struct TrendsView: View {
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [2, 3]))
                 }
             }
-            .chartXScale(domain: trendDateRange)
+            .chartXScale(domain: meatWeekLabels)
             .chartYScale(domain: 0...maximumMeatServings)
             .chartYAxis {
                 AxisMarks(values: .automatic(desiredCount: 4))
             }
             .chartXAxis {
-                AxisMarks(values: .automatic(desiredCount: 4)) { value in
+                AxisMarks(values: meatWeekLabels) { value in
                     AxisGridLine().foregroundStyle(.clear)
-                    AxisValueLabel(format: .dateTime.month(.abbreviated).day())
+                    AxisValueLabel {
+                        if let label = value.as(String.self) {
+                            Text(label)
+                                .font(.caption2)
+                                .multilineTextAlignment(.center)
+                                .lineLimit(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .minimumScaleFactor(0.8)
+                                .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                        }
+                    }
                 }
+            }
+            .chartPlotStyle { plot in
+                plot.clipped()
             }
             .chartOverlay { proxy in
                 GeometryReader { geometry in
@@ -269,18 +286,32 @@ struct TrendsView: View {
         let xPosition = location.x - plotRect.origin.x
         guard xPosition >= 0,
               xPosition <= plotRect.width,
-              let selectedDate: Date = proxy.value(atX: xPosition),
-              let week = weeklyMeatPoints.min(by: {
-                  guard let left = proxy.position(forX: $0.weekStart),
-                        let right = proxy.position(forX: $1.weekStart)
-                  else {
-                      return abs($0.weekStart.timeIntervalSince(selectedDate))
-                          < abs($1.weekStart.timeIntervalSince(selectedDate))
-                  }
-                  return abs(left - xPosition) < abs(right - xPosition)
-              })
+              let label = proxy.value(atX: xPosition, as: String.self),
+              let weekIndex = meatWeekLabels.firstIndex(of: label),
+              weeklyMeatPoints.indices.contains(weekIndex)
         else { return }
-        selectedMeatWeek = week
+        selectedMeatWeek = weeklyMeatPoints[weekIndex]
+    }
+
+    private func meatWeekLabel(for week: WeeklyMeatServings) -> String {
+        let calendar = Calendar.current
+        guard let firstDate = points.first?.date,
+              let lastDate = points.last?.date
+        else {
+            return week.weekStart.formatted(.dateTime.month(.abbreviated).day())
+        }
+
+        let start = max(week.weekStart, firstDate)
+        let end = min(week.weekEnd, lastDate)
+        let startMonth = start.formatted(.dateTime.month(.abbreviated))
+        let endMonth = end.formatted(.dateTime.month(.abbreviated))
+        let startDay = calendar.component(.day, from: start)
+        let endDay = calendar.component(.day, from: end)
+
+        if calendar.isDate(start, equalTo: end, toGranularity: .month) {
+            return "\(startMonth)\n\(startDay)–\(endDay)"
+        }
+        return "\(startMonth) \(startDay)–\n\(endMonth) \(endDay)"
     }
 
     private func meatDays(in week: WeeklyMeatServings) -> [MeatDayFoods] {
