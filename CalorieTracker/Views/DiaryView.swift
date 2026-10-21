@@ -197,11 +197,12 @@ struct DiaryView: View {
                             } label: {
                                 Image(systemName: "plus")
                                     .font(.title3.weight(.semibold))
-                                    .frame(width: 56, height: 56)
                             }
                             .buttonStyle(.bordered)
                             .buttonBorderShape(.circle)
                             .controlSize(.large)
+                            .frame(width: 56, height: 56)
+                            .tint(AppTheme.coral)
                             .disabled(selectedEntryIDs.isEmpty)
                             .accessibilityLabel("Create Meal")
                             .accessibilityHint("Create a meal from selected items")
@@ -210,14 +211,13 @@ struct DiaryView: View {
                                 showingDeleteConfirmation = true
                             } label: {
                                 Image(systemName: "trash")
-                                    .font(.headline.weight(.semibold))
-                                    .frame(width: 24, height: 24)
+                                    .font(.title3.weight(.semibold))
                             }
                             .buttonStyle(.bordered)
                             .buttonBorderShape(.circle)
                             .controlSize(.large)
                             .frame(width: 56, height: 56)
-                            .tint(.red)
+                            .tint(AppTheme.coral)
                             .disabled(selectedEntryIDs.isEmpty)
                             .accessibilityLabel("Delete")
                             .accessibilityHint("Delete selected items")
