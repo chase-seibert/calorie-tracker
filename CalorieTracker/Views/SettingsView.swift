@@ -100,6 +100,19 @@ struct SettingsView: View {
                 }
             }
 
+            Section("Reports") {
+                NavigationLink {
+                    WeeklyFoodReportView()
+                } label: {
+                    Label("Weekly Food Report", systemImage: "chart.bar.doc.horizontal")
+                }
+                NavigationLink {
+                    WeeklyFoodReportSettingsView()
+                } label: {
+                    Label("Weekly Report Settings", systemImage: "slider.horizontal.3")
+                }
+            }
+
             Section("Data & Privacy") {
                 NavigationLink {
                     PrivacyAnalyticsView()
@@ -459,7 +472,7 @@ private struct PrivacyAnalyticsView: View {
             Section("Analytics") {
                 Text("When analytics is enabled, the app sends feature-usage events, catalog or local item identifiers, successful and failed food search terms, searches dismissed without logging, and unmatched barcodes to its private analytics service. If you submit food feedback, the text you enter is also sent with that event.")
                     .foregroundStyle(.secondary)
-                Label("Diary food names, meal contents, quantities, calorie totals, and Health data are not sent. Food feedback text is sent only when you submit it.", systemImage: "checkmark.shield.fill")
+                Label("Analytics do not include diary food names, meal contents, quantities, calorie totals, or Health data. If you generate an AI weekly report, its settings explain the limited diary summary and repeated food names sent for that request. Food feedback text is sent only when you submit it.", systemImage: "checkmark.shield.fill")
                     .foregroundStyle(AppTheme.protein)
             }
         }
@@ -491,9 +504,32 @@ private struct PrivacyAnalyticsView: View {
     @State private var databaseTransferMessage: String?
     @State private var databaseTransferError: String?
     @State private var isTransferringDatabase = false
+    @StateObject private var weeklyReport = WeeklyReportCoordinator.shared
+    @State private var showingWeeklyReport = false
 
     var body: some View {
         List {
+            Section("Weekly Report") {
+                Button {
+                    Task {
+                        do {
+                            let document = try await diary.weeklyReportDocument()
+                            await weeklyReport.generate(document: document, force: true)
+                            if weeklyReport.report != nil, weeklyReport.errorMessage == nil {
+                                showingWeeklyReport = true
+                            }
+                        } catch {
+                            weeklyReport.errorMessage = error.localizedDescription
+                        }
+                    }
+                } label: {
+                    Label(weeklyReport.isGenerating ? "Generating Weekly Report…" : "Generate Weekly Report Now", systemImage: "sparkles")
+                }
+                .disabled(weeklyReport.isGenerating)
+                if let message = weeklyReport.statusMessage { Text(message).font(.footnote).foregroundStyle(.secondary) }
+                if let message = weeklyReport.errorMessage { Text(message).font(.footnote).foregroundStyle(.red) }
+            }
+
             Section {
                 NavigationLink {
                     ExperimentalFeaturesView()
@@ -524,6 +560,9 @@ private struct PrivacyAnalyticsView: View {
         .navigationTitle("Developer Diagnostics")
         .navigationBarTitleDisplayMode(.inline)
         .analyticsScreen("developer_diagnostics")
+        .navigationDestination(isPresented: $showingWeeklyReport) {
+            WeeklyFoodReportView()
+        }
         .alert("Reset first-time onboarding?", isPresented: $showingOnboardingResetConfirmation) {
             Button("Reset", role: .destructive) {
                 tracksAlcohol = true

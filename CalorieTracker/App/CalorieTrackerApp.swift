@@ -53,6 +53,9 @@ struct CalorieTrackerApp: App {
                     // Share the existing app preference with widget/Siri on the first SQLite launch.
                     LoggingPreferences.lastWeightUnit = LoggingPreferences.lastWeightUnit
                     FirstTimeOnboarding.prepareForLaunch(document: diary.document)
+                    WeeklyReportBackground.diaryStore = diary
+                    WeeklyReportBackground.scheduleIfEnabled()
+                    await WeeklyReportBackground.runForegroundCatchUp()
                     hasPreparedLaunch = true
                     HomeScreenQuickActions.update(document: diary.document)
                     await analytics.start()
@@ -61,6 +64,8 @@ struct CalorieTrackerApp: App {
                 .onChange(of: scenePhase) { _, phase in
                     switch phase {
                     case .active:
+                        WeeklyReportBackground.diaryStore = diary
+                        WeeklyReportBackground.scheduleIfEnabled()
                         guard !diary.isLoading else { return }
                         Task {
                             await diary.reloadFromDisk()

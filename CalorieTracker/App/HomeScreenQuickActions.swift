@@ -1,5 +1,7 @@
 import Combine
+import BackgroundTasks
 import UIKit
+import UserNotifications
 
 struct HomeScreenQuickActionRequest: Equatable, Identifiable {
     let id = UUID()
@@ -53,6 +55,8 @@ final class VitaChaseAppDelegate: NSObject, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
+        WeeklyReportBackground.register()
+        UNUserNotificationCenter.current().delegate = WeeklyReportNotificationDelegate.shared
         if let shortcutItem = launchOptions?[.shortcutItem] as? UIApplicationShortcutItem {
             Task { @MainActor in
                 _ = HomeScreenQuickActionRouter.shared.receive(shortcutItem)

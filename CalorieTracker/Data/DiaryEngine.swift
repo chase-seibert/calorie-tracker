@@ -207,7 +207,7 @@ final class DiaryEngine {
         }
     }
 
-    private func meatServings(on date: Date) -> (processed: Double, red: Double) {
+    func meatServings(on date: Date) -> (processed: Double, red: Double) {
         var processed = 0.0
         var red = 0.0
 

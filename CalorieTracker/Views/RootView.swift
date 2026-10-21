@@ -10,6 +10,7 @@ struct RootView: View {
     @State private var importRequest: ImportRequest?
     @State private var importError: String?
     @State private var homeViewID = UUID()
+    @State private var showingWeeklyReport = false
 
     var body: some View {
         DiaryView(catalog: catalog, foodPickerLaunch: $foodPickerLaunch)
@@ -51,6 +52,13 @@ struct RootView: View {
             .sheet(item: $importRequest) { request in
                 CustomMealImportView(file: request.file)
             }
+            .fullScreenCover(isPresented: $showingWeeklyReport) {
+                NavigationStack {
+                    WeeklyFoodReportView()
+                        .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { showingWeeklyReport = false } } }
+                }
+                .environmentObject(diary)
+            }
             .alert(
                 "Couldn’t Import File",
                 isPresented: Binding(
@@ -86,6 +94,10 @@ struct RootView: View {
         if VitaChaseDeepLink(url: url) == .logFood {
             foodPickerLaunch = .search
             AppAnalytics.capture("widget.opened_log_food")
+            return
+        }
+        if VitaChaseDeepLink(url: url) == .weeklyReport {
+            showingWeeklyReport = true
             return
         }
         openImportFile(url)

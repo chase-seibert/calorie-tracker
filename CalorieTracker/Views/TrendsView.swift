@@ -11,10 +11,9 @@ struct TrendsView: View {
     @State private var classificationReviewCount = 0
 
     private let trendDays = 30
-    private let fiberGramsPerThousandCalories = 14.0
-    private let recommendedAlcoholDrinksPerDay = 2.0
+    private let recommendedAlcoholDrinksPerDay = WeeklyReportPolicy.alcoholDrinksPerDayGuidance
     private let recommendedRedMeatServingsPerWeek = 3.0
-    private let recommendedProcessedMeatServingsPerWeek = 0.0
+    private let recommendedProcessedMeatServingsPerWeek = WeeklyReportPolicy.processedMeatServingsPerWeekGuidance
 
     private var points: [TrendPoint] {
         diary.totalsByDay(numberOfDays: trendDays).map { total in
@@ -62,7 +61,7 @@ struct TrendsView: View {
 
     private var recommendedFiberGrams: Double {
         let calorieBaseline = diary.dailyCalorieGoal ?? 2_000
-        return Double(calorieBaseline) / 1_000 * fiberGramsPerThousandCalories
+        return Double(calorieBaseline) / 1_000 * WeeklyReportPolicy.fiberGramsPerThousandCaloriesGuidance
     }
 
     var body: some View {
@@ -102,6 +101,12 @@ struct TrendsView: View {
                     FoodWeightReportView()
                 } label: {
                     Label("Food Weight Report", systemImage: "doc.text")
+                }
+
+                NavigationLink {
+                    WeeklyFoodReportView()
+                } label: {
+                    Label("Weekly Food Report", systemImage: "chart.bar.doc.horizontal")
                 }
             }
         }

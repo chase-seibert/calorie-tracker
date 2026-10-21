@@ -42,6 +42,37 @@ chooses Analyze Photo. A retry is a new billable request. This direct
 client-key design is for private deployment; use an authenticated backend before
 distributing the app to other users.
 
+## Weekly food reports
+
+Open **Settings → Reports** to edit the report prompt, choose OpenAI or Apple's
+on-device Foundation Model, enable Sunday background refresh, and open the
+latest report. Manual generation can replace the report even when this week's
+version is already saved; automatic generation reuses that version. Local-model
+availability requires a supported Apple Intelligence device running iOS 26 or
+later. The local route keeps the diary summary, food names, and prompt on the
+device and does not use the OpenAI API key. The latest completed seven days
+remain the primary report week; two preceding completed weeks provide trend
+context. Generation runs only when food or meal entries appear on at least
+three distinct days in the latest week. The summary compares calories, protein,
+known fiber, explicitly marked cheat-day and gap-day frequency, and the calorie
+overage on each marked cheat day. It also highlights single foods by calories,
+fiber, and protein across the three-week window. Fiber quantities are rounded
+to at most two decimal places. Empty unmarked days are not counted as gaps, and
+unknown nutrient values remain unknown. Enabled guidance follows Trends: up to 2 drinks per
+day, 0 processed-meat servings per week, and 14 g of fiber per 1,000 calories.
+HealthKit data and diary notes are excluded. Debug builds use the same
+Keychain API key configured in **Settings → Connections → OpenAI API**; each
+successful request may incur OpenAI API charges. Do not use a client API key as
+the access control for a paid distributed product. Release requests stay
+disabled until the authenticated, paid backend is implemented.
+
+Background refresh is scheduled for Sunday morning in the current time zone,
+but iOS controls when or whether the task runs. The app may generate late or
+skip a week if the system does not grant runtime. Notification permission is
+requested when automatic reports are enabled; the notification is submitted
+only after the report is saved. You can also create a report on demand from the
+Debug-only **Settings → Developer → Developer Diagnostics** action.
+
 To use a standalone SQLite export from the phone as the simulator's diary,
 run:
 

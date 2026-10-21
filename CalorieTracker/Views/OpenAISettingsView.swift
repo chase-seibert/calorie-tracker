@@ -35,7 +35,7 @@ struct OpenAISettingsView: View {
             } header: {
                 Text("OpenAI API")
             } footer: {
-                Text("The key is stored in this device’s Keychain and is used only when you explicitly analyze a meal. Saving a key does not contact OpenAI. The ChatGPT subscription is separate from API billing.")
+                Text("The key is stored in this device’s Keychain. It is used when you explicitly analyze a meal and, in Debug builds, when you generate a weekly report. Saving a key does not contact OpenAI. The ChatGPT subscription is separate from API billing.")
             }
 
             Section("Privacy and billing") {

@@ -1140,6 +1140,16 @@ class DiaryStore: ObservableObject {
     }
 
     var dailyCalorieGoal: Int? { engine.dailyCalorieGoal }
+
+    func weeklyReportDocument(referenceDate: Date = Date()) async throws -> DiaryDocument {
+        let calendar = self.calendar
+        let today = calendar.startOfDay(for: referenceDate)
+        guard let end = calendar.date(byAdding: .day, value: 0, to: today),
+              let start = calendar.date(byAdding: .day, value: -7, to: today) else {
+            throw DiaryDatabaseError.invalidData("Could not calculate the local report week.")
+        }
+        return try await (try await open()).snapshot(scope: .range(start, end)).document
+    }
     var favoriteMeals: [SavedMeal] { engine.favoriteMeals }
     var favoriteItems: [FoodPickerItem] { engine.favoriteItems }
     var alphabetizedMeals: [SavedMeal] { engine.alphabetizedMeals }

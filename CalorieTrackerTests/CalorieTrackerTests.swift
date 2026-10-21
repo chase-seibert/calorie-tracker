@@ -3,6 +3,112 @@ import XCTest
 @testable import CalorieTracker
 
 final class CalorieTrackerTests: XCTestCase {
+    func testWeeklyReportManualRegenerationBypassesSameWeekCache() throws {
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: "WeeklyReportProviderTests-\(UUID().uuidString)"))
+        XCTAssertFalse(WeeklyReportPolicy.usesOnDeviceModel(defaults: defaults))
+        defaults.set(true, forKey: WeeklyReportPolicy.useOnDeviceModelKey)
+        XCTAssertTrue(WeeklyReportPolicy.usesOnDeviceModel(defaults: defaults))
+        XCTAssertTrue(WeeklyReportPolicy.shouldReuseCachedReport(cachedWeekKey: "week-1", requestedWeekKey: "week-1", force: false))
+        XCTAssertFalse(WeeklyReportPolicy.shouldReuseCachedReport(cachedWeekKey: "week-1", requestedWeekKey: "week-1", force: true))
+        XCTAssertFalse(WeeklyReportPolicy.shouldReuseCachedReport(cachedWeekKey: "week-1", requestedWeekKey: "week-2", force: false))
+    }
+
+    func testWeeklyReportUsesSevenCompletedLocalDaysAndCountsDistinctFoodDays() throws {
+        let calendar = testCalendar
+        let referenceDate = testDate(day: 10)
+        var document = DiaryDocument()
+        document.dailyCalorieGoal = 2_000
+        document.entries = [
+            testEntry(calories: 500, date: testDate(day: 3), name: "Oat bowl"),
+            testEntry(calories: 700, date: testDate(day: 3), name: "Oat bowl"),
+            testEntry(calories: 800, date: testDate(day: 5), name: "Oat bowl"),
+            testEntry(calories: 1_000, date: testDate(day: 9), name: "Oat bowl"),
+            testEntry(calories: 4_000, date: testDate(day: 2), name: "Outside week")
+        ]
+        document.alcoholEntries = [AlcoholEntry(id: UUID(), date: testDate(day: 5), drinks: 2, type: nil, loggedAt: testDate(day: 5))]
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: "WeeklyReportTests-\(UUID().uuidString)"))
+        defaults.set(true, forKey: WeeklyReportPolicy.tracksAlcoholKey)
+        defaults.set(false, forKey: WeeklyReportPolicy.tracksProcessedMeatKey)
+        defaults.set(true, forKey: WeeklyReportPolicy.tracksFiberKey)
+
+        let (input, start, end) = WeeklyReportBuilder.makeInput(
+            document: document, referenceDate: referenceDate, calendar: calendar, defaults: defaults)
+
+        XCTAssertEqual(input.days.count, 7)
+        XCTAssertEqual(input.startDate, "2026-07-03")
+        XCTAssertEqual(input.endDate, "2026-07-09")
+        XCTAssertEqual(end, testDate(day: 9))
+        XCTAssertEqual(input.loggedDays, 3)
+        XCTAssertEqual(input.days.first?.calories, 1_200)
+        XCTAssertEqual(input.days.last?.calories, 1_000)
+        XCTAssertEqual(input.days.last?.loggedFoodCount, 1)
+        XCTAssertEqual(input.alcoholDrinksPerDayGuidance, 2)
+        XCTAssertNil(input.processedMeatServingsPerWeekGuidance)
+        XCTAssertEqual(input.fiberGramsPerDayGuidance, 28)
+        XCTAssertEqual(calendar.dateComponents([.day], from: start, to: end).day, 6)
+    }
+
+    func testWeeklyReportBuildsThreeWeekTrendsCheatOveragesAndRoundedFiber() throws {
+        let calendar = testCalendar
+        let referenceDate = testDate(day: 24)
+        var document = DiaryDocument()
+        document.dailyCalorieGoal = 2_000
+        document.trackingStartDate = testDate(day: 3)
+        var fractionalFiber = testEntry(calories: 2_600, date: testDate(day: 18), name: "High calorie snack")
+        fractionalFiber.nutrients.fiber = 16.634
+        fractionalFiber.food.nutrients.fiber = 16.634
+        var secondLog = testEntry(calories: 500, date: testDate(day: 18), name: "High calorie snack")
+        secondLog.nutrients.fiber = 0
+        secondLog.food.nutrients.fiber = 0
+        var thirdLog = testEntry(calories: 250, date: testDate(day: 20), name: "Beans")
+        thirdLog.nutrients.fiber = 9
+        thirdLog.food.nutrients.fiber = 9
+        var previousWeek = testEntry(calories: 2_100, date: testDate(day: 11), name: "Snack")
+        previousWeek.nutrients.fiber = 5
+        previousWeek.food.nutrients.fiber = 5
+        document.entries = [fractionalFiber, secondLog, thirdLog, previousWeek]
+        document.dayStatuses = [
+            DayStatus(date: testDate(day: 18), kind: .cheat, source: .manual),
+            DayStatus(date: testDate(day: 19), kind: .gap, source: .manual),
+            DayStatus(date: testDate(day: 11), kind: .cheat, source: .manual)
+        ]
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: "WeeklyReportTrendTests-\(UUID().uuidString)"))
+
+        let (input, _, _) = WeeklyReportBuilder.makeInput(document: document, referenceDate: referenceDate,
+                                                            calendar: calendar, defaults: defaults)
+
+        XCTAssertEqual(input.weeks.map(\.startDate), ["2026-07-17", "2026-07-10", "2026-07-03"])
+        XCTAssertEqual(input.weeks.map(\.availableDays), [7, 7, 7])
+        XCTAssertEqual(input.weeks[0].cheatDays, 1)
+        XCTAssertEqual(input.weeks[0].gapDays, 1)
+        XCTAssertEqual(input.weeks[1].cheatDays, 1)
+        XCTAssertEqual(input.weeks[0].cheatDayDetails.first?.caloriesAboveGoal, 1_100)
+        XCTAssertEqual(try XCTUnwrap(input.weeks[0].cheatDayDetails.first?.percentAboveGoal), 55, accuracy: 0.0001)
+        XCTAssertEqual(input.days.first(where: { $0.date == "2026-07-18" })?.fiberGrams, 16.63)
+        XCTAssertEqual(try XCTUnwrap(input.days.first(where: { $0.date == "2026-07-18" })?.percentAboveGoal), 55, accuracy: 0.0001)
+        XCTAssertNil(input.days.first(where: { $0.date == "2026-07-23" })?.status)
+        XCTAssertTrue(input.foodHighlights.contains { $0.name == "High calorie snack" && $0.loggedCount == 2 })
+        XCTAssertTrue(input.foodHighlights.contains { $0.name == "Beans" && $0.fiberGrams == 9 })
+        XCTAssertTrue(WeeklyReportPrompt.instructions(customPrompt: "Be helpful").contains("preceding two completed local weeks"))
+        XCTAssertTrue(WeeklyReportPrompt.instructions(customPrompt: "Be helpful").contains("at least 25% above goal"))
+    }
+
+    func testLatestWeeklyReportStoreRoundTripsProtectedReportDates() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathComponent("latest.json")
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
+        let input = WeeklyReportInput(startDate: "2026-07-03", endDate: "2026-07-09", loggedDays: 3, days: [], calorieGoal: nil, alcoholDrinksPerDayGuidance: nil, processedMeatServingsPerWeekGuidance: nil, fiberGramsPerDayGuidance: nil, recurringFoods: [])
+        let content = WeeklyReportContent(summary: "A measured summary.", patterns: [], suggestions: [], congratulations: nil, coverageNote: "Limited coverage.")
+        let report = SavedWeeklyReport(generatedAt: testDate(day: 10), startDate: testDate(day: 3), endDate: testDate(day: 9), weekKey: "2026-07-03-2026-07-09", model: WeeklyReportPolicy.model, policyVersion: WeeklyReportPolicy.version, input: input, content: content)
+        let store = LatestWeeklyReportStore(fileURL: url)
+
+        try store.save(report)
+
+        XCTAssertEqual(try store.load()?.weekKey, report.weekKey)
+        XCTAssertEqual(try store.load()?.generatedAt, report.generatedAt)
+        XCTAssertEqual(try store.load()?.content.summary, report.content.summary)
+    }
+
     func testDuplicateEntryCopiesFoodAndMealSnapshotsToToday() throws {
         let sourceDay = testDate(day: 1)
         let today = testDate(day: 2)
@@ -1199,6 +1305,11 @@ final class CalorieTrackerTests: XCTestCase {
         )
         XCTAssertNil(VitaChaseDeepLink(url: try XCTUnwrap(URL(string: "vitachase://settings"))))
         XCTAssertNil(VitaChaseDeepLink(url: try XCTUnwrap(URL(string: "https://example.com/log-food"))))
+    }
+
+    func testWeeklyReportDeepLinkRoutesOnlyTheExpectedURL() throws {
+        XCTAssertEqual(VitaChaseDeepLink(url: try XCTUnwrap(URL(string: "vitachase://weekly-report"))), .weeklyReport)
+        XCTAssertNil(VitaChaseDeepLink(url: try XCTUnwrap(URL(string: "https://example.com/weekly-report"))))
     }
 
     func testFirstTimeOnboardingAppearsForAnEmptyDiary() {

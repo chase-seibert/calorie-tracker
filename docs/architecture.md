@@ -71,6 +71,35 @@ or HealthKit data is sent, and no schema migration is required. The client-held
 key is suitable only for private deployment; distributed use requires an
 authenticated backend.
 
+Weekly food reports use a read-only summary of three completed local weeks from
+`DiaryRepository`; the latest week remains the primary report and daily chart.
+A report is requested only when food or meal entries exist on at least three
+distinct days in that latest week. The bounded request compares logged-day
+calorie, protein, and known fiber averages, explicit cheat-day and gap-day
+counts, and calorie overages for marked cheat days. It also includes up to 12
+single-food highlights ranked across calorie, fiber, and protein totals. Fiber
+values are rounded to at most two decimal places in the data and UI. Unmarked
+empty days are not classified as gaps, and unknown nutrients remain unknown.
+The summary includes alcohol, processed-meat servings, and guidance for enabled
+focus areas; it excludes HealthKit and entry notes. Existing alcohol, processed-meat, and fiber focus
+toggles determine whether corresponding Trends guidance is included; reports do
+not ask for separate weekly targets. The custom prompt is stored in UserDefaults
+and treated as untrusted preference text.
+
+The latest validated report is an atomically replaced, device-protected JSON
+file in Application Support. The dedicated report screen renders charts from
+the saved validated values and opens without another model request. Manual
+regeneration bypasses a same-week cached report; scheduled runs reuse it.
+Settings can select either OpenAI or Apple's on-device Foundation Model. The
+local route checks runtime availability and does not load an OpenAI credential
+or send report data over the network. OpenAI Debug requests use the existing
+device Keychain credential. Release builds reject the client-key path: a paid
+distributed feature needs an authenticated backend, server-owned provider
+credentials, a reviewed model policy, and an explicit paid entitlement. Sunday
+generation uses `BGAppRefreshTask` and is best effort; iOS can delay or skip it.
+A local notification is submitted only after a report is saved and only when
+notification permission is available.
+
 When Apple Health is connected, `HealthKitStore` mirrors each diary entry as up
 to five nutrition quantity samples: dietary energy, carbohydrates, total fat,
 protein, and dietary Fiber when known. Each sample uses the diary entry UUID as
