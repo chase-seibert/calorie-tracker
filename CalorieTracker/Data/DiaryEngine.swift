@@ -1294,6 +1294,18 @@ final class DiaryEngine {
         document.rememberedQuantities.removeValue(forKey: food.id)
     }
 
+    func hideFood(_ food: Food) {
+        guard !document.hiddenFoods.contains(where: { $0.id == food.id }) else { return }
+        document.hiddenFoods.append(HiddenFoodRecord(food: displayedFood(food)))
+        document.hiddenFoods.sort {
+            $0.food.name.localizedStandardCompare($1.food.name) == .orderedAscending
+        }
+    }
+
+    func restoreHiddenFood(id: String) {
+        document.hiddenFoods.removeAll { $0.id == id }
+    }
+
     func deleteMeal(_ meal: SavedMeal) {
         document.meals.removeAll { $0.id == meal.id }
         document.favoriteMealIDs.removeAll { $0 == meal.id }
@@ -1490,7 +1502,12 @@ final class DiaryEngine {
         } else {
             orderedItems = prioritizedItems + fallbackItems.map { .food(displayedFood($0)) }
         }
+        let hiddenFoodIDs = Set(document.hiddenFoods.map(\.id))
         return orderedItems
+            .filter { item in
+                guard case .food(let food) = item else { return true }
+                return !hiddenFoodIDs.contains(food.id)
+            }
             .filter { seen.insert($0.id).inserted }
             .prefix(limit)
             .map { $0 }

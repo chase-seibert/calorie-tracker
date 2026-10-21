@@ -79,9 +79,11 @@ final class DiaryReorderingUITests: XCTestCase {
         alphaSelection.tap()
         betaSelection.tap()
 
-        let duplicateButton = app.buttons["Duplicate Today"]
-        XCTAssertTrue(duplicateButton.exists)
-        duplicateButton.tap()
+        XCTAssertTrue(app.staticTexts["2 selected"].exists)
+        let logTodayButton = app.buttons["Log Today"]
+        XCTAssertTrue(logTodayButton.exists)
+        attachScreenshot(named: "Multi-select Actions")
+        logTodayButton.tap()
 
         XCTAssertTrue(waitUntil(timeout: 5) {
             app.descendants(matching: .any).matching(identifier: "diary-entry-reorder-alpha").count == 4

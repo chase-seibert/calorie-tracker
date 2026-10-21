@@ -96,6 +96,12 @@ struct FoodPickerView: View {
                             onQuickLogMeal: logMeal,
                             onEditMeal: editMeal,
                             onSearchResultSelected: captureSearchResultSelection,
+                            onHideFood: { food in
+                                diary.run {
+                                    try await diary.hideFood(food)
+                                    refreshSearchResults()
+                                }
+                            },
                             savedConfigurationIDsByFood: savedConfigurationIDsByFood,
                             onAddCustomFood: {
                                 finishSearchAttempt(recordNothingSelected: false)
@@ -1147,10 +1153,12 @@ private struct SearchResultsList: View {
     let onQuickLogMeal: (SavedMeal) -> Void
     let onEditMeal: (SavedMeal) -> Void
     let onSearchResultSelected: (FoodPickerItem) -> Void
+    let onHideFood: (Food) -> Void
     let savedConfigurationIDsByFood: [String: [UUID]]
     let onAddCustomFood: () -> Void
     let onSuggestCanonical: () -> Void
     var componentMode = false
+    @State private var foodToHide: Food?
 
     var body: some View {
         if isSearching {
@@ -1227,6 +1235,14 @@ private struct SearchResultsList: View {
                                     .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
                                 }
                             }
+                            .contextMenu {
+                                if !componentMode {
+                                    Button("Hide from Search", systemImage: "eye.slash", role: .destructive) {
+                                        foodToHide = food
+                                    }
+                                    .accessibilityIdentifier("hide-search-food-\(food.id)")
+                                }
+                            }
                         case .meal(let meal):
                             MealListActionRow(
                                 meal: meal,
@@ -1251,6 +1267,23 @@ private struct SearchResultsList: View {
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
+            .confirmationDialog(
+                "Hide \(foodToHide?.name ?? "food") from search?",
+                isPresented: Binding(
+                    get: { foodToHide != nil },
+                    set: { if !$0 { foodToHide = nil } }
+                ),
+                titleVisibility: .visible
+            ) {
+                Button("Hide Food", role: .destructive) {
+                    if let food = foodToHide { onHideFood(food) }
+                    foodToHide = nil
+                }
+                .accessibilityIdentifier("confirm-hide-search-food")
+                Button("Cancel", role: .cancel) { foodToHide = nil }
+            } message: {
+                Text("This removes it from search. Existing diary entries will stay unchanged, and you can restore it in Settings.")
+            }
         }
     }
 

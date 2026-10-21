@@ -326,6 +326,12 @@ struct Food: Codable, Hashable, Identifiable, Sendable {
     }
 }
 
+struct HiddenFoodRecord: Codable, Hashable, Identifiable, Sendable {
+    var food: Food
+
+    var id: String { food.id }
+}
+
 enum LogUnit: String, Codable, CaseIterable, Identifiable, Sendable {
     case grams = "g"
     case ounces = "oz"
@@ -823,6 +829,7 @@ struct DiaryDocument: Codable, Sendable {
     var rememberedQuantities: [String: QuantityPreference] = [:]
     var customFoods: [Food] = []
     var customFoodNames: [String: String] = [:]
+    var hiddenFoods: [HiddenFoodRecord] = []
     var alcoholEntries: [AlcoholEntry] = []
     var corpusFoodMeatOverrides: [FoodCatalogIdentity: FoodMeatOverrides] = [:]
     var foodSuggestions: [FoodSuggestion] = []
@@ -843,6 +850,7 @@ struct DiaryDocument: Codable, Sendable {
         case rememberedQuantities
         case customFoods
         case customFoodNames
+        case hiddenFoods
         case alcoholEntries
         case corpusFoodMeatOverrides
         case foodSuggestions
@@ -869,6 +877,7 @@ struct DiaryDocument: Codable, Sendable {
             [String: String].self,
             forKey: .customFoodNames
         ) ?? [:]
+        hiddenFoods = try container.decodeIfPresent([HiddenFoodRecord].self, forKey: .hiddenFoods) ?? []
         alcoholEntries = try container.decodeIfPresent([AlcoholEntry].self, forKey: .alcoholEntries) ?? []
         corpusFoodMeatOverrides = try container.decodeIfPresent(
             [FoodCatalogIdentity: FoodMeatOverrides].self,

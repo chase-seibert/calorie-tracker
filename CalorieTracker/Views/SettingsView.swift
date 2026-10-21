@@ -56,6 +56,11 @@ struct SettingsView: View {
                         value: personalLibraryDescription
                     )
                 }
+                NavigationLink {
+                    HiddenFoodsView()
+                } label: {
+                    Label("Hidden Foods", systemImage: "eye.slash")
+                }
 
                 NavigationLink {
                     CustomImportGuideView()
@@ -337,6 +342,57 @@ private struct AppleHealthSettingsView: View {
                 "source": "authorization",
                 "result": healthKit.lastError == nil ? "success" : "failure",
             ])
+    }
+}
+
+private struct HiddenFoodsView: View {
+    @EnvironmentObject private var diary: DiaryStore
+
+    var body: some View {
+        List {
+            if diary.document.hiddenFoods.isEmpty {
+                ContentUnavailableView(
+                    "No Hidden Foods",
+                    systemImage: "eye",
+                    description: Text("Foods you hide from search will appear here.")
+                )
+            } else {
+                Section {
+                    ForEach(diary.document.hiddenFoods) { record in
+                        HStack(spacing: 12) {
+                            SourceBadge(source: record.food.source)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(record.food.name)
+                                    .lineLimit(2)
+                                if let brand = record.food.displayBrand {
+                                    Text(brand)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Text(record.food.source.title)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer(minLength: 8)
+                            Button("Restore", systemImage: "arrow.uturn.backward") {
+                                diary.run {
+                                    try await diary.restoreHiddenFood(id: record.id)
+                                }
+                            }
+                            .labelStyle(.iconOnly)
+                            .accessibilityLabel("Restore \(record.food.name) to search")
+                        }
+                    }
+                } footer: {
+                    Text("Restoring a food makes it searchable again. Hiding foods does not change diary history.")
+                }
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .background(AppTheme.background)
+        .navigationTitle("Hidden Foods")
+        .navigationBarTitleDisplayMode(.inline)
+        .analyticsScreen("settings_hidden_foods")
     }
 }
 

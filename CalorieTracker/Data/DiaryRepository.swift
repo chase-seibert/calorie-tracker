@@ -209,6 +209,7 @@ private struct DiarySettings: Codable, Equatable {
     var trackingStartDate: Date?
     var favoriteItemOrder: [String]
     var corpusFoodMeatOverrides: [FoodCatalogIdentity: FoodMeatOverrides]
+    var hiddenFoods: [HiddenFoodRecord]
 
     init(_ document: DiaryDocument) {
         schemaVersion = max(document.schemaVersion, DiaryDocument().schemaVersion)
@@ -216,10 +217,11 @@ private struct DiarySettings: Codable, Equatable {
         trackingStartDate = document.trackingStartDate
         favoriteItemOrder = document.favoriteItemOrder
         corpusFoodMeatOverrides = document.corpusFoodMeatOverrides
+        hiddenFoods = document.hiddenFoods
     }
 
     private enum CodingKeys: String, CodingKey {
-        case schemaVersion, dailyCalorieGoal, trackingStartDate, favoriteItemOrder, corpusFoodMeatOverrides
+        case schemaVersion, dailyCalorieGoal, trackingStartDate, favoriteItemOrder, corpusFoodMeatOverrides, hiddenFoods
     }
 
     init(from decoder: Decoder) throws {
@@ -232,6 +234,7 @@ private struct DiarySettings: Codable, Equatable {
             [FoodCatalogIdentity: FoodMeatOverrides].self,
             forKey: .corpusFoodMeatOverrides
         ) ?? [:]
+        hiddenFoods = try container.decodeIfPresent([HiddenFoodRecord].self, forKey: .hiddenFoods) ?? []
     }
 }
 
@@ -443,6 +446,7 @@ final class DiaryRepository: @unchecked Sendable {
             document.trackingStartDate = settings.trackingStartDate
             document.favoriteItemOrder = settings.favoriteItemOrder
             document.corpusFoodMeatOverrides = settings.corpusFoodMeatOverrides
+            document.hiddenFoods = settings.hiddenFoods
         }
         document.customFoods = try objects("SELECT payload FROM personal_foods ORDER BY position")
         document.meals = try objects("SELECT payload FROM meals ORDER BY position")

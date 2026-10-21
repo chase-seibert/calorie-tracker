@@ -39,6 +39,52 @@ final class DeviceFixtureUITests: XCTestCase {
         XCTAssertEqual(app.textFields["custom-food-quantity-value"].value as? String, "275")
     }
 
+    func testSearchFoodCanBeHiddenAndRestoredFromSettings() {
+        app.launchArguments = [
+            "--show-food-search",
+            "-foodSource.enabled.chaseFood", "YES",
+            "-onboarding.focus.v1.completed", "YES"
+        ]
+        app.launchEnvironment = [
+            "CALORIE_TRACKER_UNIFIED_FIXTURE": "1",
+            "CALORIE_TRACKER_FIXTURE_RESET": "1"
+        ]
+        app.launch()
+
+        let search = app.textFields["Search foods"]
+        XCTAssertTrue(search.waitForExistence(timeout: 10))
+        search.tap()
+        search.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 6) + "sandwich")
+
+        let sandwich = app.buttons["customize-food-chaseFood:food_sandwich"]
+        XCTAssertTrue(sandwich.waitForExistence(timeout: 10))
+        sandwich.press(forDuration: 1)
+        let hideAction = app.buttons["hide-search-food-chaseFood:food_sandwich"]
+        XCTAssertTrue(hideAction.waitForExistence(timeout: 5))
+        hideAction.tap()
+        let confirmHide = app.buttons.matching(identifier: "confirm-hide-search-food").firstMatch
+        XCTAssertTrue(confirmHide.waitForExistence(timeout: 5))
+        confirmHide.tap()
+        XCTAssertTrue(waitUntil(timeout: 5) { !sandwich.exists })
+
+        app.buttons["Done"].tap()
+        app.buttons["Settings"].tap()
+        app.buttons["Hidden Foods"].tap()
+        let restore = app.buttons["Restore Sandwich to search"]
+        XCTAssertTrue(restore.waitForExistence(timeout: 5))
+        restore.tap()
+        XCTAssertTrue(waitUntil(timeout: 5) { app.staticTexts["No Hidden Foods"].exists })
+
+        app.navigationBars.buttons.firstMatch.tap()
+        app.navigationBars.buttons.firstMatch.tap()
+        app.buttons["Log food"].tap()
+        let restoredSearch = app.textFields["Search foods"]
+        XCTAssertTrue(restoredSearch.waitForExistence(timeout: 5))
+        restoredSearch.tap()
+        restoredSearch.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 6) + "sandwich")
+        XCTAssertTrue(app.buttons["customize-food-chaseFood:food_sandwich"].waitForExistence(timeout: 10))
+    }
+
     func testDeviceFixtureShowsRelativeDays() {
         app.launchArguments = ["--show-scrolled-diary", "-onboarding.focus.v1.completed", "YES"]
         app.launchEnvironment = [
@@ -553,6 +599,15 @@ final class DeviceFixtureUITests: XCTestCase {
     private func visibleButton(_ identifier: String) -> XCUIElement {
         let matches = app.buttons.matching(identifier: identifier).allElementsBoundByIndex
         return matches.first(where: { $0.isHittable }) ?? app.buttons.matching(identifier: identifier).firstMatch
+    }
+
+    private func waitUntil(timeout: TimeInterval, condition: () -> Bool) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if condition() { return true }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+        }
+        return condition()
     }
 
     private func confirmCheatDay(expectedCheat: Bool, doubleTap: Bool = false) {

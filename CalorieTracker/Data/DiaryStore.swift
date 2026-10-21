@@ -961,6 +961,14 @@ class DiaryStore: ObservableObject {
         try await perform(scope: .library) { $0.deleteCustomFood(food) }
     }
 
+    func hideFood(_ food: Food) async throws {
+        try await perform(scope: .library) { $0.hideFood(food) }
+    }
+
+    func restoreHiddenFood(id: String) async throws {
+        try await perform(scope: .library) { $0.restoreHiddenFood(id: id) }
+    }
+
     func deleteMeal(_ meal: SavedMeal) async throws {
         try await perform(scope: .library) { $0.deleteMeal(meal) }
     }

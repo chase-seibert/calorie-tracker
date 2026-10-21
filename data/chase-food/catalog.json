@@ -6341,6 +6341,56 @@
       "2",
       "FNDDS small/medium cracker bag (45 g); included in the 115 g snack profile.",
       "Draft"
+    ],
+    [
+      "food_pasta_pesto",
+      "Pasta pesto",
+      "food_pasta_cooked",
+      "Pasta, cooked",
+      "240",
+      "1",
+      "Illustrative recipe ratio used for low-confidence nutrition estimate",
+      "Review required"
+    ],
+    [
+      "food_pasta_pesto",
+      "Pasta pesto",
+      "food_pesto_sauce",
+      "Pesto sauce",
+      "60",
+      "2",
+      "Illustrative recipe ratio used for low-confidence nutrition estimate",
+      "Review required"
+    ],
+    [
+      "food_pasta_primavera",
+      "Pasta primavera",
+      "food_pasta_cooked",
+      "Pasta, cooked",
+      "250",
+      "1",
+      "Illustrative recipe ratio used for low-confidence nutrition estimate",
+      "Review required"
+    ],
+    [
+      "food_pasta_primavera",
+      "Pasta primavera",
+      "food_mixed_vegetables_cooked",
+      "Mixed vegetables, cooked",
+      "40",
+      "2",
+      "Illustrative recipe ratio used for low-confidence nutrition estimate",
+      "Review required"
+    ],
+    [
+      "food_pasta_primavera",
+      "Pasta primavera",
+      "food_olive_oil",
+      "Olive oil",
+      "10",
+      "3",
+      "Illustrative recipe ratio used for low-confidence nutrition estimate",
+      "Review required"
     ]
   ],
   "companionFoods": [
@@ -6520,7 +6570,7 @@
       "3"
     ]
   ],
-  "datasetVersion": "chase-food-2026-10-20-27",
+  "datasetVersion": "chase-food-2026-10-21-28",
   "foods": [
     {
       "aliases": [
@@ -29636,8 +29686,15 @@
         "2 percent milk",
         "reduced fat milk"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Milk, NFS",
+        "similarity": 0.7143,
+        "source": "usda",
+        "sourceID": "2705384"
+      },
       "category": "Dairy, cheese & substitutes",
-      "confidence": "Low",
+      "confidence": "High",
       "defaultGrams": 244.0,
       "defaultUnit": "1 cup",
       "foodKind": "Beverage",
@@ -29645,31 +29702,83 @@
       "includedComponentsSummary": "None",
       "name": "Milk, 2%",
       "nutrients": {
-        "calories": 126.88,
-        "carbs": 11.79,
-        "fat": 5.22,
+        "calories": 122.0,
+        "carbs": 11.96,
+        "fat": 4.64,
         "fiber": 0.0,
-        "protein": 8.13
+        "protein": 8.2
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Milk, NFS",
+          "similarity": 0.7143,
+          "source": "usda",
+          "sourceID": "2705384"
+        },
+        "compositionEvidence": {
+          "confidence": "High",
+          "decision": "Keep Milk, 2% as a searchable canonical food. Preserve its existing customization model and use the reviewed nutrition source/estimate for the default portion.",
+          "reason": "Direct 2% milk record; catalog cup aligns with USDA cup weight.",
+          "sources": [
+            {
+              "name": "FNDDS",
+              "recordName": "Milk, reduced fat (2%)",
+              "sourceID": "2705386",
+              "url": "https://fdc.nal.usda.gov/food-details/2705386/nutrients"
+            }
+          ]
+        },
+        "confidence": "High",
+        "nutritionPer100g": {
+          "calories": 50,
+          "carbs": 4.9,
+          "fat": 1.9,
+          "fiber": 0,
+          "protein": 3.36
+        },
+        "portionNutrition": {
+          "calories": 122.0,
+          "carbs": 11.96,
+          "catalogGrams": 244.0,
+          "catalogServing": "1 cup",
+          "fat": 4.64,
+          "fiber": 0.0,
+          "protein": 8.2
+        },
+        "reviewReasons": [],
+        "source": {
+          "dataType": "FNDDS",
+          "database": "FoodData Central",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2705386",
+          "recordName": "Milk, reduced fat (2%)",
+          "releaseDate": "2024-10-01",
+          "reviewedDate": "2026-10-21",
+          "serving": {
+            "description": "1 cup",
+            "grams": 244
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2705386/nutrients"
+        }
       },
       "nutritionPer100g": {
-        "calories": 52.0,
-        "carbs": 4.83,
-        "fat": 2.14,
-        "fiber": 0.0,
-        "protein": 3.33
+        "calories": 50,
+        "carbs": 4.9,
+        "fat": 1.9,
+        "fiber": 0,
+        "protein": 3.36
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Milk, NFS",
-        "similarity": 0.7143,
+        "matchBasis": "reviewed FDC record",
+        "name": "Milk, reduced fat (2%)",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2705384"
+        "sourceID": "2705386"
       },
       "optionsSummary": "None",
-      "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
-      ],
-      "reviewRequired": true,
+      "reviewReasons": [],
+      "reviewRequired": false,
       "searchEnabled": true,
       "sizeAvailable": false,
       "variationsSummary": "None"
@@ -29680,8 +29789,15 @@
         "fat free milk",
         "skim milk"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Milk, NFS",
+        "similarity": 0.7059,
+        "source": "usda",
+        "sourceID": "2705384"
+      },
       "category": "Dairy, cheese & substitutes",
-      "confidence": "Low",
+      "confidence": "High",
       "defaultGrams": 244.0,
       "defaultUnit": "1 cup",
       "foodKind": "Beverage",
@@ -29689,31 +29805,83 @@
       "includedComponentsSummary": "None",
       "name": "Milk, skim",
       "nutrients": {
-        "calories": 126.88,
-        "carbs": 11.79,
-        "fat": 5.22,
+        "calories": 82.96,
+        "carbs": 12.0,
+        "fat": 0.2,
         "fiber": 0.0,
-        "protein": 8.13
+        "protein": 8.37
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Milk, NFS",
+          "similarity": 0.7059,
+          "source": "usda",
+          "sourceID": "2705384"
+        },
+        "compositionEvidence": {
+          "confidence": "High",
+          "decision": "Keep Milk, skim as a searchable canonical food. Preserve its existing customization model and use the reviewed nutrition source/estimate for the default portion.",
+          "reason": "Direct skim milk record; catalog cup aligns with USDA cup weight.",
+          "sources": [
+            {
+              "name": "FNDDS",
+              "recordName": "Milk, fat free (skim)",
+              "sourceID": "2705388",
+              "url": "https://fdc.nal.usda.gov/food-details/2705388/nutrients"
+            }
+          ]
+        },
+        "confidence": "High",
+        "nutritionPer100g": {
+          "calories": 34,
+          "carbs": 4.92,
+          "fat": 0.08,
+          "fiber": 0,
+          "protein": 3.43
+        },
+        "portionNutrition": {
+          "calories": 82.96,
+          "carbs": 12.0,
+          "catalogGrams": 244.0,
+          "catalogServing": "1 cup",
+          "fat": 0.2,
+          "fiber": 0.0,
+          "protein": 8.37
+        },
+        "reviewReasons": [],
+        "source": {
+          "dataType": "FNDDS",
+          "database": "FoodData Central",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2705388",
+          "recordName": "Milk, fat free (skim)",
+          "releaseDate": "2024-10-01",
+          "reviewedDate": "2026-10-21",
+          "serving": {
+            "description": "1 cup",
+            "grams": 244
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2705388/nutrients"
+        }
       },
       "nutritionPer100g": {
-        "calories": 52.0,
-        "carbs": 4.83,
-        "fat": 2.14,
-        "fiber": 0.0,
-        "protein": 3.33
+        "calories": 34,
+        "carbs": 4.92,
+        "fat": 0.08,
+        "fiber": 0,
+        "protein": 3.43
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Milk, NFS",
-        "similarity": 0.7059,
+        "matchBasis": "reviewed FDC record",
+        "name": "Milk, fat free (skim)",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2705384"
+        "sourceID": "2705388"
       },
       "optionsSummary": "None",
-      "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
-      ],
-      "reviewRequired": true,
+      "reviewReasons": [],
+      "reviewRequired": false,
       "searchEnabled": true,
       "sizeAvailable": false,
       "variationsSummary": "None"
@@ -29766,8 +29934,15 @@
         "shake",
         "ice cream shake"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "High Protein Milkshake Vanilla",
+        "similarity": 0.4615,
+        "source": "off",
+        "sourceID": "0811620021968"
+      },
       "category": "Desserts & sweets",
-      "confidence": "Low",
+      "confidence": "Medium",
       "defaultGrams": 240.0,
       "defaultUnit": "1 cup",
       "foodKind": "Beverage",
@@ -29775,29 +29950,85 @@
       "includedComponentsSummary": "None",
       "name": "Milkshake",
       "nutrients": {
-        "calories": 98.4,
-        "carbs": 3.48,
-        "fat": 2.62,
-        "fiber": 0.58,
-        "protein": 15.07
+        "calories": 271.2,
+        "carbs": 27.36,
+        "fat": 14.35,
+        "fiber": 0.48,
+        "protein": 8.04
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "High Protein Milkshake Vanilla",
+          "similarity": 0.4615,
+          "source": "off",
+          "sourceID": "0811620021968"
+        },
+        "compositionEvidence": {
+          "confidence": "Medium",
+          "decision": "Keep Milkshake as a searchable canonical food. Preserve its existing customization model and use the reviewed nutrition source/estimate for the default portion.",
+          "reason": "Generic home-recipe milkshake; flavors and ice-cream ratios vary.",
+          "sources": [
+            {
+              "name": "FNDDS",
+              "recordName": "Milk shake, home recipe, flavors other than chocolate",
+              "sourceID": "2705504",
+              "url": "https://fdc.nal.usda.gov/food-details/2705504/nutrients"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 113,
+          "carbs": 11.4,
+          "fat": 5.98,
+          "fiber": 0.2,
+          "protein": 3.35
+        },
+        "portionNutrition": {
+          "calories": 271.2,
+          "carbs": 27.36,
+          "catalogGrams": 240.0,
+          "catalogServing": "1 cup",
+          "fat": 14.35,
+          "fiber": 0.48,
+          "protein": 8.04
+        },
+        "reviewReasons": [
+          "Generic home-recipe milkshake; flavors and ice-cream ratios vary."
+        ],
+        "source": {
+          "dataType": "FNDDS",
+          "database": "FoodData Central",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2705504",
+          "recordName": "Milk shake, home recipe, flavors other than chocolate",
+          "releaseDate": "2024-10-01",
+          "reviewedDate": "2026-10-21",
+          "serving": {
+            "description": "1 fl oz",
+            "grams": 28
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2705504/nutrients"
+        }
       },
       "nutritionPer100g": {
-        "calories": 41.0,
-        "carbs": 1.45,
-        "fat": 1.09,
-        "fiber": 0.24,
-        "protein": 6.28
+        "calories": 113,
+        "carbs": 11.4,
+        "fat": 5.98,
+        "fiber": 0.2,
+        "protein": 3.35
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "High Protein Milkshake Vanilla",
-        "similarity": 0.4615,
-        "source": "off",
-        "sourceID": "0811620021968"
+        "matchBasis": "reviewed FDC record",
+        "name": "Milk shake, home recipe, flavors other than chocolate",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2705504"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
+        "Generic home-recipe milkshake; flavors and ice-cream ratios vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -29852,8 +30083,15 @@
         "miso soup",
         "japanese miso soup"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Miso sauce",
+        "similarity": 0.7368,
+        "source": "usda",
+        "sourceID": "2707438"
+      },
       "category": "Soups & stews",
-      "confidence": "Low",
+      "confidence": "Medium",
       "defaultGrams": 250.0,
       "defaultUnit": "1 bowl",
       "foodKind": "Recipe / assembled",
@@ -29861,30 +30099,85 @@
       "includedComponentsSummary": "None",
       "name": "Miso soup",
       "nutrients": {
-        "calories": 1072.5,
-        "carbs": 35.0,
-        "fat": 102.5,
-        "fiber": 3.0,
-        "protein": 8.58
+        "calories": 60.0,
+        "carbs": 5.75,
+        "fat": 2.12,
+        "fiber": 1.5,
+        "protein": 5.53
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Miso sauce",
+          "similarity": 0.7368,
+          "source": "usda",
+          "sourceID": "2707438"
+        },
+        "compositionEvidence": {
+          "confidence": "Medium",
+          "decision": "Keep Miso soup as a searchable canonical food. Preserve its existing customization model and use the reviewed nutrition source/estimate for the default portion.",
+          "reason": "Direct miso/tofu soup match; tofu and broth recipes vary.",
+          "sources": [
+            {
+              "name": "FNDDS",
+              "recordName": "Soup, miso or tofu",
+              "sourceID": "2707455",
+              "url": "https://fdc.nal.usda.gov/food-details/2707455/nutrients"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 24,
+          "carbs": 2.3,
+          "fat": 0.85,
+          "fiber": 0.6,
+          "protein": 2.21
+        },
+        "portionNutrition": {
+          "calories": 60.0,
+          "carbs": 5.75,
+          "catalogGrams": 250.0,
+          "catalogServing": "1 bowl",
+          "fat": 2.12,
+          "fiber": 1.5,
+          "protein": 5.53
+        },
+        "reviewReasons": [
+          "Direct miso/tofu soup match; tofu and broth recipes vary."
+        ],
+        "source": {
+          "dataType": "FNDDS",
+          "database": "FoodData Central",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2707455",
+          "recordName": "Soup, miso or tofu",
+          "releaseDate": "2024-10-01",
+          "reviewedDate": "2026-10-21",
+          "serving": {
+            "description": "1 cup",
+            "grams": 245
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2707455/nutrients"
+        }
       },
       "nutritionPer100g": {
-        "calories": 429.0,
-        "carbs": 14.0,
-        "fat": 41.0,
-        "fiber": 1.2,
-        "protein": 3.43
+        "calories": 24,
+        "carbs": 2.3,
+        "fat": 0.85,
+        "fiber": 0.6,
+        "protein": 2.21
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Miso sauce",
-        "similarity": 0.7368,
+        "matchBasis": "reviewed FDC record",
+        "name": "Soup, miso or tofu",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2707438"
+        "sourceID": "2707455"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "Direct miso/tofu soup match; tofu and broth recipes vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -30026,8 +30319,15 @@
         "monterey jack cheese",
         "jack cheese"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Cheese, monterey jack, solid",
+        "similarity": 0.75,
+        "source": "usda",
+        "sourceID": "2647438"
+      },
       "category": "Dairy, cheese & substitutes",
-      "confidence": "Low",
+      "confidence": "High",
       "defaultGrams": 28.4,
       "defaultUnit": "1 oz",
       "foodKind": "Reusable ingredient",
@@ -30041,24 +30341,79 @@
         "fiber": null,
         "protein": 6.42
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Cheese, monterey jack, solid",
+          "similarity": 0.75,
+          "source": "usda",
+          "sourceID": "2647438"
+        },
+        "compositionEvidence": {
+          "confidence": "High",
+          "decision": "Keep Monterey Jack cheese as a searchable canonical food. Preserve its existing customization model and use the reviewed nutrition source/estimate for the default portion.",
+          "reason": "Direct Monterey Jack record; fiber was not reported in the source.",
+          "sources": [
+            {
+              "name": "Foundation",
+              "recordName": "Cheese, monterey jack, solid",
+              "sourceID": "2647438",
+              "url": "https://fdc.nal.usda.gov/food-details/2647438/nutrients"
+            }
+          ]
+        },
+        "confidence": "High",
+        "nutritionPer100g": {
+          "calories": 392,
+          "carbs": 1.9,
+          "fat": 32.6,
+          "fiber": null,
+          "protein": 22.6
+        },
+        "portionNutrition": {
+          "calories": 111.33,
+          "carbs": 0.54,
+          "catalogGrams": 28.4,
+          "catalogServing": "1 oz",
+          "fat": 9.26,
+          "fiber": null,
+          "protein": 6.42
+        },
+        "reviewReasons": [
+          "Fiber was not reported in the selected USDA Foundation record; catalog fiber is unavailable."
+        ],
+        "source": {
+          "dataType": "Foundation",
+          "database": "FoodData Central",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2647438",
+          "recordName": "Cheese, monterey jack, solid",
+          "releaseDate": "2026-04-01",
+          "reviewedDate": "2026-10-21",
+          "serving": {
+            "description": "100 g",
+            "grams": 100
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2647438/nutrients"
+        }
+      },
       "nutritionPer100g": {
-        "calories": 392.0,
+        "calories": 392,
         "carbs": 1.9,
         "fat": 32.6,
         "fiber": null,
         "protein": 22.6
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Cheese, monterey jack, solid",
-        "similarity": 0.75,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2647438"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Fiber unavailable in matched record"
+        "Fiber was not reported in the selected USDA Foundation record; catalog fiber is unavailable."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -30071,8 +30426,15 @@
         "mozzarella",
         "shredded mozzarella"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Roll, cheese",
+        "similarity": 0.7143,
+        "source": "usda",
+        "sourceID": "2707660"
+      },
       "category": "Pizza & pasta",
-      "confidence": "Low",
+      "confidence": "Medium",
       "defaultGrams": 28.4,
       "defaultUnit": "1 oz",
       "foodKind": "Reusable ingredient",
@@ -30080,29 +30442,85 @@
       "includedComponentsSummary": "None",
       "name": "Mozzarella cheese",
       "nutrients": {
-        "calories": 89.46,
-        "carbs": 14.09,
-        "fat": 2.23,
-        "fiber": 0.54,
-        "protein": 3.27
+        "calories": 83.78,
+        "carbs": 1.58,
+        "fat": 5.62,
+        "fiber": 0.0,
+        "protein": 6.76
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Roll, cheese",
+          "similarity": 0.7143,
+          "source": "usda",
+          "sourceID": "2707660"
+        },
+        "compositionEvidence": {
+          "confidence": "Medium",
+          "decision": "Keep Mozzarella cheese as a searchable canonical food. Preserve its existing customization model and use the reviewed nutrition source/estimate for the default portion.",
+          "reason": "Part-skim low-moisture match; generic mozzarella can differ by moisture and fat level.",
+          "sources": [
+            {
+              "name": "SR Legacy",
+              "recordName": "Cheese, mozzarella, low moisture, part-skim",
+              "sourceID": "171244",
+              "url": "https://fdc.nal.usda.gov/food-details/171244/nutrients"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 295,
+          "carbs": 5.58,
+          "fat": 19.8,
+          "fiber": 0,
+          "protein": 23.8
+        },
+        "portionNutrition": {
+          "calories": 83.78,
+          "carbs": 1.58,
+          "catalogGrams": 28.4,
+          "catalogServing": "1 oz",
+          "fat": 5.62,
+          "fiber": 0.0,
+          "protein": 6.76
+        },
+        "reviewReasons": [
+          "Part-skim low-moisture match; generic mozzarella can differ by moisture and fat level."
+        ],
+        "source": {
+          "dataType": "SR Legacy",
+          "database": "FoodData Central",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "171244",
+          "recordName": "Cheese, mozzarella, low moisture, part-skim",
+          "releaseDate": "2018-04-01",
+          "reviewedDate": "2026-10-21",
+          "serving": {
+            "description": "1 cup diced",
+            "grams": 132
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/171244/nutrients"
+        }
       },
       "nutritionPer100g": {
-        "calories": 315.0,
-        "carbs": 49.6,
-        "fat": 7.85,
-        "fiber": 1.9,
-        "protein": 11.5
+        "calories": 295,
+        "carbs": 5.58,
+        "fat": 19.8,
+        "fiber": 0,
+        "protein": 23.8
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Roll, cheese",
-        "similarity": 0.7143,
+        "matchBasis": "reviewed FDC record",
+        "name": "Cheese, mozzarella, low moisture, part-skim",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2707660"
+        "sourceID": "171244"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
+        "Part-skim low-moisture match; generic mozzarella can differ by moisture and fat level."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -30113,6 +30531,13 @@
       "aliases": [
         "muesli cereal"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Crunchy muesli",
+        "similarity": 0.6,
+        "source": "off",
+        "sourceID": "5900749610339"
+      },
       "category": "Breakfast & eggs",
       "confidence": "Low",
       "defaultGrams": 85.0,
@@ -30128,23 +30553,79 @@
         "fiber": 6.29,
         "protein": 6.8
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Crunchy muesli",
+          "similarity": 0.6,
+          "source": "off",
+          "sourceID": "5900749610339"
+        },
+        "compositionEvidence": {
+          "confidence": "Low",
+          "decision": "Keep Muesli as a searchable canonical food. Preserve its existing customization model and use the reviewed nutrition source/estimate for the default portion.",
+          "reason": "One branded crunchy muesli label is only a low-confidence proxy for generic muesli; sugar and ingredient ratios vary.",
+          "sources": [
+            {
+              "name": "Open Food Facts product label",
+              "recordName": "Crunchy muesli, Bakalland",
+              "sourceID": "5900749610339",
+              "url": "https://world.openfoodfacts.org/product/5900749610339"
+            }
+          ]
+        },
+        "confidence": "Low",
+        "nutritionPer100g": {
+          "calories": 406,
+          "carbs": 65,
+          "fat": 11,
+          "fiber": 7.4,
+          "protein": 8
+        },
+        "portionNutrition": {
+          "calories": 345.1,
+          "carbs": 55.25,
+          "catalogGrams": 85.0,
+          "catalogServing": "1 cup",
+          "fat": 9.35,
+          "fiber": 6.29,
+          "protein": 6.8
+        },
+        "reviewReasons": [
+          "One branded crunchy muesli label is only a low-confidence proxy for generic muesli; sugar and ingredient ratios vary."
+        ],
+        "source": {
+          "dataType": "Open Food Facts product label",
+          "database": "Open Food Facts",
+          "organization": "Open Food Facts community product database",
+          "recordID": "5900749610339",
+          "recordName": "Crunchy muesli, Bakalland",
+          "releaseDate": "2026-10-21",
+          "reviewedDate": "2026-10-21",
+          "serving": {
+            "description": "50 g",
+            "grams": 50
+          },
+          "url": "https://world.openfoodfacts.org/product/5900749610339"
+        }
+      },
       "nutritionPer100g": {
-        "calories": 406.0,
-        "carbs": 65.0,
-        "fat": 11.0,
+        "calories": 406,
+        "carbs": 65,
+        "fat": 11,
         "fiber": 7.4,
-        "protein": 8.0
+        "protein": 8
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Crunchy muesli",
-        "similarity": 0.6,
-        "source": "off",
+        "matchBasis": "reviewed FDC record",
+        "name": "Crunchy muesli, Bakalland",
+        "similarity": null,
+        "source": "usda",
         "sourceID": "5900749610339"
       },
       "optionsSummary": "Whole milk, 2% milk, 1% milk, Skim milk, Oat milk, Almond milk, Soy milk",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
+        "One branded crunchy muesli label is only a low-confidence proxy for generic muesli; sugar and ingredient ratios vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -30368,8 +30849,15 @@
         "mussels, cooked",
         "steamed mussels"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Spelt, cooked",
+        "similarity": 0.7692,
+        "source": "usda",
+        "sourceID": "169746"
+      },
       "category": "Seafood",
-      "confidence": "Low",
+      "confidence": "Medium",
       "defaultGrams": 150.0,
       "defaultUnit": "1 cup",
       "foodKind": "Recipe / assembled",
@@ -30377,30 +30865,85 @@
       "includedComponentsSummary": "None",
       "name": "Mussels, cooked",
       "nutrients": {
-        "calories": 190.5,
-        "carbs": 39.6,
-        "fat": 1.27,
-        "fiber": 5.85,
-        "protein": 8.25
+        "calories": 258.0,
+        "carbs": 11.09,
+        "fat": 6.72,
+        "fiber": 0.0,
+        "protein": 35.7
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Spelt, cooked",
+          "similarity": 0.7692,
+          "source": "usda",
+          "sourceID": "169746"
+        },
+        "compositionEvidence": {
+          "confidence": "Medium",
+          "decision": "Keep Mussels, cooked as a searchable canonical food. Preserve its existing customization model and use the reviewed nutrition source/estimate for the default portion.",
+          "reason": "Cooked blue mussel record; species and serving density vary.",
+          "sources": [
+            {
+              "name": "SR Legacy",
+              "recordName": "Mollusks, mussel, blue, cooked, moist heat",
+              "sourceID": "174217",
+              "url": "https://fdc.nal.usda.gov/food-details/174217/nutrients"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 172,
+          "carbs": 7.39,
+          "fat": 4.48,
+          "fiber": 0,
+          "protein": 23.8
+        },
+        "portionNutrition": {
+          "calories": 258.0,
+          "carbs": 11.09,
+          "catalogGrams": 150.0,
+          "catalogServing": "1 cup",
+          "fat": 6.72,
+          "fiber": 0.0,
+          "protein": 35.7
+        },
+        "reviewReasons": [
+          "Cooked blue mussel record; species and serving density vary."
+        ],
+        "source": {
+          "dataType": "SR Legacy",
+          "database": "FoodData Central",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "174217",
+          "recordName": "Mollusks, mussel, blue, cooked, moist heat",
+          "releaseDate": "2018-04-01",
+          "reviewedDate": "2026-10-21",
+          "serving": {
+            "description": "3 oz",
+            "grams": 85
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/174217/nutrients"
+        }
       },
       "nutritionPer100g": {
-        "calories": 127.0,
-        "carbs": 26.4,
-        "fat": 0.85,
-        "fiber": 3.9,
-        "protein": 5.5
+        "calories": 172,
+        "carbs": 7.39,
+        "fat": 4.48,
+        "fiber": 0,
+        "protein": 23.8
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Spelt, cooked",
-        "similarity": 0.7692,
+        "matchBasis": "reviewed FDC record",
+        "name": "Mollusks, mussel, blue, cooked, moist heat",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "169746"
+        "sourceID": "174217"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "Cooked blue mussel record; species and serving density vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -30412,8 +30955,15 @@
         "naan",
         "naan bread"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Bread, naan",
+        "similarity": 0.5714,
+        "source": "usda",
+        "sourceID": "2707613"
+      },
       "category": "Asian & international",
-      "confidence": "Low",
+      "confidence": "Medium",
       "defaultGrams": 105.0,
       "defaultUnit": "1 piece",
       "foodKind": "Recipe / assembled",
@@ -30427,24 +30977,79 @@
         "fiber": 5.46,
         "protein": 11.65
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Bread, naan",
+          "similarity": 0.5714,
+          "source": "usda",
+          "sourceID": "2707613"
+        },
+        "compositionEvidence": {
+          "confidence": "Medium",
+          "decision": "Keep Naan as a searchable canonical food. Preserve its existing customization model and use the reviewed nutrition source/estimate for the default portion.",
+          "reason": "Direct naan record; catalog piece estimate is larger than the source piece.",
+          "sources": [
+            {
+              "name": "FNDDS",
+              "recordName": "Bread, naan",
+              "sourceID": "2707613",
+              "url": "https://fdc.nal.usda.gov/food-details/2707613/nutrients"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 311,
+          "carbs": 50.2,
+          "fat": 7.28,
+          "fiber": 5.2,
+          "protein": 11.1
+        },
+        "portionNutrition": {
+          "calories": 326.55,
+          "carbs": 52.71,
+          "catalogGrams": 105.0,
+          "catalogServing": "1 piece",
+          "fat": 7.64,
+          "fiber": 5.46,
+          "protein": 11.65
+        },
+        "reviewReasons": [
+          "Direct naan record; catalog piece estimate is larger than the source piece."
+        ],
+        "source": {
+          "dataType": "FNDDS",
+          "database": "FoodData Central",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2707613",
+          "recordName": "Bread, naan",
+          "releaseDate": "2024-10-01",
+          "reviewedDate": "2026-10-21",
+          "serving": {
+            "description": "1 piece",
+            "grams": 44
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2707613/nutrients"
+        }
+      },
       "nutritionPer100g": {
-        "calories": 311.0,
+        "calories": 311,
         "carbs": 50.2,
         "fat": 7.28,
         "fiber": 5.2,
         "protein": 11.1
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Bread, naan",
-        "similarity": 0.5714,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2707613"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "Direct naan record; catalog piece estimate is larger than the source piece."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -30457,6 +31062,13 @@
         "nacho plate",
         "loaded nachos"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Nachos, NFS",
+        "similarity": 0.75,
+        "source": "usda",
+        "sourceID": "2708576"
+      },
       "category": "Mexican & Tex-Mex",
       "confidence": "Low",
       "defaultGrams": 290.0,
@@ -30472,24 +31084,79 @@
         "fiber": 4.93,
         "protein": 22.04
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Nachos, NFS",
+          "similarity": 0.75,
+          "source": "usda",
+          "sourceID": "2708576"
+        },
+        "compositionEvidence": {
+          "confidence": "Low",
+          "decision": "Keep Nachos as a searchable canonical food. Preserve its existing customization model and use the reviewed nutrition source/estimate for the default portion.",
+          "reason": "Generic nacho record with small source portion; the catalog plate includes highly variable toppings and portion size.",
+          "sources": [
+            {
+              "name": "FNDDS",
+              "recordName": "Nachos, NFS",
+              "sourceID": "2708576",
+              "url": "https://fdc.nal.usda.gov/food-details/2708576/nutrients"
+            }
+          ]
+        },
+        "confidence": "Low",
+        "nutritionPer100g": {
+          "calories": 265,
+          "carbs": 23.8,
+          "fat": 15.8,
+          "fiber": 1.7,
+          "protein": 7.6
+        },
+        "portionNutrition": {
+          "calories": 768.5,
+          "carbs": 69.02,
+          "catalogGrams": 290.0,
+          "catalogServing": "1 plate",
+          "fat": 45.82,
+          "fiber": 4.93,
+          "protein": 22.04
+        },
+        "reviewReasons": [
+          "Generic nacho record with small source portion; the catalog plate includes highly variable toppings and portion size."
+        ],
+        "source": {
+          "dataType": "FNDDS",
+          "database": "FoodData Central",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2708576",
+          "recordName": "Nachos, NFS",
+          "releaseDate": "2024-10-01",
+          "reviewedDate": "2026-10-21",
+          "serving": {
+            "description": "1 chip",
+            "grams": 7
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2708576/nutrients"
+        }
+      },
       "nutritionPer100g": {
-        "calories": 265.0,
+        "calories": 265,
         "carbs": 23.8,
         "fat": 15.8,
         "fiber": 1.7,
         "protein": 7.6
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Nachos, NFS",
-        "similarity": 0.75,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2708576"
       },
       "optionsSummary": "Cheddar cheese, Cheese sauce, Salsa, Sour cream, Guacamole",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "Generic nacho record with small source portion; the catalog plate includes highly variable toppings and portion size."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -30587,8 +31254,15 @@
         "Multigrain Cheerios",
         "Cheerios Oat Crunch"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Oat bran cereal, cooked",
+        "similarity": 0.7027,
+        "source": "usda",
+        "sourceID": "2708444"
+      },
       "category": "Breakfast & grains",
-      "confidence": "Low",
+      "confidence": "Medium",
       "defaultGrams": 28.0,
       "defaultUnit": "1 cup",
       "foodKind": "Reusable ingredient",
@@ -30596,29 +31270,85 @@
       "includedComponentsSummary": "None",
       "name": "Oat ring cereal",
       "nutrients": {
-        "calories": 12.88,
-        "carbs": 3.44,
-        "fat": 0.36,
-        "fiber": 0.81,
-        "protein": 0.9
+        "calories": 104.16,
+        "carbs": 20.5,
+        "fat": 1.85,
+        "fiber": 2.83,
+        "protein": 3.47
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Oat bran cereal, cooked",
+          "similarity": 0.7027,
+          "source": "usda",
+          "sourceID": "2708444"
+        },
+        "compositionEvidence": {
+          "confidence": "Medium",
+          "decision": "Keep Oat ring cereal as a searchable canonical food. Preserve its existing customization model and use the reviewed nutrition source/estimate for the default portion.",
+          "reason": "Cheerios is a close oat-ring cereal proxy; brand formulations differ.",
+          "sources": [
+            {
+              "name": "SR Legacy",
+              "recordName": "Cereals ready-to-eat, GENERAL MILLS, CHEERIOS",
+              "sourceID": "173884",
+              "url": "https://fdc.nal.usda.gov/food-details/173884/nutrients"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 372,
+          "carbs": 73.2,
+          "fat": 6.6,
+          "fiber": 10.1,
+          "protein": 12.4
+        },
+        "portionNutrition": {
+          "calories": 104.16,
+          "carbs": 20.5,
+          "catalogGrams": 28.0,
+          "catalogServing": "1 cup",
+          "fat": 1.85,
+          "fiber": 2.83,
+          "protein": 3.47
+        },
+        "reviewReasons": [
+          "Cheerios is a close oat-ring cereal proxy; brand formulations differ."
+        ],
+        "source": {
+          "dataType": "SR Legacy",
+          "database": "FoodData Central",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "173884",
+          "recordName": "Cereals ready-to-eat, GENERAL MILLS, CHEERIOS",
+          "releaseDate": "2018-04-01",
+          "reviewedDate": "2026-10-21",
+          "serving": {
+            "description": "1 cup",
+            "grams": 28
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/173884/nutrients"
+        }
       },
       "nutritionPer100g": {
-        "calories": 46.0,
-        "carbs": 12.3,
-        "fat": 1.3,
-        "fiber": 2.9,
-        "protein": 3.21
+        "calories": 372,
+        "carbs": 73.2,
+        "fat": 6.6,
+        "fiber": 10.1,
+        "protein": 12.4
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Oat bran cereal, cooked",
-        "similarity": 0.7027,
+        "matchBasis": "reviewed FDC record",
+        "name": "Cereals ready-to-eat, GENERAL MILLS, CHEERIOS",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2708444"
+        "sourceID": "173884"
       },
       "optionsSummary": "Whole milk, 2% milk, 1% milk, Skim milk, Oat milk, Almond milk, Soy milk",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
+        "Cheerios is a close oat-ring cereal proxy; brand formulations differ."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -30631,8 +31361,15 @@
         "porridge",
         "hot oats"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Oatmeal, NFS",
+        "similarity": 0.7778,
+        "source": "usda",
+        "sourceID": "2708380"
+      },
       "category": "Breakfast & eggs",
-      "confidence": "Low",
+      "confidence": "Medium",
       "defaultGrams": 235.0,
       "defaultUnit": "1 cup",
       "foodKind": "Recipe / assembled",
@@ -30646,24 +31383,79 @@
         "fiber": 4.0,
         "protein": 5.12
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Oatmeal, NFS",
+          "similarity": 0.7778,
+          "source": "usda",
+          "sourceID": "2708380"
+        },
+        "compositionEvidence": {
+          "confidence": "Medium",
+          "decision": "Keep Oatmeal as a searchable canonical food. Preserve its existing customization model and use the reviewed nutrition source/estimate for the default portion.",
+          "reason": "Generic oatmeal prepared without specified additions; water, milk, and fat change totals.",
+          "sources": [
+            {
+              "name": "FNDDS",
+              "recordName": "Oatmeal, NFS",
+              "sourceID": "2708380",
+              "url": "https://fdc.nal.usda.gov/food-details/2708380/nutrients"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 76,
+          "carbs": 11.2,
+          "fat": 2.63,
+          "fiber": 1.7,
+          "protein": 2.18
+        },
+        "portionNutrition": {
+          "calories": 178.6,
+          "carbs": 26.32,
+          "catalogGrams": 235.0,
+          "catalogServing": "1 cup",
+          "fat": 6.18,
+          "fiber": 4.0,
+          "protein": 5.12
+        },
+        "reviewReasons": [
+          "Generic oatmeal prepared without specified additions; water, milk, and fat change totals."
+        ],
+        "source": {
+          "dataType": "FNDDS",
+          "database": "FoodData Central",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2708380",
+          "recordName": "Oatmeal, NFS",
+          "releaseDate": "2024-10-01",
+          "reviewedDate": "2026-10-21",
+          "serving": {
+            "description": "1 cup",
+            "grams": 240
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2708380/nutrients"
+        }
+      },
       "nutritionPer100g": {
-        "calories": 76.0,
+        "calories": 76,
         "carbs": 11.2,
         "fat": 2.63,
         "fiber": 1.7,
         "protein": 2.18
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Oatmeal, NFS",
-        "similarity": 0.7778,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2708380"
       },
       "optionsSummary": "Milk whole, Blueberries, Banana, Peanut butter, Maple syrup, Honey",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "Generic oatmeal prepared without specified additions; water, milk, and fat change totals."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -30801,6 +31593,13 @@
         "omelette",
         "egg omelette"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "fallback",
+        "name": "Millet",
+        "similarity": 0.6667,
+        "source": "usda",
+        "sourceID": "2708377"
+      },
       "category": "Breakfast & eggs",
       "confidence": "Low",
       "defaultGrams": 164.0,
@@ -30810,30 +31609,91 @@
       "includedComponentsSummary": "Whole egg, Butter",
       "name": "Omelet",
       "nutrients": {
-        "calories": 193.52,
-        "carbs": 38.7,
-        "fat": 1.64,
-        "fiber": 2.13,
-        "protein": 5.74
+        "calories": 314.88,
+        "carbs": 1.09,
+        "fat": 25.62,
+        "fiber": 0.0,
+        "protein": 18.96
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "fallback",
+          "name": "Millet",
+          "similarity": 0.6667,
+          "source": "usda",
+          "sourceID": "2708377"
+        },
+        "compositionEvidence": {
+          "confidence": "Low",
+          "decision": "Keep Omelet as a searchable canonical food. Preserve its existing customization model and use the reviewed nutrition source/estimate for the default portion.",
+          "reason": "Calculated from 150 g whole egg plus 14 g butter; illustrative composition and cooking yield require review.",
+          "sources": [
+            {
+              "name": "USDA SR Legacy",
+              "recordName": "Egg, whole, raw, fresh",
+              "sourceID": "171287",
+              "url": "https://fdc.nal.usda.gov/food-details/171287/nutrients"
+            },
+            {
+              "name": "USDA SR Legacy",
+              "recordName": "Butter, salted",
+              "sourceID": "173410",
+              "url": "https://fdc.nal.usda.gov/food-details/173410/nutrients"
+            }
+          ]
+        },
+        "confidence": "Low",
+        "nutritionPer100g": {
+          "calories": 192.0,
+          "carbs": 0.665,
+          "fat": 15.622,
+          "fiber": 0,
+          "protein": 11.56
+        },
+        "portionNutrition": {
+          "calories": 314.88,
+          "carbs": 1.09,
+          "catalogGrams": 164.0,
+          "catalogServing": "1 omelet",
+          "fat": 25.62,
+          "fiber": 0.0,
+          "protein": 18.96
+        },
+        "reviewReasons": [
+          "Calculated from 150 g whole egg plus 14 g butter; illustrative composition and cooking yield require review."
+        ],
+        "source": {
+          "dataType": "USDA FDC composition",
+          "database": "FoodData Central",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "recipe-calculation",
+          "recordName": "Omelet, calculated from whole egg and butter",
+          "releaseDate": "2026-10-21",
+          "reviewedDate": "2026-10-21",
+          "serving": {
+            "description": "1 omelet",
+            "grams": 164
+          },
+          "url": "https://fdc.nal.usda.gov/"
+        }
       },
       "nutritionPer100g": {
-        "calories": 118.0,
-        "carbs": 23.6,
-        "fat": 1.0,
-        "fiber": 1.3,
-        "protein": 3.5
+        "calories": 192.0,
+        "carbs": 0.665,
+        "fat": 15.622,
+        "fiber": 0,
+        "protein": 11.56
       },
       "nutritionSource": {
-        "matchBasis": "fallback",
-        "name": "Millet",
-        "similarity": 0.6667,
+        "matchBasis": "reviewed FDC record",
+        "name": "Omelet, calculated from whole egg and butter",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2708377"
+        "sourceID": "recipe-calculation"
       },
       "optionsSummary": "Cheddar, Ham, Bacon",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "Calculated from 150 g whole egg plus 14 g butter; illustrative composition and cooking yield require review."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -30889,8 +31749,15 @@
         "orange",
         "navel orange"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Orange, raw",
+        "similarity": 0.75,
+        "source": "usda",
+        "sourceID": "2709171"
+      },
       "category": "Fruit",
-      "confidence": "Low",
+      "confidence": "Medium",
       "defaultGrams": 130.0,
       "defaultUnit": "1 orange",
       "foodKind": "Reusable ingredient",
@@ -30904,23 +31771,79 @@
         "fiber": 2.86,
         "protein": 1.2
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Orange, raw",
+          "similarity": 0.75,
+          "source": "usda",
+          "sourceID": "2709171"
+        },
+        "compositionEvidence": {
+          "confidence": "Medium",
+          "decision": "Keep Orange as a searchable canonical food. Preserve its existing customization model and use the reviewed nutrition source/estimate for the default portion.",
+          "reason": "Direct raw orange record; catalog edible portion is smaller than USDA medium orange.",
+          "sources": [
+            {
+              "name": "FNDDS",
+              "recordName": "Orange, raw",
+              "sourceID": "2709171",
+              "url": "https://fdc.nal.usda.gov/food-details/2709171/nutrients"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 50,
+          "carbs": 11.8,
+          "fat": 0.14,
+          "fiber": 2.2,
+          "protein": 0.92
+        },
+        "portionNutrition": {
+          "calories": 65.0,
+          "carbs": 15.34,
+          "catalogGrams": 130.0,
+          "catalogServing": "1 orange",
+          "fat": 0.18,
+          "fiber": 2.86,
+          "protein": 1.2
+        },
+        "reviewReasons": [
+          "Direct raw orange record; catalog edible portion is smaller than USDA medium orange."
+        ],
+        "source": {
+          "dataType": "FNDDS",
+          "database": "FoodData Central",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2709171",
+          "recordName": "Orange, raw",
+          "releaseDate": "2024-10-01",
+          "reviewedDate": "2026-10-21",
+          "serving": {
+            "description": "1 orange",
+            "grams": 154
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2709171/nutrients"
+        }
+      },
       "nutritionPer100g": {
-        "calories": 50.0,
+        "calories": 50,
         "carbs": 11.8,
         "fat": 0.14,
         "fiber": 2.2,
         "protein": 0.92
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Orange, raw",
-        "similarity": 0.75,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2709171"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
+        "Direct raw orange record; catalog edible portion is smaller than USDA medium orange."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -30976,8 +31899,15 @@
         "oj",
         "fresh orange juice"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Orange chicken",
+        "similarity": 0.7692,
+        "source": "usda",
+        "sourceID": "2706443"
+      },
       "category": "Beverages",
-      "confidence": "Low",
+      "confidence": "High",
       "defaultGrams": 248.0,
       "defaultUnit": "1 cup",
       "foodKind": "Beverage",
@@ -30985,31 +31915,83 @@
       "includedComponentsSummary": "None",
       "name": "Orange juice",
       "nutrients": {
-        "calories": 649.76,
-        "carbs": 55.8,
-        "fat": 31.5,
-        "fiber": 1.98,
-        "protein": 35.96
+        "calories": 116.56,
+        "carbs": 25.3,
+        "fat": 0.84,
+        "fiber": 0.74,
+        "protein": 1.91
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Orange chicken",
+          "similarity": 0.7692,
+          "source": "usda",
+          "sourceID": "2706443"
+        },
+        "compositionEvidence": {
+          "confidence": "High",
+          "decision": "Keep Orange juice as a searchable canonical food. Preserve its existing customization model and use the reviewed nutrition source/estimate for the default portion.",
+          "reason": "Direct 100% orange juice record, scaled to catalog 1 cup.",
+          "sources": [
+            {
+              "name": "FNDDS",
+              "recordName": "Orange juice, 100%, NFS",
+              "sourceID": "2709186",
+              "url": "https://fdc.nal.usda.gov/food-details/2709186/nutrients"
+            }
+          ]
+        },
+        "confidence": "High",
+        "nutritionPer100g": {
+          "calories": 47,
+          "carbs": 10.2,
+          "fat": 0.34,
+          "fiber": 0.3,
+          "protein": 0.77
+        },
+        "portionNutrition": {
+          "calories": 116.56,
+          "carbs": 25.3,
+          "catalogGrams": 248.0,
+          "catalogServing": "1 cup",
+          "fat": 0.84,
+          "fiber": 0.74,
+          "protein": 1.91
+        },
+        "reviewReasons": [],
+        "source": {
+          "dataType": "FNDDS",
+          "database": "FoodData Central",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2709186",
+          "recordName": "Orange juice, 100%, NFS",
+          "releaseDate": "2024-10-01",
+          "reviewedDate": "2026-10-21",
+          "serving": {
+            "description": "1 fl oz",
+            "grams": 31
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2709186/nutrients"
+        }
       },
       "nutritionPer100g": {
-        "calories": 262.0,
-        "carbs": 22.5,
-        "fat": 12.7,
-        "fiber": 0.8,
-        "protein": 14.5
+        "calories": 47,
+        "carbs": 10.2,
+        "fat": 0.34,
+        "fiber": 0.3,
+        "protein": 0.77
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Orange chicken",
-        "similarity": 0.7692,
+        "matchBasis": "reviewed FDC record",
+        "name": "Orange juice, 100%, NFS",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2706443"
+        "sourceID": "2709186"
       },
       "optionsSummary": "None",
-      "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
-      ],
-      "reviewRequired": true,
+      "reviewReasons": [],
+      "reviewRequired": false,
       "searchEnabled": true,
       "sizeAvailable": false,
       "variationsSummary": "None"
@@ -31018,6 +32000,13 @@
       "aliases": [
         "orange sauce"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Cranberry sauce",
+        "similarity": 0.7407,
+        "source": "usda",
+        "sourceID": "2709280"
+      },
       "category": "Ingredients",
       "confidence": "Low",
       "defaultGrams": 30.0,
@@ -31027,29 +32016,85 @@
       "includedComponentsSummary": "None",
       "name": "Orange sauce",
       "nutrients": {
-        "calories": 47.7,
-        "carbs": 12.12,
-        "fat": 0.04,
-        "fiber": 0.33,
-        "protein": 0.27
+        "calories": 46.2,
+        "carbs": 11.46,
+        "fat": 0.01,
+        "fiber": 0.03,
+        "protein": 0.08
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Cranberry sauce",
+          "similarity": 0.7407,
+          "source": "usda",
+          "sourceID": "2709280"
+        },
+        "compositionEvidence": {
+          "confidence": "Low",
+          "decision": "Keep Orange sauce as a searchable canonical food. Preserve its existing customization model and use the reviewed nutrition source/estimate for the default portion.",
+          "reason": "Sweet-and-sour sauce is only a broad orange glaze proxy; sauce recipes differ substantially.",
+          "sources": [
+            {
+              "name": "SR Legacy",
+              "recordName": "Sauce, sweet and sour, ready-to-serve",
+              "sourceID": "174066",
+              "url": "https://fdc.nal.usda.gov/food-details/174066/nutrients"
+            }
+          ]
+        },
+        "confidence": "Low",
+        "nutritionPer100g": {
+          "calories": 154,
+          "carbs": 38.2,
+          "fat": 0.02,
+          "fiber": 0.1,
+          "protein": 0.27
+        },
+        "portionNutrition": {
+          "calories": 46.2,
+          "carbs": 11.46,
+          "catalogGrams": 30.0,
+          "catalogServing": "1 serving",
+          "fat": 0.01,
+          "fiber": 0.03,
+          "protein": 0.08
+        },
+        "reviewReasons": [
+          "Sweet-and-sour sauce is only a broad orange glaze proxy; sauce recipes differ substantially."
+        ],
+        "source": {
+          "dataType": "SR Legacy",
+          "database": "FoodData Central",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "174066",
+          "recordName": "Sauce, sweet and sour, ready-to-serve",
+          "releaseDate": "2018-04-01",
+          "reviewedDate": "2026-10-21",
+          "serving": {
+            "description": "1 serving",
+            "grams": 35
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/174066/nutrients"
+        }
       },
       "nutritionPer100g": {
-        "calories": 159.0,
-        "carbs": 40.4,
-        "fat": 0.15,
-        "fiber": 1.1,
-        "protein": 0.9
+        "calories": 154,
+        "carbs": 38.2,
+        "fat": 0.02,
+        "fiber": 0.1,
+        "protein": 0.27
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Cranberry sauce",
-        "similarity": 0.7407,
+        "matchBasis": "reviewed FDC record",
+        "name": "Sauce, sweet and sour, ready-to-serve",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2709280"
+        "sourceID": "174066"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
+        "Sweet-and-sour sauce is only a broad orange glaze proxy; sauce recipes differ substantially."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -31107,8 +32152,15 @@
         "hotcakes",
         "buttermilk pancake"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Pancake syrup",
+        "similarity": 0.7,
+        "source": "usda",
+        "sourceID": "2710273"
+      },
       "category": "Breakfast & eggs",
-      "confidence": "Low",
+      "confidence": "Medium",
       "defaultGrams": 75.0,
       "defaultUnit": "2 pancakes",
       "foodKind": "Recipe / assembled",
@@ -31116,30 +32168,85 @@
       "includedComponentsSummary": "None",
       "name": "Pancake",
       "nutrients": {
-        "calories": 198.75,
-        "carbs": 52.2,
-        "fat": 0.08,
-        "fiber": 0.0,
-        "protein": 0.0
+        "calories": 211.5,
+        "carbs": 26.48,
+        "fat": 9.07,
+        "fiber": 1.57,
+        "protein": 5.56
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Pancake syrup",
+          "similarity": 0.7,
+          "source": "usda",
+          "sourceID": "2710273"
+        },
+        "compositionEvidence": {
+          "confidence": "Medium",
+          "decision": "Keep Pancake as a searchable canonical food. Preserve its existing customization model and use the reviewed nutrition source/estimate for the default portion.",
+          "reason": "Plain pancake record; catalog two-pancake portion is an estimate and recipe sizes vary.",
+          "sources": [
+            {
+              "name": "FNDDS",
+              "recordName": "Pancakes, plain, prepared from mix, NFS",
+              "sourceID": "2708304",
+              "url": "https://fdc.nal.usda.gov/food-details/2708304/nutrients"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 282,
+          "carbs": 35.3,
+          "fat": 12.1,
+          "fiber": 2.1,
+          "protein": 7.41
+        },
+        "portionNutrition": {
+          "calories": 211.5,
+          "carbs": 26.48,
+          "catalogGrams": 75.0,
+          "catalogServing": "2 pancakes",
+          "fat": 9.07,
+          "fiber": 1.57,
+          "protein": 5.56
+        },
+        "reviewReasons": [
+          "Plain pancake record; catalog two-pancake portion is an estimate and recipe sizes vary."
+        ],
+        "source": {
+          "dataType": "FNDDS",
+          "database": "FoodData Central",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2708304",
+          "recordName": "Pancakes, plain, prepared from mix, NFS",
+          "releaseDate": "2024-10-01",
+          "reviewedDate": "2026-10-21",
+          "serving": {
+            "description": "1 miniature/bite size pancake",
+            "grams": 10
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2708304/nutrients"
+        }
       },
       "nutritionPer100g": {
-        "calories": 265.0,
-        "carbs": 69.6,
-        "fat": 0.1,
-        "fiber": 0.0,
-        "protein": 0.0
+        "calories": 282,
+        "carbs": 35.3,
+        "fat": 12.1,
+        "fiber": 2.1,
+        "protein": 7.41
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Pancake syrup",
-        "similarity": 0.7,
+        "matchBasis": "reviewed FDC record",
+        "name": "Pancakes, plain, prepared from mix, NFS",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2710273"
+        "sourceID": "2708304"
       },
       "optionsSummary": "Butter, Blueberries, Maple syrup, Chocolate chips",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "Plain pancake record; catalog two-pancake portion is an estimate and recipe sizes vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -31192,6 +32299,13 @@
         "panini",
         "grilled panini"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "fallback",
+        "name": "Tahini",
+        "similarity": 0.6667,
+        "source": "usda",
+        "sourceID": "2707587"
+      },
       "category": "Sandwiches & handhelds",
       "confidence": "Low",
       "defaultGrams": 215.0,
@@ -31201,30 +32315,85 @@
       "includedComponentsSummary": "None",
       "name": "Panini",
       "nutrients": {
-        "calories": 1498.55,
-        "carbs": 30.53,
-        "fat": 134.16,
-        "fiber": 18.06,
-        "protein": 42.35
+        "calories": 617.05,
+        "carbs": 72.67,
+        "fat": 25.8,
+        "fiber": 4.08,
+        "protein": 27.52
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "fallback",
+          "name": "Tahini",
+          "similarity": 0.6667,
+          "source": "usda",
+          "sourceID": "2707587"
+        },
+        "compositionEvidence": {
+          "confidence": "Low",
+          "decision": "Keep Panini as a searchable canonical food. Preserve its existing customization model and use the reviewed nutrition source/estimate for the default portion.",
+          "reason": "Generic sandwich is a broad proxy; panini fillings, bread, and pressed oil vary.",
+          "sources": [
+            {
+              "name": "FNDDS",
+              "recordName": "Sandwich, NFS",
+              "sourceID": "2706880",
+              "url": "https://fdc.nal.usda.gov/food-details/2706880/nutrients"
+            }
+          ]
+        },
+        "confidence": "Low",
+        "nutritionPer100g": {
+          "calories": 287,
+          "carbs": 33.8,
+          "fat": 12,
+          "fiber": 1.9,
+          "protein": 12.8
+        },
+        "portionNutrition": {
+          "calories": 617.05,
+          "carbs": 72.67,
+          "catalogGrams": 215.0,
+          "catalogServing": "1 sandwich",
+          "fat": 25.8,
+          "fiber": 4.08,
+          "protein": 27.52
+        },
+        "reviewReasons": [
+          "Generic sandwich is a broad proxy; panini fillings, bread, and pressed oil vary."
+        ],
+        "source": {
+          "dataType": "FNDDS",
+          "database": "FoodData Central",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2706880",
+          "recordName": "Sandwich, NFS",
+          "releaseDate": "2024-10-01",
+          "reviewedDate": "2026-10-21",
+          "serving": {
+            "description": "1 sandwich",
+            "grams": 115
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2706880/nutrients"
+        }
       },
       "nutritionPer100g": {
-        "calories": 697.0,
-        "carbs": 14.2,
-        "fat": 62.4,
-        "fiber": 8.4,
-        "protein": 19.7
+        "calories": 287,
+        "carbs": 33.8,
+        "fat": 12,
+        "fiber": 1.9,
+        "protein": 12.8
       },
       "nutritionSource": {
-        "matchBasis": "fallback",
-        "name": "Tahini",
-        "similarity": 0.6667,
+        "matchBasis": "reviewed FDC record",
+        "name": "Sandwich, NFS",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2707587"
+        "sourceID": "2706880"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "Generic sandwich is a broad proxy; panini fillings, bread, and pressed oil vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -31376,39 +32545,107 @@
         "pasta pesto",
         "pesto pasta"
       ],
-      "category": "Pizza & pasta",
-      "confidence": "Low",
-      "defaultGrams": 300.0,
-      "defaultUnit": "1 plate",
-      "foodKind": "Recipe / assembled",
-      "id": "food_pasta_pesto",
-      "includedComponentsSummary": "None",
-      "name": "Pasta pesto",
-      "nutrients": {
-        "calories": 1650.0,
-        "carbs": 45.0,
-        "fat": 150.0,
-        "fiber": 5.0,
-        "protein": 30.0
-      },
-      "nutritionPer100g": {
-        "calories": 550.0,
-        "carbs": 15.0,
-        "fat": 50.0,
-        "fiber": 1.6667,
-        "protein": 10.0
-      },
-      "nutritionSource": {
+      "baselineNutritionSource": {
         "matchBasis": "canonical",
         "name": "Basil Pesto",
         "similarity": 0.7273,
         "source": "off",
         "sourceID": "0096619905515"
       },
+      "category": "Pizza & pasta",
+      "confidence": "Low",
+      "defaultGrams": 300.0,
+      "defaultUnit": "1 plate",
+      "foodKind": "Recipe / assembled",
+      "id": "food_pasta_pesto",
+      "includedComponentsSummary": "Pasta cooked, Pesto sauce",
+      "name": "Pasta pesto",
+      "nutrients": {
+        "calories": 627.6,
+        "carbs": 79.74,
+        "fat": 24.77,
+        "fiber": 5.4,
+        "protein": 19.72
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Basil Pesto",
+          "similarity": 0.7273,
+          "source": "off",
+          "sourceID": "0096619905515"
+        },
+        "compositionEvidence": {
+          "confidence": "Low",
+          "decision": "Keep Pasta pesto as a searchable canonical food. Preserve its existing customization model and use the reviewed nutrition source/estimate for the default portion.",
+          "reason": "Calculated as 240 g cooked pasta plus 60 g pesto; pesto-to-pasta ratio varies.",
+          "sources": [
+            {
+              "name": "USDA FNDDS",
+              "recordName": "Pasta, cooked",
+              "sourceID": "2708357",
+              "url": "https://fdc.nal.usda.gov/food-details/2708357/nutrients"
+            },
+            {
+              "name": "USDA SR Legacy",
+              "recordName": "Sauce, pesto, ready-to-serve",
+              "sourceID": "171579",
+              "url": "https://fdc.nal.usda.gov/food-details/171579/nutrients"
+            }
+          ]
+        },
+        "confidence": "Low",
+        "nutritionPer100g": {
+          "calories": 209.2,
+          "carbs": 26.58,
+          "fat": 8.256,
+          "fiber": 1.8,
+          "protein": 6.574
+        },
+        "portionNutrition": {
+          "calories": 627.6,
+          "carbs": 79.74,
+          "catalogGrams": 300.0,
+          "catalogServing": "1 plate",
+          "fat": 24.77,
+          "fiber": 5.4,
+          "protein": 19.72
+        },
+        "reviewReasons": [
+          "Calculated as 240 g cooked pasta plus 60 g pesto; pesto-to-pasta ratio varies."
+        ],
+        "source": {
+          "dataType": "USDA FDC composition",
+          "database": "FoodData Central",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "recipe-calculation",
+          "recordName": "Pasta with pesto, calculated recipe",
+          "releaseDate": "2026-10-21",
+          "reviewedDate": "2026-10-21",
+          "serving": {
+            "description": "300 g plate",
+            "grams": 300
+          },
+          "url": "https://fdc.nal.usda.gov/"
+        }
+      },
+      "nutritionPer100g": {
+        "calories": 209.2,
+        "carbs": 26.58,
+        "fat": 8.256,
+        "fiber": 1.8,
+        "protein": 6.574
+      },
+      "nutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Pasta with pesto, calculated recipe",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "recipe-calculation"
+      },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "Calculated as 240 g cooked pasta plus 60 g pesto; pesto-to-pasta ratio varies."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -31420,39 +32657,113 @@
         "pasta primavera",
         "vegetable pasta"
       ],
-      "category": "Pizza & pasta",
-      "confidence": "Low",
-      "defaultGrams": 300.0,
-      "defaultUnit": "1 plate",
-      "foodKind": "Recipe / assembled",
-      "id": "food_pasta_primavera",
-      "includedComponentsSummary": "None",
-      "name": "Pasta primavera",
-      "nutrients": {
-        "calories": 1113.0,
-        "carbs": 224.1,
-        "fat": 4.53,
-        "fiber": 9.6,
-        "protein": 39.0
-      },
-      "nutritionPer100g": {
-        "calories": 371.0,
-        "carbs": 74.7,
-        "fat": 1.51,
-        "fiber": 3.2,
-        "protein": 13.0
-      },
-      "nutritionSource": {
+      "baselineNutritionSource": {
         "matchBasis": "canonical",
         "name": "Pasta, dry, enriched",
         "similarity": 0.5455,
         "source": "usda",
         "sourceID": "169736"
       },
+      "category": "Pizza & pasta",
+      "confidence": "Low",
+      "defaultGrams": 300.0,
+      "defaultUnit": "1 plate",
+      "foodKind": "Recipe / assembled",
+      "id": "food_pasta_primavera",
+      "includedComponentsSummary": "Pasta cooked, Mixed vegetables cooked, Olive oil",
+      "name": "Pasta primavera",
+      "nutrients": {
+        "calories": 504.9,
+        "carbs": 80.34,
+        "fat": 12.45,
+        "fiber": 5.91,
+        "protein": 15.39
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Pasta, dry, enriched",
+          "similarity": 0.5455,
+          "source": "usda",
+          "sourceID": "169736"
+        },
+        "compositionEvidence": {
+          "confidence": "Low",
+          "decision": "Keep Pasta primavera as a searchable canonical food. Preserve its existing customization model and use the reviewed nutrition source/estimate for the default portion.",
+          "reason": "Calculated as 250 g cooked pasta, 40 g mixed vegetables, and 10 g olive oil; recipe proportions vary.",
+          "sources": [
+            {
+              "name": "USDA FNDDS",
+              "recordName": "Pasta, cooked",
+              "sourceID": "2708357",
+              "url": "https://fdc.nal.usda.gov/food-details/2708357/nutrients"
+            },
+            {
+              "name": "USDA SR Legacy",
+              "recordName": "Vegetables, mixed, frozen, cooked, boiled, drained, without salt",
+              "sourceID": "170472",
+              "url": "https://fdc.nal.usda.gov/food-details/170472/nutrients"
+            },
+            {
+              "name": "USDA SR Legacy",
+              "recordName": "Oil, olive, salad or cooking",
+              "sourceID": "171413",
+              "url": "https://fdc.nal.usda.gov/food-details/171413/nutrients"
+            }
+          ]
+        },
+        "confidence": "Low",
+        "nutritionPer100g": {
+          "calories": 168.3,
+          "carbs": 26.78,
+          "fat": 4.15,
+          "fiber": 1.97,
+          "protein": 5.13
+        },
+        "portionNutrition": {
+          "calories": 504.9,
+          "carbs": 80.34,
+          "catalogGrams": 300.0,
+          "catalogServing": "1 plate",
+          "fat": 12.45,
+          "fiber": 5.91,
+          "protein": 15.39
+        },
+        "reviewReasons": [
+          "Calculated as 250 g cooked pasta, 40 g mixed vegetables, and 10 g olive oil; recipe proportions vary."
+        ],
+        "source": {
+          "dataType": "USDA FDC composition",
+          "database": "FoodData Central",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "recipe-calculation",
+          "recordName": "Pasta primavera, calculated recipe",
+          "releaseDate": "2026-10-21",
+          "reviewedDate": "2026-10-21",
+          "serving": {
+            "description": "300 g plate",
+            "grams": 300
+          },
+          "url": "https://fdc.nal.usda.gov/"
+        }
+      },
+      "nutritionPer100g": {
+        "calories": 168.3,
+        "carbs": 26.78,
+        "fat": 4.15,
+        "fiber": 1.97,
+        "protein": 5.13
+      },
+      "nutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Pasta primavera, calculated recipe",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "recipe-calculation"
+      },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "Calculated as 250 g cooked pasta, 40 g mixed vegetables, and 10 g olive oil; recipe proportions vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,

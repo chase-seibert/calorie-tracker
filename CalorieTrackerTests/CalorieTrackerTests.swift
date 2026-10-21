@@ -2215,6 +2215,69 @@ final class CalorieTrackerTests: XCTestCase {
         })
     }
 
+    func testHiddenFoodIsFilteredByStableIdentityAndCanBeRestored() throws {
+        let catalogFood = testFood(calories: 80, name: "Shared name")
+        let personalFood = Food(
+            sourceID: "another-source",
+            source: .usda,
+            name: catalogFood.name,
+            brand: nil,
+            barcode: nil,
+            nutrients: catalogFood.nutrients,
+            baseAmountGrams: catalogFood.baseAmountGrams,
+            servingGrams: catalogFood.servingGrams,
+            servingDescription: catalogFood.servingDescription
+        )
+        var document = DiaryDocument()
+        document.hiddenFoods = [HiddenFoodRecord(food: catalogFood)]
+
+        let hiddenResults = DiaryEngine(document: document).searchItems(
+            "Shared", catalogFoods: [catalogFood, personalFood]
+        )
+        XCTAssertEqual(hiddenResults.map(\.id), ["food:usda:another-source"])
+
+        let engine = DiaryEngine(document: document)
+        engine.restoreHiddenFood(id: catalogFood.id)
+        XCTAssertEqual(
+            engine.searchItems("Shared", catalogFoods: [catalogFood, personalFood]).map(\.id),
+            [catalogFood.id, personalFood.id].map { "food:\($0)" }
+        )
+    }
+
+    func testHiddenFoodSnapshotPersistsInSQLiteWithoutChangingDiaryHistory() throws {
+        let food = testFood(calories: 140, name: "Hidden history food")
+        let date = testDate(day: 1)
+        let url = temporaryDiaryURL()
+        let repository = try DiaryRepository(fileURL: url, calendar: testCalendar)
+        try repository.performSync(scope: .day(date)) { engine in
+            engine.log(food, amount: 1, unit: .serving, on: date, allowCheatDay: true)
+        }
+        try repository.performSync(scope: .library) { $0.hideFood(food) }
+
+        let reopened = try DiaryRepository(fileURL: url, calendar: testCalendar)
+        let saved = try reopened.snapshotSync().document
+        XCTAssertEqual(saved.hiddenFoods.map(\.id), [food.id])
+        XCTAssertEqual(saved.hiddenFoods.first?.food.id, food.id)
+        XCTAssertEqual(saved.hiddenFoods.first?.food.name, food.name)
+        XCTAssertEqual(saved.entries.count, 1)
+        XCTAssertEqual(saved.entries.first?.food.id, food.id)
+        XCTAssertEqual(saved.entries.first?.nutrients.calories, 140)
+
+        try reopened.performSync(scope: .library) { $0.restoreHiddenFood(id: food.id) }
+        XCTAssertTrue(try reopened.snapshotSync().document.hiddenFoods.isEmpty)
+        XCTAssertEqual(try reopened.snapshotSync().document.entries.count, 1)
+    }
+
+    func testOlderDiaryDocumentDefaultsHiddenFoodsToEmpty() throws {
+        let data = try JSONEncoder().encode(DiaryDocument())
+        var payload = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        payload.removeValue(forKey: "hiddenFoods")
+        let oldData = try JSONSerialization.data(withJSONObject: payload)
+
+        let decoded = try JSONDecoder().decode(DiaryDocument.self, from: oldData)
+        XCTAssertTrue(decoded.hiddenFoods.isEmpty)
+    }
+
     func testSearchSelectionAnalyticsCapturesQueryIdentityRankAndResultsAbove() throws {
         let rankedIDs = ["food:usda:one", "meal:local:two", "food:off:three"]
         let properties = try XCTUnwrap(FoodSearchSelectionAnalytics.properties(

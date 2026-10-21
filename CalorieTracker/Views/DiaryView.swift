@@ -168,67 +168,78 @@ struct DiaryView: View {
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 if isSelectingMealItems {
-                    HStack(spacing: 8) {
-                        Button {
-                            cancelMealSelection()
-                        } label: {
-                            Image(systemName: "xmark")
-                                .font(.subheadline.weight(.bold))
-                                .frame(width: 44, height: 32)
+                    VStack(spacing: 10) {
+                        HStack {
+                            Text("\(selectedEntryIDs.count) selected")
+                                .font(.subheadline.weight(.semibold))
+                                .accessibilityIdentifier("diary-selection-count")
+                            Spacer()
+                            Button("Cancel", action: cancelMealSelection)
+                                .font(.subheadline.weight(.semibold))
                         }
-                        .buttonStyle(.bordered)
-                        .accessibilityLabel("Cancel")
 
-                        Button(role: .destructive) {
-                            showingDeleteConfirmation = true
-                        } label: {
-                            Text("Delete")
-                                .lineLimit(1)
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.bordered)
-                        .tint(.red)
-                        .disabled(selectedEntryIDs.isEmpty)
-                        .confirmationDialog(
-                            "Delete \(selectedEntryIDs.count) selected item\(selectedEntryIDs.count == 1 ? "" : "s")?",
-                            isPresented: $showingDeleteConfirmation,
-                            titleVisibility: .visible
-                        ) {
-                            Button("Delete", role: .destructive) {
-                                deleteSelectedEntries()
+                        HStack(spacing: 12) {
+                            Button {
+                                duplicateSelectedEntriesToday()
+                            } label: {
+                                Text("Log Today")
+                                    .lineLimit(1)
+                                    .frame(maxWidth: .infinity)
                             }
-                            Button("Cancel", role: .cancel) {}
-                        } message: {
-                            Text("This cannot be undone.")
-                        }
+                            .buttonStyle(.borderedProminent)
+                            .controlSize(.large)
+                            .disabled(selectedEntryIDs.isEmpty)
+                            .accessibilityHint("Log selected items today")
 
-                        Button {
-                            duplicateSelectedEntriesToday()
-                        } label: {
-                            Text("Duplicate Today")
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.72)
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.bordered)
-                        .disabled(selectedEntryIDs.isEmpty)
+                            Button {
+                                mealName = ""
+                                showingMealName = true
+                            } label: {
+                                Image(systemName: "plus")
+                                    .font(.title3.weight(.semibold))
+                                    .frame(width: 56, height: 56)
+                            }
+                            .buttonStyle(.bordered)
+                            .buttonBorderShape(.circle)
+                            .controlSize(.large)
+                            .disabled(selectedEntryIDs.isEmpty)
+                            .accessibilityLabel("Create Meal")
+                            .accessibilityHint("Create a meal from selected items")
 
-                        Button {
-                            mealName = ""
-                            showingMealName = true
-                        } label: {
-                            Text("Create meal")
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.8)
-                                .frame(maxWidth: .infinity)
+                            Button(role: .destructive) {
+                                showingDeleteConfirmation = true
+                            } label: {
+                                Image(systemName: "trash")
+                                    .font(.headline.weight(.semibold))
+                                    .frame(width: 24, height: 24)
+                            }
+                            .buttonStyle(.bordered)
+                            .buttonBorderShape(.circle)
+                            .controlSize(.large)
+                            .frame(width: 56, height: 56)
+                            .tint(.red)
+                            .disabled(selectedEntryIDs.isEmpty)
+                            .accessibilityLabel("Delete")
+                            .accessibilityHint("Delete selected items")
+                            .confirmationDialog(
+                                "Delete \(selectedEntryIDs.count) selected item\(selectedEntryIDs.count == 1 ? "" : "s")?",
+                                isPresented: $showingDeleteConfirmation,
+                                titleVisibility: .visible
+                            ) {
+                                Button("Delete", role: .destructive) {
+                                    deleteSelectedEntries()
+                                }
+                                Button("Cancel", role: .cancel) {}
+                            } message: {
+                                Text("This cannot be undone.")
+                            }
                         }
-                        .buttonStyle(.borderedProminent)
-                        .disabled(selectedEntryIDs.isEmpty)
+                        .font(.subheadline.weight(.semibold))
+                        .controlSize(.large)
                     }
-                    .font(.subheadline.weight(.semibold))
-                    .controlSize(.regular)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 10)
+                    .padding(.bottom, 8)
                     .background(.ultraThinMaterial)
                 } else {
                     HStack(spacing: 10) {
@@ -428,7 +439,7 @@ struct DiaryView: View {
             .padding(.top, 9)
             .padding(.bottom, 4)
             if isSelectingMealItems, !entries.isEmpty {
-                Text("Choose foods to save as a meal or delete.")
+                Text("Select items to duplicate, save as a meal, or delete.")
                     .font(.subheadline)
                     .foregroundStyle(AppTheme.muted)
                     .frame(maxWidth: .infinity, alignment: .leading)
