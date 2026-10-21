@@ -222,12 +222,12 @@
     },
     {
       "alias": "granola",
-      "foodID": "food_granola",
-      "kind": "canonical"
+      "foodID": "food_cold_breakfast_cereal",
+      "kind": "synonym"
     },
     {
       "alias": "granola cereal",
-      "foodID": "food_granola",
+      "foodID": "food_cold_breakfast_cereal",
       "kind": "synonym"
     },
     {
@@ -5517,12 +5517,12 @@
     },
     {
       "alias": "corn flakes",
-      "foodID": "food_corn_flakes",
+      "foodID": "food_cold_breakfast_cereal",
       "kind": "synonym"
     },
     {
       "alias": "Cheerios",
-      "foodID": "food_oat_ring_cereal",
+      "foodID": "food_cold_breakfast_cereal",
       "kind": "brand"
     },
     {
@@ -5747,38 +5747,38 @@
     },
     {
       "alias": "Raisin Bran",
-      "foodID": "food_bran_flakes_cereal",
+      "foodID": "food_cold_breakfast_cereal",
       "kind": "brand"
     },
     {
       "alias": "bran flakes",
-      "foodID": "food_bran_flakes_cereal",
+      "foodID": "food_cold_breakfast_cereal",
       "kind": "synonym"
     },
     {
       "alias": "Frosted Mini-Wheats",
-      "foodID": "food_shredded_wheat_cereal",
+      "foodID": "food_cold_breakfast_cereal",
       "kind": "brand"
     },
     {
       "alias": "shredded wheat",
-      "foodID": "food_shredded_wheat_cereal",
+      "foodID": "food_cold_breakfast_cereal",
       "kind": "synonym"
     },
     {
       "alias": "Rice Krispies",
-      "foodID": "food_rice_cereal_squares",
+      "foodID": "food_cold_breakfast_cereal",
       "kind": "brand"
     },
     {
       "alias": "rice cereal",
-      "foodID": "food_rice_cereal_squares",
+      "foodID": "food_cold_breakfast_cereal",
       "kind": "synonym"
     },
     {
       "alias": "muesli cereal",
-      "foodID": "food_muesli",
-      "kind": "canonical"
+      "foodID": "food_cold_breakfast_cereal",
+      "kind": "synonym"
     },
     {
       "alias": "deep dish crust",
@@ -5787,17 +5787,17 @@
     },
     {
       "alias": "Honey Nut Cheerios",
-      "foodID": "food_oat_ring_cereal",
+      "foodID": "food_cold_breakfast_cereal",
       "kind": "brand"
     },
     {
       "alias": "Multigrain Cheerios",
-      "foodID": "food_oat_ring_cereal",
+      "foodID": "food_cold_breakfast_cereal",
       "kind": "brand"
     },
     {
       "alias": "Cheerios Oat Crunch",
-      "foodID": "food_oat_ring_cereal",
+      "foodID": "food_cold_breakfast_cereal",
       "kind": "brand"
     },
     {
@@ -6028,6 +6028,21 @@
     {
       "alias": "shish kebab",
       "foodID": "food_kebabs",
+      "kind": "synonym"
+    },
+    {
+      "alias": "oat rings",
+      "foodID": "food_cold_breakfast_cereal",
+      "kind": "synonym"
+    },
+    {
+      "alias": "oat ring cereal",
+      "foodID": "food_cold_breakfast_cereal",
+      "kind": "synonym"
+    },
+    {
+      "alias": "muesli",
+      "foodID": "food_cold_breakfast_cereal",
       "kind": "synonym"
     },
     {
@@ -6391,6 +6406,36 @@
       "3",
       "Illustrative recipe ratio used for low-confidence nutrition estimate",
       "Review required"
+    ],
+    [
+      "food_garlic_naan",
+      "Garlic naan",
+      "food_naan",
+      "Naan",
+      "97",
+      "1",
+      "Illustrative recipe estimate; calculated from USDA naan base plus garlic butter",
+      "Review required"
+    ],
+    [
+      "food_garlic_naan",
+      "Garlic naan",
+      "food_butter",
+      "Butter",
+      "5",
+      "2",
+      "Illustrative garlic-butter topping estimate",
+      "Review required"
+    ],
+    [
+      "food_garlic_naan",
+      "Garlic naan",
+      "food_garlic",
+      "Garlic",
+      "3",
+      "3",
+      "Illustrative garlic amount; USDA raw garlic",
+      "Review required"
     ]
   ],
   "companionFoods": [
@@ -6570,7 +6615,7 @@
       "3"
     ]
   ],
-  "datasetVersion": "chase-food-2026-10-21-28",
+  "datasetVersion": "chase-food-2026-10-21-29",
   "foods": [
     {
       "aliases": [
@@ -10199,10 +10244,7 @@
       "variationsSummary": "None"
     },
     {
-      "aliases": [
-        "Raisin Bran",
-        "bran flakes"
-      ],
+      "aliases": [],
       "category": "Breakfast & eggs",
       "confidence": "Medium",
       "defaultGrams": 40.0,
@@ -10237,7 +10279,7 @@
         "Approximate existing-catalog match; verify identity and preparation"
       ],
       "reviewRequired": true,
-      "searchEnabled": true,
+      "searchEnabled": false,
       "sizeAvailable": true,
       "variationsSummary": "None"
     },
@@ -13428,9 +13470,23 @@
       "aliases": [
         "cereal",
         "breakfast cereal",
+        "granola",
+        "granola cereal",
         "cold breakfast cereal",
+        "corn flakes",
+        "Cheerios",
         "Frosted Flakes",
         "Kellogg Frosted Flakes",
+        "Raisin Bran",
+        "bran flakes",
+        "Frosted Mini-Wheats",
+        "shredded wheat",
+        "Rice Krispies",
+        "rice cereal",
+        "muesli cereal",
+        "Honey Nut Cheerios",
+        "Multigrain Cheerios",
+        "Cheerios Oat Crunch",
         "Lucky Charms",
         "Froot Loops",
         "Froot Loops cereal",
@@ -13441,7 +13497,10 @@
         "Corn Pops",
         "Wheaties",
         "Trix cereal",
-        "Cap’n Crunch"
+        "Cap’n Crunch",
+        "oat rings",
+        "oat ring cereal",
+        "muesli"
       ],
       "baselineNutritionSource": {
         "matchBasis": "canonical",
@@ -13539,14 +13598,14 @@
         "source": "usda",
         "sourceID": "2708445"
       },
-      "optionsSummary": "Corn flakes, Oat rings, Granola, Frosted flakes, Bran flakes, Shredded wheat, Rice cereal, Muesli, Whole milk, Banana, Berries, Honey, 2% milk, 1% milk, Skim milk, Oat milk, Almond milk, Soy milk",
+      "optionsSummary": "Whole milk, Banana, Berries, Honey, 2% milk, 1% milk, Skim milk, Oat milk, Almond milk, Soy milk",
       "reviewReasons": [
         "Direct FNDDS ready-to-eat cereal, NFS; cereal types have wide calorie and fiber variation. Use only as generic placeholder; brand/type options need refinement."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
       "sizeAvailable": true,
-      "variationsSummary": "None"
+      "variationsSummary": "Corn flakes, Oat rings, Granola, Frosted flakes, Bran flakes, Shredded wheat, Rice cereal, Muesli"
     },
     {
       "aliases": [
@@ -17623,9 +17682,7 @@
       "variationsSummary": "None"
     },
     {
-      "aliases": [
-        "corn flakes"
-      ],
+      "aliases": [],
       "baselineNutritionSource": {
         "matchBasis": "canonical",
         "name": "All Bran Flakes",
@@ -17720,7 +17777,7 @@
       "optionsSummary": "Whole milk, 2% milk, 1% milk, Skim milk, Oat milk, Almond milk, Soy milk",
       "reviewReasons": [],
       "reviewRequired": false,
-      "searchEnabled": true,
+      "searchEnabled": false,
       "sizeAvailable": false,
       "variationsSummary": "None"
     },
@@ -23719,10 +23776,7 @@
       "variationsSummary": "None"
     },
     {
-      "aliases": [
-        "granola",
-        "granola cereal"
-      ],
+      "aliases": [],
       "baselineNutritionSource": {
         "matchBasis": "canonical",
         "name": "Granola Bar",
@@ -23822,7 +23876,7 @@
       "optionsSummary": "Whole milk, 2% milk, 1% milk, Skim milk, Oat milk, Almond milk, Soy milk",
       "reviewReasons": [],
       "reviewRequired": false,
-      "searchEnabled": true,
+      "searchEnabled": false,
       "sizeAvailable": false,
       "variationsSummary": "None"
     },
@@ -30528,9 +30582,7 @@
       "variationsSummary": "None"
     },
     {
-      "aliases": [
-        "muesli cereal"
-      ],
+      "aliases": [],
       "baselineNutritionSource": {
         "matchBasis": "canonical",
         "name": "Crunchy muesli",
@@ -30628,7 +30680,7 @@
         "One branded crunchy muesli label is only a low-confidence proxy for generic muesli; sugar and ingredient ratios vary."
       ],
       "reviewRequired": true,
-      "searchEnabled": true,
+      "searchEnabled": false,
       "sizeAvailable": true,
       "variationsSummary": "None"
     },
@@ -31054,7 +31106,7 @@
       "reviewRequired": true,
       "searchEnabled": true,
       "sizeAvailable": true,
-      "variationsSummary": "None"
+      "variationsSummary": "Plain naan, Garlic naan"
     },
     {
       "aliases": [
@@ -31154,7 +31206,7 @@
         "source": "usda",
         "sourceID": "2708576"
       },
-      "optionsSummary": "Cheddar cheese, Cheese sauce, Salsa, Sour cream, Guacamole",
+      "optionsSummary": "Cheddar cheese, Cheese sauce, Salsa, Sour cream, Guacamole, Chicken, Ground beef",
       "reviewReasons": [
         "Generic nacho record with small source portion; the catalog plate includes highly variable toppings and portion size."
       ],
@@ -31248,12 +31300,7 @@
       "variationsSummary": "None"
     },
     {
-      "aliases": [
-        "Cheerios",
-        "Honey Nut Cheerios",
-        "Multigrain Cheerios",
-        "Cheerios Oat Crunch"
-      ],
+      "aliases": [],
       "baselineNutritionSource": {
         "matchBasis": "canonical",
         "name": "Oat bran cereal, cooked",
@@ -31351,7 +31398,7 @@
         "Cheerios is a close oat-ring cereal proxy; brand formulations differ."
       ],
       "reviewRequired": true,
-      "searchEnabled": true,
+      "searchEnabled": false,
       "sizeAvailable": false,
       "variationsSummary": "None"
     },
@@ -31453,7 +31500,7 @@
         "source": "usda",
         "sourceID": "2708380"
       },
-      "optionsSummary": "Milk whole, Blueberries, Banana, Peanut butter, Maple syrup, Honey",
+      "optionsSummary": "Milk whole, Blueberries, Banana, Peanut butter, Maple syrup, Honey, Raisins",
       "reviewReasons": [
         "Generic oatmeal prepared without specified additions; water, milk, and fat change totals."
       ],
@@ -31691,7 +31738,7 @@
         "source": "usda",
         "sourceID": "recipe-calculation"
       },
-      "optionsSummary": "Cheddar, Ham, Bacon",
+      "optionsSummary": "Cheddar, Ham, Bacon, American cheese, Mushrooms, Bell pepper, Onions, Kielbasa, Steak, Spinach, Tomato, Mozzarella",
       "reviewReasons": [
         "Calculated from 150 g whole egg plus 14 g butter; illustrative composition and cooking yield require review."
       ],
@@ -32391,7 +32438,7 @@
         "source": "usda",
         "sourceID": "2706880"
       },
-      "optionsSummary": "None",
+      "optionsSummary": "Ham, Turkey, Roast beef, Chicken, Cheddar, American cheese, Provolone, Swiss, Mozzarella, Pepper Jack",
       "reviewReasons": [
         "Generic sandwich is a broad proxy; panini fillings, bread, and pressed oil vary."
       ],
@@ -35396,10 +35443,7 @@
       "variationsSummary": "None"
     },
     {
-      "aliases": [
-        "Rice Krispies",
-        "rice cereal"
-      ],
+      "aliases": [],
       "category": "Breakfast & eggs",
       "confidence": "High",
       "defaultGrams": 28.0,
@@ -35432,7 +35476,7 @@
       "optionsSummary": "Whole milk, 2% milk, 1% milk, Skim milk, Oat milk, Almond milk, Soy milk",
       "reviewReasons": [],
       "reviewRequired": false,
-      "searchEnabled": true,
+      "searchEnabled": false,
       "sizeAvailable": true,
       "variationsSummary": "None"
     },
@@ -36821,10 +36865,7 @@
       "variationsSummary": "None"
     },
     {
-      "aliases": [
-        "Frosted Mini-Wheats",
-        "shredded wheat"
-      ],
+      "aliases": [],
       "category": "Breakfast & eggs",
       "confidence": "Medium",
       "defaultGrams": 50.0,
@@ -36848,9 +36889,9 @@
         "protein": 7.02
       },
       "nutritionSource": {
-        "matchBasis": "alias",
+        "matchBasis": "canonical",
         "name": "Shredded Wheat",
-        "similarity": 0.94,
+        "similarity": 0.8,
         "source": "off",
         "sourceID": "0884912180599"
       },
@@ -36859,7 +36900,7 @@
         "Approximate existing-catalog match; verify identity and preparation"
       ],
       "reviewRequired": true,
-      "searchEnabled": true,
+      "searchEnabled": false,
       "sizeAvailable": true,
       "variationsSummary": "None"
     },
@@ -41237,6 +41278,206 @@
       "optionsSummary": "None",
       "reviewReasons": [
         "Direct thick-crust cheese pizza match for the prepared style; restaurant and homemade recipes vary."
+      ],
+      "reviewRequired": true,
+      "searchEnabled": false,
+      "sizeAvailable": false,
+      "variationsSummary": "None"
+    },
+    {
+      "aliases": [],
+      "baselineNutritionSource": {
+        "matchBasis": "component recipe estimate",
+        "name": "Bread, naan",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2707613"
+      },
+      "category": "Asian & international",
+      "confidence": "Low",
+      "defaultGrams": 105.0,
+      "defaultUnit": "1 piece",
+      "foodKind": "Recipe / assembled",
+      "id": "food_garlic_naan",
+      "includedComponentsSummary": "Naan, Butter, Garlic",
+      "name": "Garlic naan",
+      "nutrients": {
+        "calories": 341.99,
+        "carbs": 49.69,
+        "fat": 11.13,
+        "fiber": 5.11,
+        "protein": 11.0
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "component recipe estimate",
+          "name": "Bread, naan",
+          "similarity": null,
+          "source": "usda",
+          "sourceID": "2707613"
+        },
+        "compositionEvidence": {
+          "confidence": "Low",
+          "decision": "Keep Garlic naan as an internal nutrient-bearing variant under Naan, not a separate search identity.",
+          "reason": "Calculated from a generic naan record with illustrative garlic-butter quantities; recipes vary.",
+          "sources": [
+            {
+              "name": "USDA FNDDS",
+              "recordName": "Bread, naan",
+              "sourceID": "2707613",
+              "url": "https://fdc.nal.usda.gov/food-details/2707613/nutrients"
+            },
+            {
+              "name": "USDA SR Legacy",
+              "recordName": "Butter, salted",
+              "sourceID": "173410",
+              "url": "https://fdc.nal.usda.gov/food-details/173410/nutrients"
+            },
+            {
+              "name": "USDA SR Legacy",
+              "recordName": "Garlic, raw",
+              "sourceID": "169230",
+              "url": "https://fdc.nal.usda.gov/food-details/169230/nutrients"
+            }
+          ]
+        },
+        "confidence": "Low",
+        "nutritionPer100g": {
+          "calories": 325.7048,
+          "carbs": 47.3238,
+          "fat": 10.6015,
+          "fiber": 4.8638,
+          "protein": 10.4765
+        },
+        "reviewReasons": [
+          "Recipe estimate combines 97 g USDA naan, 5 g salted butter, and 3 g raw garlic; validate ingredient amounts and preparation."
+        ],
+        "source": {
+          "dataType": "USDA FDC composition",
+          "database": "FoodData Central",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "recipe-calculation",
+          "recordName": "Garlic naan, calculated from naan, butter, and raw garlic",
+          "releaseDate": "2018-04-01",
+          "reviewedDate": "2026-10-21",
+          "serving": {
+            "description": "1 piece",
+            "grams": 105
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2707613/nutrients"
+        }
+      },
+      "nutritionPer100g": {
+        "calories": 325.7048,
+        "carbs": 47.3238,
+        "fat": 10.6015,
+        "fiber": 4.8638,
+        "protein": 10.4765
+      },
+      "nutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Garlic naan, calculated from naan, butter, and raw garlic",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "recipe-calculation"
+      },
+      "optionsSummary": "None",
+      "reviewReasons": [
+        "Recipe estimate combines 97 g USDA naan, 5 g salted butter, and 3 g raw garlic; validate ingredient amounts and preparation."
+      ],
+      "reviewRequired": true,
+      "searchEnabled": false,
+      "sizeAvailable": false,
+      "variationsSummary": "None"
+    },
+    {
+      "aliases": [],
+      "baselineNutritionSource": {
+        "matchBasis": "direct FDC record",
+        "name": "Kielbasa, fully cooked, grilled",
+        "similarity": 1.0,
+        "source": "usda",
+        "sourceID": "173877"
+      },
+      "category": "Meat & poultry",
+      "confidence": "Medium",
+      "defaultGrams": 85.0,
+      "defaultUnit": "1 serving",
+      "foodKind": "Reusable ingredient",
+      "id": "food_kielbasa",
+      "includedComponentsSummary": "None",
+      "name": "Kielbasa",
+      "nutrients": {
+        "calories": 286.45,
+        "carbs": 4.28,
+        "fat": 25.25,
+        "fiber": 0.0,
+        "protein": 10.54
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "direct FDC record",
+          "name": "Kielbasa, fully cooked, grilled",
+          "similarity": 1.0,
+          "source": "usda",
+          "sourceID": "173877"
+        },
+        "compositionEvidence": {
+          "confidence": "Medium",
+          "decision": "Keep Kielbasa as a reusable hidden food component for configurable entries.",
+          "reason": "Direct USDA kielbasa record; sausage brands vary in fat and salt.",
+          "sources": [
+            {
+              "name": "USDA SR Legacy",
+              "recordName": "Kielbasa, fully cooked, grilled",
+              "sourceID": "173877",
+              "url": "https://fdc.nal.usda.gov/food-details/173877/nutrients"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 337,
+          "carbs": 5.03,
+          "fat": 29.7,
+          "fiber": 0,
+          "protein": 12.4
+        },
+        "reviewReasons": [
+          "USDA grilled kielbasa is a close generic match; brand formulations and preparation vary."
+        ],
+        "source": {
+          "dataType": "SR Legacy",
+          "database": "FoodData Central",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "173877",
+          "recordName": "Kielbasa, fully cooked, grilled",
+          "releaseDate": "2018-04-01",
+          "reviewedDate": "2026-10-21",
+          "serving": {
+            "description": "3 oz",
+            "grams": 85
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/173877/nutrients"
+        }
+      },
+      "nutritionPer100g": {
+        "calories": 337,
+        "carbs": 5.03,
+        "fat": 29.7,
+        "fiber": 0,
+        "protein": 12.4
+      },
+      "nutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Kielbasa, fully cooked, grilled",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "173877"
+      },
+      "optionsSummary": "None",
+      "reviewReasons": [
+        "USDA grilled kielbasa is a close generic match; brand formulations and preparation vary."
       ],
       "reviewRequired": true,
       "searchEnabled": false,
@@ -64719,9 +64960,9 @@
       "food_corn_flakes",
       "Corn flakes",
       "48",
-      "Cereal type",
+      "variant",
       "Yes",
-      "Draft",
+      "Reviewed",
       "Cereal type",
       "exclusive",
       "35"
@@ -64732,9 +64973,9 @@
       "food_oat_ring_cereal",
       "Oat rings",
       "49",
-      "Cereal type",
+      "variant",
       "No",
-      "Draft",
+      "Reviewed",
       "Cereal type",
       "exclusive",
       "35"
@@ -64745,9 +64986,9 @@
       "food_granola",
       "Granola",
       "50",
-      "Cereal type",
+      "variant",
       "No",
-      "Draft",
+      "Reviewed",
       "Cereal type",
       "exclusive",
       "35"
@@ -64758,9 +64999,9 @@
       "food_frosted_corn_flakes",
       "Frosted flakes",
       "51",
-      "Cereal type",
+      "variant",
       "No",
-      "Draft",
+      "Reviewed",
       "Cereal type",
       "exclusive",
       "35"
@@ -64771,9 +65012,9 @@
       "food_bran_flakes_cereal",
       "Bran flakes",
       "52",
-      "Cereal type",
+      "variant",
       "No",
-      "Draft",
+      "Reviewed",
       "Cereal type",
       "exclusive",
       "35"
@@ -64784,9 +65025,9 @@
       "food_shredded_wheat_cereal",
       "Shredded wheat",
       "53",
-      "Cereal type",
+      "variant",
       "No",
-      "Draft",
+      "Reviewed",
       "Cereal type",
       "exclusive",
       "35"
@@ -64797,9 +65038,9 @@
       "food_rice_cereal_squares",
       "Rice cereal",
       "54",
-      "Cereal type",
+      "variant",
       "No",
-      "Draft",
+      "Reviewed",
       "Cereal type",
       "exclusive",
       "35"
@@ -64810,9 +65051,9 @@
       "food_muesli",
       "Muesli",
       "55",
-      "Cereal type",
+      "variant",
       "No",
-      "Draft",
+      "Reviewed",
       "Cereal type",
       "exclusive",
       "35"
@@ -68469,8 +68710,320 @@
       "Protein",
       "exclusive",
       "160"
+    ],
+    [
+      "food_oatmeal",
+      "Oatmeal",
+      "food_raisins",
+      "Raisins",
+      "6",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "",
+      "multiple",
+      "28.4"
+    ],
+    [
+      "food_naan",
+      "Naan",
+      "food_naan",
+      "Plain naan",
+      "1",
+      "variant",
+      "Yes",
+      "Draft",
+      "Naan type",
+      "exclusive",
+      "105"
+    ],
+    [
+      "food_naan",
+      "Naan",
+      "food_garlic_naan",
+      "Garlic naan",
+      "2",
+      "variant",
+      "No",
+      "Draft",
+      "Naan type",
+      "exclusive",
+      "105"
+    ],
+    [
+      "food_nachos",
+      "Nachos",
+      "food_grilled_chicken_breast",
+      "Chicken",
+      "6",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "",
+      "multiple",
+      "56"
+    ],
+    [
+      "food_nachos",
+      "Nachos",
+      "food_ground_beef_cooked",
+      "Ground beef",
+      "7",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "",
+      "multiple",
+      "56"
+    ],
+    [
+      "food_omelet",
+      "Omelet",
+      "food_american_cheese",
+      "American cheese",
+      "25",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "",
+      "multiple",
+      "28.4"
+    ],
+    [
+      "food_omelet",
+      "Omelet",
+      "food_mushrooms_cooked",
+      "Mushrooms",
+      "26",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "",
+      "multiple",
+      "40"
+    ],
+    [
+      "food_omelet",
+      "Omelet",
+      "food_bell_pepper",
+      "Bell pepper",
+      "27",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "",
+      "multiple",
+      "30"
+    ],
+    [
+      "food_omelet",
+      "Omelet",
+      "food_onions_cooked",
+      "Onions",
+      "28",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "",
+      "multiple",
+      "25"
+    ],
+    [
+      "food_omelet",
+      "Omelet",
+      "food_kielbasa",
+      "Kielbasa",
+      "29",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "",
+      "multiple",
+      "56"
+    ],
+    [
+      "food_omelet",
+      "Omelet",
+      "food_steak",
+      "Steak",
+      "30",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "",
+      "multiple",
+      "56"
+    ],
+    [
+      "food_omelet",
+      "Omelet",
+      "food_spinach_cooked",
+      "Spinach",
+      "31",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "",
+      "multiple",
+      "30"
+    ],
+    [
+      "food_omelet",
+      "Omelet",
+      "food_tomato",
+      "Tomato",
+      "32",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "",
+      "multiple",
+      "30"
+    ],
+    [
+      "food_omelet",
+      "Omelet",
+      "food_mozzarella_cheese",
+      "Mozzarella",
+      "33",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "",
+      "multiple",
+      "28.4"
+    ],
+    [
+      "food_panini",
+      "Panini",
+      "food_ham",
+      "Ham",
+      "1",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "Panini filling",
+      "exclusive",
+      "56"
+    ],
+    [
+      "food_panini",
+      "Panini",
+      "food_turkey_breast",
+      "Turkey",
+      "2",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "Panini filling",
+      "exclusive",
+      "56"
+    ],
+    [
+      "food_panini",
+      "Panini",
+      "food_roast_beef",
+      "Roast beef",
+      "3",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "Panini filling",
+      "exclusive",
+      "56"
+    ],
+    [
+      "food_panini",
+      "Panini",
+      "food_grilled_chicken_breast",
+      "Chicken",
+      "4",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "Panini filling",
+      "exclusive",
+      "56"
+    ],
+    [
+      "food_panini",
+      "Panini",
+      "food_cheddar_cheese",
+      "Cheddar",
+      "1",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "Panini cheese",
+      "exclusive",
+      "28.4"
+    ],
+    [
+      "food_panini",
+      "Panini",
+      "food_american_cheese",
+      "American cheese",
+      "2",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "Panini cheese",
+      "exclusive",
+      "20"
+    ],
+    [
+      "food_panini",
+      "Panini",
+      "food_provolone_cheese",
+      "Provolone",
+      "3",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "Panini cheese",
+      "exclusive",
+      "28"
+    ],
+    [
+      "food_panini",
+      "Panini",
+      "food_swiss_cheese",
+      "Swiss",
+      "4",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "Panini cheese",
+      "exclusive",
+      "28"
+    ],
+    [
+      "food_panini",
+      "Panini",
+      "food_mozzarella_cheese",
+      "Mozzarella",
+      "5",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "Panini cheese",
+      "exclusive",
+      "28.4"
+    ],
+    [
+      "food_panini",
+      "Panini",
+      "food_pepper_jack_cheese",
+      "Pepper Jack",
+      "6",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "Panini cheese",
+      "exclusive",
+      "28.4"
     ]
   ],
-  "workbookTitle": "Canonical U.S. Food Taxonomy — 530 Catalog Identities (Review Draft)",
+  "workbookTitle": "Canonical U.S. Food Taxonomy — 532 Catalog Identities (Review Draft)",
   "workbookURL": "https://docs.google.com/spreadsheets/d/16Y1Uc0jldJ4tGO_vf5mgjT0n8pwJxO13W54zR5M_wWo/edit"
 }

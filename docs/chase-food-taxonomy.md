@@ -544,3 +544,29 @@ Burger uses one exclusive Protein group: Beef (default), Chicken, or Bean. Selec
 - The 2026-10-19 enrichment ledger corrects several unrelated baseline matches
   (including hot chocolate, cooked ground beef, and hard-shell taco) while
   preserving every food ID and existing diary history.
+
+### 2026-10-21 configuration refinements
+
+- **Cereal types:** Keep `food_cold_breakfast_cereal` as the single searchable
+  canonical entry displayed as **Cereal**. Corn flakes, oat rings, granola,
+  frosted flakes, bran flakes, shredded wheat, rice cereal, and muesli are
+  exclusive nutrient-bearing cereal type variants. Their former IDs remain
+  available for diary history and as variant components; cereal searches and
+  type aliases resolve to Cereal. Milk choices stay exclusive and fruit/honey
+  remain independent additions.
+- **Naan:** Keep Plain naan as the default and Garlic naan as a mutually
+  exclusive variation beneath Naan. The garlic variation uses a low-confidence
+  draft composition based on naan, butter, and garlic; review its ingredient
+  amounts before treating its calories as final.
+- **Nachos:** Add chicken and cooked ground beef as optional toppings alongside
+  the existing cheese, sauce, salsa, sour cream, and guacamole options.
+- **Oatmeal:** Add raisins as an optional topping.
+- **Omelet:** Expand multiple-select ingredients to include American cheese,
+  mushrooms, bell pepper, onion, kielbasa, steak, spinach, tomato, and
+  mozzarella, retaining the existing cheddar, ham, and bacon choices. Kielbasa
+  uses the USDA grilled fully cooked record as a medium-confidence reusable
+  ingredient.
+- **Panini:** Offer a mutually exclusive filling choice (ham, turkey, roast
+  beef, or chicken) and a mutually exclusive cheese choice (cheddar, American,
+  provolone, Swiss, mozzarella, or Pepper Jack). These are customizable
+  ingredients under Panini, not separate diary companion suggestions.

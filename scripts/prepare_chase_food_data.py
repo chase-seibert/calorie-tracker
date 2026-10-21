@@ -78,6 +78,18 @@ INTERNAL_OPTION_FOODS = {
     "food_deep_dish_pizza_crust",
     "food_pizza_variant_deep_dish",
     "food_hot_dog_sausage",
+    # Cereal types are selectable variants under the one searchable Cereal result.
+    "food_corn_flakes",
+    "food_oat_ring_cereal",
+    "food_granola",
+    "food_frosted_corn_flakes",
+    "food_bran_flakes_cereal",
+    "food_shredded_wheat_cereal",
+    "food_rice_cereal_squares",
+    "food_muesli",
+    # Reusable component records shown only under their parent food.
+    "food_garlic_naan",
+    "food_kielbasa",
 }
 
 # UI-only preparation labels have no food energy. Nutrient-bearing variant
@@ -339,7 +351,7 @@ def main() -> int:
         })
     payload = {
         "schemaVersion": 1,
-        "datasetVersion": "chase-food-2026-10-21-28",
+        "datasetVersion": "chase-food-2026-10-21-29",
         "workbookTitle": f"Canonical U.S. Food Taxonomy — {len(output_foods)} Catalog Identities (Review Draft)",
         "workbookURL": "https://docs.google.com/spreadsheets/d/16Y1Uc0jldJ4tGO_vf5mgjT0n8pwJxO13W54zR5M_wWo/edit",
         "foods": output_foods,

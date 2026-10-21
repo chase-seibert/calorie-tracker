@@ -6631,6 +6631,65 @@
         "url": "https://fdc.nal.usda.gov/food-details/2709822/nutrients"
       }
     },
+    "food_garlic_naan": {
+      "baselineNutritionSource": {
+        "matchBasis": "component recipe estimate",
+        "name": "Bread, naan",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2707613"
+      },
+      "compositionEvidence": {
+        "confidence": "Low",
+        "decision": "Keep Garlic naan as an internal nutrient-bearing variant under Naan, not a separate search identity.",
+        "reason": "Calculated from a generic naan record with illustrative garlic-butter quantities; recipes vary.",
+        "sources": [
+          {
+            "name": "USDA FNDDS",
+            "recordName": "Bread, naan",
+            "sourceID": "2707613",
+            "url": "https://fdc.nal.usda.gov/food-details/2707613/nutrients"
+          },
+          {
+            "name": "USDA SR Legacy",
+            "recordName": "Butter, salted",
+            "sourceID": "173410",
+            "url": "https://fdc.nal.usda.gov/food-details/173410/nutrients"
+          },
+          {
+            "name": "USDA SR Legacy",
+            "recordName": "Garlic, raw",
+            "sourceID": "169230",
+            "url": "https://fdc.nal.usda.gov/food-details/169230/nutrients"
+          }
+        ]
+      },
+      "confidence": "Low",
+      "nutritionPer100g": {
+        "calories": 325.7048,
+        "carbs": 47.3238,
+        "fat": 10.6015,
+        "fiber": 4.8638,
+        "protein": 10.4765
+      },
+      "reviewReasons": [
+        "Recipe estimate combines 97 g USDA naan, 5 g salted butter, and 3 g raw garlic; validate ingredient amounts and preparation."
+      ],
+      "source": {
+        "dataType": "USDA FDC composition",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "recipe-calculation",
+        "recordName": "Garlic naan, calculated from naan, butter, and raw garlic",
+        "releaseDate": "2018-04-01",
+        "reviewedDate": "2026-10-21",
+        "serving": {
+          "description": "1 piece",
+          "grams": 105
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2707613/nutrients"
+      }
+    },
     "food_gelato": {
       "baselineNutritionSource": {
         "matchBasis": "canonical",
@@ -8214,6 +8273,53 @@
         },
         "source": "usda",
         "url": "https://fdc.nal.usda.gov/food-details/172509/nutrients"
+      }
+    },
+    "food_kielbasa": {
+      "baselineNutritionSource": {
+        "matchBasis": "direct FDC record",
+        "name": "Kielbasa, fully cooked, grilled",
+        "similarity": 1.0,
+        "source": "usda",
+        "sourceID": "173877"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Kielbasa as a reusable hidden food component for configurable entries.",
+        "reason": "Direct USDA kielbasa record; sausage brands vary in fat and salt.",
+        "sources": [
+          {
+            "name": "USDA SR Legacy",
+            "recordName": "Kielbasa, fully cooked, grilled",
+            "sourceID": "173877",
+            "url": "https://fdc.nal.usda.gov/food-details/173877/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 337,
+        "carbs": 5.03,
+        "fat": 29.7,
+        "fiber": 0,
+        "protein": 12.4
+      },
+      "reviewReasons": [
+        "USDA grilled kielbasa is a close generic match; brand formulations and preparation vary."
+      ],
+      "source": {
+        "dataType": "SR Legacy",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "173877",
+        "recordName": "Kielbasa, fully cooked, grilled",
+        "releaseDate": "2018-04-01",
+        "reviewedDate": "2026-10-21",
+        "serving": {
+          "description": "3 oz",
+          "grams": 85
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/173877/nutrients"
       }
     },
     "food_kiwi": {
