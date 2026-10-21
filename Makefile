@@ -51,6 +51,10 @@ test: simulator-ready
 ui-test-reorder: simulator-ready
 	xcodebuild -project $(PROJECT) -scheme CalorieTrackerUITests -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -destination-timeout $(SIMULATOR_DESTINATION_TIMEOUT) -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -collect-test-diagnostics $(TEST_DIAGNOSTICS) -only-testing:CalorieTrackerUITests/DiaryReorderingUITests/testLongPressDragReordersVisuallyAndPersists test
 
+.PHONY: ui-test-duplicate-today
+ui-test-duplicate-today: simulator-ready
+	xcodebuild -project $(PROJECT) -scheme CalorieTrackerUITests -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -destination-timeout $(SIMULATOR_DESTINATION_TIMEOUT) -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -collect-test-diagnostics $(TEST_DIAGNOSTICS) -only-testing:CalorieTrackerUITests/DiaryReorderingUITests/testStationaryLongPressDuplicatesLoggedFoodToday -only-testing:CalorieTrackerUITests/DiaryReorderingUITests/testMultiSelectDuplicatesSelectedFoodsToday test
+
 ui-test-fixture: simulator-ready
 	xcodebuild -project $(PROJECT) -scheme CalorieTrackerUITests -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -destination-timeout $(SIMULATOR_DESTINATION_TIMEOUT) -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -collect-test-diagnostics $(TEST_DIAGNOSTICS) -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testDeviceFixtureShowsRelativeDays test
 

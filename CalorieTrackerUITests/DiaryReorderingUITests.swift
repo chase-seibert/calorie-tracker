@@ -44,6 +44,51 @@ final class DiaryReorderingUITests: XCTestCase {
         XCTAssertGreaterThan(alpha.frame.minY, gamma.frame.minY)
     }
 
+    func testStationaryLongPressDuplicatesLoggedFoodToday() {
+        launchApp(resetFixture: true)
+
+        let alpha = row("reorder-alpha")
+        XCTAssertTrue(alpha.waitForExistence(timeout: 5))
+        XCTAssertEqual(app.descendants(matching: .any)
+            .matching(identifier: "diary-entry-reorder-alpha").count, 2)
+
+        alpha.press(forDuration: 0.6)
+        let duplicateAction = app.descendants(matching: .any)
+            .matching(identifier: "Duplicate Today")
+            .firstMatch
+        XCTAssertTrue(duplicateAction.waitForExistence(timeout: 5))
+        duplicateAction.tap()
+
+        XCTAssertTrue(waitUntil(timeout: 5) {
+            app.descendants(matching: .any)
+                .matching(identifier: "diary-entry-reorder-alpha").count == 4
+        }, "Duplicating the row did not add a second diary entry.")
+    }
+
+    func testMultiSelectDuplicatesSelectedFoodsToday() {
+        launchApp(resetFixture: true)
+
+        let selectButton = app.buttons["Select"]
+        XCTAssertTrue(selectButton.waitForExistence(timeout: 5))
+        selectButton.tap()
+
+        let alphaSelection = app.buttons["selected-diary-entry-reorder-alpha"]
+        let betaSelection = app.buttons["selected-diary-entry-reorder-beta"]
+        XCTAssertTrue(alphaSelection.waitForExistence(timeout: 5))
+        XCTAssertTrue(betaSelection.waitForExistence(timeout: 5))
+        alphaSelection.tap()
+        betaSelection.tap()
+
+        let duplicateButton = app.buttons["Duplicate Today"]
+        XCTAssertTrue(duplicateButton.exists)
+        duplicateButton.tap()
+
+        XCTAssertTrue(waitUntil(timeout: 5) {
+            app.descendants(matching: .any).matching(identifier: "diary-entry-reorder-alpha").count == 4
+                && app.descendants(matching: .any).matching(identifier: "diary-entry-reorder-beta").count == 4
+        }, "Multi-select duplication did not add both selected rows.")
+    }
+
     func testChaseFoodSandwichAndProteinShakeCustomizationScreens() {
         app.launchArguments = [
             "--show-food-search",

@@ -32,6 +32,8 @@ enum DiaryScope: Sendable {
     case range(Date, Date)
     case search(String)
     case entries(Set<UUID>)
+    case entryAndDay(UUID, Date)
+    case entriesAndDay(Set<UUID>, Date)
     case food(String)
     case foods(Set<String>)
     case meal(UUID)
@@ -516,6 +518,20 @@ final class DiaryRepository: @unchecked Sendable {
             return (
                 "day IN (SELECT day FROM diary_entries WHERE id IN (\(ids.map { _ in "?" }.joined(separator: ","))))",
                 ids.sorted { $0.uuidString < $1.uuidString }.map { .text($0.uuidString) }
+            )
+        case .entryAndDay(let entryID, let day):
+            return try predicate(for: .entriesAndDay([entryID], day))
+        case .entriesAndDay(let entryIDs, let day):
+            guard !entryIDs.isEmpty else { return ("0", []) }
+            let start = calendar.startOfDay(for: day)
+            let end = calendar.date(byAdding: .day, value: 1, to: start)!
+            return (
+                "id IN (SELECT value FROM json_each(?1)) OR (day >= ?2 AND day < ?3)",
+                [
+                    .text(String(decoding: try JSONEncoder().encode(entryIDs.map(\.uuidString).sorted()), as: UTF8.self)),
+                    .real(start.timeIntervalSince1970),
+                    .real(end.timeIntervalSince1970),
+                ]
             )
         case .food(let id):
             return (

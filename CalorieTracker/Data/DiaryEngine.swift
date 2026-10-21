@@ -521,6 +521,87 @@ final class DiaryEngine {
         document.entries.removeAll { $0.id == entryID && !$0.isCheatDayAdjustment }
     }
 
+    func duplicateEntry(entryID: UUID, on date: Date) throws {
+        try duplicateEntries(entryIDs: [entryID], on: date)
+    }
+
+    func duplicateEntries(entryIDs: Set<UUID>, on date: Date) throws {
+        guard !entryIDs.isEmpty else { return }
+        let sources = document.entries.filter { entryIDs.contains($0.id) }.sorted {
+            let leftOrder = $0.displayOrder ?? Int.max
+            let rightOrder = $1.displayOrder ?? Int.max
+            if leftOrder != rightOrder { return leftOrder < rightOrder }
+            return $0.loggedAt > $1.loggedAt
+        }
+        guard sources.count == entryIDs.count else {
+            throw DiaryDatabaseError.invalidData("A selected logged item is no longer available.")
+        }
+        guard !sources.contains(where: \.isCheatDayAdjustment) else {
+            throw DiaryDatabaseError.invalidData("Calorie adjustments cannot be duplicated as food.")
+        }
+        guard canLogFood(on: date) else {
+            throw DiaryDatabaseError.invalidData("Food logging is disabled for this day.")
+        }
+
+        clearAutomaticStatus(on: date)
+        for source in sources {
+            let clonedMealItems = source.mealItems?.map(cloningIdentity)
+            let clonedConfiguration = source.foodConfigurationSnapshot.map(cloningIdentities)
+            let duplicate = DiaryEntry(
+                id: UUID(),
+                date: calendar.startOfDay(for: date),
+                food: source.food,
+                amount: source.amount,
+                unit: source.unit,
+                nutrients: source.nutrients,
+                loggedAt: Date(),
+                portionID: source.portionID,
+                displayOrder: nextDisplayOrder(on: date),
+                // A copied meal owns its logged ingredient snapshot; later template edits
+                // must not change what this diary entry represents.
+                savedMealID: nil,
+                mealItems: clonedMealItems,
+                kind: nil,
+                processedMeatOverride: source.processedMeatOverride,
+                redMeatOverride: source.redMeatOverride,
+                meatServingsOverride: source.meatServingsOverride,
+                foodConfigurationSnapshot: clonedConfiguration,
+                mealNotes: source.mealNotes
+            )
+            document.entries.append(duplicate)
+            if !source.isMeal {
+                document.rememberedQuantities[source.food.id] = QuantityPreference(
+                    amount: source.amount,
+                    unit: source.unit,
+                    portionID: source.portionID
+                )
+            }
+        }
+    }
+
+    private func cloningIdentity(_ item: MealItem) -> MealItem {
+        MealItem(
+            id: UUID(),
+            food: item.food,
+            amount: item.amount,
+            unit: item.unit,
+            portionID: item.portionID,
+            meatServingsOverride: item.meatServingsOverride,
+            foodConfigurationSnapshot: item.foodConfigurationSnapshot.map(cloningIdentities),
+            configurationOptionID: item.configurationOptionID,
+            notes: item.notes,
+            processedMeatOverride: item.processedMeatOverride,
+            redMeatOverride: item.redMeatOverride
+        )
+    }
+
+    private func cloningIdentities(_ snapshot: FoodConfigurationSnapshot) -> FoodConfigurationSnapshot {
+        var copy = snapshot
+        copy.components = snapshot.components.map(cloningIdentity)
+        copy.extraComponents = snapshot.extraComponents?.map(cloningIdentity)
+        return copy
+    }
+
     func deleteEntries(entryIDs: Set<UUID>) {
         guard !entryIDs.isEmpty else { return }
         document.entries.removeAll {

@@ -3,6 +3,124 @@ import XCTest
 @testable import CalorieTracker
 
 final class CalorieTrackerTests: XCTestCase {
+    func testDuplicateEntryCopiesFoodAndMealSnapshotsToToday() throws {
+        let sourceDay = testDate(day: 1)
+        let today = testDate(day: 2)
+        let food = testFood(calories: 120, name: "Oat bar")
+        let component = MealItem(id: UUID(), food: food, amount: 1.5, unit: .serving)
+        let mealFood = testFood(calories: 180, name: "Logged bowl")
+        let foodConfiguration = FoodConfigurationSnapshot(
+            selectedOptionIDs: ["extra-oats"],
+            components: [component],
+            suggestedChanges: "Add oats",
+            catalogVersion: nil
+        )
+        let foodEntry = DiaryEntry(
+            id: UUID(), date: sourceDay, food: food, amount: 2, unit: .serving,
+            nutrients: food.nutrients.scaled(by: 2), loggedAt: sourceDay, portionID: "serving",
+            foodConfigurationSnapshot: foodConfiguration
+        )
+        let mealEntry = DiaryEntry(
+            id: UUID(), date: sourceDay, food: mealFood, amount: 1, unit: .serving,
+            nutrients: mealFood.nutrients, loggedAt: sourceDay, portionID: "saved-meal",
+            savedMealID: UUID(), mealItems: [component], mealNotes: "Saved snapshot"
+        )
+        let adjustment = DiaryEntry(
+            id: UUID(), date: sourceDay, food: testFood(calories: 0, name: "Adjustment"),
+            amount: 0, unit: .serving, nutrients: .zero, loggedAt: sourceDay,
+            kind: .cheatDayAdjustment
+        )
+        var originalDocument = DiaryDocument()
+        originalDocument.entries = [foodEntry, mealEntry, adjustment]
+        let engine = DiaryEngine(document: originalDocument, calendar: testCalendar)
+
+        try engine.duplicateEntry(entryID: foodEntry.id, on: today)
+        try engine.duplicateEntry(entryID: mealEntry.id, on: today)
+
+        let duplicates = engine.entries(on: today)
+        XCTAssertEqual(duplicates.count, 2)
+        let foodCopy = try XCTUnwrap(duplicates.first { $0.food.name == food.name })
+        XCTAssertNotEqual(foodCopy.id, foodEntry.id)
+        XCTAssertEqual(foodCopy.date, today)
+        XCTAssertEqual(foodCopy.amount, foodEntry.amount)
+        XCTAssertEqual(foodCopy.unit, foodEntry.unit)
+        XCTAssertEqual(foodCopy.portionID, foodEntry.portionID)
+        XCTAssertEqual(foodCopy.nutrients, foodEntry.nutrients)
+        XCTAssertEqual(foodCopy.foodConfigurationSnapshot?.selectedOptionIDs, ["extra-oats"])
+        XCTAssertNotEqual(foodCopy.foodConfigurationSnapshot?.components.first?.id, component.id)
+
+        let mealCopy = try XCTUnwrap(duplicates.first { $0.food.name == mealFood.name })
+        XCTAssertNotEqual(mealCopy.id, mealEntry.id)
+        XCTAssertNil(mealCopy.savedMealID, "The copied meal must retain its own historical ingredient snapshot.")
+        XCTAssertEqual(mealCopy.mealItems?.first?.amount, component.amount)
+        XCTAssertNotEqual(mealCopy.mealItems?.first?.id, component.id)
+        XCTAssertEqual(mealCopy.mealNotes, mealEntry.mealNotes)
+        XCTAssertThrowsError(try engine.duplicateEntry(entryID: adjustment.id, on: today))
+        XCTAssertEqual(engine.document.entries.filter { $0.date == sourceDay }, originalDocument.entries)
+    }
+
+    func testDuplicateEntryRejectsCheatDayWithoutChangingSource() {
+        let source = testEntry(calories: 100, date: testDate(day: 1), name: "Source")
+        let today = testDate(day: 2)
+        var document = DiaryDocument()
+        document.entries = [source]
+        document.dayStatuses = [DayStatus(date: today, kind: .cheat, source: .manual)]
+        let engine = DiaryEngine(document: document, calendar: testCalendar)
+
+        XCTAssertThrowsError(try engine.duplicateEntry(entryID: source.id, on: today))
+        XCTAssertEqual(engine.document.entries, [source])
+        XCTAssertEqual(engine.document.dayStatuses.first?.kind, .cheat)
+    }
+
+    func testDuplicateEntriesCopiesSelectedRowsAndRejectsBatchAtomically() throws {
+        let today = testDate(day: 3)
+        let first = testEntry(calories: 100, date: testDate(day: 1), name: "First snack")
+        let second = testEntry(calories: 200, date: testDate(day: 2), name: "Second snack")
+        let adjustment = DiaryEntry(
+            id: UUID(), date: today, food: testFood(calories: 0, name: "Adjustment"),
+            amount: 0, unit: .serving, nutrients: .zero, loggedAt: today,
+            kind: .cheatDayAdjustment
+        )
+        var document = DiaryDocument()
+        document.entries = [first, second, adjustment]
+        let engine = DiaryEngine(document: document, calendar: testCalendar)
+
+        try engine.duplicateEntries(entryIDs: [first.id, second.id], on: today)
+
+        let copies = engine.entries(on: today).filter { !$0.isCheatDayAdjustment }
+        XCTAssertEqual(copies.count, 2)
+        XCTAssertEqual(Set(copies.map(\.food.name)), [first.food.name, second.food.name])
+        XCTAssertTrue(copies.allSatisfy { $0.date == today && ![first.id, second.id].contains($0.id) })
+
+        let entriesBeforeRejectedBatch = engine.document.entries
+        let statusesBeforeRejectedBatch = engine.document.dayStatuses
+        XCTAssertThrowsError(try engine.duplicateEntries(entryIDs: [first.id, adjustment.id], on: today))
+        XCTAssertEqual(engine.document.entries, entriesBeforeRejectedBatch)
+        XCTAssertEqual(engine.document.dayStatuses, statusesBeforeRejectedBatch)
+    }
+
+    @MainActor
+    func testDiaryStoreDuplicatePersistsEntryFromHistoricalDayToToday() async throws {
+        let calendar = testCalendar
+        let today = calendar.startOfDay(for: Date())
+        let yesterday = calendar.date(byAdding: .day, value: -1, to: today)!
+        let source = testEntry(calories: 95, date: yesterday, name: "Yesterday snack")
+        var document = DiaryDocument()
+        document.entries = [source]
+        let store = DiaryStore(document: document, fileURL: temporaryDiaryURL(), calendar: calendar,
+                               catalog: resolutionCatalog, usesWindow: false)
+        await store.reloadFromDisk(referenceDate: today)
+
+        try await store.duplicateEntry(entryID: source.id, on: today)
+
+        let persisted = try XCTUnwrap(store.repository).snapshotSync(scope: .day(today)).document.entries
+        XCTAssertEqual(persisted.count, 1)
+        XCTAssertNotEqual(persisted[0].id, source.id)
+        XCTAssertEqual(persisted[0].date, today)
+        XCTAssertEqual(persisted[0].food, source.food)
+        XCTAssertEqual(persisted[0].nutrients, source.nutrients)
+    }
+
     func testCalorieTrendAverageExcludesGapsAndIncludesCheatAndZeroCalorieDays() throws {
         let average = try XCTUnwrap(CalorieTrendAverage.calculate([
             (calories: 100, status: nil),

@@ -750,6 +750,14 @@ class DiaryStore: ObservableObject {
         try await perform(scope: .entries([entryID])) { $0.delete(entryID: entryID) }
     }
 
+    func duplicateEntry(entryID: UUID, on date: Date) async throws {
+        try await perform(scope: .entryAndDay(entryID, date)) { try $0.duplicateEntry(entryID: entryID, on: date) }
+    }
+
+    func duplicateEntries(entryIDs: Set<UUID>, on date: Date) async throws {
+        try await perform(scope: .entriesAndDay(entryIDs, date)) { try $0.duplicateEntries(entryIDs: entryIDs, on: date) }
+    }
+
     func deleteEntries(entryIDs: Set<UUID>) async throws {
         try await perform(scope: .entries(entryIDs)) { $0.deleteEntries(entryIDs: entryIDs) }
     }

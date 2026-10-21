@@ -116,6 +116,9 @@
   swipe. The normal row shows no trash button or destructive long-press action.
 - Logged foods reorder through a long-press drag and visibly move as they are
   crossed, without displaying a persistent reorder handle.
+- A stationary long press on a logged food or meal offers **Duplicate Today**;
+  the copy is an independent entry for the current local day. Calorie
+  adjustments are not duplicable.
 - Diary multi-select keeps Cancel, Delete, and Create meal in a bottom safe-area
   action bar.
 - Diary multi-select can delete all selected entries after confirmation.

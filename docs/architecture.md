@@ -117,9 +117,14 @@ or meal from those dates.
 
 Diary rows use a small `UIViewRepresentable` collection-view adapter for
 reordering and deletion. `UICollectionView` interactive movement provides the
-long-press lift and live row displacement on iOS 18, while its list layout owns
-the native full-swipe delete action. The adapter reports the final destination
-index to `DiaryStore`, which normalizes and atomically persists display order.
+long-press lift and live row displacement on iOS 18; a stationary long press
+opens the native edit menu with **Duplicate Today**. The copied diary entry is
+written through `DiaryStore` and `DiaryEngine` into the current local day with a
+new identity while preserving its logged quantity and snapshots. Meal copies
+retain detached ingredient snapshots so later template edits do not affect the
+copy. Calorie adjustments are excluded. The list layout owns the native
+full-swipe delete action. The adapter reports the final destination index to
+`DiaryStore`, which normalizes and atomically persists display order.
 This avoids overlapping custom drag and swipe gestures inside SwiftUI `List`.
 Because the collection is non-scrolling inside the diary's SwiftUI scroll view,
 it disables UIKit's automatic safe-area content-inset adjustment. The diary's

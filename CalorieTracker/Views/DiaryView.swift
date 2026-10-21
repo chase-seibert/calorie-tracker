@@ -203,6 +203,17 @@ struct DiaryView: View {
                         }
 
                         Button {
+                            duplicateSelectedEntriesToday()
+                        } label: {
+                            Text("Duplicate Today")
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.72)
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(selectedEntryIDs.isEmpty)
+
+                        Button {
                             mealName = ""
                             showingMealName = true
                         } label: {
@@ -474,6 +485,7 @@ struct DiaryView: View {
                         }
                     }
                     .buttonStyle(.plain)
+                    .accessibilityIdentifier("selected-diary-entry-\(entry.food.sourceID)")
                     .padding(.horizontal, 16)
                     .padding(.vertical, 6)
                 }
@@ -507,6 +519,17 @@ struct DiaryView: View {
                                     showingBottomCheatPopover = true
                                 } else if !entry.isCheatDayAdjustment {
                                     editingEntry = entry
+                                }
+                            },
+                            onDuplicateToday: { entry in
+                                let today = Calendar.current.startOfDay(for: Date())
+                                guard diary.canLogFood(on: today) else {
+                                    dayOffset = 0
+                                    showingBottomCheatPopover = true
+                                    return
+                                }
+                                diary.run {
+                                    try await diary.duplicateEntry(entryID: entry.id, on: today)
                                 }
                             },
                             onDelete: { entryID in
@@ -591,6 +614,20 @@ struct DiaryView: View {
             }
             cancelMealSelection()
 
+        }
+    }
+
+    private func duplicateSelectedEntriesToday() {
+        let today = Calendar.current.startOfDay(for: Date())
+        guard diary.canLogFood(on: today) else {
+            dayOffset = 0
+            showingBottomCheatPopover = true
+            return
+        }
+        let entryIDs = selectedEntryIDs
+        diary.run {
+            try await diary.duplicateEntries(entryIDs: entryIDs, on: today)
+            cancelMealSelection()
         }
     }
 
@@ -1348,6 +1385,7 @@ private struct ReorderableDiaryEntries: UIViewRepresentable {
     @Binding var contentHeight: CGFloat
     let onMove: (UUID, Int) -> Void
     let onEdit: (DiaryEntry) -> Void
+    let onDuplicateToday: (DiaryEntry) -> Void
     let onDelete: (UUID) -> Void
 
     func makeCoordinator() -> Coordinator {
@@ -1384,6 +1422,7 @@ private struct ReorderableDiaryEntries: UIViewRepresentable {
             action: #selector(Coordinator.handleLongPress(_:))
         )
         longPress.minimumPressDuration = 0.45
+        longPress.cancelsTouchesInView = false
         collectionView.addGestureRecognizer(longPress)
         context.coordinator.collectionView = collectionView
         collectionView.reloadData()
@@ -1408,12 +1447,16 @@ private struct ReorderableDiaryEntries: UIViewRepresentable {
         collectionView.layoutIfNeeded()
     }
 
+    @MainActor
     final class Coordinator: NSObject, UICollectionViewDataSource {
         static let reuseIdentifier = "DiaryEntryCell"
 
         var parent: ReorderableDiaryEntries
         var currentEntries: [DiaryEntry]
         weak var collectionView: UICollectionView?
+        private var longPressIndexPath: IndexPath?
+        private var longPressOrigin: CGPoint?
+        private var editMenuDelegates: [ObjectIdentifier: DiaryEntryEditMenuDelegate] = [:]
         private(set) var isReordering = false
 
         init(parent: ReorderableDiaryEntries) {
@@ -1445,6 +1488,15 @@ private struct ReorderableDiaryEntries: UIViewRepresentable {
             let entry = currentEntries[indexPath.item]
             cell.accessibilityIdentifier = "diary-entry-\(entry.food.sourceID)"
             cell.backgroundConfiguration = UIBackgroundConfiguration.clear()
+            if !cell.interactions.contains(where: { $0 is UIEditMenuInteraction }) {
+                let menuDelegate = DiaryEntryEditMenuDelegate()
+                editMenuDelegates[ObjectIdentifier(cell)] = menuDelegate
+                cell.addInteraction(UIEditMenuInteraction(delegate: menuDelegate))
+            }
+            if let menuDelegate = editMenuDelegates[ObjectIdentifier(cell)] {
+                menuDelegate.entry = entry
+                menuDelegate.onDuplicateToday = parent.onDuplicateToday
+            }
             cell.contentConfiguration = UIHostingConfiguration { [weak self] in
                 DiaryEntryRow(entry: entry)
                 .contentShape(Rectangle())
@@ -1453,6 +1505,9 @@ private struct ReorderableDiaryEntries: UIViewRepresentable {
                 }
                 .accessibilityAction(named: "Edit quantity") {
                     self?.parent.onEdit(entry)
+                }
+                .accessibilityAction(named: "Duplicate Today") {
+                    self?.parent.onDuplicateToday(entry)
                 }
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("diary-entry-\(entry.food.sourceID)")
@@ -1506,20 +1561,71 @@ private struct ReorderableDiaryEntries: UIViewRepresentable {
             switch gesture.state {
             case .began:
                 guard let indexPath = collectionView.indexPathForItem(at: location) else { return }
+                guard currentEntries.indices.contains(indexPath.item), !currentEntries[indexPath.item].isCheatDayAdjustment else { return }
+                longPressIndexPath = indexPath
+                longPressOrigin = location
+            case .changed:
+                if isReordering {
+                    collectionView.updateInteractiveMovementTargetPosition(location)
+                    return
+                }
+                guard
+                    let indexPath = longPressIndexPath,
+                    let origin = longPressOrigin,
+                    hypot(location.x - origin.x, location.y - origin.y) >= 12
+                else { return }
                 isReordering = collectionView.beginInteractiveMovementForItem(at: indexPath)
-            case .changed where isReordering:
-                collectionView.updateInteractiveMovementTargetPosition(location)
-            case .ended where isReordering:
-                collectionView.endInteractiveMovement()
-                isReordering = false
+                if isReordering { collectionView.updateInteractiveMovementTargetPosition(location) }
+            case .ended:
+                if isReordering {
+                    collectionView.endInteractiveMovement()
+                    isReordering = false
+                } else if
+                    let indexPath = longPressIndexPath,
+                    currentEntries.indices.contains(indexPath.item),
+                    let cell = collectionView.cellForItem(at: indexPath),
+                    let interaction = cell.interactions.compactMap({ $0 as? UIEditMenuInteraction }).first,
+                    !currentEntries[indexPath.item].isCheatDayAdjustment
+                {
+                    let entry = currentEntries[indexPath.item]
+                    let menuDelegate = editMenuDelegates[ObjectIdentifier(cell)]
+                    menuDelegate?.entry = entry
+                    menuDelegate?.onDuplicateToday = parent.onDuplicateToday
+                    let sourcePoint = gesture.location(in: interaction.view)
+                    interaction.presentEditMenu(with: UIEditMenuConfiguration(identifier: nil, sourcePoint: sourcePoint))
+                }
+                longPressIndexPath = nil
+                longPressOrigin = nil
             case .cancelled, .failed:
-                guard isReordering else { return }
-                collectionView.cancelInteractiveMovement()
-                isReordering = false
+                if isReordering {
+                    collectionView.cancelInteractiveMovement()
+                    isReordering = false
+                }
+                longPressIndexPath = nil
+                longPressOrigin = nil
             default:
                 break
             }
         }
+    }
+}
+
+@MainActor
+private final class DiaryEntryEditMenuDelegate: NSObject, @preconcurrency UIEditMenuInteractionDelegate {
+    var entry: DiaryEntry?
+    var onDuplicateToday: ((DiaryEntry) -> Void)?
+
+    func editMenuInteraction(
+        _ interaction: UIEditMenuInteraction,
+        menuFor configuration: UIEditMenuConfiguration,
+        suggestedActions: [UIMenuElement]
+    ) -> UIMenu? {
+        guard entry != nil else { return nil }
+        let duplicate = UIAction(title: "Duplicate Today", image: UIImage(systemName: "plus.square.on.square")) { [weak self] _ in
+            guard let self, let entry = self.entry else { return }
+            self.onDuplicateToday?(entry)
+        }
+        return UIMenu(children: [duplicate])
     }
 }
 
