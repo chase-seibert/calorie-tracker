@@ -10392,6 +10392,394 @@
         "url": "https://fdc.nal.usda.gov/"
       }
     },
+    "food_peach": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Peach, raw",
+        "similarity": 0.7143,
+        "source": "usda",
+        "sourceID": "2709249"
+      },
+      "compositionEvidence": {
+        "confidence": "High",
+        "decision": "Keep Peach as a distinct canonical food identity. Use the reviewed direct match or documented recipe estimate as its default nutrition profile.",
+        "reason": "Direct raw peach record; catalog and source fruit portions both 150 g.",
+        "sources": [
+          {
+            "name": "FNDDS",
+            "recordName": "Peach, raw",
+            "sourceID": "2709249",
+            "url": "https://fdc.nal.usda.gov/food-details/2709249/nutrients"
+          }
+        ]
+      },
+      "confidence": "High",
+      "nutritionPer100g": {
+        "calories": 46,
+        "carbs": 10.1,
+        "fat": 0.27,
+        "fiber": 1.5,
+        "protein": 0.91
+      },
+      "portionNutrition": {
+        "calories": 69.0,
+        "carbs": 15.15,
+        "catalogGrams": 150.0,
+        "catalogServing": "1 peach",
+        "fat": 0.41,
+        "fiber": 2.25,
+        "protein": 1.36
+      },
+      "reviewReasons": [],
+      "source": {
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2709249",
+        "recordName": "Peach, raw",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-22",
+        "serving": {
+          "description": "1 fruit",
+          "grams": 150
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2709249/nutrients"
+      }
+    },
+    "food_peanuts": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Peanuts, NFS",
+        "similarity": 0.7778,
+        "source": "usda",
+        "sourceID": "2707512"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Peanuts as a distinct canonical food identity. Use the reviewed direct match or documented recipe estimate as its default nutrition profile.",
+        "reason": "Direct dry-roasted unsalted record; source unit is one peanut, scaled by weight to the catalog 1 oz.",
+        "sources": [
+          {
+            "name": "FNDDS",
+            "recordName": "Peanuts, dry roasted, unsalted",
+            "sourceID": "2707519",
+            "url": "https://fdc.nal.usda.gov/food-details/2707519/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 587,
+        "carbs": 21.3,
+        "fat": 49.7,
+        "fiber": 8.4,
+        "protein": 24.4
+      },
+      "portionNutrition": {
+        "calories": 166.71,
+        "carbs": 6.05,
+        "catalogGrams": 28.4,
+        "catalogServing": "1 oz",
+        "fat": 14.11,
+        "fiber": 2.39,
+        "protein": 6.93
+      },
+      "reviewReasons": [
+        "Direct dry-roasted unsalted record; source unit is one peanut, scaled by weight to the catalog 1 oz."
+      ],
+      "source": {
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2707519",
+        "recordName": "Peanuts, dry roasted, unsalted",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-22",
+        "serving": {
+          "description": "1 peanut, without shell",
+          "grams": 1
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2707519/nutrients"
+      }
+    },
+    "food_pear": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Pear, raw",
+        "similarity": 0.6667,
+        "source": "usda",
+        "sourceID": "2709254"
+      },
+      "compositionEvidence": {
+        "confidence": "High",
+        "decision": "Keep Pear as a distinct canonical food identity. Use the reviewed direct match or documented recipe estimate as its default nutrition profile.",
+        "reason": "Direct raw pear record; catalog one-pear estimate is close to USDA medium fruit.",
+        "sources": [
+          {
+            "name": "FNDDS",
+            "recordName": "Pear, raw",
+            "sourceID": "2709254",
+            "url": "https://fdc.nal.usda.gov/food-details/2709254/nutrients"
+          }
+        ]
+      },
+      "confidence": "High",
+      "nutritionPer100g": {
+        "calories": 59,
+        "carbs": 15.2,
+        "fat": 0.15,
+        "fiber": 3.1,
+        "protein": 0.37
+      },
+      "portionNutrition": {
+        "calories": 103.25,
+        "carbs": 26.6,
+        "catalogGrams": 175.0,
+        "catalogServing": "1 pear",
+        "fat": 0.26,
+        "fiber": 5.42,
+        "protein": 0.65
+      },
+      "reviewReasons": [],
+      "source": {
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2709254",
+        "recordName": "Pear, raw",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-22",
+        "serving": {
+          "description": "1 fruit",
+          "grams": 180
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2709254/nutrients"
+      }
+    },
+    "food_pepper_jack_cheese": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Crackers, cheese",
+        "similarity": 0.6667,
+        "source": "usda",
+        "sourceID": "2708150"
+      },
+      "compositionEvidence": {
+        "confidence": "Low",
+        "decision": "Keep Pepper Jack cheese as a distinct canonical food identity. Use the reviewed direct match or documented recipe estimate as its default nutrition profile.",
+        "reason": "No generic Pepper Jack USDA record was found in the bundled catalog; Monterey Jack is the closest cheese proxy, its pepper inclusion is not represented, and fiber was not reported.",
+        "sources": [
+          {
+            "name": "Foundation",
+            "recordName": "Cheese, monterey jack, solid",
+            "sourceID": "2647438",
+            "url": "https://fdc.nal.usda.gov/food-details/2647438/nutrients"
+          }
+        ]
+      },
+      "confidence": "Low",
+      "nutritionPer100g": {
+        "calories": 392,
+        "carbs": 1.9,
+        "fat": 32.6,
+        "fiber": null,
+        "protein": 22.6
+      },
+      "portionNutrition": {
+        "calories": 111.33,
+        "carbs": 0.54,
+        "catalogGrams": 28.4,
+        "catalogServing": "1 oz",
+        "fat": 9.26,
+        "fiber": null,
+        "protein": 6.42
+      },
+      "reviewReasons": [
+        "No generic Pepper Jack USDA record was found in the bundled catalog; Monterey Jack is the closest cheese proxy, its pepper inclusion is not represented, and fiber was not reported."
+      ],
+      "source": {
+        "dataType": "Foundation",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2647438",
+        "recordName": "Cheese, monterey jack, solid",
+        "releaseDate": "2026-04",
+        "reviewedDate": "2026-10-22",
+        "serving": {
+          "description": "100 g",
+          "grams": 100
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2647438/nutrients"
+      }
+    },
+    "food_philly_cheesesteak": {
+      "baselineNutritionSource": {
+        "matchBasis": "fallback",
+        "name": "Roll, cheese",
+        "similarity": 0.6207,
+        "source": "usda",
+        "sourceID": "2707660"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Philly cheesesteak as a distinct canonical food identity. Use the reviewed direct match or documented recipe estimate as its default nutrition profile.",
+        "reason": "Direct cheesesteak sandwich match; catalog 250 g sandwich is scaled from a 145 g regular serving.",
+        "sources": [
+          {
+            "name": "FNDDS",
+            "recordName": "Cheese steak sandwich or sub on white",
+            "sourceID": "2706960",
+            "url": "https://fdc.nal.usda.gov/food-details/2706960/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 270,
+        "carbs": 21.5,
+        "fat": 12,
+        "fiber": 1.0,
+        "protein": 18.4
+      },
+      "portionNutrition": {
+        "calories": 675.0,
+        "carbs": 53.75,
+        "catalogGrams": 250.0,
+        "catalogServing": "1 sandwich",
+        "fat": 30.0,
+        "fiber": 2.5,
+        "protein": 46.0
+      },
+      "reviewReasons": [
+        "Direct cheesesteak sandwich match; catalog 250 g sandwich is scaled from a 145 g regular serving."
+      ],
+      "source": {
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2706960",
+        "recordName": "Cheese steak sandwich or sub on white",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-22",
+        "serving": {
+          "description": "1 regular sandwich",
+          "grams": 145
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2706960/nutrients"
+      }
+    },
+    "food_pho": {
+      "baselineNutritionSource": {
+        "matchBasis": "fallback",
+        "name": "Poi",
+        "similarity": 0.6667,
+        "source": "usda",
+        "sourceID": "170431"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Pho as a distinct canonical food identity. Use the reviewed direct match or documented recipe estimate as its default nutrition profile.",
+        "reason": "Direct pho soup with meat; bowl size and meat/noodle ratios vary.",
+        "sources": [
+          {
+            "name": "FNDDS",
+            "recordName": "Soup, pho, with meat",
+            "sourceID": "2707124",
+            "url": "https://fdc.nal.usda.gov/food-details/2707124/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 77,
+        "carbs": 5.6,
+        "fat": 3.33,
+        "fiber": 0.4,
+        "protein": 5.81
+      },
+      "portionNutrition": {
+        "calories": 423.5,
+        "carbs": 30.8,
+        "catalogGrams": 550.0,
+        "catalogServing": "1 bowl",
+        "fat": 18.32,
+        "fiber": 2.2,
+        "protein": 31.95
+      },
+      "reviewReasons": [
+        "Direct pho soup with meat; bowl size and meat/noodle ratios vary."
+      ],
+      "source": {
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2707124",
+        "recordName": "Soup, pho, with meat",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-22",
+        "serving": {
+          "description": "1 cup",
+          "grams": 245
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2707124/nutrients"
+      }
+    },
+    "food_pickle": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Relish, pickle",
+        "similarity": 0.6316,
+        "source": "usda",
+        "sourceID": "2710079"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Pickle as a distinct canonical food identity. Use the reviewed direct match or documented recipe estimate as its default nutrition profile.",
+        "reason": "Direct dill-pickle spear record; catalog spear estimate is slightly smaller.",
+        "sources": [
+          {
+            "name": "SR Legacy",
+            "recordName": "Pickles, cucumber, dill or kosher dill",
+            "sourceID": "324653",
+            "url": "https://fdc.nal.usda.gov/food-details/324653/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 12,
+        "carbs": 1.99,
+        "fat": 0.43,
+        "fiber": 1.0,
+        "protein": 0.48
+      },
+      "portionNutrition": {
+        "calories": 4.2,
+        "carbs": 0.7,
+        "catalogGrams": 35.0,
+        "catalogServing": "1 spear",
+        "fat": 0.15,
+        "fiber": 0.35,
+        "protein": 0.17
+      },
+      "reviewReasons": [
+        "Direct dill-pickle spear record; catalog spear estimate is slightly smaller."
+      ],
+      "source": {
+        "dataType": "SR Legacy",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "324653",
+        "recordName": "Pickles, cucumber, dill or kosher dill",
+        "releaseDate": "2018-04",
+        "reviewedDate": "2026-10-22",
+        "serving": {
+          "description": "1 spear",
+          "grams": 40.4
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/324653/nutrients"
+      }
+    },
     "food_pizza_slice": {
       "baselineNutritionSource": {
         "matchBasis": "canonical",
@@ -10509,6 +10897,775 @@
           "grams": 132
         },
         "url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708617/nutrients"
+      }
+    },
+    "food_plum": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Plum, raw",
+        "similarity": 0.6667,
+        "source": "usda",
+        "sourceID": "2709265"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Plum as a distinct canonical food identity. Use the reviewed direct match or documented recipe estimate as its default nutrition profile.",
+        "reason": "Direct raw plum record; edible fruit size varies around the catalog estimate.",
+        "sources": [
+          {
+            "name": "FNDDS",
+            "recordName": "Plum, raw",
+            "sourceID": "2709265",
+            "url": "https://fdc.nal.usda.gov/food-details/2709265/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 46,
+        "carbs": 11.4,
+        "fat": 0.28,
+        "fiber": 1.4,
+        "protein": 0.7
+      },
+      "portionNutrition": {
+        "calories": 30.36,
+        "carbs": 7.52,
+        "catalogGrams": 66.0,
+        "catalogServing": "1 plum",
+        "fat": 0.18,
+        "fiber": 0.92,
+        "protein": 0.46
+      },
+      "reviewReasons": [
+        "Direct raw plum record; edible fruit size varies around the catalog estimate."
+      ],
+      "source": {
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2709265",
+        "recordName": "Plum, raw",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-22",
+        "serving": {
+          "description": "1 fruit",
+          "grams": 75
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2709265/nutrients"
+      }
+    },
+    "food_poached_egg": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Bread, egg",
+        "similarity": 0.6,
+        "source": "usda",
+        "sourceID": "172673"
+      },
+      "compositionEvidence": {
+        "confidence": "High",
+        "decision": "Keep Poached egg as a distinct canonical food identity. Use the reviewed direct match or documented recipe estimate as its default nutrition profile.",
+        "reason": "Direct cooked poached egg record with a matching 50 g egg portion.",
+        "sources": [
+          {
+            "name": "SR Legacy",
+            "recordName": "Egg, whole, cooked, poached",
+            "sourceID": "172186",
+            "url": "https://fdc.nal.usda.gov/food-details/172186/nutrients"
+          }
+        ]
+      },
+      "confidence": "High",
+      "nutritionPer100g": {
+        "calories": 143,
+        "carbs": 0.71,
+        "fat": 9.47,
+        "fiber": 0,
+        "protein": 12.5
+      },
+      "portionNutrition": {
+        "calories": 71.5,
+        "carbs": 0.35,
+        "catalogGrams": 50.0,
+        "catalogServing": "1 egg",
+        "fat": 4.74,
+        "fiber": 0.0,
+        "protein": 6.25
+      },
+      "reviewReasons": [],
+      "source": {
+        "dataType": "SR Legacy",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "172186",
+        "recordName": "Egg, whole, cooked, poached",
+        "releaseDate": "2018-04",
+        "reviewedDate": "2026-10-22",
+        "serving": {
+          "description": "1 large egg",
+          "grams": 50
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/172186/nutrients"
+      }
+    },
+    "food_poke_bowl": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Ramen bowl, NFS",
+        "similarity": 0.5217,
+        "source": "usda",
+        "sourceID": "2709153"
+      },
+      "compositionEvidence": {
+        "confidence": "Low",
+        "decision": "Keep Poke bowl as a distinct canonical food identity. Use the reviewed direct match or documented recipe estimate as its default nutrition profile.",
+        "reason": "Low-confidence bowl estimate from 180 g cooked rice, 100 g raw tuna, 40 g avocado, 40 g cucumber, 15 g soy sauce, 5 g sesame, and 40 g edamame. Actual protein, rice, sauces, and toppings vary.",
+        "sources": [
+          {
+            "amountGrams": 180,
+            "name": "USDA FNDDS",
+            "recordName": "Rice, white, cooked, NS as to fat",
+            "sourceID": "2708403",
+            "url": "https://fdc.nal.usda.gov/food-details/2708403/nutrients"
+          },
+          {
+            "amountGrams": 100,
+            "name": "USDA FNDDS",
+            "recordName": "Fish, tuna, raw",
+            "sourceID": "2706308",
+            "url": "https://fdc.nal.usda.gov/food-details/2706308/nutrients"
+          },
+          {
+            "amountGrams": 40,
+            "name": "USDA FNDDS",
+            "recordName": "Avocado, raw",
+            "sourceID": "2709223",
+            "url": "https://fdc.nal.usda.gov/food-details/2709223/nutrients"
+          },
+          {
+            "amountGrams": 40,
+            "name": "USDA FNDDS",
+            "recordName": "Cucumber, raw",
+            "sourceID": "2709784",
+            "url": "https://fdc.nal.usda.gov/food-details/2709784/nutrients"
+          },
+          {
+            "amountGrams": 15,
+            "name": "USDA FNDDS",
+            "recordName": "Soy sauce",
+            "sourceID": "2707442",
+            "url": "https://fdc.nal.usda.gov/food-details/2707442/nutrients"
+          },
+          {
+            "amountGrams": 5,
+            "name": "USDA FNDDS",
+            "recordName": "Sesame seeds",
+            "sourceID": "2707586",
+            "url": "https://fdc.nal.usda.gov/food-details/2707586/nutrients"
+          },
+          {
+            "amountGrams": 40,
+            "name": "USDA FNDDS",
+            "recordName": "Edamame, cooked",
+            "sourceID": "2707436",
+            "url": "https://fdc.nal.usda.gov/food-details/2707436/nutrients"
+          }
+        ]
+      },
+      "confidence": "Low",
+      "nutritionPer100g": {
+        "calories": 120.7381,
+        "carbs": 14.2306,
+        "fat": 3.1246,
+        "fiber": 1.5,
+        "protein": 8.8321
+      },
+      "portionNutrition": {
+        "calories": 507.1,
+        "carbs": 59.77,
+        "catalogGrams": 420.0,
+        "catalogServing": "1 bowl",
+        "fat": 13.12,
+        "fiber": 6.3,
+        "protein": 37.09
+      },
+      "reviewReasons": [
+        "Low-confidence bowl estimate from 180 g cooked rice, 100 g raw tuna, 40 g avocado, 40 g cucumber, 15 g soy sauce, 5 g sesame, and 40 g edamame. Actual protein, rice, sauces, and toppings vary."
+      ],
+      "source": {
+        "dataType": "USDA FDC recipe estimate",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "recipe-calculation",
+        "recordName": "Poke bowl, tuna and rice representative calculation",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-22",
+        "serving": {
+          "description": "1 bowl",
+          "grams": 420
+        },
+        "url": "https://fdc.nal.usda.gov/download-datasets/"
+      }
+    },
+    "food_pork": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Pork, NFS",
+        "similarity": 0.6667,
+        "source": "usda",
+        "sourceID": "2705862"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Pork as a distinct canonical food identity. Use the reviewed direct match or documented recipe estimate as its default nutrition profile.",
+        "reason": "Direct generic pork record and 30 g source portion; cut, fat, and preparation remain unspecified.",
+        "sources": [
+          {
+            "name": "FNDDS",
+            "recordName": "Pork, NFS",
+            "sourceID": "2705862",
+            "url": "https://fdc.nal.usda.gov/food-details/2705862/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 192,
+        "carbs": 0,
+        "fat": 8.67,
+        "fiber": 0,
+        "protein": 27.1
+      },
+      "portionNutrition": {
+        "calories": 57.6,
+        "carbs": 0.0,
+        "catalogGrams": 30.0,
+        "catalogServing": "1 serving",
+        "fat": 2.6,
+        "fiber": 0.0,
+        "protein": 8.13
+      },
+      "reviewReasons": [
+        "Direct generic pork record and 30 g source portion; cut, fat, and preparation remain unspecified."
+      ],
+      "source": {
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2705862",
+        "recordName": "Pork, NFS",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-22",
+        "serving": {
+          "description": "1 slice, any size",
+          "grams": 30
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2705862/nutrients"
+      }
+    },
+    "food_pork_chop": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Pork, chop, stuffed",
+        "similarity": 0.6923,
+        "source": "usda",
+        "sourceID": "2705872"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Pork chop as a distinct canonical food identity. Use the reviewed direct match or documented recipe estimate as its default nutrition profile.",
+        "reason": "Direct pork chop record; catalog chop weight is estimated at 175 g and fat trimming varies.",
+        "sources": [
+          {
+            "name": "FNDDS",
+            "recordName": "Pork, chop, NS as to fat eaten",
+            "sourceID": "2705866",
+            "url": "https://fdc.nal.usda.gov/food-details/2705866/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 183,
+        "carbs": 0,
+        "fat": 7.55,
+        "fiber": 0,
+        "protein": 27.5
+      },
+      "portionNutrition": {
+        "calories": 320.25,
+        "carbs": 0.0,
+        "catalogGrams": 175.0,
+        "catalogServing": "1 chop",
+        "fat": 13.21,
+        "fiber": 0.0,
+        "protein": 48.12
+      },
+      "reviewReasons": [
+        "Direct pork chop record; catalog chop weight is estimated at 175 g and fat trimming varies."
+      ],
+      "source": {
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2705866",
+        "recordName": "Pork, chop, NS as to fat eaten",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-22",
+        "serving": {
+          "description": "1 thin chop",
+          "grams": 90
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2705866/nutrients"
+      }
+    },
+    "food_potato_salad": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Pea salad",
+        "similarity": 0.7619,
+        "source": "usda",
+        "sourceID": "2710056"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Potato salad as a distinct canonical food identity. Use the reviewed direct match or documented recipe estimate as its default nutrition profile.",
+        "reason": "Close American potato salad profile with egg and mayonnaise; catalog cup uses 250 g.",
+        "sources": [
+          {
+            "name": "FNDDS",
+            "recordName": "Potato salad with egg, made with mayonnaise",
+            "sourceID": "2709532",
+            "url": "https://fdc.nal.usda.gov/food-details/2709532/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 157,
+        "carbs": 16.2,
+        "fat": 9.4,
+        "fiber": 1.3,
+        "protein": 1.96
+      },
+      "portionNutrition": {
+        "calories": 392.5,
+        "carbs": 40.5,
+        "catalogGrams": 250.0,
+        "catalogServing": "1 cup",
+        "fat": 23.5,
+        "fiber": 3.25,
+        "protein": 4.9
+      },
+      "reviewReasons": [
+        "Close American potato salad profile with egg and mayonnaise; catalog cup uses 250 g."
+      ],
+      "source": {
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2709532",
+        "recordName": "Potato salad with egg, made with mayonnaise",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-22",
+        "serving": {
+          "description": "1 cup",
+          "grams": 275
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2709532/nutrients"
+      }
+    },
+    "food_pretzel": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Pretzel Crisps Original",
+        "similarity": 0.4667,
+        "source": "off",
+        "sourceID": "0049508001409"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Pretzel as a distinct canonical food identity. Use the reviewed direct match or documented recipe estimate as its default nutrition profile.",
+        "reason": "Generic FNDDS pretzel record; catalog ounce is scaled from the small source unit and soft/hard types vary.",
+        "sources": [
+          {
+            "name": "FNDDS",
+            "recordName": "Pretzels, NFS",
+            "sourceID": "2708247",
+            "url": "https://fdc.nal.usda.gov/food-details/2708247/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 384,
+        "carbs": 80.4,
+        "fat": 2.93,
+        "fiber": 3.4,
+        "protein": 10
+      },
+      "portionNutrition": {
+        "calories": 109.06,
+        "carbs": 22.83,
+        "catalogGrams": 28.4,
+        "catalogServing": "1 oz",
+        "fat": 0.83,
+        "fiber": 0.97,
+        "protein": 2.84
+      },
+      "reviewReasons": [
+        "Generic FNDDS pretzel record; catalog ounce is scaled from the small source unit and soft/hard types vary."
+      ],
+      "source": {
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2708247",
+        "recordName": "Pretzels, NFS",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-22",
+        "serving": {
+          "description": "1 pretzel, NS as to size",
+          "grams": 3
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2708247/nutrients"
+      }
+    },
+    "food_protein_bar": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "protein shake",
+        "similarity": 0.75,
+        "source": "off",
+        "sourceID": "0851770008297"
+      },
+      "compositionEvidence": {
+        "confidence": "Low",
+        "decision": "Keep Protein bar as a distinct canonical food identity. Use the reviewed direct match or documented recipe estimate as its default nutrition profile.",
+        "reason": "One branded protein-bar profile is only a proxy for the generic category; bar recipes and sizes vary.",
+        "sources": [
+          {
+            "name": "FNDDS",
+            "recordName": "Nutrition bar (Snickers Marathon Protein Bar)",
+            "sourceID": "2708122",
+            "url": "https://fdc.nal.usda.gov/food-details/2708122/nutrients"
+          }
+        ]
+      },
+      "confidence": "Low",
+      "nutritionPer100g": {
+        "calories": 415,
+        "carbs": 50.5,
+        "fat": 12.5,
+        "fiber": 12.5,
+        "protein": 25
+      },
+      "portionNutrition": {
+        "calories": 249.0,
+        "carbs": 30.3,
+        "catalogGrams": 60.0,
+        "catalogServing": "1 bar",
+        "fat": 7.5,
+        "fiber": 7.5,
+        "protein": 15.0
+      },
+      "reviewReasons": [
+        "One branded protein-bar profile is only a proxy for the generic category; bar recipes and sizes vary."
+      ],
+      "source": {
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2708122",
+        "recordName": "Nutrition bar (Snickers Marathon Protein Bar)",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-22",
+        "serving": {
+          "description": "1 bar",
+          "grams": 80
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2708122/nutrients"
+      }
+    },
+    "food_pudding": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Pudding, rice",
+        "similarity": 0.7368,
+        "source": "usda",
+        "sourceID": "2705685"
+      },
+      "compositionEvidence": {
+        "confidence": "Low",
+        "decision": "Keep Pudding as a distinct canonical food identity. Use the reviewed direct match or documented recipe estimate as its default nutrition profile.",
+        "reason": "Chocolate pudding is a flavor-specific proxy for generic pudding; flavor, milk, and sugar alter values.",
+        "sources": [
+          {
+            "name": "FNDDS",
+            "recordName": "Pudding, chocolate, NFS",
+            "sourceID": "2705679",
+            "url": "https://fdc.nal.usda.gov/food-details/2705679/nutrients"
+          }
+        ]
+      },
+      "confidence": "Low",
+      "nutritionPer100g": {
+        "calories": 142,
+        "carbs": 23,
+        "fat": 4.6,
+        "fiber": 0,
+        "protein": 2.09
+      },
+      "portionNutrition": {
+        "calories": 227.2,
+        "carbs": 36.8,
+        "catalogGrams": 160.0,
+        "catalogServing": "1 cup",
+        "fat": 7.36,
+        "fiber": 0.0,
+        "protein": 3.34
+      },
+      "reviewReasons": [
+        "Chocolate pudding is a flavor-specific proxy for generic pudding; flavor, milk, and sugar alter values."
+      ],
+      "source": {
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2705679",
+        "recordName": "Pudding, chocolate, NFS",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-22",
+        "serving": {
+          "description": "1 cup",
+          "grams": 260
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2705679/nutrients"
+      }
+    },
+    "food_pulled_pork": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Scrapple, pork",
+        "similarity": 0.6667,
+        "source": "usda",
+        "sourceID": "172969"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Pulled pork as a distinct canonical food identity. Use the reviewed direct match or documented recipe estimate as its default nutrition profile.",
+        "reason": "Direct barbecue pulled-pork profile; sauce is included, while unsauced preparations differ.",
+        "sources": [
+          {
+            "name": "SR Legacy",
+            "recordName": "Pulled pork in barbecue sauce",
+            "sourceID": "173344",
+            "url": "https://fdc.nal.usda.gov/food-details/173344/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 168,
+        "carbs": 18.7,
+        "fat": 4.42,
+        "fiber": 1.2,
+        "protein": 13.2
+      },
+      "portionNutrition": {
+        "calories": 252.0,
+        "carbs": 28.05,
+        "catalogGrams": 150.0,
+        "catalogServing": "1 serving",
+        "fat": 6.63,
+        "fiber": 1.8,
+        "protein": 19.8
+      },
+      "reviewReasons": [
+        "Direct barbecue pulled-pork profile; sauce is included, while unsauced preparations differ."
+      ],
+      "source": {
+        "dataType": "SR Legacy",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "173344",
+        "recordName": "Pulled pork in barbecue sauce",
+        "releaseDate": "2018-04",
+        "reviewedDate": "2026-10-22",
+        "serving": {
+          "description": "1 cup",
+          "grams": 249
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/173344/nutrients"
+      }
+    },
+    "food_quinoa": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Flour, quinoa",
+        "similarity": 0.6667,
+        "source": "usda",
+        "sourceID": "2512372"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Quinoa as a distinct canonical food identity. Use the reviewed direct match or documented recipe estimate as its default nutrition profile.",
+        "reason": "Direct cooked quinoa record; catalog cup is 185 g and added fat is unspecified.",
+        "sources": [
+          {
+            "name": "FNDDS",
+            "recordName": "Quinoa, NS as to fat",
+            "sourceID": "2708399",
+            "url": "https://fdc.nal.usda.gov/food-details/2708399/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 146,
+        "carbs": 20.2,
+        "fat": 5.42,
+        "fiber": 2.7,
+        "protein": 4.2
+      },
+      "portionNutrition": {
+        "calories": 270.1,
+        "carbs": 37.37,
+        "catalogGrams": 185.0,
+        "catalogServing": "1 cup",
+        "fat": 10.03,
+        "fiber": 5.0,
+        "protein": 7.77
+      },
+      "reviewReasons": [
+        "Direct cooked quinoa record; catalog cup is 185 g and added fat is unspecified."
+      ],
+      "source": {
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2708399",
+        "recordName": "Quinoa, NS as to fat",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-22",
+        "serving": {
+          "description": "1 cup, cooked",
+          "grams": 170
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2708399/nutrients"
+      }
+    },
+    "food_ravioli": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Ravioli vegetariens",
+        "similarity": 0.5385,
+        "source": "off",
+        "sourceID": "3270190174349"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Ravioli as a distinct canonical food identity. Use the reviewed direct match or documented recipe estimate as its default nutrition profile.",
+        "reason": "Generic prepared ravioli without sauce; filling type varies and catalog cup is scaled from piece weight.",
+        "sources": [
+          {
+            "name": "FNDDS",
+            "recordName": "Ravioli, NS as to filling, no sauce",
+            "sourceID": "2708760",
+            "url": "https://fdc.nal.usda.gov/food-details/2708760/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 185,
+        "carbs": 19.9,
+        "fat": 6.97,
+        "fiber": 0.7,
+        "protein": 10.3
+      },
+      "portionNutrition": {
+        "calories": 444.0,
+        "carbs": 47.76,
+        "catalogGrams": 240.0,
+        "catalogServing": "1 cup",
+        "fat": 16.73,
+        "fiber": 1.68,
+        "protein": 24.72
+      },
+      "reviewReasons": [
+        "Generic prepared ravioli without sauce; filling type varies and catalog cup is scaled from piece weight."
+      ],
+      "source": {
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2708760",
+        "recordName": "Ravioli, NS as to filling, no sauce",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-22",
+        "serving": {
+          "description": "1 piece",
+          "grams": 15
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2708760/nutrients"
+      }
+    },
+    "food_ribeye_steak": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Beef, steak, NFS",
+        "similarity": 0.6923,
+        "source": "usda",
+        "sourceID": "2705824"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Ribeye steak as a distinct canonical food identity. Use the reviewed direct match or documented recipe estimate as its default nutrition profile.",
+        "reason": "Direct cooked ribeye profile; a catalog 230 g steak is an estimated portion and fat trimming varies.",
+        "sources": [
+          {
+            "name": "FNDDS",
+            "recordName": "Beef, steak, ribeye, lean and fat eaten",
+            "sourceID": "2705829",
+            "url": "https://fdc.nal.usda.gov/food-details/2705829/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 289,
+        "carbs": 0,
+        "fat": 21.6,
+        "fiber": 0,
+        "protein": 23.5
+      },
+      "portionNutrition": {
+        "calories": 664.7,
+        "carbs": 0.0,
+        "catalogGrams": 230.0,
+        "catalogServing": "1 steak",
+        "fat": 49.68,
+        "fiber": 0.0,
+        "protein": 54.05
+      },
+      "reviewReasons": [
+        "Direct cooked ribeye profile; a catalog 230 g steak is an estimated portion and fat trimming varies."
+      ],
+      "source": {
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2705829",
+        "recordName": "Beef, steak, ribeye, lean and fat eaten",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-22",
+        "serving": {
+          "description": "1 piece/slice, any size",
+          "grams": 30
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2705829/nutrients"
       }
     },
     "food_snap_peas": {
