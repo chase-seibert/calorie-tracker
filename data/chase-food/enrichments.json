@@ -2375,98 +2375,284 @@
     },
     "food_burrito": {
       "baselineNutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Burrito, NFS",
-        "similarity": 0.7778,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2708534"
       },
       "compositionEvidence": {
-        "confidence": "Low",
-        "decision": "Keep Burrito as one canonical with beans, rice, cheese, sour cream, guacamole, and salsa as reusable optional additions. The generic FNDDS profile cannot establish one standard filling or full-burrito size.",
-        "reason": "FNDDS Burrito, NFS is a generic filling analogue with only a miniature serving measure; the 340 g catalog burrito is larger and filling-dependent.",
+        "confidence": "Medium",
+        "decision": "Keep Burrito as a distinct canonical food. Use the selected USDA FoodData Central match for its default nutrition; keep variations and additions in the structured taxonomy.",
+        "reason": "FNDDS provides a generic burrito profile, but the measured source portion is a miniature 110 g burrito; scale its per-100-g values to the larger 340 g catalog burrito. Filling and size vary.",
         "sources": [
           {
-            "name": "USDA FoodData Central Survey (FNDDS)",
+            "name": "USDA FoodData Central FNDDS",
             "recordName": "Burrito, NFS",
             "sourceID": "2708534",
             "url": "https://fdc.nal.usda.gov/food-details/2708534/nutrients"
           }
         ]
       },
-      "confidence": "Low",
+      "confidence": "Medium",
       "nutritionPer100g": {
         "calories": 219.0,
         "carbs": 23.9,
         "fat": 8.54,
-        "fiber": 2.5,
-        "protein": 11.1
+        "protein": 11.1,
+        "fiber": 2.5
       },
-      "reviewReasons": [
-        "FNDDS Burrito, NFS is a generic filling analogue with only a miniature serving measure; the 340 g catalog burrito is larger and filling-dependent."
-      ],
+      "reviewReasons": [],
       "source": {
-        "dataType": "Survey (FNDDS)",
+        "source": "usda",
+        "dataType": "FNDDS",
         "database": "FoodData Central",
-        "name": "USDA FoodData Central Survey (FNDDS)",
         "organization": "U.S. Department of Agriculture, Agricultural Research Service",
         "recordID": "2708534",
         "recordName": "Burrito, NFS",
-        "releaseDate": "2024-10-31",
+        "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-23",
         "serving": {
           "description": "1 miniature",
           "grams": 110.0
         },
-        "sourceID": "2708534",
         "url": "https://fdc.nal.usda.gov/food-details/2708534/nutrients"
+      },
+      "portionNutrition": {
+        "calories": 744.6,
+        "carbs": 81.26,
+        "fat": 29.04,
+        "protein": 37.74,
+        "fiber": 8.5,
+        "catalogGrams": 340.0,
+        "catalogServing": "1 burrito"
       }
     },
     "food_butter_chicken": {
       "baselineNutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Butter, stick",
-        "similarity": 0.7692,
+        "matchBasis": "reviewed FDC record",
+        "name": "Butter chicken representative recipe",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2710155"
+        "sourceID": "recipe-calculation"
       },
       "compositionEvidence": {
         "confidence": "Low",
-        "decision": "Keep Butter chicken as a distinct prepared-food canonical. Use generic Chicken curry only as a broad estimate until a specific butter-chicken recipe or authoritative prepared-food match is selected.",
-        "reason": "The closest bundled FNDDS prepared-food record is generic Chicken curry, not butter chicken; cream, butter, tomato, and chicken proportions differ by recipe.",
+        "decision": "Keep Butter chicken as one prepared-food identity. Use a transparent chicken, tomato, cream, butter, and onion recipe estimate; rice and naan remain separate foods.",
+        "reason": "No direct butter-chicken FDC profile was found in the local food data. Recipe mass is 180 g cooked chicken breast, 70 g tomato sauce, 40 g heavy cream, 20 g butter, and 15 g onion; cream fat level, chicken-to-sauce ratio, and restaurant recipes vary.",
+        "components": [
+          {
+            "name": "Chicken breast, baked, broiled, or roasted, skin not eaten, from raw",
+            "sourceID": "2705956",
+            "grams": 180.0
+          },
+          {
+            "name": "Tomato sauce, canned, no salt added",
+            "sourceID": "169074",
+            "grams": 70.0
+          },
+          {
+            "name": "Cream, heavy",
+            "sourceID": "2346386",
+            "grams": 40.0
+          },
+          {
+            "name": "Butter, salted",
+            "sourceID": "173410",
+            "grams": 20.0
+          },
+          {
+            "name": "Onions, yellow, raw",
+            "sourceID": "790646",
+            "grams": 15.0
+          }
+        ],
         "sources": [
           {
-            "name": "USDA FoodData Central Survey (FNDDS)",
-            "recordName": "Chicken curry",
-            "sourceID": "2706437",
-            "url": "https://fdc.nal.usda.gov/food-details/2706437/nutrients"
+            "name": "USDA FoodData Central ingredient records",
+            "recordName": "Chicken breast, baked, broiled, or roasted, skin not eaten, from raw",
+            "sourceID": "2705956",
+            "url": "https://fdc.nal.usda.gov/food-details/2705956/nutrients"
+          },
+          {
+            "name": "USDA FoodData Central ingredient records",
+            "recordName": "Tomato sauce, canned, no salt added",
+            "sourceID": "169074",
+            "url": "https://fdc.nal.usda.gov/food-details/169074/nutrients"
+          },
+          {
+            "name": "USDA FoodData Central ingredient records",
+            "recordName": "Cream, heavy",
+            "sourceID": "2346386",
+            "url": "https://fdc.nal.usda.gov/food-details/2346386/nutrients"
+          },
+          {
+            "name": "USDA FoodData Central ingredient records",
+            "recordName": "Butter, salted",
+            "sourceID": "173410",
+            "url": "https://fdc.nal.usda.gov/food-details/173410/nutrients"
+          },
+          {
+            "name": "USDA FoodData Central ingredient records",
+            "recordName": "Onions, yellow, raw",
+            "sourceID": "790646",
+            "url": "https://fdc.nal.usda.gov/food-details/790646/nutrients"
           }
         ]
       },
       "confidence": "Low",
       "nutritionPer100g": {
-        "calories": 107.0,
-        "carbs": 6.54,
-        "fat": 6.48,
-        "fiber": 1.4,
-        "protein": 6.48
+        "calories": 182.4308,
+        "carbs": 2.0125,
+        "fat": 11.3888,
+        "protein": 17.3238,
+        "fiber": null
       },
       "reviewReasons": [
-        "The closest bundled FNDDS prepared-food record is generic Chicken curry, not butter chicken; cream, butter, tomato, and chicken proportions differ by recipe."
+        "No direct butter-chicken FDC profile was found in the local food data. Recipe mass is 180 g cooked chicken breast, 70 g tomato sauce, 40 g heavy cream, 20 g butter, and 15 g onion; cream fat level, chicken-to-sauce ratio, and restaurant recipes vary."
       ],
       "source": {
-        "dataType": "Survey (FNDDS)",
+        "source": "usda",
+        "dataType": "USDA FDC ingredient-weighted recipe estimate",
         "database": "FoodData Central",
-        "name": "USDA FoodData Central Survey (FNDDS)",
         "organization": "U.S. Department of Agriculture, Agricultural Research Service",
-        "recordID": "2706437",
-        "recordName": "Chicken curry",
-        "releaseDate": "2024-10-31",
+        "recordID": "recipe-calculation",
+        "matchBasis": "Ingredient-weighted recipe estimate; components and quantities are listed in the evidence.",
+        "recordName": "Butter chicken representative recipe",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31; SR Legacy 2018-04; Foundation Foods 2026-04",
+        "reviewedDate": "2026-10-23",
         "serving": {
-          "description": "1 cup",
-          "grams": 240.0
+          "description": "1 bowl",
+          "grams": 325.0
         },
-        "sourceID": "2706437",
-        "url": "https://fdc.nal.usda.gov/food-details/2706437/nutrients"
+        "url": "https://fdc.nal.usda.gov/download-datasets/",
+        "componentSources": [
+          {
+            "source": "usda",
+            "dataType": "FNDDS",
+            "database": "FoodData Central",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "recordID": "2705956",
+            "recordName": "Chicken breast, baked, broiled, or roasted, skin not eaten, from raw",
+            "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+            "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+            "reviewedDate": "2026-10-23",
+            "serving": {
+              "description": "180 g recipe component",
+              "grams": 180.0
+            },
+            "url": "https://fdc.nal.usda.gov/food-details/2705956/nutrients",
+            "nutritionPer100g": {
+              "calories": 161.0,
+              "carbs": 0.0,
+              "fat": 3.52,
+              "protein": 30.2,
+              "fiber": 0.0
+            }
+          },
+          {
+            "source": "usda",
+            "dataType": "SR Legacy",
+            "database": "FoodData Central",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "recordID": "169074",
+            "recordName": "Tomato sauce, canned, no salt added",
+            "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+            "releaseDate": "SR Legacy 2018-04",
+            "reviewedDate": "2026-10-23",
+            "serving": {
+              "description": "70 g recipe component",
+              "grams": 70.0
+            },
+            "url": "https://fdc.nal.usda.gov/food-details/169074/nutrients",
+            "nutritionPer100g": {
+              "calories": 24.0,
+              "carbs": 5.31,
+              "fat": 0.3,
+              "protein": 1.2,
+              "fiber": 1.5
+            }
+          },
+          {
+            "source": "usda",
+            "dataType": "Foundation Foods",
+            "database": "FoodData Central",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "recordID": "2346386",
+            "recordName": "Cream, heavy",
+            "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+            "releaseDate": "Foundation Foods 2026-04",
+            "reviewedDate": "2026-10-23",
+            "serving": {
+              "description": "40 g recipe component",
+              "grams": 40.0
+            },
+            "url": "https://fdc.nal.usda.gov/food-details/2346386/nutrients",
+            "nutritionPer100g": {
+              "calories": 343.0,
+              "carbs": 3.8,
+              "fat": 35.6,
+              "protein": 2.02,
+              "fiber": null
+            }
+          },
+          {
+            "source": "usda",
+            "dataType": "SR Legacy",
+            "database": "FoodData Central",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "recordID": "173410",
+            "recordName": "Butter, salted",
+            "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+            "releaseDate": "SR Legacy 2018-04",
+            "reviewedDate": "2026-10-23",
+            "serving": {
+              "description": "20 g recipe component",
+              "grams": 20.0
+            },
+            "url": "https://fdc.nal.usda.gov/food-details/173410/nutrients",
+            "nutritionPer100g": {
+              "calories": 717.0,
+              "carbs": 0.06,
+              "fat": 81.1,
+              "protein": 0.85,
+              "fiber": 0.0
+            }
+          },
+          {
+            "source": "usda",
+            "dataType": "SR Legacy",
+            "database": "FoodData Central",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "recordID": "790646",
+            "recordName": "Onions, yellow, raw",
+            "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+            "releaseDate": "SR Legacy 2018-04",
+            "reviewedDate": "2026-10-23",
+            "serving": {
+              "description": "15 g recipe component",
+              "grams": 15.0
+            },
+            "url": "https://fdc.nal.usda.gov/food-details/790646/nutrients",
+            "nutritionPer100g": {
+              "calories": 38.0,
+              "carbs": 8.61,
+              "fat": 0.05,
+              "protein": 0.83,
+              "fiber": 1.9
+            }
+          }
+        ]
+      },
+      "portionNutrition": {
+        "calories": 592.9,
+        "carbs": 6.54,
+        "fat": 37.01,
+        "protein": 56.3,
+        "fiber": null,
+        "catalogGrams": 325.0,
+        "catalogServing": "1 bowl"
       }
     },
     "food_butter_popcorn": {
@@ -11825,6 +12011,1330 @@
           "grams": 100
         },
         "url": "https://fdc.nal.usda.gov/food-details/2708530/nutrients"
+      }
+    },
+    "food_roasted_mixed_vegetables": {
+      "baselineNutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Classic mixed vegetables, frozen, cooked with oil",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2710018"
+      },
+      "compositionEvidence": {
+        "confidence": "Low",
+        "decision": "Keep Roasted mixed vegetables as a distinct canonical food. Use the selected USDA FoodData Central match for its default nutrition; keep variations and additions in the structured taxonomy.",
+        "reason": "Closest USDA record is classic mixed vegetables cooked with oil, not a roasted vegetable medley. Vegetable mix and roasting oil materially affect the profile.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central FNDDS",
+            "recordName": "Classic mixed vegetables, frozen, cooked with oil",
+            "sourceID": "2710018",
+            "url": "https://fdc.nal.usda.gov/food-details/2710018/nutrients"
+          }
+        ]
+      },
+      "confidence": "Low",
+      "nutritionPer100g": {
+        "calories": 89.0,
+        "carbs": 12.7,
+        "fat": 3.05,
+        "protein": 2.77,
+        "fiber": 4.3
+      },
+      "reviewReasons": [
+        "USDA FNDDS cooked-with-oil vegetables are a preparation proxy rather than a roasted recipe."
+      ],
+      "source": {
+        "source": "usda",
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2710018",
+        "recordName": "Classic mixed vegetables, frozen, cooked with oil",
+        "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-23",
+        "serving": {
+          "description": "1 cup",
+          "grams": 185.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2710018/nutrients"
+      },
+      "portionNutrition": {
+        "calories": 155.75,
+        "carbs": 22.23,
+        "fat": 5.34,
+        "protein": 4.85,
+        "fiber": 7.53,
+        "catalogGrams": 175.0,
+        "catalogServing": "1 cup"
+      }
+    },
+    "food_root_beer": {
+      "baselineNutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Soft drink, root beer",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2710557"
+      },
+      "compositionEvidence": {
+        "confidence": "High",
+        "decision": "Keep Root beer as a distinct canonical food. Use the selected USDA FoodData Central match for its default nutrition; keep variations and additions in the structured taxonomy.",
+        "reason": "Direct USDA FNDDS full-sugar root beer profile; the catalog 355 g can is approximately 12 fl oz and close to the source beverage amount.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central FNDDS",
+            "recordName": "Soft drink, root beer",
+            "sourceID": "2710557",
+            "url": "https://fdc.nal.usda.gov/food-details/2710557/nutrients"
+          }
+        ]
+      },
+      "confidence": "High",
+      "nutritionPer100g": {
+        "calories": 41.0,
+        "carbs": 10.6,
+        "fat": 0.0,
+        "protein": 0.0,
+        "fiber": 0.0
+      },
+      "reviewReasons": [],
+      "source": {
+        "source": "usda",
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2710557",
+        "recordName": "Soft drink, root beer",
+        "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-23",
+        "serving": {
+          "description": "1 fl oz (no ice)",
+          "grams": 31.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2710557/nutrients"
+      },
+      "portionNutrition": {
+        "calories": 145.55,
+        "carbs": 37.63,
+        "fat": 0.0,
+        "protein": 0.0,
+        "fiber": 0.0,
+        "catalogGrams": 355.0,
+        "catalogServing": "1 can"
+      }
+    },
+    "food_rotisserie_chicken": {
+      "baselineNutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Chicken, NS as to part, rotisserie, NS as to skin eaten",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2705935"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Rotisserie chicken as a distinct canonical food. Use the selected USDA FoodData Central match for its default nutrition; keep variations and additions in the structured taxonomy.",
+        "reason": "Direct FNDDS rotisserie chicken record with part and skin unspecified; actual edible portion and skin choice vary. The source cup portion is 135 g and catalog serving is 170 g.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central FNDDS",
+            "recordName": "Chicken, NS as to part, rotisserie, NS as to skin eaten",
+            "sourceID": "2705935",
+            "url": "https://fdc.nal.usda.gov/food-details/2705935/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 164.0,
+        "carbs": 0.0,
+        "fat": 6.36,
+        "protein": 26.8,
+        "fiber": 0.0
+      },
+      "reviewReasons": [],
+      "source": {
+        "source": "usda",
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2705935",
+        "recordName": "Chicken, NS as to part, rotisserie, NS as to skin eaten",
+        "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-23",
+        "serving": {
+          "description": "1 cup, cooked, diced",
+          "grams": 135.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2705935/nutrients"
+      },
+      "portionNutrition": {
+        "calories": 278.8,
+        "carbs": 0.0,
+        "fat": 10.81,
+        "protein": 45.56,
+        "fiber": 0.0,
+        "catalogGrams": 170.0,
+        "catalogServing": "1 serving"
+      }
+    },
+    "food_salami": {
+      "baselineNutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Salami, NFS",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2706195"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Salami as a distinct canonical food. Use the selected USDA FoodData Central match for its default nutrition; keep variations and additions in the structured taxonomy.",
+        "reason": "Direct generic FNDDS salami record. Catalog uses a thin 10 g slice while FNDDS reports a 28 g slice; slice style and meat blend vary.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central FNDDS",
+            "recordName": "Salami, NFS",
+            "sourceID": "2706195",
+            "url": "https://fdc.nal.usda.gov/food-details/2706195/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 378.0,
+        "carbs": 0.72,
+        "fat": 31.6,
+        "protein": 21.1,
+        "fiber": 0.0
+      },
+      "reviewReasons": [],
+      "source": {
+        "source": "usda",
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2706195",
+        "recordName": "Salami, NFS",
+        "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-23",
+        "serving": {
+          "description": "1 slice, NFS (28 g source slice)",
+          "grams": 28.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2706195/nutrients"
+      },
+      "portionNutrition": {
+        "calories": 37.8,
+        "carbs": 0.07,
+        "fat": 3.16,
+        "protein": 2.11,
+        "fiber": 0.0,
+        "catalogGrams": 10.0,
+        "catalogServing": "1 slice"
+      }
+    },
+    "food_salmon_cooked": {
+      "baselineNutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Fish, salmon, baked or broiled",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2706286"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Salmon, cooked as a distinct canonical food. Use the selected USDA FoodData Central match for its default nutrition; keep variations and additions in the structured taxonomy.",
+        "reason": "Direct FNDDS baked-or-broiled salmon profile; species and fat content vary. USDA source fillet is 140 g and catalog serving is estimated at 170 g.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central FNDDS",
+            "recordName": "Fish, salmon, baked or broiled",
+            "sourceID": "2706286",
+            "url": "https://fdc.nal.usda.gov/food-details/2706286/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 274.0,
+        "carbs": 0.01,
+        "fat": 18.4,
+        "protein": 25.4,
+        "fiber": 0.0
+      },
+      "reviewReasons": [],
+      "source": {
+        "source": "usda",
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2706286",
+        "recordName": "Fish, salmon, baked or broiled",
+        "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-23",
+        "serving": {
+          "description": "1 small/regular fillet",
+          "grams": 140.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2706286/nutrients"
+      },
+      "portionNutrition": {
+        "calories": 465.8,
+        "carbs": 0.02,
+        "fat": 31.28,
+        "protein": 43.18,
+        "fiber": 0.0,
+        "catalogGrams": 170.0,
+        "catalogServing": "1 fillet"
+      }
+    },
+    "food_salsa": {
+      "baselineNutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Salsa, NFS",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2709736"
+      },
+      "compositionEvidence": {
+        "confidence": "High",
+        "decision": "Keep Salsa as a distinct canonical food. Use the selected USDA FoodData Central match for its default nutrition; keep variations and additions in the structured taxonomy.",
+        "reason": "Direct USDA FNDDS salsa, not further specified; source tablespoon is 16 g, matching the catalog portion.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central FNDDS",
+            "recordName": "Salsa, NFS",
+            "sourceID": "2709736",
+            "url": "https://fdc.nal.usda.gov/food-details/2709736/nutrients"
+          }
+        ]
+      },
+      "confidence": "High",
+      "nutritionPer100g": {
+        "calories": 34.0,
+        "carbs": 6.74,
+        "fat": 0.19,
+        "protein": 1.44,
+        "fiber": 1.8
+      },
+      "reviewReasons": [],
+      "source": {
+        "source": "usda",
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2709736",
+        "recordName": "Salsa, NFS",
+        "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-23",
+        "serving": {
+          "description": "1 tablespoon",
+          "grams": 16.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2709736/nutrients"
+      },
+      "portionNutrition": {
+        "calories": 5.44,
+        "carbs": 1.08,
+        "fat": 0.03,
+        "protein": 0.23,
+        "fiber": 0.29,
+        "catalogGrams": 16.0,
+        "catalogServing": "1 tbsp"
+      }
+    },
+    "food_sashimi": {
+      "baselineNutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Sashimi representative recipe",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "recipe-calculation"
+      },
+      "compositionEvidence": {
+        "confidence": "Low",
+        "decision": "Keep Sashimi as a generic assorted raw-fish identity. Estimate one 30 g piece as equal parts raw farmed Atlantic salmon and raw yellowfin tuna.",
+        "reason": "No generic assorted-sashimi FDC record was found. The low-confidence estimate uses two common raw-fish choices in equal weights; species and mix vary, and neither source reports fiber.",
+        "components": [
+          {
+            "name": "Fish, salmon, Atlantic, farm raised, raw",
+            "sourceID": "2684441",
+            "grams": 15.0
+          },
+          {
+            "name": "Fish, tuna, fresh, yellowfin, raw",
+            "sourceID": "175159",
+            "grams": 15.0
+          }
+        ],
+        "sources": [
+          {
+            "name": "USDA FoodData Central ingredient records",
+            "recordName": "Fish, salmon, Atlantic, farm raised, raw",
+            "sourceID": "2684441",
+            "url": "https://fdc.nal.usda.gov/food-details/2684441/nutrients"
+          },
+          {
+            "name": "USDA FoodData Central ingredient records",
+            "recordName": "Fish, tuna, fresh, yellowfin, raw",
+            "sourceID": "175159",
+            "url": "https://fdc.nal.usda.gov/food-details/175159/nutrients"
+          }
+        ]
+      },
+      "confidence": "Low",
+      "nutritionPer100g": {
+        "calories": 153.0,
+        "carbs": 0.0,
+        "fat": 6.795,
+        "protein": 22.35,
+        "fiber": null
+      },
+      "reviewReasons": [
+        "No generic assorted-sashimi FDC record was found. The low-confidence estimate uses two common raw-fish choices in equal weights; species and mix vary, and neither source reports fiber."
+      ],
+      "source": {
+        "source": "usda",
+        "dataType": "USDA FDC ingredient-weighted recipe estimate",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "recipe-calculation",
+        "matchBasis": "Ingredient-weighted recipe estimate; components and quantities are listed in the evidence.",
+        "recordName": "Sashimi representative recipe",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31; SR Legacy 2018-04; Foundation Foods 2026-04",
+        "reviewedDate": "2026-10-23",
+        "serving": {
+          "description": "1 piece",
+          "grams": 30.0
+        },
+        "url": "https://fdc.nal.usda.gov/download-datasets/",
+        "componentSources": [
+          {
+            "source": "usda",
+            "dataType": "Foundation Foods",
+            "database": "FoodData Central",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "recordID": "2684441",
+            "recordName": "Fish, salmon, Atlantic, farm raised, raw",
+            "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+            "releaseDate": "Foundation Foods 2026-04",
+            "reviewedDate": "2026-10-23",
+            "serving": {
+              "description": "15 g recipe component",
+              "grams": 15.0
+            },
+            "url": "https://fdc.nal.usda.gov/food-details/2684441/nutrients",
+            "nutritionPer100g": {
+              "calories": 197.0,
+              "carbs": 0.0,
+              "fat": 13.1,
+              "protein": 20.3,
+              "fiber": null
+            }
+          },
+          {
+            "source": "usda",
+            "dataType": "SR Legacy",
+            "database": "FoodData Central",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "recordID": "175159",
+            "recordName": "Fish, tuna, fresh, yellowfin, raw",
+            "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+            "releaseDate": "SR Legacy 2018-04",
+            "reviewedDate": "2026-10-23",
+            "serving": {
+              "description": "15 g recipe component",
+              "grams": 15.0
+            },
+            "url": "https://fdc.nal.usda.gov/food-details/175159/nutrients",
+            "nutritionPer100g": {
+              "calories": 109.0,
+              "carbs": 0.0,
+              "fat": 0.49,
+              "protein": 24.4,
+              "fiber": 0.0
+            }
+          }
+        ]
+      },
+      "portionNutrition": {
+        "calories": 45.9,
+        "carbs": 0.0,
+        "fat": 2.04,
+        "protein": 6.71,
+        "fiber": null,
+        "catalogGrams": 30.0,
+        "catalogServing": "1 piece"
+      }
+    },
+    "food_sausage": {
+      "baselineNutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Sausage, NFS",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2706190"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Sausage as a distinct canonical food. Use the selected USDA FoodData Central match for its default nutrition; keep variations and additions in the structured taxonomy.",
+        "reason": "FNDDS generic pork sausage, not further specified, is the closest generic match. The source measure is a 35 g patty while the catalog uses an 85 g link; type and shape vary.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central FNDDS",
+            "recordName": "Sausage, NFS",
+            "sourceID": "2706190",
+            "url": "https://fdc.nal.usda.gov/food-details/2706190/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 325.0,
+        "carbs": 1.42,
+        "fat": 27.2,
+        "protein": 18.5,
+        "fiber": 0.0
+      },
+      "reviewReasons": [],
+      "source": {
+        "source": "usda",
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2706190",
+        "recordName": "Sausage, NFS",
+        "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-23",
+        "serving": {
+          "description": "1 patty (35 g source measure)",
+          "grams": 35.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2706190/nutrients"
+      },
+      "portionNutrition": {
+        "calories": 276.25,
+        "carbs": 1.21,
+        "fat": 23.12,
+        "protein": 15.72,
+        "fiber": 0.0,
+        "catalogGrams": 85.0,
+        "catalogServing": "1 link"
+      }
+    },
+    "food_sausage_patty": {
+      "baselineNutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Pork sausage, link/patty, cooked, pan-fried",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "174578"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Sausage patty as a distinct canonical food. Use the selected USDA FoodData Central match for its default nutrition; keep variations and additions in the structured taxonomy.",
+        "reason": "Direct SR Legacy cooked, pan-fried pork sausage patty profile. Catalog patty is 55 g; the source patty is 27 g, and meat blend and cooking fat vary.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central SR Legacy",
+            "recordName": "Pork sausage, link/patty, cooked, pan-fried",
+            "sourceID": "174578",
+            "url": "https://fdc.nal.usda.gov/food-details/174578/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 325.0,
+        "carbs": 1.42,
+        "fat": 27.2,
+        "protein": 18.5,
+        "fiber": 0.0
+      },
+      "reviewReasons": [],
+      "source": {
+        "source": "usda",
+        "dataType": "SR Legacy",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "174578",
+        "recordName": "Pork sausage, link/patty, cooked, pan-fried",
+        "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+        "releaseDate": "SR Legacy 2018-04",
+        "reviewedDate": "2026-10-23",
+        "serving": {
+          "description": "1 patty",
+          "grams": 27.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/174578/nutrients"
+      },
+      "portionNutrition": {
+        "calories": 178.75,
+        "carbs": 0.78,
+        "fat": 14.96,
+        "protein": 10.18,
+        "fiber": 0.0,
+        "catalogGrams": 55.0,
+        "catalogServing": "1 patty"
+      }
+    },
+    "food_scalloped_potatoes": {
+      "baselineNutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Potato, scalloped, NFS",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2709448"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Scalloped potatoes as a distinct canonical food. Use the selected USDA FoodData Central match for its default nutrition; keep variations and additions in the structured taxonomy.",
+        "reason": "Direct FNDDS scalloped-potato profile, not further specified. Catalog cup estimate is 205 g versus a 250 g USDA cup; cream, cheese, and recipe ratios vary.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central FNDDS",
+            "recordName": "Potato, scalloped, NFS",
+            "sourceID": "2709448",
+            "url": "https://fdc.nal.usda.gov/food-details/2709448/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 168.0,
+        "carbs": 13.5,
+        "fat": 9.63,
+        "protein": 7.13,
+        "fiber": 0.8
+      },
+      "reviewReasons": [],
+      "source": {
+        "source": "usda",
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2709448",
+        "recordName": "Potato, scalloped, NFS",
+        "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-23",
+        "serving": {
+          "description": "1 cup",
+          "grams": 250.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2709448/nutrients"
+      },
+      "portionNutrition": {
+        "calories": 344.4,
+        "carbs": 27.68,
+        "fat": 19.74,
+        "protein": 14.62,
+        "fiber": 1.64,
+        "catalogGrams": 205.0,
+        "catalogServing": "1 cup"
+      }
+    },
+    "food_scallops_cooked": {
+      "baselineNutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Scallops, steamed or boiled",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2706358"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Scallops, cooked as a distinct canonical food. Use the selected USDA FoodData Central match for its default nutrition; keep variations and additions in the structured taxonomy.",
+        "reason": "Direct FNDDS steamed-or-boiled scallops. Catalog one-ounce portion is scaled from the source 15 g scallop; cooking method and moisture vary.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central FNDDS",
+            "recordName": "Scallops, steamed or boiled",
+            "sourceID": "2706358",
+            "url": "https://fdc.nal.usda.gov/food-details/2706358/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 87.0,
+        "carbs": 4.02,
+        "fat": 0.62,
+        "protein": 15.2,
+        "fiber": 0.0
+      },
+      "reviewReasons": [],
+      "source": {
+        "source": "usda",
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2706358",
+        "recordName": "Scallops, steamed or boiled",
+        "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-23",
+        "serving": {
+          "description": "1 scallop",
+          "grams": 15.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2706358/nutrients"
+      },
+      "portionNutrition": {
+        "calories": 24.71,
+        "carbs": 1.14,
+        "fat": 0.18,
+        "protein": 4.32,
+        "fiber": 0.0,
+        "catalogGrams": 28.4,
+        "catalogServing": "1 oz"
+      }
+    },
+    "food_scrambled_eggs": {
+      "baselineNutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Egg omelet or scrambled egg, NS as to fat",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2707198"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Scrambled eggs as a distinct canonical food. Use the selected USDA FoodData Central match for its default nutrition; keep variations and additions in the structured taxonomy.",
+        "reason": "Direct FNDDS scrambled egg profile with fat unspecified. Catalog 120 g serving is about two eggs; added milk and cooking fat vary.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central FNDDS",
+            "recordName": "Egg omelet or scrambled egg, NS as to fat",
+            "sourceID": "2707198",
+            "url": "https://fdc.nal.usda.gov/food-details/2707198/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 185.0,
+        "carbs": 0.91,
+        "fat": 15.0,
+        "protein": 11.6,
+        "fiber": 0.0
+      },
+      "reviewReasons": [],
+      "source": {
+        "source": "usda",
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2707198",
+        "recordName": "Egg omelet or scrambled egg, NS as to fat",
+        "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-23",
+        "serving": {
+          "description": "1 egg (55 g source measure)",
+          "grams": 55.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2707198/nutrients"
+      },
+      "portionNutrition": {
+        "calories": 222.0,
+        "carbs": 1.09,
+        "fat": 18.0,
+        "protein": 13.92,
+        "fiber": 0.0,
+        "catalogGrams": 120.0,
+        "catalogServing": "1 serving"
+      }
+    },
+    "food_seaweed_salad": {
+      "baselineNutritionSource": {
+        "matchBasis": "Manufacturer wakame seaweed salad label used as generic analog; no brand-specific food identity",
+        "name": "Seaweed salad",
+        "similarity": null,
+        "source": "manufacturer_label",
+        "sourceID": "Manufacturer product 2154"
+      },
+      "compositionEvidence": {
+        "confidence": "Low",
+        "decision": "Keep Seaweed salad as one canonical salad entry; use a manufacturer wakame-salad label as a generic estimate, not a brand-specific identity.",
+        "reason": "Official Kanehatsu wakame salad panel is a close generic product analog, not a USDA generic record; ingredients and recipes vary and fiber is not reported.",
+        "sources": [
+          {
+            "name": "Kanehatsu official product information",
+            "recordName": "Seaweed salad, per 100 g",
+            "sourceID": "Manufacturer product 2154",
+            "url": "https://www.kanehatsu.co.jp/products/gyomuyo/gyomu-sozai/2154/"
+          }
+        ]
+      },
+      "confidence": "Low",
+      "nutritionPer100g": {
+        "calories": 114.0,
+        "carbs": 20.3,
+        "fat": 2.3,
+        "protein": 3.1,
+        "fiber": null
+      },
+      "reviewReasons": [
+        "Official Kanehatsu wakame salad panel is a close generic product analog, not a USDA generic record; ingredients and recipes vary and fiber is not reported."
+      ],
+      "source": {
+        "source": "manufacturer_label",
+        "dataType": "Official manufacturer nutrition information",
+        "database": "Kanehatsu Food Products",
+        "organization": "Kanehatsu Food Products Co., Ltd.",
+        "recordID": "Manufacturer product 2154",
+        "recordName": "Seaweed salad",
+        "reviewedDate": "2026-10-23",
+        "serving": {
+          "description": "100 g manufacturer label basis",
+          "grams": 100
+        },
+        "nutritionPer100g": {
+          "calories": 114.0,
+          "carbs": 20.3,
+          "fat": 2.3,
+          "protein": 3.1,
+          "fiber": null
+        },
+        "url": "https://www.kanehatsu.co.jp/products/gyomuyo/gyomu-sozai/2154/",
+        "matchBasis": "Manufacturer wakame seaweed salad label used as generic analog; no brand-specific food identity"
+      },
+      "portionNutrition": {
+        "calories": 131.1,
+        "carbs": 23.34,
+        "fat": 2.65,
+        "protein": 3.56,
+        "fiber": null,
+        "catalogGrams": 115.0,
+        "catalogServing": "1 cup"
+      }
+    },
+    "food_shrimp_cooked": {
+      "baselineNutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Crustaceans, shrimp, cooked",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "175180"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Shrimp, cooked as a distinct canonical food. Use the selected USDA FoodData Central match for its default nutrition; keep variations and additions in the structured taxonomy.",
+        "reason": "USDA SR Legacy cooked shrimp, broad preparation match. Species and cooking method vary; the record does not report fiber.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central SR Legacy",
+            "recordName": "Crustaceans, shrimp, cooked",
+            "sourceID": "175180",
+            "url": "https://fdc.nal.usda.gov/food-details/175180/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 99.0,
+        "carbs": 0.2,
+        "fat": 0.28,
+        "protein": 24.0,
+        "fiber": null
+      },
+      "reviewReasons": [],
+      "source": {
+        "source": "usda",
+        "dataType": "SR Legacy",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "175180",
+        "recordName": "Crustaceans, shrimp, cooked",
+        "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+        "releaseDate": "SR Legacy 2018-04",
+        "reviewedDate": "2026-10-23",
+        "serving": {
+          "description": "1 3 oz",
+          "grams": 85.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/175180/nutrients"
+      },
+      "portionNutrition": {
+        "calories": 28.12,
+        "carbs": 0.06,
+        "fat": 0.08,
+        "protein": 6.82,
+        "fiber": null,
+        "catalogGrams": 28.4,
+        "catalogServing": "1 oz"
+      }
+    },
+    "food_sirloin_steak": {
+      "baselineNutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Beef, steak, sirloin, NS as to fat eaten",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2705832"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Sirloin steak as a distinct canonical food. Use the selected USDA FoodData Central match for its default nutrition; keep variations and additions in the structured taxonomy.",
+        "reason": "Direct FNDDS cooked sirloin steak with fat eaten unspecified. Catalog steak is estimated at 200 g; cut, trimming, and doneness vary.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central FNDDS",
+            "recordName": "Beef, steak, sirloin, NS as to fat eaten",
+            "sourceID": "2705832",
+            "url": "https://fdc.nal.usda.gov/food-details/2705832/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 239.0,
+        "carbs": 0.0,
+        "fat": 14.0,
+        "protein": 27.1,
+        "fiber": 0.0
+      },
+      "reviewReasons": [],
+      "source": {
+        "source": "usda",
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2705832",
+        "recordName": "Beef, steak, sirloin, NS as to fat eaten",
+        "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-23",
+        "serving": {
+          "description": "1 piece/slice, any size",
+          "grams": 30.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2705832/nutrients"
+      },
+      "portionNutrition": {
+        "calories": 478.0,
+        "carbs": 0.0,
+        "fat": 28.0,
+        "protein": 54.2,
+        "fiber": 0.0,
+        "catalogGrams": 200.0,
+        "catalogServing": "1 steak"
+      }
+    },
+    "food_sloppy_joe": {
+      "baselineNutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Sloppy joe sandwich, on white bun",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2706883"
+      },
+      "compositionEvidence": {
+        "confidence": "Medium",
+        "decision": "Keep Sloppy joe as a distinct canonical food. Use the selected USDA FoodData Central match for its default nutrition; keep variations and additions in the structured taxonomy.",
+        "reason": "Direct FNDDS sloppy-joe sandwich on a white bun. Catalog sandwich estimate is 210 g versus the source 185 g; filling and bun size vary.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central FNDDS",
+            "recordName": "Sloppy joe sandwich, on white bun",
+            "sourceID": "2706883",
+            "url": "https://fdc.nal.usda.gov/food-details/2706883/nutrients"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 185.0,
+        "carbs": 20.0,
+        "fat": 6.42,
+        "protein": 11.3,
+        "fiber": 1.1
+      },
+      "reviewReasons": [],
+      "source": {
+        "source": "usda",
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2706883",
+        "recordName": "Sloppy joe sandwich, on white bun",
+        "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-23",
+        "serving": {
+          "description": "1 sandwich, any size",
+          "grams": 185.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2706883/nutrients"
+      },
+      "portionNutrition": {
+        "calories": 388.5,
+        "carbs": 42.0,
+        "fat": 13.48,
+        "protein": 23.73,
+        "fiber": 2.31,
+        "catalogGrams": 210.0,
+        "catalogServing": "1 sandwich"
+      }
+    },
+    "food_soy_milk": {
+      "baselineNutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Soy milk, unsweetened",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2705405"
+      },
+      "compositionEvidence": {
+        "confidence": "Low",
+        "decision": "Keep Soy milk as a distinct canonical food. Use the selected USDA FoodData Central match for its default nutrition; keep variations and additions in the structured taxonomy.",
+        "reason": "USDA FNDDS unsweetened soy milk is a defensible generic base, but the catalog name does not specify sweetened versus unsweetened; sweetened alternatives are higher in calories. Fiber is reported as zero by the selected record.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central FNDDS",
+            "recordName": "Soy milk, unsweetened",
+            "sourceID": "2705405",
+            "url": "https://fdc.nal.usda.gov/food-details/2705405/nutrients"
+          }
+        ]
+      },
+      "confidence": "Low",
+      "nutritionPer100g": {
+        "calories": 38.0,
+        "carbs": 1.29,
+        "fat": 2.12,
+        "protein": 3.55,
+        "fiber": 0.0
+      },
+      "reviewReasons": [],
+      "source": {
+        "source": "usda",
+        "dataType": "FNDDS",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2705405",
+        "recordName": "Soy milk, unsweetened",
+        "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+        "reviewedDate": "2026-10-23",
+        "serving": {
+          "description": "1 cup",
+          "grams": 244.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-details/2705405/nutrients"
+      },
+      "portionNutrition": {
+        "calories": 91.2,
+        "carbs": 3.1,
+        "fat": 5.09,
+        "protein": 8.52,
+        "fiber": 0.0,
+        "catalogGrams": 240.0,
+        "catalogServing": "1 cup"
+      }
+    },
+    "food_shawarma_wrap": {
+      "baselineNutritionSource": {
+        "matchBasis": "reviewed FDC record",
+        "name": "Shawarma wrap representative recipe",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "recipe-calculation"
+      },
+      "compositionEvidence": {
+        "confidence": "Low",
+        "decision": "Keep Shawarma wrap as one assembled food. Estimate one 255 g chicken shawarma wrap with pita, garlic sauce, and vegetables.",
+        "reason": "No direct USDA shawarma-wrap profile was found in the local catalog. The estimate uses 105 g cooked chicken breast, 70 g pita, 20 g garlic sauce, and 60 g cucumber, tomato, lettuce, and onion; filling, sauce, and bread sizes vary.",
+        "components": [
+          {
+            "name": "Chicken breast, baked, broiled, or roasted, skin not eaten, from raw",
+            "sourceID": "2705956",
+            "grams": 105.0
+          },
+          {
+            "name": "Bread, pita",
+            "sourceID": "2707616",
+            "grams": 70.0
+          },
+          {
+            "name": "Garlic sauce",
+            "sourceID": "2710169",
+            "grams": 20.0
+          },
+          {
+            "name": "Cucumber, raw",
+            "sourceID": "2709784",
+            "grams": 20.0
+          },
+          {
+            "name": "Tomatoes, red, ripe, raw, year round average",
+            "sourceID": "170457",
+            "grams": 20.0
+          },
+          {
+            "name": "Lettuce, iceberg, raw",
+            "sourceID": "2346388",
+            "grams": 10.0
+          },
+          {
+            "name": "Onions, yellow, raw",
+            "sourceID": "790646",
+            "grams": 10.0
+          }
+        ],
+        "sources": [
+          {
+            "name": "USDA FoodData Central ingredient records",
+            "recordName": "Chicken breast, baked, broiled, or roasted, skin not eaten, from raw",
+            "sourceID": "2705956",
+            "url": "https://fdc.nal.usda.gov/food-details/2705956/nutrients"
+          },
+          {
+            "name": "USDA FoodData Central ingredient records",
+            "recordName": "Bread, pita",
+            "sourceID": "2707616",
+            "url": "https://fdc.nal.usda.gov/food-details/2707616/nutrients"
+          },
+          {
+            "name": "USDA FoodData Central ingredient records",
+            "recordName": "Garlic sauce",
+            "sourceID": "2710169",
+            "url": "https://fdc.nal.usda.gov/food-details/2710169/nutrients"
+          },
+          {
+            "name": "USDA FoodData Central ingredient records",
+            "recordName": "Cucumber, raw",
+            "sourceID": "2709784",
+            "url": "https://fdc.nal.usda.gov/food-details/2709784/nutrients"
+          },
+          {
+            "name": "USDA FoodData Central ingredient records",
+            "recordName": "Tomatoes, red, ripe, raw, year round average",
+            "sourceID": "170457",
+            "url": "https://fdc.nal.usda.gov/food-details/170457/nutrients"
+          },
+          {
+            "name": "USDA FoodData Central ingredient records",
+            "recordName": "Lettuce, iceberg, raw",
+            "sourceID": "2346388",
+            "url": "https://fdc.nal.usda.gov/food-details/2346388/nutrients"
+          },
+          {
+            "name": "USDA FoodData Central ingredient records",
+            "recordName": "Onions, yellow, raw",
+            "sourceID": "790646",
+            "url": "https://fdc.nal.usda.gov/food-details/790646/nutrients"
+          }
+        ]
+      },
+      "confidence": "Low",
+      "nutritionPer100g": {
+        "calories": 200.1804,
+        "carbs": 16.5216,
+        "fat": 7.6174,
+        "protein": 15.2248,
+        "fiber": null
+      },
+      "reviewReasons": [
+        "No direct USDA shawarma-wrap profile was found in the local catalog. The estimate uses 105 g cooked chicken breast, 70 g pita, 20 g garlic sauce, and 60 g cucumber, tomato, lettuce, and onion; filling, sauce, and bread sizes vary."
+      ],
+      "source": {
+        "source": "usda",
+        "dataType": "USDA FDC ingredient-weighted recipe estimate",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "recipe-calculation",
+        "matchBasis": "Ingredient-weighted recipe estimate; components and quantities are listed in the evidence.",
+        "recordName": "Shawarma wrap representative recipe",
+        "releaseDate": "FNDDS 2021-2023 released 2024-10-31; SR Legacy 2018-04; Foundation Foods 2026-04",
+        "reviewedDate": "2026-10-23",
+        "serving": {
+          "description": "1 wrap",
+          "grams": 255.0
+        },
+        "url": "https://fdc.nal.usda.gov/download-datasets/",
+        "componentSources": [
+          {
+            "source": "usda",
+            "dataType": "FNDDS",
+            "database": "FoodData Central",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "recordID": "2705956",
+            "recordName": "Chicken breast, baked, broiled, or roasted, skin not eaten, from raw",
+            "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+            "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+            "reviewedDate": "2026-10-23",
+            "serving": {
+              "description": "105 g recipe component",
+              "grams": 105.0
+            },
+            "url": "https://fdc.nal.usda.gov/food-details/2705956/nutrients",
+            "nutritionPer100g": {
+              "calories": 161.0,
+              "carbs": 0.0,
+              "fat": 3.52,
+              "protein": 30.2,
+              "fiber": 0.0
+            }
+          },
+          {
+            "source": "usda",
+            "dataType": "FNDDS",
+            "database": "FoodData Central",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "recordID": "2707616",
+            "recordName": "Bread, pita",
+            "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+            "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+            "reviewedDate": "2026-10-23",
+            "serving": {
+              "description": "70 g recipe component",
+              "grams": 70.0
+            },
+            "url": "https://fdc.nal.usda.gov/food-details/2707616/nutrients",
+            "nutritionPer100g": {
+              "calories": 275.0,
+              "carbs": 55.7,
+              "fat": 1.2,
+              "protein": 9.1,
+              "fiber": 2.2
+            }
+          },
+          {
+            "source": "usda",
+            "dataType": "FNDDS",
+            "database": "FoodData Central",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "recordID": "2710169",
+            "recordName": "Garlic sauce",
+            "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+            "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+            "reviewedDate": "2026-10-23",
+            "serving": {
+              "description": "20 g recipe component",
+              "grams": 20.0
+            },
+            "url": "https://fdc.nal.usda.gov/food-details/2710169/nutrients",
+            "nutritionPer100g": {
+              "calories": 683.0,
+              "carbs": 2.87,
+              "fat": 74.0,
+              "protein": 1.43,
+              "fiber": 0.3
+            }
+          },
+          {
+            "source": "usda",
+            "dataType": "FNDDS",
+            "database": "FoodData Central",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "recordID": "2709784",
+            "recordName": "Cucumber, raw",
+            "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+            "releaseDate": "FNDDS 2021-2023 released 2024-10-31",
+            "reviewedDate": "2026-10-23",
+            "serving": {
+              "description": "20 g recipe component",
+              "grams": 20.0
+            },
+            "url": "https://fdc.nal.usda.gov/food-details/2709784/nutrients",
+            "nutritionPer100g": {
+              "calories": 16.0,
+              "carbs": 2.95,
+              "fat": 0.18,
+              "protein": 0.62,
+              "fiber": 0.5
+            }
+          },
+          {
+            "source": "usda",
+            "dataType": "SR Legacy",
+            "database": "FoodData Central",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "recordID": "170457",
+            "recordName": "Tomatoes, red, ripe, raw, year round average",
+            "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+            "releaseDate": "SR Legacy 2018-04",
+            "reviewedDate": "2026-10-23",
+            "serving": {
+              "description": "20 g recipe component",
+              "grams": 20.0
+            },
+            "url": "https://fdc.nal.usda.gov/food-details/170457/nutrients",
+            "nutritionPer100g": {
+              "calories": 18.0,
+              "carbs": 3.89,
+              "fat": 0.2,
+              "protein": 0.88,
+              "fiber": 1.2
+            }
+          },
+          {
+            "source": "usda",
+            "dataType": "Foundation Foods",
+            "database": "FoodData Central",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "recordID": "2346388",
+            "recordName": "Lettuce, iceberg, raw",
+            "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+            "releaseDate": "Foundation Foods 2026-04",
+            "reviewedDate": "2026-10-23",
+            "serving": {
+              "description": "10 g recipe component",
+              "grams": 10.0
+            },
+            "url": "https://fdc.nal.usda.gov/food-details/2346388/nutrients",
+            "nutritionPer100g": {
+              "calories": 17.1,
+              "carbs": 3.37,
+              "fat": 0.074,
+              "protein": 0.742,
+              "fiber": null
+            }
+          },
+          {
+            "source": "usda",
+            "dataType": "SR Legacy",
+            "database": "FoodData Central",
+            "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+            "recordID": "790646",
+            "recordName": "Onions, yellow, raw",
+            "matchBasis": "Reviewed FoodData Central record; match quality and preparation differences are documented in composition evidence.",
+            "releaseDate": "SR Legacy 2018-04",
+            "reviewedDate": "2026-10-23",
+            "serving": {
+              "description": "10 g recipe component",
+              "grams": 10.0
+            },
+            "url": "https://fdc.nal.usda.gov/food-details/790646/nutrients",
+            "nutritionPer100g": {
+              "calories": 38.0,
+              "carbs": 8.61,
+              "fat": 0.05,
+              "protein": 0.83,
+              "fiber": 1.9
+            }
+          }
+        ]
+      },
+      "portionNutrition": {
+        "calories": 510.46,
+        "carbs": 42.13,
+        "fat": 19.42,
+        "protein": 38.82,
+        "fiber": null,
+        "catalogGrams": 255.0,
+        "catalogServing": "1 wrap"
       }
     }
   },

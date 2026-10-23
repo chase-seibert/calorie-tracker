@@ -855,7 +855,7 @@ private struct MagicFoodSuggestionsList: View {
                     )
                 }
             } else {
-                Section("\(timeRange.title) · \(timeRange.hoursDescription)") {
+                Section("Magic suggestions") {
                     ForEach(suggestions) { suggestion in
                         MagicFoodSuggestionRow(
                             suggestion: suggestion,
@@ -876,7 +876,7 @@ private struct MagicFoodSuggestionsList: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Your recent routine, ready in one tap")
                             .font(.subheadline.weight(.semibold))
-                        Text("Magic looks at your last 10 days during breakfast (5–11 AM), lunch (11 AM–3 PM), or dinner (after 3 PM). A set adds each item separately to your log.")
+                        Text("Magic looks at your last 10 days in the current period. Before your first food log today, it also includes periods that have passed: breakfast (5–11 AM), lunch (11 AM–3 PM), and dinner (after 3 PM). A set adds each item separately to your log.")
                             .font(.caption)
                             .foregroundStyle(AppTheme.muted)
                     }

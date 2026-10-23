@@ -223,7 +223,9 @@
 - Foods logged today remain eligible for Magic. A single-food suggestion
   normally requires logs on at least two previous days. If the food is already
   logged today, at least one previous day must contain two matching logs in the
-  active time band. Today's entries never count toward historical frequency.
+  current time band. Before the first food log of the day, Magic can also show
+  suggestions for earlier periods that have passed. Today's entries never
+  count toward historical frequency.
 - The Log Food sheet exposes Magic, Recent, Frequent, Favorites, Meals, and Scan
   modes; the diary's primary persistent action is the larger Log food button.
 - Magic's explanation appears below its suggestions and lists the breakfast,

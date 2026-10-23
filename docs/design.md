@@ -152,8 +152,9 @@ When no search result matches, the empty state offers a compact Add custom food
 action with the search text prefilled as the food name. Saving from that flow
 logs one serving and closes the food picker.
 
-Magic opens with a short explanation and three or four suggestions learned from
-the previous 10 days in the current local-time band: breakfast from 5–11 AM,
+Magic opens with a short explanation and up to four suggestions learned from
+the previous 10 days in the current local-time band. Before the first food is
+logged today, it also includes bands that have passed: breakfast from 5–11 AM,
 lunch from 11 AM–3 PM, and dinner otherwise. A suggestion can be one food or a
 visually grouped set. Repeated, cohesive sets receive a modest ranking boost so
 a strong routine such as cappuccino plus protein shake can lead, while a more

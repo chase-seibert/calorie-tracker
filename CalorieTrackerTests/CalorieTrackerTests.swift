@@ -1658,6 +1658,24 @@ final class CalorieTrackerTests: XCTestCase {
 
         let lunch = store.magicSuggestions(at: date(8, 12))
         XCTAssertEqual(lunch.first?.items.map(\.id), ["food:\(turkeySandwich.id)"])
+        XCTAssertTrue(lunch.contains { suggestion in
+            suggestion.items.contains { $0.id == "food:\(cappuccino.id)" }
+        })
+
+        var loggedTodayDocument = document
+        loggedTodayDocument.entries.append(entry(oneOffBreakfast, day: 8, hour: 12))
+        let loggedTodayStore = TestDiaryStore(
+            document: loggedTodayDocument,
+            fileURL: folder.appendingPathComponent("logged-today-diary.json"),
+            calendar: calendar,
+            referenceDate: date(8, 12)
+        )
+        let afterLogging = loggedTodayStore.magicSuggestions(at: date(8, 12), limit: 10)
+        XCTAssertFalse(afterLogging.contains { suggestion in
+            suggestion.items.contains {
+                $0.id == "food:\(cappuccino.id)" || $0.id == "food:\(proteinShake.id)"
+            }
+        })
     }
 
     @MainActor

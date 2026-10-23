@@ -1,8 +1,10 @@
 # Magic recommendations
 
-Magic recommends up to four foods, saved meals, or repeated sets for the current
-local-time band. Its purpose is to make recurring routines fast without turning
-an inferred set into a saved meal.
+Magic recommends up to four foods, saved meals, or repeated sets. Before the
+first food is logged today, it includes the current local-time band and any
+earlier bands that have started today. After a food has been logged, it uses
+only the current band. Its purpose is to make recurring routines fast without
+turning an inferred set into a saved meal.
 
 ## Time and history window
 
@@ -12,11 +14,17 @@ Magic assigns the current local time to one band:
 - Lunch: 11:00 AM through 2:59 PM.
 - Dinner: 3:00 PM through 4:59 AM.
 
-The history window is the 10 complete local calendar days immediately before
-today. Today is never part of the historical counts, scores, combination
-cohesion, or recency tie-breakers. Calorie-adjustment entries are ignored.
-Within each historical day, only entries whose logging time belongs to the
-current band are considered.
+Before 5:00 AM, dinner is the only active band. From 5:00 AM to 10:59 AM,
+breakfast is active. From 11:00 AM to 2:59 PM, lunch and breakfast are used,
+in that order. From 3:00 PM onward, dinner, lunch, and breakfast are used, in
+that order. Earlier bands are included only while there are no food entries in
+today's diary.
+
+Each selected band uses the 10 complete local calendar days immediately before
+today. Today is never part of historical counts, scores, combination cohesion,
+or recency tie-breakers. Calorie-adjustment entries are ignored. Within each
+historical day, only entries whose logging time belongs to that band are
+considered.
 
 ## Item identity
 
@@ -32,7 +40,7 @@ adds a stronger historical-confidence requirement:
 
 1. Magic checks all of today's diary entries, regardless of which time band
    they were logged in.
-2. For every matching item logged today, Magic looks in the active band's
+2. For every matching item logged today, Magic looks in the current band's
    10-day history.
 3. The item remains eligible only if at least one historical day contains two
    or more matching entries in that band.
@@ -63,13 +71,13 @@ matching entries is sufficient, although its singleton score is still based on
 one distinct day.
 
 A singleton's score is the number of distinct historical days on which the item
-appeared in the current band. Its most recent historical entry supplies the
+appeared in the selected band. Its most recent historical entry supplies the
 recency tie-breaker and the current display data.
 
 ## Set selection
 
 Magic considers sets of two and three distinct items. For every historical day,
-it takes the distinct items observed in the current band and generates all
+it takes the distinct items observed in the selected band and generates all
 two-item and three-item combinations. Items only need to occur on the same day
 and in the same band; they do not need to be adjacent or logged within a smaller
 minute interval.
@@ -91,14 +99,19 @@ does not create a saved meal or grouped diary object.
 
 ## Ranking and result limit
 
-Eligible singleton and set candidates share one ranking. Magic sorts them by:
+Within each band, singleton and set candidates share one ranking. Magic sorts
+them by:
 
 1. Score, highest first.
 2. Most recent qualifying historical observation, newest first.
 3. Item count, larger set first.
 4. Stable suggestion ID, ascending, for deterministic final ordering.
 
-Only the first four candidates are displayed.
+Magic merges band results by taking the highest-ranked suggestion from the
+current band, then each earlier band in order, and repeating that cycle until
+four suggestions are selected or all bands are empty. Duplicate suggestions
+shared by multiple bands appear once. This keeps the current period prominent
+while making room for routines from periods that have passed.
 
 ## UI refresh behavior
 

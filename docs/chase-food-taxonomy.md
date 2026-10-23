@@ -12,16 +12,16 @@ evaluate Chase Food on its own.
 
 The workbook is [Canonical U.S. Food Taxonomy — Review Draft](https://docs.google.com/spreadsheets/d/16Y1Uc0jldJ4tGO_vf5mgjT0n8pwJxO13W54zR5M_wWo/edit).
 The preceding [Canonical Food List Criteria conversation](https://chatgpt.com/share/6ace459c-9910-83e8-b7db-44bcaa4894be)
-provides the rationale and initial model. The current review dataset has 529
-catalog identities (494 search-enabled), 1,934 portion mappings, 1,220 alias
-records, 465 configurable options/components, 25 companion-food pairings, and
-28 presets. Portion and option amounts are first-pass estimates;
-nutrition values are matched from the bundled USDA/Open Food Facts catalog and
-still need review when confidence or preparation notes flag them. The
-2026-10-20 local revision adds a single Kebabs search identity with exclusive
+provides the rationale and initial model. The current review dataset has 532
+catalog identities (487 search-enabled), 1,934 portion mappings, 1,223 alias
+records, 494 configurable options/components, 25 companion-food pairings, and
+28 presets. Portion and option amounts are first-pass estimates; nutrition
+records include reviewed source portions, confidence, and preparation notes.
+The 2026-10-20 revision adds a single Kebabs search identity with exclusive
 lamb, chicken, and beef protein variants; the former Lamb kebab and Beef kebab
-IDs remain history-resolvable and serve as reusable variant components. Approved
-companion suggestions are separate foods logged independently. The generated
+IDs remain history-resolvable and serve as reusable variant components. The
+2026-10-23 revision adds nutrition evidence for 20 more searchable identities.
+Companion suggestions are separate foods logged independently. The generated
 review workbook is rebuilt from the same catalog projection.
 
 The [Bagel customization concept](chase-food-bagel-concept.pdf) documents the

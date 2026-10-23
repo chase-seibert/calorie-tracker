@@ -354,6 +354,64 @@ struct QuickLogSnapshot: Sendable {
             return MagicFoodSuggestionResult(suggestions: [], hasExcludedMatches: false)
         }
         let timeRange = MagicFoodTimeRange(date: referenceDate, calendar: calendar)
+        let hasLoggedToday = document.entries.contains { entry in
+            !entry.isCheatDayAdjustment
+                && calendar.isDate(entry.date, inSameDayAs: referenceDate)
+        }
+        let ranges: [MagicFoodTimeRange]
+        if hasLoggedToday {
+            ranges = [timeRange]
+        } else {
+            switch calendar.component(.hour, from: referenceDate) {
+            case 5..<11:
+                ranges = [.breakfast]
+            case 11..<15:
+                ranges = [.lunch, .breakfast]
+            case 15..<24:
+                ranges = [.dinner, .lunch, .breakfast]
+            default:
+                ranges = [.dinner]
+            }
+        }
+
+        let periodResults = ranges.map { range in
+            magicSuggestionResult(
+                for: range,
+                referenceDate: referenceDate,
+                lookbackDays: lookbackDays,
+                limit: limit
+            )
+        }
+        var suggestions: [MagicFoodSuggestion] = []
+        var seenSuggestionIDs = Set<String>()
+        var suggestionIndexes = Array(repeating: 0, count: periodResults.count)
+        while suggestions.count < limit {
+            var appendedSuggestion = false
+            for (resultIndex, result) in periodResults.enumerated() {
+                while suggestionIndexes[resultIndex] < result.suggestions.count {
+                    let suggestion = result.suggestions[suggestionIndexes[resultIndex]]
+                    suggestionIndexes[resultIndex] += 1
+                    guard seenSuggestionIDs.insert(suggestion.id).inserted else { continue }
+                    suggestions.append(suggestion)
+                    appendedSuggestion = true
+                    break
+                }
+                if suggestions.count == limit { break }
+            }
+            guard appendedSuggestion else { break }
+        }
+        return MagicFoodSuggestionResult(
+            suggestions: suggestions,
+            hasExcludedMatches: suggestions.isEmpty && periodResults.contains(where: \.hasExcludedMatches)
+        )
+    }
+
+    private func magicSuggestionResult(
+        for timeRange: MagicFoodTimeRange,
+        referenceDate: Date,
+        lookbackDays: Int,
+        limit: Int
+    ) -> MagicFoodSuggestionResult {
         let referenceDay = calendar.startOfDay(for: referenceDate)
         let cutoffDay = calendar.date(
             byAdding: .day,
