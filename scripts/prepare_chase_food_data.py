@@ -351,7 +351,7 @@ def main() -> int:
         })
     payload = {
         "schemaVersion": 1,
-        "datasetVersion": "chase-food-2026-10-23-31",
+        "datasetVersion": "chase-food-2026-10-23-32",
         "workbookTitle": f"Canonical U.S. Food Taxonomy — {len(output_foods)} Catalog Identities (Review Draft)",
         "workbookURL": "https://docs.google.com/spreadsheets/d/16Y1Uc0jldJ4tGO_vf5mgjT0n8pwJxO13W54zR5M_wWo/edit",
         "foods": output_foods,

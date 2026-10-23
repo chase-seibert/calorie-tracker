@@ -1961,7 +1961,7 @@
       "kind": "synonym"
     },
     {
-      "alias": "salmon, cooked",
+      "alias": "salmon",
       "foodID": "food_salmon_cooked",
       "kind": "canonical"
     },
@@ -2051,7 +2051,7 @@
       "kind": "synonym"
     },
     {
-      "alias": "shrimp, cooked",
+      "alias": "shrimp",
       "foodID": "food_shrimp_cooked",
       "kind": "canonical"
     },
@@ -2156,7 +2156,7 @@
       "kind": "synonym"
     },
     {
-      "alias": "scallops, cooked",
+      "alias": "scallops",
       "foodID": "food_scallops_cooked",
       "kind": "canonical"
     },
@@ -6046,6 +6046,21 @@
       "kind": "synonym"
     },
     {
+      "alias": "salmon, cooked",
+      "foodID": "food_salmon_cooked",
+      "kind": "synonym"
+    },
+    {
+      "alias": "scallops, cooked",
+      "foodID": "food_scallops_cooked",
+      "kind": "synonym"
+    },
+    {
+      "alias": "shrimp, cooked",
+      "foodID": "food_shrimp_cooked",
+      "kind": "synonym"
+    },
+    {
       "alias": "Five Guys",
       "foodID": "food_burger",
       "kind": "brand"
@@ -6615,7 +6630,7 @@
       "3"
     ]
   ],
-  "datasetVersion": "chase-food-2026-10-23-31",
+  "datasetVersion": "chase-food-2026-10-23-32",
   "foods": [
     {
       "aliases": [
@@ -37867,9 +37882,10 @@
     },
     {
       "aliases": [
-        "salmon, cooked",
+        "salmon",
         "grilled salmon",
-        "baked salmon"
+        "baked salmon",
+        "salmon, cooked"
       ],
       "baselineNutritionSource": {
         "matchBasis": "reviewed FDC record",
@@ -37885,7 +37901,7 @@
       "foodKind": "Recipe / assembled",
       "id": "food_salmon_cooked",
       "includedComponentsSummary": "None",
-      "name": "Salmon, cooked",
+      "name": "Salmon",
       "nutrients": {
         "calories": 465.8,
         "carbs": 0.02,
@@ -38710,8 +38726,9 @@
     },
     {
       "aliases": [
-        "scallops, cooked",
-        "seared scallops"
+        "scallops",
+        "seared scallops",
+        "scallops, cooked"
       ],
       "baselineNutritionSource": {
         "matchBasis": "reviewed FDC record",
@@ -38727,7 +38744,7 @@
       "foodKind": "Recipe / assembled",
       "id": "food_scallops_cooked",
       "includedComponentsSummary": "None",
-      "name": "Scallops, cooked",
+      "name": "Scallops",
       "nutrients": {
         "calories": 24.71,
         "carbs": 1.14,
@@ -39624,9 +39641,10 @@
     },
     {
       "aliases": [
-        "shrimp, cooked",
+        "shrimp",
         "boiled shrimp",
-        "peeled shrimp"
+        "peeled shrimp",
+        "shrimp, cooked"
       ],
       "baselineNutritionSource": {
         "matchBasis": "reviewed FDC record",
@@ -39642,7 +39660,7 @@
       "foodKind": "Reusable ingredient",
       "id": "food_shrimp_cooked",
       "includedComponentsSummary": "None",
-      "name": "Shrimp, cooked",
+      "name": "Shrimp",
       "nutrients": {
         "calories": 28.12,
         "carbs": 0.06,
@@ -52393,7 +52411,7 @@
     [
       "prt_food_salmon_cooked_default",
       "food_salmon_cooked",
-      "Salmon, cooked",
+      "Salmon",
       "1 fillet",
       "medium",
       "1",
@@ -52404,7 +52422,7 @@
     [
       "prt_food_salmon_cooked_small",
       "food_salmon_cooked",
-      "Salmon, cooked",
+      "Salmon",
       "1 small fillet",
       "small",
       "1",
@@ -52415,7 +52433,7 @@
     [
       "prt_food_salmon_cooked_large",
       "food_salmon_cooked",
-      "Salmon, cooked",
+      "Salmon",
       "1 large fillet",
       "large",
       "1",
@@ -52426,7 +52444,7 @@
     [
       "prt_food_salmon_cooked_oz",
       "food_salmon_cooked",
-      "Salmon, cooked",
+      "Salmon",
       "oz",
       "exact",
       "1",
@@ -52437,7 +52455,7 @@
     [
       "prt_food_salmon_cooked_g",
       "food_salmon_cooked",
-      "Salmon, cooked",
+      "Salmon",
       "g",
       "exact",
       "1",
@@ -52789,7 +52807,7 @@
     [
       "prt_food_shrimp_cooked_default",
       "food_shrimp_cooked",
-      "Shrimp, cooked",
+      "Shrimp",
       "1 oz",
       "standard",
       "1",
@@ -52800,7 +52818,7 @@
     [
       "prt_food_shrimp_cooked_g",
       "food_shrimp_cooked",
-      "Shrimp, cooked",
+      "Shrimp",
       "g",
       "exact",
       "1",
@@ -53207,7 +53225,7 @@
     [
       "prt_food_scallops_cooked_default",
       "food_scallops_cooked",
-      "Scallops, cooked",
+      "Scallops",
       "1 oz",
       "standard",
       "1",
@@ -53218,7 +53236,7 @@
     [
       "prt_food_scallops_cooked_g",
       "food_scallops_cooked",
-      "Scallops, cooked",
+      "Scallops",
       "g",
       "exact",
       "1",
@@ -67063,7 +67081,7 @@
     ],
     [
       "food_salmon_cooked",
-      "Salmon, cooked",
+      "Salmon",
       "food_olive_oil",
       "Olive oil",
       "1",
@@ -67076,7 +67094,7 @@
     ],
     [
       "food_salmon_cooked",
-      "Salmon, cooked",
+      "Salmon",
       "food_butter",
       "Butter",
       "2",
@@ -67089,7 +67107,7 @@
     ],
     [
       "food_salmon_cooked",
-      "Salmon, cooked",
+      "Salmon",
       "food_lemon",
       "Lemon",
       "3",

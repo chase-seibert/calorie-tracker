@@ -7598,14 +7598,14 @@
     ],
     [
       "food_salmon_cooked",
-      "Salmon, cooked",
+      "Salmon",
       "Seafood",
       "Recipe / assembled",
       "",
       "1 fillet",
       "170.0",
       "Yes",
-      "grilled salmon; baked salmon",
+      "salmon, cooked; grilled salmon; baked salmon",
       "Olive oil; Butter; Lemon",
       "Nutrition reviewed · Medium",
       "Catalog default 1 fillet (170.0 g); source basis: 1 small/regular fillet. Direct FNDDS baked-or-broiled salmon profile; species and fat content vary. USDA source fillet is 140 g and catalog serving is estimated at 170 g.",
@@ -7760,14 +7760,14 @@
     ],
     [
       "food_scallops_cooked",
-      "Scallops, cooked",
+      "Scallops",
       "Seafood",
       "Recipe / assembled",
       "",
       "1 oz",
       "28.4",
       "No",
-      "seared scallops",
+      "scallops, cooked; seared scallops",
       "",
       "Nutrition reviewed · Medium",
       "Catalog default 1 oz (28.4 g); source basis: 1 scallop. Direct FNDDS steamed-or-boiled scallops. Catalog one-ounce portion is scaled from the source 15 g scallop; cooking method and moisture vary.",
@@ -7922,14 +7922,14 @@
     ],
     [
       "food_shrimp_cooked",
-      "Shrimp, cooked",
+      "Shrimp",
       "Seafood",
       "Reusable ingredient",
       "",
       "1 oz",
       "28.4",
       "No",
-      "boiled shrimp; peeled shrimp",
+      "shrimp, cooked; boiled shrimp; peeled shrimp",
       "",
       "Nutrition reviewed · Medium",
       "Catalog default 1 oz (28.4 g); source basis: 1 3 oz. USDA SR Legacy cooked shrimp, broad preparation match. Species and cooking method vary; the record does not report fiber.",
@@ -17640,7 +17640,7 @@
     [
       "prt_food_salmon_cooked_default",
       "food_salmon_cooked",
-      "Salmon, cooked",
+      "Salmon",
       "1 fillet",
       "medium",
       "1",
@@ -17651,7 +17651,7 @@
     [
       "prt_food_salmon_cooked_small",
       "food_salmon_cooked",
-      "Salmon, cooked",
+      "Salmon",
       "1 small fillet",
       "small",
       "1",
@@ -17662,7 +17662,7 @@
     [
       "prt_food_salmon_cooked_large",
       "food_salmon_cooked",
-      "Salmon, cooked",
+      "Salmon",
       "1 large fillet",
       "large",
       "1",
@@ -17673,7 +17673,7 @@
     [
       "prt_food_salmon_cooked_oz",
       "food_salmon_cooked",
-      "Salmon, cooked",
+      "Salmon",
       "oz",
       "exact",
       "1",
@@ -17684,7 +17684,7 @@
     [
       "prt_food_salmon_cooked_g",
       "food_salmon_cooked",
-      "Salmon, cooked",
+      "Salmon",
       "g",
       "exact",
       "1",
@@ -18036,7 +18036,7 @@
     [
       "prt_food_shrimp_cooked_default",
       "food_shrimp_cooked",
-      "Shrimp, cooked",
+      "Shrimp",
       "1 oz",
       "standard",
       "1",
@@ -18047,7 +18047,7 @@
     [
       "prt_food_shrimp_cooked_g",
       "food_shrimp_cooked",
-      "Shrimp, cooked",
+      "Shrimp",
       "g",
       "exact",
       "1",
@@ -18454,7 +18454,7 @@
     [
       "prt_food_scallops_cooked_default",
       "food_scallops_cooked",
-      "Scallops, cooked",
+      "Scallops",
       "1 oz",
       "standard",
       "1",
@@ -18465,7 +18465,7 @@
     [
       "prt_food_scallops_cooked_g",
       "food_scallops_cooked",
-      "Scallops, cooked",
+      "Scallops",
       "g",
       "exact",
       "1",
@@ -33635,7 +33635,7 @@
       "Draft"
     ],
     [
-      "salmon, cooked",
+      "salmon",
       "food",
       "food_salmon_cooked",
       "Canonical",
@@ -33761,7 +33761,7 @@
       "Draft"
     ],
     [
-      "shrimp, cooked",
+      "shrimp",
       "food",
       "food_shrimp_cooked",
       "Canonical",
@@ -33908,7 +33908,7 @@
       "Draft"
     ],
     [
-      "scallops, cooked",
+      "scallops",
       "food",
       "food_scallops_cooked",
       "Canonical",
@@ -39541,6 +39541,27 @@
       "food_cold_breakfast_cereal",
       "Synonym",
       "Draft"
+    ],
+    [
+      "salmon, cooked",
+      "food",
+      "food_salmon_cooked",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "scallops, cooked",
+      "food",
+      "food_scallops_cooked",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "shrimp, cooked",
+      "food",
+      "food_shrimp_cooked",
+      "Synonym",
+      "Draft"
     ]
   ],
   "presets": [
@@ -41677,7 +41698,7 @@
     ],
     [
       "food_salmon_cooked",
-      "Salmon, cooked",
+      "Salmon",
       "food_olive_oil",
       "Olive oil",
       "1",
@@ -41690,7 +41711,7 @@
     ],
     [
       "food_salmon_cooked",
-      "Salmon, cooked",
+      "Salmon",
       "food_butter",
       "Butter",
       "2",
@@ -41703,7 +41724,7 @@
     ],
     [
       "food_salmon_cooked",
-      "Salmon, cooked",
+      "Salmon",
       "food_lemon",
       "Lemon",
       "3",
@@ -48397,7 +48418,7 @@
     ],
     [
       "food_salmon_cooked",
-      "Salmon, cooked",
+      "Salmon",
       "USDA FDC reviewed match",
       274.0,
       25.4,
@@ -48488,7 +48509,7 @@
     ],
     [
       "food_shrimp_cooked",
-      "Shrimp, cooked",
+      "Shrimp",
       "USDA FDC reviewed match",
       99.0,
       24.0,
@@ -48601,7 +48622,7 @@
     ],
     [
       "food_scallops_cooked",
-      "Scallops, cooked",
+      "Scallops",
       "USDA FDC reviewed match",
       87.0,
       15.2,
