@@ -13,14 +13,16 @@ evaluate Chase Food on its own.
 The workbook is [Canonical U.S. Food Taxonomy — Review Draft](https://docs.google.com/spreadsheets/d/16Y1Uc0jldJ4tGO_vf5mgjT0n8pwJxO13W54zR5M_wWo/edit).
 The preceding [Canonical Food List Criteria conversation](https://chatgpt.com/share/6ace459c-9910-83e8-b7db-44bcaa4894be)
 provides the rationale and initial model. The current review dataset has 532
-catalog identities (487 search-enabled), 1,934 portion mappings, 1,223 alias
-records, 494 configurable options/components, 25 companion-food pairings, and
+catalog identities (484 search-enabled), 1,934 portion mappings, 1,223 alias
+records, 492 configurable options/components, 27 companion-food pairings, and
 28 presets. Portion and option amounts are first-pass estimates; nutrition
 records include reviewed source portions, confidence, and preparation notes.
 The 2026-10-20 revision adds a single Kebabs search identity with exclusive
 lamb, chicken, and beef protein variants; the former Lamb kebab and Beef kebab
 IDs remain history-resolvable and serve as reusable variant components. The
-2026-10-23 revision adds nutrition evidence for 20 more searchable identities.
+2026-10-23 and 2026-10-24 revisions add nutrition evidence for 40 more
+identities; two October 24 foods now resolve to broader canonical foods while
+their original IDs remain history-resolvable.
 Companion suggestions are separate foods logged independently. The generated
 review workbook is rebuilt from the same catalog projection.
 
@@ -34,6 +36,15 @@ last updated September 15, 2026. Cookbook recipe titles should usually become
 search aliases, saved configurations, or reusable ingredients rather than
 separate canonical foods. The mapping below is a first editorial pass, not a
 claim that recipe nutrition is already measured.
+
+The October 24 review consolidated **Spaghetti with tomato sauce** under the
+configurable **Pasta with sauce** identity and **Spinach salad** under **Salad**.
+Their former IDs remain available for diary history, and their familiar names
+now search to the broader canonical foods. Spaghetti is an alias for Pasta with
+sauce; the cooked pasta is the base food, while sauce, cheese, meat, and other
+toppings are configurable options. Turkey meatballs are now an additional
+option. Sparkling water was removed from new search because it contributes no
+calories; its stable ID remains available for history.
 
 ## Product principles
 
@@ -207,8 +218,9 @@ Apply the relationship test to each parent food when curating additions:
   deltas. Current pairings include Burger with Fries and Milkshake, Sandwich with
   Chips, Taco and Hard-shell taco with Refried beans and Rice, Fried fish with
   Fries, Eggplant Parmesan with Pasta, Hummus with vegetable dippers, Kebabs
-  with Pita bread, Hummus, and Rice, Lo mein with Spring roll and Fried rice,
-  and Meatball sub with Fries, Salad, and Chips. Foods without a useful
+  with Pita bread, Hummus, and Rice, Steak with Mashed potatoes and White rice,
+  Lo mein with Spring roll and Fried rice, and Meatball sub with Fries, Salad,
+  and Chips. Foods without a useful
   companion recommendation keep no companion rows.
 
 Examples to guide future review, not blanket catalog assignments: extra cheese
@@ -219,8 +231,8 @@ it; syrup or berries can top Pancakes while eggs or sausage can accompany them;
 and salsa or cheese can configure Tacos while rice or beans can accompany
 them. Confirm each pairing with the food's intended use before adding catalog
 data. The pairings currently implemented also include Kebabs → Pita bread, Hummus,
-and Rice; Lo mein → Spring roll and Fried rice; and Meatball sub → Fries, Salad,
-and Chips. USDA Pork, carnitas → Mexican rice and Black beans remains a
+and Rice; Steak → Mashed potatoes and White rice; Lo mein → Spring roll and
+Fried rice; and Meatball sub → Fries, Salad, and Chips. USDA Pork, carnitas → Mexican rice and Black beans remains a
 source-qualified pairing.
 A companion parent may come from USDA or Chase Food; source-qualify non-Chase
 parent IDs so recommendations attach to the existing catalog identity without

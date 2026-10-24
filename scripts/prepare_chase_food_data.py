@@ -49,6 +49,12 @@ HISTORY_ONLY_FOODS = {
     "food_food_pizza_crust",
     "food_goldfish_crackers",
     "food_fried_chicken_sandwich",
+    # These narrower labels now resolve to their broader configurable foods;
+    # retain the former identities for diary history.
+    "food_spaghetti_with_tomato_sauce",
+    "food_spinach_salad",
+    # Zero-calorie beverage retired from discovery; keep its stable ID for history.
+    "food_sparkling_water",
     # Lamb and beef kebab histories resolve to their original records; new searches use Kebabs.
     "food_lamb_kebab",
     "food_beef_kebab",
@@ -351,7 +357,7 @@ def main() -> int:
         })
     payload = {
         "schemaVersion": 1,
-        "datasetVersion": "chase-food-2026-10-23-32",
+        "datasetVersion": "chase-food-2026-10-24-34",
         "workbookTitle": f"Canonical U.S. Food Taxonomy — {len(output_foods)} Catalog Identities (Review Draft)",
         "workbookURL": "https://docs.google.com/spreadsheets/d/16Y1Uc0jldJ4tGO_vf5mgjT0n8pwJxO13W54zR5M_wWo/edit",
         "foods": output_foods,

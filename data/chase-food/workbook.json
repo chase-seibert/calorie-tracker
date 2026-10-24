@@ -6309,13 +6309,13 @@
       "1 plate",
       "320.0",
       "Yes",
-      "penne pasta; penne marinara",
-      "",
+      "penne pasta; penne marinara; penne with sauce; pasta marinara; spaghetti with sauce; spaghetti with tomato sauce; spaghetti marinara; spaghetti and sauce",
+      "Marinara; Alfredo; Meat sauce; Meatballs; Sausage; Broccoli; Olive oil; Parmesan cheese; Ground beef, cooked; Turkey meatballs",
       "Draft",
       "Portion estimate; verify with FNDDS/label",
       "",
       "None",
-      "Marinara, Alfredo, Meat sauce, Meatballs, Sausage, Broccoli, Olive oil",
+      "Marinara, Alfredo, Meat sauce, Meatballs, Sausage, Broccoli, Olive oil, Parmesan cheese, Ground beef cooked, Turkey meatballs",
       "None"
     ],
     [
@@ -7569,7 +7569,7 @@
       "1 bowl",
       "180.0",
       "Yes",
-      "side salad; green salad; other salad; garden salad",
+      "side salad; green salad; other salad; garden salad; spinach salad; baby spinach salad",
       "Ranch dressing; Italian dressing; Balsamic vinaigrette; Croutons; Cheddar cheese",
       "Draft",
       "Portion estimate; verify with FNDDS/label",
@@ -8145,14 +8145,14 @@
       "1 plate",
       "330.0",
       "Yes",
-      "spaghetti marinara; spaghetti and sauce",
+      "",
       "Parmesan cheese; Meatballs; Ground beef, cooked",
       "Draft",
       "Portion estimate; verify with FNDDS/label",
       "",
       "None",
-      "Parmesan cheese, Meatballs, Ground beef cooked",
-      "Pasta cooked, Tomato pasta sauce"
+      "None",
+      "None"
     ],
     [
       "food_sparkling_water",
@@ -8163,7 +8163,7 @@
       "1 cup",
       "240.0",
       "No",
-      "seltzer; carbonated water",
+      "",
       "",
       "Draft",
       "Portion estimate; verify with FNDDS/label",
@@ -8181,7 +8181,7 @@
       "1 bowl",
       "180.0",
       "Yes",
-      "baby spinach salad",
+      "",
       "",
       "Draft",
       "Portion estimate; verify with FNDDS/label",
@@ -32417,27 +32417,6 @@
       "Draft"
     ],
     [
-      "spaghetti with tomato sauce",
-      "food",
-      "food_spaghetti_with_tomato_sauce",
-      "Canonical",
-      "Draft"
-    ],
-    [
-      "spaghetti marinara",
-      "food",
-      "food_spaghetti_with_tomato_sauce",
-      "Synonym",
-      "Draft"
-    ],
-    [
-      "spaghetti and sauce",
-      "food",
-      "food_spaghetti_with_tomato_sauce",
-      "Synonym",
-      "Draft"
-    ],
-    [
       "spaghetti with meat sauce",
       "food",
       "food_spaghetti_with_meat_sauce",
@@ -34618,20 +34597,6 @@
       "chef's salad",
       "food",
       "food_chef_salad",
-      "Synonym",
-      "Draft"
-    ],
-    [
-      "spinach salad",
-      "food",
-      "food_spinach_salad",
-      "Canonical",
-      "Draft"
-    ],
-    [
-      "baby spinach salad",
-      "food",
-      "food_spinach_salad",
       "Synonym",
       "Draft"
     ],
@@ -38094,27 +38059,6 @@
       "Draft"
     ],
     [
-      "sparkling water",
-      "food",
-      "food_sparkling_water",
-      "Canonical",
-      "Draft"
-    ],
-    [
-      "seltzer",
-      "food",
-      "food_sparkling_water",
-      "Synonym",
-      "Draft"
-    ],
-    [
-      "carbonated water",
-      "food",
-      "food_sparkling_water",
-      "Synonym",
-      "Draft"
-    ],
-    [
       "coffee",
       "food",
       "food_black_coffee",
@@ -39562,6 +39506,41 @@
       "food_shrimp_cooked",
       "Synonym",
       "Draft"
+    ],
+    [
+      "spaghetti with tomato sauce",
+      "food",
+      "food_penne_pasta_with_sauce",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "spaghetti marinara",
+      "food",
+      "food_penne_pasta_with_sauce",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "spaghetti and sauce",
+      "food",
+      "food_penne_pasta_with_sauce",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "spinach salad",
+      "food",
+      "food_garden_salad",
+      "Synonym",
+      "Draft"
+    ],
+    [
+      "baby spinach salad",
+      "food",
+      "food_garden_salad",
+      "Synonym",
+      "Draft"
     ]
   ],
   "presets": [
@@ -39984,26 +39963,6 @@
       "food_cream_cheese",
       "Cream cheese",
       "30",
-      "2",
-      "Example only: verify ingredient weight and cooking yield",
-      "Draft"
-    ],
-    [
-      "food_spaghetti_with_tomato_sauce",
-      "Spaghetti with tomato sauce",
-      "food_pasta_cooked",
-      "Pasta, cooked",
-      "200",
-      "1",
-      "Example only: verify ingredient weight and cooking yield",
-      "Draft"
-    ],
-    [
-      "food_spaghetti_with_tomato_sauce",
-      "Spaghetti with tomato sauce",
-      "food_tomato_pasta_sauce",
-      "Tomato pasta sauce",
-      "130",
       "2",
       "Example only: verify ingredient weight and cooking yield",
       "Draft"
@@ -41760,45 +41719,6 @@
       "",
       "",
       "16.0"
-    ],
-    [
-      "food_spaghetti_with_tomato_sauce",
-      "Spaghetti with tomato sauce",
-      "food_parmesan_cheese",
-      "Parmesan cheese",
-      "1",
-      "Suggested addition",
-      "No",
-      "Draft",
-      "",
-      "",
-      "5.0"
-    ],
-    [
-      "food_spaghetti_with_tomato_sauce",
-      "Spaghetti with tomato sauce",
-      "food_meatballs",
-      "Meatballs",
-      "2",
-      "Suggested addition",
-      "No",
-      "Draft",
-      "",
-      "",
-      "45.0"
-    ],
-    [
-      "food_spaghetti_with_tomato_sauce",
-      "Spaghetti with tomato sauce",
-      "food_ground_beef_cooked",
-      "Ground beef, cooked",
-      "3",
-      "Suggested addition",
-      "No",
-      "Draft",
-      "",
-      "",
-      "28.4"
     ],
     [
       "food_pasta_cooked",
@@ -46531,6 +46451,45 @@
       "Panini cheese",
       "exclusive",
       "28.4"
+    ],
+    [
+      "food_penne_pasta_with_sauce",
+      "Pasta with sauce",
+      "food_parmesan_cheese",
+      "Parmesan cheese",
+      "40",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "",
+      "",
+      "5.0"
+    ],
+    [
+      "food_penne_pasta_with_sauce",
+      "Pasta with sauce",
+      "food_ground_beef_cooked",
+      "Ground beef, cooked",
+      "41",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "",
+      "",
+      "28.4"
+    ],
+    [
+      "food_penne_pasta_with_sauce",
+      "Pasta with sauce",
+      "food_turkey_meatballs",
+      "Turkey meatballs",
+      "42",
+      "Suggested addition",
+      "No",
+      "Draft",
+      "",
+      "multiple",
+      "45.0"
     ]
   ],
   "nutritionProfiles": [
@@ -52461,6 +52420,20 @@
       "food_potato_chips",
       "Chips",
       "3"
+    ],
+    [
+      "food_steak",
+      "Steak",
+      "food_mashed_potatoes",
+      "Mashed potatoes",
+      "1"
+    ],
+    [
+      "food_steak",
+      "Steak",
+      "food_white_rice",
+      "White rice",
+      "2"
     ]
   ],
   "workbookTitle": "Canonical U.S. Food Taxonomy — 528 Catalog Identities (Review Draft)"
