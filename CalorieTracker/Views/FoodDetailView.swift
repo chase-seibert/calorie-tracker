@@ -559,42 +559,7 @@ struct FoodCustomizationView: View {
     }
 
     private func selectionPill(title: String, detail: String? = nil, isSelected: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 9) {
-                Circle()
-                    .fill(isSelected ? AppTheme.coral : AppTheme.muted.opacity(0.45))
-                    .frame(width: 10, height: 10)
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(title)
-                        .font(.subheadline.weight(isSelected ? .semibold : .regular))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.78)
-                    if let detail {
-                        Text(detail)
-                            .font(.caption)
-                            .foregroundStyle(isSelected ? AppTheme.coral : AppTheme.muted)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
-                    }
-                }
-                Spacer(minLength: 0)
-                if isSelected {
-                    Image(systemName: "checkmark")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(AppTheme.coral)
-                }
-            }
-            .padding(.horizontal, 12)
-            .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
-            .background(isSelected ? AppTheme.coral.opacity(0.13) : AppTheme.card, in: RoundedRectangle(cornerRadius: 16))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(isSelected ? AppTheme.coral : AppTheme.controlFill, lineWidth: 1.25))
-            .contentShape(RoundedRectangle(cornerRadius: 16))
-        }
-        .buttonStyle(.plain)
-        .foregroundStyle(AppTheme.ink)
-        .accessibilityLabel(title)
-        .accessibilityValue(detail.map { "\(isSelected ? "Selected" : "Not selected"), \($0)" } ?? (isSelected ? "Selected" : "Not selected"))
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        CustomizationSelectionPill(title: title, detail: detail, isSelected: isSelected, action: action)
     }
 
     private func loggedMeatToggle(
@@ -915,7 +880,10 @@ struct CustomizationScreen<Content: View, Quantity: View, MenuContent: View>: Vi
             ScrollView {
                 content().padding(.horizontal, 20).padding(.vertical, 20)
                     .frame(maxWidth: 620, alignment: .leading).frame(maxWidth: .infinity)
-            }.scrollIndicators(.hidden).accessibilityIdentifier("customization-content")
+            }
+            .frame(maxHeight: .infinity)
+            .scrollIndicators(.hidden)
+            .accessibilityIdentifier("customization-content")
             footer
         }
         .background(AppTheme.background.ignoresSafeArea())
@@ -1056,6 +1024,52 @@ private struct CustomizationSummary<MenuContent: View>: View {
 
 }
 
+struct CustomizationSelectionPill: View {
+    let title: String
+    let detail: String?
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 9) {
+                Circle()
+                    .fill(isSelected ? AppTheme.coral : AppTheme.muted.opacity(0.45))
+                    .frame(width: 10, height: 10)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(.subheadline.weight(isSelected ? .semibold : .regular))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.78)
+                    if let detail {
+                        Text(detail)
+                            .font(.caption)
+                            .foregroundStyle(isSelected ? AppTheme.coral : AppTheme.muted)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                    }
+                }
+                Spacer(minLength: 0)
+                if isSelected {
+                    Image(systemName: "checkmark")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(AppTheme.coral)
+                }
+            }
+            .padding(.horizontal, 12)
+            .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
+            .background(isSelected ? AppTheme.coral.opacity(0.13) : AppTheme.card, in: RoundedRectangle(cornerRadius: 16))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(isSelected ? AppTheme.coral : AppTheme.controlFill, lineWidth: 1.25))
+            .contentShape(RoundedRectangle(cornerRadius: 16))
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(AppTheme.ink)
+        .accessibilityLabel(title)
+        .accessibilityValue(detail.map { "\(isSelected ? "Selected" : "Not selected"), \($0)" } ?? (isSelected ? "Selected" : "Not selected"))
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+}
+
 
 /// Food extras and meal ingredients share editing, removal and ordering affordances.
 struct CustomizationIngredients: View {
@@ -1142,6 +1156,17 @@ struct CustomizationEvidenceView: View {
                 MealItem(id: UUID(), food: custom, amount: 1, unit: .serving, portionID: "imported-serving")],
             notes: "A mixed-source meal: USDA fruit, packaged yogurt and a custom recipe.")
     }
+    private var longMeal: SavedMeal {
+        let items = (1...12).map { index in
+            let food = Food(sourceID: "scroll-ingredient-\(index)", source: .custom,
+                name: "Scroll ingredient \(index)", brand: nil, barcode: nil,
+                nutrients: MacroNutrients(calories: 40, carbs: 6, fat: 1, protein: 2),
+                baseAmountGrams: 100, servingGrams: 100, servingDescription: "1 serving")
+            return MealItem(id: UUID(), food: food, amount: 1, unit: .serving)
+        }
+        return SavedMeal(id: UUID(uuidString: "24400000-0000-4000-8000-000000000001")!,
+            name: "Long scrolling meal", items: items, notes: "A long meal for scroll and swipe coverage.")
+    }
     private var file: CustomMealFile {
         CustomMealFile(format: CustomMealFile.formatIdentifier, version: 1, name: "Reviewed breakfast bowl",
             foods: [definition,
@@ -1164,6 +1189,25 @@ struct CustomizationEvidenceView: View {
     private func entry(_ food: Food, amount: Double = 1, unit: LogUnit = .serving, portion: String? = nil) -> DiaryEntry {
         DiaryEntry(id: UUID(), date: date, food: food, amount: amount, unit: unit,
             nutrients: food.nutrients(for: amount, unit: unit, portionID: portion), loggedAt: date, portionID: portion)
+    }
+    private var longMealView: some View {
+        mealView(longMeal)
+    }
+    private var shortMealView: some View {
+        var meal = longMeal
+        meal.items = Array(meal.items.prefix(1))
+        meal.name = "Short scrolling meal"
+        meal.notes = nil
+        return mealView(meal)
+    }
+    private func mealView(_ meal: SavedMeal) -> some View {
+        let food = Food(sourceID: "task244-long-meal", source: .custom, name: meal.name, brand: nil,
+            barcode: nil, nutrients: meal.nutrients, baseAmountGrams: 1, servingGrams: 1,
+            servingDescription: "1 meal")
+        var logged = entry(food)
+        logged.mealItems = meal.items
+        logged.mealNotes = meal.notes
+        return MealDetailView(context: .logged(logged), catalog: catalog)
     }
     static func document(catalog: CatalogStore) -> DiaryDocument {
         let fixture = Self(route: "", catalog: catalog)
@@ -1201,6 +1245,8 @@ struct CustomizationEvidenceView: View {
         case "yum-chase-configured-log": FoodDetailView(food: sandwich, catalog: catalog, date: date, initialConfiguration: configuration)
         case "custom-food-log": FoodDetailView(food: custom, catalog: catalog, date: date)
         case "saved-meal-log": MealDetailView(context: .log(meal, date, { _, _ in }), catalog: catalog)
+        case "long-meal-scroll": longMealView
+        case "short-meal-scroll": shortMealView
         case "imported-meal-review": MealDetailView(context: .imported(file, date, .fileImport, nil), catalog: catalog)
         case "photo-meal-review": MealDetailView(context: .imported(file, date, .openAIAnalysis, nil), catalog: catalog)
         case "usda-portioned-edit": FoodDetailView(entry: entry(plum, portion: "306269"), catalog: catalog)

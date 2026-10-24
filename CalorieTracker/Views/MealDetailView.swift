@@ -16,14 +16,11 @@ struct MealDetailView: View {
     private let initialItems: [MealItem]
     @State private var name: String
     @State private var items: [MealItem]
+    @State private var selectedItemIDs: Set<UUID>
     @State private var amount: Double
     @State private var processed: Bool?
     @State private var red: Bool?
     @State private var showingSearch = false
-    @State private var editingQuantityItem: MealItem?
-    @State private var editingFoodItem: MealItem?
-    @State private var pendingRemoval: MealItem?
-    @State private var openSwipeRowID: UUID?
     @State private var showingNameEditor = false
     @State private var saveForReuse = false
     @State private var isCommitting = false
@@ -45,6 +42,7 @@ struct MealDetailView: View {
         }
         initialItems = meal.items
         _name = State(initialValue: meal.name); _items = State(initialValue: meal.items)
+        _selectedItemIDs = State(initialValue: Set(meal.items.map(\.id)))
         _amount = State(initialValue: amount)
         _processed = State(initialValue: meal.containsProcessedMeat); _red = State(initialValue: meal.containsRedMeat)
     }
@@ -82,21 +80,22 @@ struct MealDetailView: View {
         }
     }
     private var scaledItems: [MealItem] {
-        if case .logged(let entry) = context, items == initialItems, amount == entry.amount {
+        if case .logged(let entry) = context, selectedItems == initialItems, amount == entry.amount {
             return entry.mealItems ?? []
         }
-        return items.map { var item = $0; item.amount *= amount; return item }
+        return selectedItems.map { var item = $0; item.amount *= amount; return item }
     }
+    private var selectedItems: [MealItem] { items.filter { selectedItemIDs.contains($0.id) } }
     private var totals: MacroNutrients {
-        if case .logged(let entry) = context, items == initialItems {
+        if case .logged(let entry) = context, selectedItems == initialItems {
             return entry.nutrients.scaled(by: amount / max(entry.amount, 0.001))
         }
         return scaledItems.reduce(.zero) { $0 + $1.food.nutrients(for: $1.amount, unit: $1.unit, portionID: $1.portionID) }
     }
     private var canSave: Bool {
         !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && name.count <= 120
-            && amount.isFinite && amount > 0 && !items.isEmpty && items.count <= 50
-            && items.allSatisfy { $0.amount.isFinite && $0.amount > 0 }
+            && amount.isFinite && amount > 0 && !selectedItems.isEmpty && selectedItems.count <= 50
+            && selectedItems.allSatisfy { $0.amount.isFinite && $0.amount > 0 }
     }
     private var excludedMealIDs: Set<UUID> {
         switch context {
@@ -134,49 +133,16 @@ struct MealDetailView: View {
                         if case .logged = context { Text("Changes apply to this logged entry only.").font(.caption).foregroundStyle(AppTheme.muted) }
                     }
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("FOODS PER MEAL").font(.caption.weight(.bold)).foregroundStyle(AppTheme.muted)
-                        VStack(spacing: 12) {
-                            ForEach($items) { item in
-                                ZStack(alignment: .trailing) {
-                                    Button {
-                                        pendingRemoval = item.wrappedValue
-                                        openSwipeRowID = nil
-                                    } label: {
-                                        Label("Delete", systemImage: "trash")
-                                            .font(.subheadline.weight(.semibold))
-                                            .foregroundStyle(.white)
-                                            .frame(width: 82).frame(maxHeight: .infinity)
-                                            .background(Color.red, in: RoundedRectangle(cornerRadius: 14))
-                                    }
-                                    .accessibilityIdentifier("meal-component-delete-" + item.wrappedValue.food.sourceID)
-                                    .opacity(openSwipeRowID == item.wrappedValue.id ? 1 : 0)
-                                    .allowsHitTesting(openSwipeRowID == item.wrappedValue.id)
-                                    .zIndex(openSwipeRowID == item.wrappedValue.id ? 1 : -1)
-
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        MealItemRow(item: item.wrappedValue)
-                                        Button("Customize") { customizeMealItem(item.wrappedValue) }
-                                            .font(.subheadline.weight(.semibold)).underline().foregroundStyle(AppTheme.coral)
-                                            .accessibilityIdentifier("meal-component-edit-" + item.wrappedValue.food.sourceID)
-                                    }
-                                    .padding(16)
-                                    .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 16))
-                                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppTheme.controlFill, lineWidth: 1))
-                                    .offset(x: openSwipeRowID == item.wrappedValue.id ? -90 : 0)
-                                    .zIndex(openSwipeRowID == item.wrappedValue.id ? 0 : 1)
-                                    .contentShape(RoundedRectangle(cornerRadius: 16))
-                                }
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .accessibilityElement(children: .contain)
-                                .accessibilityIdentifier("meal-component-row-" + item.wrappedValue.food.sourceID)
-                                .simultaneousGesture(DragGesture(minimumDistance: 10).onChanged { value in
-                                    guard abs(value.translation.width) > abs(value.translation.height) else { return }
-                                    if value.translation.width < -45 {
-                                        withAnimation(.easeOut(duration: 0.18)) { openSwipeRowID = item.wrappedValue.id }
-                                    } else if value.translation.width > 35 {
-                                        withAnimation(.easeOut(duration: 0.18)) { openSwipeRowID = nil }
-                                    }
-                                })
+                        Text("Foods for this meal").font(.caption.weight(.bold)).foregroundStyle(AppTheme.muted)
+                        LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+                            ForEach(items) { item in
+                                CustomizationSelectionPill(
+                                    title: item.food.name,
+                                    detail: "\(Int(item.food.nutrients(for: item.amount, unit: item.unit, portionID: item.portionID).calories.rounded())) kcal",
+                                    isSelected: selectedItemIDs.contains(item.id),
+                                    action: { toggleItem(item.id) }
+                                )
+                                .accessibilityIdentifier("meal-food-option-" + item.id.uuidString)
                             }
                         }
                         Button { showingSearch = true } label: {
@@ -201,32 +167,11 @@ struct MealDetailView: View {
             }
             .sheet(isPresented: $showingSearch) {
                 FoodPickerView(date: targetDate, catalog: catalog, componentSelection: ComponentSelectionContext(
-                    excludedMealIDs: excludedMealIDs, onSelect: { items += $0 }))
+                    excludedMealIDs: excludedMealIDs, onSelect: addItems))
             }
             .sheet(isPresented: $showingNameEditor) {
                 CustomizationNameEditor(name: name, title: "Edit meal name") { name = $0 }
             }
-            .sheet(item: $editingQuantityItem) { item in
-                MealComponentQuantityEditor(item: item) { updated in
-                    if let index = items.firstIndex(where: { $0.id == item.id }) { items[index] = updated }
-                    editingQuantityItem = nil
-                }
-            }
-            .fullScreenCover(item: $editingFoodItem) { item in
-                FoodDetailView(item: item, catalog: catalog, date: targetDate) { result in
-                    if let index = items.firstIndex(where: { $0.id == item.id }) { items[index] = result }
-                    editingFoodItem = nil
-                }
-            }
-            .alert("Remove \(pendingRemoval?.food.name ?? "food")?", isPresented: Binding(
-                get: { pendingRemoval != nil }, set: { if !$0 { pendingRemoval = nil } })) {
-                Button("Remove", role: .destructive) {
-                    guard let item = pendingRemoval else { return }
-                    items.removeAll { $0.id == item.id }
-                    pendingRemoval = nil
-                }
-                Button("Cancel", role: .cancel) { pendingRemoval = nil }
-            } message: { Text("This food will be removed from this meal when you save.") }
         }
         .draftSaveError()
     }
@@ -241,9 +186,13 @@ struct MealDetailView: View {
     }
     private var isTemplate: Bool { if case .template = context { return true }; return false }
 
-    private func customizeMealItem(_ item: MealItem) {
-        if case .imported = context { editingFoodItem = item }
-        else { editingQuantityItem = item }
+    private func toggleItem(_ id: UUID) {
+        if selectedItemIDs.contains(id) { selectedItemIDs.remove(id) }
+        else { selectedItemIDs.insert(id) }
+    }
+    private func addItems(_ newItems: [MealItem]) {
+        items += newItems
+        selectedItemIDs.formUnion(newItems.map(\.id))
     }
 
     private var favoriteMeal: SavedMeal? {
@@ -254,7 +203,7 @@ struct MealDetailView: View {
         }
     }
     private func classification(_ override: KeyPath<MealItem, Bool?>, food: KeyPath<Food, Bool?>) -> Bool? {
-        let values = items.map { $0[keyPath: override] ?? $0.food[keyPath: food] }
+        let values = selectedItems.map { $0[keyPath: override] ?? $0.food[keyPath: food] }
         if values.contains(true) { return true }
         return values.allSatisfy { $0 == false } ? false : nil
     }
@@ -277,23 +226,23 @@ struct MealDetailView: View {
                 try await diary.updateMealDraft(original: entry, name: name, amount: amount, items: scaledItems, processed: processed, red: red)
             case .template(let meal):
                 if let meal {
-                    guard try await diary.updateSavedMeal(mealID: meal.id, name: name, items: items,
+                    guard try await diary.updateSavedMeal(mealID: meal.id, name: name, items: selectedItems,
                         meatOverrides: FoodMeatOverrides(processed: processed, red: red)) else { throw FoodDraftError.missingEntry }
                 } else {
-                    guard try await diary.saveMeal(name: name, items: items, containsProcessedMeat: processed, containsRedMeat: red) != nil
+                    guard try await diary.saveMeal(name: name, items: selectedItems, containsProcessedMeat: processed, containsRedMeat: red) != nil
                     else { throw FoodDraftError.invalidDraft }
                 }
             case .log(let original, let date, let onLogged):
-                if name == original.name && items == original.items && processed == original.containsProcessedMeat && red == original.containsRedMeat {
+                if name == original.name && selectedItems == original.items && processed == original.containsProcessedMeat && red == original.containsRedMeat {
                     try await diary.logMeal(original, amount: amount, on: date, allowCheatDay: true)
                 } else {
-                    let meal = SavedMeal(id: UUID(), name: name, items: items,
+                    let meal = SavedMeal(id: UUID(), name: name, items: selectedItems,
                         containsProcessedMeat: processed, containsRedMeat: red, notes: notes)
                     _ = try await diary.logImportedMeal(meal, saveForReuse: false, amount: amount, on: date, allowCheatDay: true)
                 }
                 onLogged(QuantityPreference(amount: amount, unit: .serving), nil)
             case .imported(_, let date, let source, let onLogged):
-                let meal = SavedMeal(id: UUID(), name: name, items: items,
+                let meal = SavedMeal(id: UUID(), name: name, items: selectedItems,
                     containsProcessedMeat: processed, containsRedMeat: red, origin: .imported, notes: notes)
                 let logged = try await diary.logImportedMeal(meal, saveForReuse: saveForReuse, amount: amount, on: date, allowCheatDay: true)
                 AppAnalytics.capture("food_log.completed", properties: FoodLogAnalytics.mealProperties(meal: logged,

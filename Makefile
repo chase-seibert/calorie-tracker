@@ -22,7 +22,7 @@ OFF_PAGES ?= 10
 DEBUG_CATALOG_DIR := data/work/catalogs
 DEBUG_REPORT_DIR := data/work/catalog-reports
 
-.PHONY: setup format lint simulator-ready test ui-test-reorder ui-test-fixture build clean catalog catalog-refresh catalog-grouped-report catalog-family-report catalog-debug-off-search-10000 catalog-debug-gap catalog-debug-report catalog-debug sim-compile sim-build sim-runtime-build sim-launch sim-import-fixture phone-build phone-install phone-launch phone-deploy phone-siri-logs phone-diary-performance-logs phone-wifi-check phone-wifi-deploy chase-food-data chase-food-review chase-food-bagel-pdf
+.PHONY: setup format lint simulator-ready test ui-test-reorder ui-test-fixture ui-test-meal-scroll build clean catalog catalog-refresh catalog-grouped-report catalog-family-report catalog-debug-off-search-10000 catalog-debug-gap catalog-debug-report catalog-debug sim-compile sim-build sim-runtime-build sim-launch sim-import-fixture phone-build phone-install phone-launch phone-deploy phone-siri-logs phone-diary-performance-logs phone-wifi-check phone-wifi-deploy chase-food-data chase-food-review chase-food-bagel-pdf
 
 setup: catalog
 
@@ -57,6 +57,9 @@ ui-test-duplicate-today: simulator-ready
 
 ui-test-fixture: simulator-ready
 	xcodebuild -project $(PROJECT) -scheme CalorieTrackerUITests -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -destination-timeout $(SIMULATOR_DESTINATION_TIMEOUT) -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -collect-test-diagnostics $(TEST_DIAGNOSTICS) -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testDeviceFixtureShowsRelativeDays test
+
+ui-test-meal-scroll: simulator-ready
+	xcodebuild -project $(PROJECT) -scheme CalorieTrackerUITests -configuration $(CONFIGURATION) -destination '$(SIM_DESTINATION)' -destination-timeout $(SIMULATOR_DESTINATION_TIMEOUT) -derivedDataPath $(DERIVED_DATA) CODE_SIGNING_ALLOWED=NO -collect-test-diagnostics $(TEST_DIAGNOSTICS) -only-testing:CalorieTrackerUITests/DeviceFixtureUITests/testLongMealScrollsBetweenPinnedSummaryAndQuantityFooter test
 
 .PHONY: ui-test-snacks
 ui-test-snacks: simulator-ready

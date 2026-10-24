@@ -388,22 +388,17 @@ final class DeviceFixtureUITests: XCTestCase {
         XCTAssertEqual(mealName.value as? String, "Chili, no rice")
         app.buttons["customization-name-save"].tap()
         XCTAssertTrue(app.buttons["meal-detail-save"].waitForExistence(timeout: 3))
-        let componentCustomize = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'meal-component-edit-'" )).firstMatch
-        XCTAssertTrue(componentCustomize.waitForExistence(timeout: 3))
-        componentCustomize.tap()
-        XCTAssertTrue(app.textFields["meal-component-quantity-value"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.buttons["meal-component-quantity-save"].exists)
-        app.buttons["Cancel"].tap()
-        XCTAssertTrue(app.buttons["meal-detail-save"].waitForExistence(timeout: 3))
-        let ingredientRow = app.descendants(matching: .any).matching(NSPredicate(format: "identifier BEGINSWITH 'meal-component-row-'" )).firstMatch
-        XCTAssertTrue(ingredientRow.waitForExistence(timeout: 3))
-        ingredientRow.swipeLeft()
-        let deleteIngredient = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'meal-component-delete-'" )).firstMatch
-        XCTAssertTrue(deleteIngredient.waitForExistence(timeout: 3))
-        XCTAssertTrue(deleteIngredient.isHittable, "Swipe left should reveal the ingredient delete button")
-        deleteIngredient.tap()
-        XCTAssertTrue(app.buttons["Remove"].waitForExistence(timeout: 3))
-        app.buttons["Cancel"].tap()
+        let mealFoods = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'meal-food-option-'"))
+        XCTAssertGreaterThan(mealFoods.count, 0)
+        let firstMealFood = mealFoods.firstMatch
+        XCTAssertTrue(firstMealFood.isSelected)
+        firstMealFood.tap()
+        XCTAssertFalse(firstMealFood.isSelected, "Meal foods should toggle off using the shared selection-pill pattern.")
+        firstMealFood.tap()
+        XCTAssertTrue(firstMealFood.isSelected)
+        let originalMealFoodCount = mealFoods.count
+        XCTAssertFalse(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'meal-component-edit-'" )).firstMatch.exists,
+            "Meal food units are changed by adding a different food selection.")
         XCTAssertTrue(app.buttons["meal-detail-save"].waitForExistence(timeout: 3))
         for _ in 0..<5 where !app.buttons["meal-detail-add-food"].isHittable { scrollCustomizationBody() }
         XCTAssertTrue(app.buttons["meal-detail-add-food"].waitForExistence(timeout: 3))
@@ -414,10 +409,7 @@ final class DeviceFixtureUITests: XCTestCase {
         XCTAssertTrue(sandwich.waitForExistence(timeout: 5)); sandwich.tap()
         XCTAssertTrue(app.buttons["Add to parent"].waitForExistence(timeout: 3))
         app.buttons["Add to parent"].tap()
-        XCTAssertTrue(app.buttons["meal-component-edit-food_sandwich"].waitForExistence(timeout: 5))
-        app.buttons["meal-component-edit-food_sandwich"].tap()
-        XCTAssertTrue(app.textFields["meal-component-quantity-value"].waitForExistence(timeout: 3))
-        app.buttons["meal-component-quantity-save"].tap()
+        XCTAssertEqual(mealFoods.count, originalMealFoodCount + 1)
         XCTAssertTrue(app.buttons["meal-detail-save"].waitForExistence(timeout: 3))
         visibleButton("custom-food-back").tap()
         XCTAssertTrue(meal.waitForExistence(timeout: 5))
@@ -426,11 +418,61 @@ final class DeviceFixtureUITests: XCTestCase {
         XCTAssertTrue(app.buttons["meal-detail-save"].waitForExistence(timeout: 3))
         for _ in 0..<5 where !app.buttons["meal-detail-add-food"].isHittable { scrollCustomizationBody() }
         XCTAssertTrue(app.buttons["meal-detail-add-food"].exists)
-        XCTAssertFalse(app.buttons["meal-component-edit-food_sandwich"].exists)
+        XCTAssertFalse(app.buttons.matching(NSPredicate(format: "label == 'Sandwich'" )).firstMatch.exists,
+            "Leaving the parent meal without saving should discard the newly added food.")
         let attachment = XCTAttachment(screenshot: app.screenshot())
         attachment.name = "Logged meal — Shared composition"
         attachment.lifetime = .keepAlways; add(attachment)
         visibleButton("custom-food-back").tap()
+    }
+
+    func testLongMealScrollsBetweenPinnedSummaryAndQuantityFooter() {
+        app.launchArguments = ["-onboarding.focus.v1.completed", "YES"]
+        app.launchEnvironment = ["CALORIE_TRACKER_CUSTOMIZATION_EVIDENCE": "long-meal-scroll"]
+        app.launch()
+
+        let body = app.scrollViews["customization-content"]
+        XCTAssertTrue(body.waitForExistence(timeout: 10))
+        let save = app.buttons["meal-detail-save"]
+        let quantity = app.textFields["meal-detail-quantity"]
+        XCTAssertTrue(waitUntil(timeout: 5) { save.isHittable && quantity.isHittable })
+
+        let mealFoods = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'meal-food-option-'"))
+        let firstFood = mealFoods.firstMatch
+        XCTAssertTrue(firstFood.waitForExistence(timeout: 5))
+        firstFood.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            .press(forDuration: 0.05, thenDragTo: body.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.12)))
+
+        let lastFood = mealFoods.element(boundBy: 11)
+        for _ in 0..<8 where !lastFood.isHittable { scrollCustomizationBody() }
+        XCTAssertTrue(lastFood.waitForExistence(timeout: 3))
+        XCTAssertTrue(lastFood.isHittable, "Vertical drags over meal food pills should reach the final ingredient.")
+        let addFood = app.buttons["meal-detail-add-food"]
+        let meatTracking = app.staticTexts["MEAT TRACKING"]
+        for _ in 0..<5 where !addFood.isHittable { scrollCustomizationBody() }
+        XCTAssertTrue(addFood.isHittable, "The Add Food control should be reachable below a long ingredient list.")
+        for _ in 0..<5 where !meatTracking.isHittable { scrollCustomizationBody() }
+        XCTAssertTrue(meatTracking.isHittable, "Meat tracking should be reachable below the ingredient list.")
+        XCTAssertTrue(save.isHittable, "The save action stays pinned while meal contents scroll.")
+        XCTAssertTrue(quantity.isHittable, "The quantity control stays pinned while meal contents scroll.")
+
+        for _ in 0..<8 where !firstFood.isHittable { body.swipeDown() }
+        XCTAssertTrue(firstFood.isHittable, "The meal scroll region should return to the first ingredient.")
+        XCTAssertTrue(firstFood.isSelected)
+        firstFood.tap()
+        XCTAssertFalse(firstFood.isSelected)
+        firstFood.tap()
+        XCTAssertTrue(firstFood.isSelected)
+        XCTAssertTrue(save.isHittable)
+
+        app.terminate()
+        app.launchEnvironment = ["CALORIE_TRACKER_CUSTOMIZATION_EVIDENCE": "short-meal-scroll"]
+        app.launch()
+        XCTAssertTrue(app.scrollViews["customization-content"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["meal-detail-add-food"].isHittable,
+            "The short meal form should fit without requiring a scroll.")
+        XCTAssertTrue(app.buttons["meal-detail-save"].isHittable)
+        XCTAssertTrue(app.textFields["meal-detail-quantity"].isHittable)
     }
 
     func testMixedCatalogCustomizationAndScreenshotMatrix() {
@@ -523,15 +565,17 @@ final class DeviceFixtureUITests: XCTestCase {
         }
         launch(); open("Yogurt, fruit and oats", id: "customize-meal-19600000-0000-4000-8000-000000000001")
         XCTAssertFalse(app.buttons["customization-edit-title"].exists, "The title should use Rename in the actions menu")
-        XCTAssertFalse(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'meal-component-delete-'" )).firstMatch.isHittable,
-            "Meal ingredient deletion should be revealed by swiping the row")
+        XCTAssertGreaterThan(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'meal-food-option-'" )).count, 0)
         capture("saved-meal-log"); scrollCustomizationBody(); capture("saved-meal-log-scrolled")
         for route in ["imported-meal-review", "photo-meal-review"] {
             launch(route); capture(route)
-            let child = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'meal-component-edit-'")).firstMatch
-            XCTAssertTrue(child.waitForExistence(timeout: 3)); child.tap()
-            XCTAssertTrue(app.buttons["Use changes"].waitForExistence(timeout: 3)); capture(route + "-child")
-            visibleButton("custom-food-back").tap()
+            let importedFood = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'meal-food-option-'")).firstMatch
+            XCTAssertTrue(importedFood.waitForExistence(timeout: 3))
+            XCTAssertTrue(importedFood.isSelected)
+            importedFood.tap()
+            XCTAssertFalse(importedFood.isSelected)
+            importedFood.tap()
+            XCTAssertTrue(importedFood.isSelected)
             XCTAssertTrue(app.switches["Save to Saved meals"].exists)
             capture(route + "-scrolled")
         }
