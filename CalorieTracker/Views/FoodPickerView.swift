@@ -107,6 +107,11 @@ struct FoodPickerView: View {
                                 finishSearchAttempt(recordNothingSelected: false)
                                 showingCustomFoodEditor = true
                             },
+                            onEstimateWithAI: {
+                                searchIsFocused = false
+                                showingMealAnalysis = true
+                                AppAnalytics.capture("food_picker.ai_estimate_selected")
+                            },
                             onSuggestCanonical: { showingFoodSuggestionEditor = true },
                             componentMode: componentSelection != nil
                         )
@@ -254,10 +259,14 @@ struct FoodPickerView: View {
                 )
             }
             .sheet(isPresented: $showingMealAnalysis) {
-                MealAnalysisView(targetDate: date) {
+                MealAnalysisView(
+                    targetDate: date,
+                    initialDescription: query.trimmingCharacters(in: .whitespacesAndNewlines)
+                ) {
                     finishSearchAttempt()
                     dismiss()
                 }
+                .id(query.trimmingCharacters(in: .whitespacesAndNewlines))
                 .environmentObject(diary)
             }
             .task {
@@ -1156,6 +1165,7 @@ private struct SearchResultsList: View {
     let onHideFood: (Food) -> Void
     let savedConfigurationIDsByFood: [String: [UUID]]
     let onAddCustomFood: () -> Void
+    let onEstimateWithAI: () -> Void
     let onSuggestCanonical: () -> Void
     var componentMode = false
     @State private var foodToHide: Food?
@@ -1172,10 +1182,16 @@ private struct SearchResultsList: View {
                     .controlSize(.large)
                     .frame(maxWidth: .infinity)
                     .padding(.top, 28)
-                if !componentMode { Button("Suggest a canonical food", systemImage: "lightbulb", action: onSuggestCanonical)
-                    .buttonStyle(.bordered)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 10) }
+                if !componentMode {
+                    Button("Estimate with AI", systemImage: "sparkles", action: onEstimateWithAI)
+                        .buttonStyle(.borderedProminent)
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 10)
+                    Button("Suggest a canonical food", systemImage: "lightbulb", action: onSuggestCanonical)
+                        .buttonStyle(.bordered)
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 10)
+                }
             }
             .padding(.horizontal, 24)
             .frame(maxWidth: .infinity, maxHeight: .infinity)

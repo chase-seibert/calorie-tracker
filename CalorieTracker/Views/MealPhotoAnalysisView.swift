@@ -32,6 +32,7 @@ struct MealAnalysisView: View {
 
     init(
         targetDate: Date,
+        initialDescription: String? = nil,
         onLogged: @escaping () -> Void,
         analysisClient: any MealAnalysisClient = OpenAIMealAnalysisClient(),
         credentialStore: any OpenAICredentialStoring = OpenAICredentialStore.shared
@@ -40,6 +41,7 @@ struct MealAnalysisView: View {
         self.onLogged = onLogged
         self.analysisClient = analysisClient
         self.credentialStore = credentialStore
+        _mealDescription = State(initialValue: initialDescription?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "")
     }
 
     var body: some View {

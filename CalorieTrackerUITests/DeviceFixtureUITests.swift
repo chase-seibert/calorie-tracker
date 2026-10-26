@@ -85,6 +85,33 @@ final class DeviceFixtureUITests: XCTestCase {
         XCTAssertTrue(app.buttons["customize-food-chaseFood:food_sandwich"].waitForExistence(timeout: 10))
     }
 
+    func testNoResultSearchCanOpenPrefilledAIEstimate() {
+        let query = "unlisted dragonfruit snack"
+        app.launchArguments = [
+            "--show-food-search",
+            "-onboarding.focus.v1.completed", "YES"
+        ]
+        app.launchEnvironment = [
+            "CALORIE_TRACKER_UNIFIED_FIXTURE": "1",
+            "CALORIE_TRACKER_FIXTURE_RESET": "1"
+        ]
+        app.launch()
+
+        let search = app.textFields["Search foods"]
+        XCTAssertTrue(search.waitForExistence(timeout: 10))
+        search.tap()
+        search.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 6) + query)
+
+        let estimate = app.buttons["Estimate with AI"]
+        XCTAssertTrue(estimate.waitForExistence(timeout: 10))
+        estimate.tap()
+
+        let descriptions = app.descendants(matching: .any).matching(identifier: "Meal description")
+        XCTAssertTrue(descriptions.firstMatch.waitForExistence(timeout: 5))
+        XCTAssertTrue(descriptions.allElementsBoundByIndex.contains { ($0.value as? String) == query })
+        XCTAssertTrue(app.buttons["Analyze Meal"].exists)
+    }
+
     func testDeviceFixtureShowsRelativeDays() {
         app.launchArguments = ["--show-scrolled-diary", "-onboarding.focus.v1.completed", "YES"]
         app.launchEnvironment = [
