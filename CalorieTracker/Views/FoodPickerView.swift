@@ -1198,10 +1198,15 @@ private struct SearchResultsList: View {
                     }
                     #if DEBUG
                     if !componentMode {
-                        Button("Suggest a canonical food", systemImage: "lightbulb", action: onSuggestCanonical)
-                            .buttonStyle(.bordered)
-                            .controlSize(.large)
-                            .frame(maxWidth: .infinity)
+                        Button(action: onSuggestCanonical) {
+                            Text("Suggest a canonical food")
+                                .underline()
+                                .font(.subheadline)
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(AppTheme.coral)
+                        .frame(maxWidth: .infinity)
+                        .accessibilityIdentifier("suggest-canonical-food-link")
                     }
                     #endif
                 }

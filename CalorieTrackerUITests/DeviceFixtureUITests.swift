@@ -108,7 +108,7 @@ final class DeviceFixtureUITests: XCTestCase {
         let manual = app.buttons["Create Manually"]
         XCTAssertTrue(manual.exists)
         XCTAssertTrue(manual.isHittable)
-        XCTAssertTrue(app.buttons["Suggest a canonical food"].exists)
+        XCTAssertTrue(app.buttons["suggest-canonical-food-link"].exists)
         automatic.tap()
 
         let descriptions = app.descendants(matching: .any).matching(identifier: "Meal description")

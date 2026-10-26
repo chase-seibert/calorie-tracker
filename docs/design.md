@@ -161,8 +161,8 @@ flow with the trimmed search text prefilled. Create Manually opens the custom
 food editor as a secondary action. Both actions stay above the keyboard. The
 description can be edited and a photo can be added; the generated result remains
 an imported meal with one or more foods and goes through the existing review
-screen before anything is logged. Suggest a canonical food appears only in
-development builds. Automatic estimation and canonical suggestions are hidden
+screen before anything is logged. A text link to suggest a canonical food
+appears only in development builds. Automatic estimation and canonical suggestions are hidden
 while choosing a component for another meal.
 
 Magic opens with a short explanation and up to four suggestions learned from
