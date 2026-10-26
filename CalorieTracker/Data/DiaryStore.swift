@@ -97,12 +97,41 @@ private struct TimedDiaryOperation: Sendable {
     }
 }
 
+enum DiaryLoadingPhase: Equatable, Sendable {
+    case checkingStorage
+    case migratingLegacyDiary
+    case openingDatabase
+    case importingDiary
+    case preparingDiary
+    case loadingEntries
+    case calculatingStreak
+    case preparingWeeklyReports
+    case ready
+    case failed
+
+    var message: String {
+        switch self {
+        case .checkingStorage: "Checking diary storage…"
+        case .migratingLegacyDiary: "Converting your existing diary…"
+        case .openingDatabase: "Opening the diary database…"
+        case .importingDiary: "Importing diary data…"
+        case .preparingDiary: "Preparing diary days…"
+        case .loadingEntries: "Loading diary entries…"
+        case .calculatingStreak: "Calculating your streak…"
+        case .preparingWeeklyReports: "Preparing weekly reports…"
+        case .ready: "Diary ready"
+        case .failed: "Diary unavailable"
+        }
+    }
+}
+
 /// Main-actor presentation cache. Mutations execute against current SQLite state off the main thread.
 @MainActor
 class DiaryStore: ObservableObject {
     @Published private(set) var document = DiaryDocument()
     @Published private(set) var lastSaveError: String?
     @Published private(set) var isLoading = true
+    @Published private(set) var loadingPhase: DiaryLoadingPhase = .checkingStorage
     @Published private(set) var isSaving = false
     @Published private(set) var hasLoadedSnapshot = false
     @Published private(set) var currentStreak = StreakSummary.empty
@@ -156,17 +185,30 @@ class DiaryStore: ObservableObject {
         let calendar = calendar
         let initial = initialDocument
         let catalog = catalog
+        let updateLoadingPhase: @MainActor @Sendable (DiaryLoadingPhase) -> Void = { [weak self] phase in
+            self?.loadingPhase = phase
+        }
         let task = Task.detached {
+            await updateLoadingPhase(.checkingStorage)
             if initial == nil, url == SharedDiaryStorage.defaultFileURL(), !SharedDiaryStorage.usesSimulatorFixture {
                 guard SharedDiaryStorage.hasSharedContainer else {
                     throw DiaryDatabaseError.unavailable("The shared App Group container is unavailable.")
+                }
+                let destinationExists = try DiaryJSONMigration.exists(url)
+                if !destinationExists,
+                   try SharedDiaryStorage.legacyDiaryURLs.contains(where: { try DiaryJSONMigration.exists($0) }) {
+                    await updateLoadingPhase(.migratingLegacyDiary)
                 }
                 try DiaryJSONMigration.convertIfNeeded(
                     destination: url, sources: SharedDiaryStorage.legacyDiaryURLs,
                     backupDirectory: SharedDiaryStorage.migrationBackupDirectory, calendar: calendar)
             }
+            await updateLoadingPhase(.openingDatabase)
             let repository = try DiaryRepository(fileURL: url, calendar: calendar, catalog: catalog)
-            if let initial { try repository.importDocument(initial) }
+            if let initial {
+                await updateLoadingPhase(.importingDiary)
+                try repository.importDocument(initial)
+            }
             return repository
         }
         openingTask = task
@@ -178,16 +220,25 @@ class DiaryStore: ObservableObject {
     }
 
     func reloadFromDisk(referenceDate: Date = Date()) async {
+        if !hasLoadedSnapshot { isLoading = true }
+        loadingPhase = .checkingStorage
         do {
             let repository = try await open()
+            loadingPhase = .preparingDiary
             try await repository.prepare(referenceDate: referenceDate)
             try await refresh(repository, referenceDate: referenceDate)
             lastSaveError = nil
             startHealthSync()
+            loadingPhase = .ready
         } catch {
             lastSaveError = error.localizedDescription
+            loadingPhase = .failed
         }
         isLoading = false
+    }
+
+    func showLoadingPhase(_ phase: DiaryLoadingPhase) {
+        loadingPhase = phase
     }
 
     func selectDay(_ date: Date) async {
@@ -205,6 +256,7 @@ class DiaryStore: ObservableObject {
         operation?.record("refresh_started")
         refreshGeneration += 1
         let generation = refreshGeneration
+        if isLoading { loadingPhase = .loadingEntries }
         operation?.record("snapshot_started")
         let snapshot = try await repository.snapshot(scope: scope(at: referenceDate))
         operation?.record("snapshot_finished", properties: [
@@ -217,6 +269,7 @@ class DiaryStore: ObservableObject {
         }
         publish(snapshot.document)
         operation?.record("snapshot_published")
+        if isLoading { loadingPhase = .calculatingStreak }
         operation?.record("streak_started")
         let streak = try await repository.streak(referenceDate: referenceDate)
         operation?.record("streak_finished")
@@ -930,6 +983,13 @@ class DiaryStore: ObservableObject {
             $0.saveMeal(
                 name: name, items: items, containsProcessedMeat: containsProcessedMeat,
                 containsRedMeat: containsRedMeat, origin: origin)
+        }
+    }
+
+    @discardableResult
+    func saveLoggedMeal(entryID: UUID, favorite: Bool = false) async throws -> SavedMeal {
+        try await perform(scope: .entries([entryID])) {
+            try $0.saveLoggedMeal(entryID: entryID, favorite: favorite)
         }
     }
 

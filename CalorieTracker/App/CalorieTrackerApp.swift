@@ -38,7 +38,7 @@ struct CalorieTrackerApp: App {
                     RootView(catalog: catalog, pendingOpenURL: $pendingOpenURL)
                     #endif
                 } else {
-                    ProgressView("Opening diary…")
+                    ProgressView(diary.loadingPhase.message)
                 }
             }
                 .environmentObject(diary)
@@ -53,6 +53,7 @@ struct CalorieTrackerApp: App {
                     // Share the existing app preference with widget/Siri on the first SQLite launch.
                     LoggingPreferences.lastWeightUnit = LoggingPreferences.lastWeightUnit
                     FirstTimeOnboarding.prepareForLaunch(document: diary.document)
+                    diary.showLoadingPhase(.preparingWeeklyReports)
                     WeeklyReportBackground.diaryStore = diary
                     WeeklyReportBackground.scheduleIfEnabled()
                     await WeeklyReportBackground.runForegroundCatchUp()

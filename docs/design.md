@@ -132,6 +132,11 @@ apart without being added to the hand-created Saved Meals catalog. Former
 `.calfood` files are unsupported. Files contain only structured estimates; no
 conversation URL or assistant account is shared.
 
+The detail view for a one-off logged meal can save its current ingredient
+snapshot to Saved meals or save and favorite it. These actions remain available
+after logging; the promoted imported meal is reusable from the meal picker and
+does not link back to or rewrite the diary entry's recorded history.
+
 The Trends toolbar links to a food-weight report that previews the last 90
 calendar days as foods sorted by exact total weight, displayed as whole ounces.
 Logged saved meals are expanded from the component snapshots on their diary

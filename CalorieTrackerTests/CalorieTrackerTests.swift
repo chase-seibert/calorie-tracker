@@ -4528,6 +4528,49 @@ extension CalorieTrackerTests {
     }
 
     @MainActor
+    func testOneOffMealCanBePromotedAndFavoritedAfterLogging() throws {
+        let fileURL = temporaryDiaryURL()
+        let store = TestDiaryStore(fileURL: fileURL)
+        let day = testDate(day: 12)
+        let meal = SavedMeal(
+            id: UUID(), name: "AI lunch", items: [MealItem(id: UUID(), food: testFood(calories: 150, name: "Tofu"), amount: 2, unit: .serving)],
+            origin: .imported, notes: "Estimated from the photo")
+        store.logOneOffMeal(meal, amount: 2, on: day)
+        let logged = try XCTUnwrap(store.entries(on: day).first)
+        XCTAssertNil(logged.savedMealID)
+        XCTAssertTrue(store.document.meals.isEmpty)
+
+        let promoted = try store.saveLoggedMeal(entryID: logged.id, favorite: true)
+        XCTAssertEqual(promoted.id, logged.id)
+        XCTAssertEqual(promoted.origin, .imported)
+        XCTAssertEqual(promoted.notes, "Estimated from the photo")
+        XCTAssertEqual(promoted.items.map(\.amount), [2])
+        XCTAssertEqual(store.document.meals.filter { $0.id == logged.id }.count, 1)
+        XCTAssertEqual(store.document.favoriteMealIDs, [logged.id])
+        XCTAssertEqual(try XCTUnwrap(store.entries(on: day).first), logged)
+
+        let repeated = try store.saveLoggedMeal(entryID: logged.id, favorite: true)
+        XCTAssertEqual(repeated.id, promoted.id)
+        XCTAssertEqual(store.document.meals.filter { $0.id == logged.id }.count, 1)
+        XCTAssertEqual(store.document.favoriteMealIDs, [logged.id])
+
+        let persisted = try DiaryRepository(fileURL: fileURL, calendar: testCalendar).snapshotSync().document
+        XCTAssertEqual(persisted.meals.first { $0.id == logged.id }, promoted)
+        XCTAssertEqual(persisted.favoriteMealIDs, [logged.id])
+        XCTAssertEqual(persisted.entries.first { $0.id == logged.id }, logged)
+    }
+
+    func testSavingUnavailableDiaryMealSnapshotFailsWithoutMutation() throws {
+        let entry = testEntry(calories: 300, date: testDate(day: 12), name: "Dinner")
+        var document = DiaryDocument()
+        document.entries = [entry]
+        let engine = DiaryEngine(document: document, calendar: testCalendar)
+        XCTAssertThrowsError(try engine.saveLoggedMeal(entryID: entry.id))
+        XCTAssertTrue(engine.document.meals.isEmpty)
+        XCTAssertTrue(engine.document.favoriteMealIDs.isEmpty)
+    }
+
+    @MainActor
     func testOneOffImportedMealRemainsDetachedAfterReload() throws {
         let fileURL = temporaryDiaryURL()
         let store = TestDiaryStore(fileURL: fileURL)
@@ -5131,6 +5174,9 @@ private final class TestDiaryStore: DiaryStore {
         containsRedMeat: Bool? = nil,
         origin: SavedMealOrigin = .custom) -> SavedMeal? {
         try! performTestMutation(scope: .library) { $0.saveMeal(name: name, items: items, containsProcessedMeat: containsProcessedMeat, containsRedMeat: containsRedMeat, origin: origin) }
+    }
+    func saveLoggedMeal(entryID: UUID, favorite: Bool = false) throws -> SavedMeal {
+        try performTestMutation(scope: .entries([entryID])) { try $0.saveLoggedMeal(entryID: entryID, favorite: favorite) }
     }
     @discardableResult
     func updateSavedMeal(mealID: UUID,

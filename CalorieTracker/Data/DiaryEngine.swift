@@ -1173,6 +1173,61 @@ final class DiaryEngine {
         return meal
     }
 
+    /// Promotes a diary meal snapshot to the imported meal collection without linking the
+    /// saved template back to history. The diary entry remains authoritative for its own totals.
+    @discardableResult
+    func saveLoggedMeal(entryID: UUID, favorite: Bool = false) throws -> SavedMeal {
+        guard let entryIndex = document.entries.firstIndex(where: { $0.id == entryID }) else {
+            throw DiaryDatabaseError.invalidData("This logged meal is no longer available. Refresh the diary and try again.")
+        }
+        let entry = document.entries[entryIndex]
+        guard entry.isMeal, entry.savedMealID == nil,
+              let snapshot = entry.mealItems, !snapshot.isEmpty,
+              entry.amount.isFinite, entry.amount > 0 else {
+            throw DiaryDatabaseError.invalidData("This diary entry does not contain a reusable meal snapshot.")
+        }
+
+        let name = entry.food.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty, name.count <= 120,
+              snapshot.count <= 50,
+              snapshot.allSatisfy({ $0.amount.isFinite && $0.amount > 0 }) else {
+            throw DiaryDatabaseError.invalidData("This meal has incomplete or invalid ingredients and could not be saved.")
+        }
+
+        // The entry ID gives repeated promotion a stable identity without changing its
+        // savedMealID or allowing later template edits to rewrite logged history.
+        let perServingItems = snapshot.map { item -> MealItem in
+            var item = item
+            item.amount /= entry.amount
+            return item
+        }
+        guard perServingItems.allSatisfy({ $0.amount.isFinite && $0.amount > 0 }) else {
+            throw DiaryDatabaseError.invalidData("This meal's serving quantities could not be normalized safely.")
+        }
+        let meal = SavedMeal(
+            id: entry.id,
+            name: name,
+            items: resolvedItems(perServingItems),
+            containsProcessedMeat: entry.processedMeatOverride,
+            containsRedMeat: entry.redMeatOverride,
+            origin: .imported,
+            notes: entry.mealNotes
+        )
+        if let existingIndex = document.meals.firstIndex(where: { $0.id == meal.id }) {
+            guard document.meals[existingIndex].origin == .imported else {
+                throw DiaryDatabaseError.invalidData("This meal could not be saved because its ID is already in use.")
+            }
+            document.meals[existingIndex] = meal
+        } else {
+            document.meals.insert(meal, at: 0)
+        }
+
+        if favorite, !isFavorite(meal) {
+            toggleFavorite(meal)
+        }
+        return meal
+    }
+
     @discardableResult
     func updateSavedMeal(
         mealID: UUID,

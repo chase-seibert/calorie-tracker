@@ -18,7 +18,7 @@ struct RootView: View {
             .disabled(diary.isLoading || diary.isSaving || !diary.hasLoadedSnapshot)
             .overlay {
                 if diary.isLoading {
-                    ProgressView("Opening diary…").padding().background(
+                    ProgressView(diary.loadingPhase.message).padding().background(
                         .regularMaterial, in: RoundedRectangle(cornerRadius: 12))
                 } else if !diary.hasLoadedSnapshot {
                     ContentUnavailableView {

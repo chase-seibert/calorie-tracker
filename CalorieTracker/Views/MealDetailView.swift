@@ -117,6 +117,16 @@ struct MealDetailView: View {
                             diary.run { try await diary.toggleFavorite(meal) }
                         }
                     }
+                    if case .logged(let entry) = context, entry.savedMealID == nil, promotedLoggedMeal == nil {
+                        Button("Save to Saved meals", systemImage: "bookmark") {
+                            diary.run { _ = try await diary.saveLoggedMeal(entryID: entry.id) }
+                        }
+                        .accessibilityIdentifier("meal-detail-save-to-library")
+                        Button("Favorite", systemImage: "star") {
+                            diary.run { _ = try await diary.saveLoggedMeal(entryID: entry.id, favorite: true) }
+                        }
+                        .accessibilityIdentifier("meal-detail-favorite")
+                    }
                     Button("Rename") { showingNameEditor = true }
                     Divider()
                     if case .logged(let entry) = context {
@@ -198,9 +208,15 @@ struct MealDetailView: View {
     private var favoriteMeal: SavedMeal? {
         switch context {
         case .log(let meal, _, _): meal
-        case .logged(let entry): diary.document.meals.first { $0.id == entry.savedMealID }
+        case .logged(let entry):
+            entry.savedMealID.flatMap { mealID in diary.document.meals.first { $0.id == mealID } }
+                ?? promotedLoggedMeal
         default: nil
         }
+    }
+    private var promotedLoggedMeal: SavedMeal? {
+        guard case .logged(let entry) = context, entry.savedMealID == nil else { return nil }
+        return diary.document.meals.first { $0.id == entry.id && $0.origin == .imported }
     }
     private func classification(_ override: KeyPath<MealItem, Bool?>, food: KeyPath<Food, Bool?>) -> Bool? {
         let values = selectedItems.map { $0[keyPath: override] ?? $0.food[keyPath: food] }

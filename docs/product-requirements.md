@@ -77,6 +77,8 @@
 - As someone importing an AI-estimated meal, I want its component foods retained
   in an imported meal snapshot for Recent and repeat logging without having that
   snapshot appear in my hand-created Saved Meals catalog.
+- As someone importing an AI-estimated meal, I want to save or favorite its
+  logged diary snapshot later so I can reuse it without deciding during import.
 - As someone who estimates photographed food manually with an AI assistant, I
   want to open a small app-owned food or meal file, review its calories and
   macros, and log it without sharing my conversation or cluttering my personal
