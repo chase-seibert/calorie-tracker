@@ -20,9 +20,9 @@ records include reviewed source portions, confidence, and preparation notes.
 The 2026-10-20 revision adds a single Kebabs search identity with exclusive
 lamb, chicken, and beef protein variants; the former Lamb kebab and Beef kebab
 IDs remain history-resolvable and serve as reusable variant components. The
-2026-10-23 and 2026-10-24 revisions add nutrition evidence for 40 more
-identities; two October 24 foods now resolve to broader canonical foods while
-their original IDs remain history-resolvable.
+2026-10-23 through 2026-10-26 revisions add reviewed nutrition evidence for
+80 more identities; two October 24 foods now resolve to broader canonical foods
+while their original IDs remain history-resolvable.
 Companion suggestions are separate foods logged independently. The generated
 review workbook is rebuilt from the same catalog projection.
 
