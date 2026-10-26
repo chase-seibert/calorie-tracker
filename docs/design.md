@@ -153,15 +153,17 @@ selected mode with combined
 personal, USDA, and Open Food Facts results; Search is not a separate mode or
 source picker. Matching favorite foods and saved meals lead the results in one
 alphabetized group, and saved meals can be found by their names.
-When no search result matches, the empty state offers a compact Add custom food
-action with the search text prefilled as the food name. Saving from that flow
-logs one serving and closes the food picker. It also offers Estimate with AI,
-which opens the existing meal analysis flow with the trimmed search text
-prefilled. The description can be edited and a photo can be added; the generated
-result remains an imported meal with one or more foods and goes through the
-existing review screen before anything is logged. The AI estimate action is
-available only after search completes with no matches and is hidden while
-choosing a component for another meal.
+When no search result matches, the empty state offers a Create Manually action
+that opens the custom food editor with the search text prefilled as the food
+name. Saving from that flow logs one serving and closes the food picker. Create
+Automatically is the primary action and opens the existing meal analysis
+flow with the trimmed search text prefilled. Create Manually opens the custom
+food editor as a secondary action. Both actions stay above the keyboard. The
+description can be edited and a photo can be added; the generated result remains
+an imported meal with one or more foods and goes through the existing review
+screen before anything is logged. Suggest a canonical food appears only in
+development builds. Automatic estimation and canonical suggestions are hidden
+while choosing a component for another meal.
 
 Magic opens with a short explanation and up to four suggestions learned from
 the previous 10 days in the current local-time band. Before the first food is

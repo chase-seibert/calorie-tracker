@@ -1177,24 +1177,39 @@ private struct SearchResultsList: View {
         } else if results.isEmpty {
             VStack(spacing: 0) {
                 ContentUnavailableView.search(text: query)
-                Button("Add custom food", systemImage: "plus", action: onAddCustomFood)
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 28)
-                if !componentMode {
-                    Button("Estimate with AI", systemImage: "sparkles", action: onEstimateWithAI)
-                        .buttonStyle(.borderedProminent)
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 10)
-                    Button("Suggest a canonical food", systemImage: "lightbulb", action: onSuggestCanonical)
-                        .buttonStyle(.bordered)
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 10)
-                }
             }
-            .padding(.horizontal, 24)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                VStack(spacing: 10) {
+                    if !componentMode {
+                        Button("Create Automatically", systemImage: "sparkles", action: onEstimateWithAI)
+                            .buttonStyle(.borderedProminent)
+                            .controlSize(.large)
+                            .frame(maxWidth: .infinity)
+                        Button("Create Manually", systemImage: "plus", action: onAddCustomFood)
+                            .buttonStyle(.bordered)
+                            .controlSize(.large)
+                            .frame(maxWidth: .infinity)
+                    } else {
+                        Button("Create Manually", systemImage: "plus", action: onAddCustomFood)
+                            .buttonStyle(.borderedProminent)
+                            .controlSize(.large)
+                            .frame(maxWidth: .infinity)
+                    }
+                    #if DEBUG
+                    if !componentMode {
+                        Button("Suggest a canonical food", systemImage: "lightbulb", action: onSuggestCanonical)
+                            .buttonStyle(.bordered)
+                            .controlSize(.large)
+                            .frame(maxWidth: .infinity)
+                    }
+                    #endif
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 12)
+                .padding(.bottom, 10)
+                .background(AppTheme.background)
+            }
         } else {
             List {
                 Section {

@@ -102,9 +102,14 @@ final class DeviceFixtureUITests: XCTestCase {
         search.tap()
         search.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 6) + query)
 
-        let estimate = app.buttons["Estimate with AI"]
-        XCTAssertTrue(estimate.waitForExistence(timeout: 10))
-        estimate.tap()
+        let automatic = app.buttons["Create Automatically"]
+        XCTAssertTrue(automatic.waitForExistence(timeout: 10))
+        XCTAssertTrue(automatic.isHittable)
+        let manual = app.buttons["Create Manually"]
+        XCTAssertTrue(manual.exists)
+        XCTAssertTrue(manual.isHittable)
+        XCTAssertTrue(app.buttons["Suggest a canonical food"].exists)
+        automatic.tap()
 
         let descriptions = app.descendants(matching: .any).matching(identifier: "Meal description")
         XCTAssertTrue(descriptions.firstMatch.waitForExistence(timeout: 5))
