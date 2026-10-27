@@ -6609,7 +6609,7 @@
       "2"
     ]
   ],
-  "datasetVersion": "chase-food-2026-10-26-36",
+  "datasetVersion": "chase-food-2026-10-27-37",
   "foods": [
     {
       "aliases": [
@@ -14004,9 +14004,9 @@
         "cappuccino coffee"
       ],
       "baselineNutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Coffee, Cappuccino",
-        "similarity": 0.7407,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2710472"
       },
@@ -14027,19 +14027,19 @@
       },
       "nutritionEvidence": {
         "baselineNutritionSource": {
-          "matchBasis": "canonical",
+          "matchBasis": "reviewed FDC record",
           "name": "Coffee, Cappuccino",
-          "similarity": 0.7407,
+          "similarity": null,
           "source": "usda",
           "sourceID": "2710472"
         },
         "compositionEvidence": {
           "confidence": "Medium",
-          "decision": "Keep Cappuccino as its own beverage canonical. Retain mutually exclusive milk choices including 1% milk and treat the USDA generic cappuccino as a whole-milk-style baseline estimate.",
-          "reason": "FNDDS generic cappuccino is a close beverage match; milk type, milk-to-espresso ratio, and cup size vary. The 180 g catalog cup is a six-fluid-ounce estimate.",
+          "decision": "Keep Cappuccino as a beverage with selectable milk and add-ins.",
+          "reason": "USDA cappuccino, not-further-specified, is the closest direct prepared-drink profile. Milk choice and espresso-to-milk ratio can change nutrition.",
           "sources": [
             {
-              "name": "USDA FoodData Central Survey (FNDDS)",
+              "name": "FoodData Central",
               "recordName": "Coffee, Cappuccino",
               "sourceID": "2710472",
               "url": "https://fdc.nal.usda.gov/food-details/2710472/nutrients"
@@ -14055,21 +14055,20 @@
           "protein": 1.71
         },
         "reviewReasons": [
-          "FNDDS generic cappuccino is a close beverage match; milk type, milk-to-espresso ratio, and cup size vary. The 180 g catalog cup is a six-fluid-ounce estimate."
+          "USDA cappuccino, not-further-specified, is the closest direct prepared-drink profile. Milk choice and espresso-to-milk ratio can change nutrition."
         ],
         "source": {
-          "dataType": "Survey (FNDDS)",
+          "dataType": "FNDDS 2021-2023",
           "database": "FoodData Central",
-          "name": "USDA FoodData Central Survey (FNDDS)",
-          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "organization": "USDA Agricultural Research Service",
           "recordID": "2710472",
           "recordName": "Coffee, Cappuccino",
           "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-27",
           "serving": {
             "description": "1 fl oz",
             "grams": 30.0
           },
-          "sourceID": "2710472",
           "url": "https://fdc.nal.usda.gov/food-details/2710472/nutrients"
         }
       },
@@ -14089,7 +14088,7 @@
       },
       "optionsSummary": "Whole milk, 2% milk, Skim milk, Almond milk, Oat milk, Sugar, Cocoa powder, Cinnamon, Extra espresso, 1% milk",
       "reviewReasons": [
-        "FNDDS generic cappuccino is a close beverage match; milk type, milk-to-espresso ratio, and cup size vary. The 180 g catalog cup is a six-fluid-ounce estimate."
+        "USDA cappuccino, not-further-specified, is the closest direct prepared-drink profile. Milk choice and espresso-to-milk ratio can change nutrition."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -14102,11 +14101,11 @@
         "tomato mozzarella salad"
       ],
       "baselineNutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Beef salad",
-        "similarity": 0.6957,
+        "matchBasis": "reviewed FDC record",
+        "name": "Mozzarella cheese, tomato, and basil, with oil and vinegar dressing",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2706749"
+        "sourceID": "2705818"
       },
       "category": "Salads",
       "confidence": "Medium",
@@ -14125,19 +14124,19 @@
       },
       "nutritionEvidence": {
         "baselineNutritionSource": {
-          "matchBasis": "canonical",
-          "name": "Beef salad",
-          "similarity": 0.6957,
+          "matchBasis": "reviewed FDC record",
+          "name": "Mozzarella cheese, tomato, and basil, with oil and vinegar dressing",
+          "similarity": null,
           "source": "usda",
-          "sourceID": "2706749"
+          "sourceID": "2705818"
         },
         "compositionEvidence": {
           "confidence": "Medium",
-          "decision": "Keep Caprese salad as its own canonical. Use the FNDDS tomato-mozzarella-basil salad with dressing as a close prepared-food profile.",
-          "reason": "FNDDS mozzarella, tomato, and basil with oil-and-vinegar dressing is a close Caprese match; mozzarella and dressing ratios vary.",
+          "decision": "Keep Caprese salad as a canonical composed salad.",
+          "reason": "USDA directly represents mozzarella, tomato, and basil with oil and vinegar; component proportions and dressing amount vary.",
           "sources": [
             {
-              "name": "USDA FoodData Central Survey (FNDDS)",
+              "name": "FoodData Central",
               "recordName": "Mozzarella cheese, tomato, and basil, with oil and vinegar dressing",
               "sourceID": "2705818",
               "url": "https://fdc.nal.usda.gov/food-details/2705818/nutrients"
@@ -14153,21 +14152,20 @@
           "protein": 7.17
         },
         "reviewReasons": [
-          "FNDDS mozzarella, tomato, and basil with oil-and-vinegar dressing is a close Caprese match; mozzarella and dressing ratios vary."
+          "USDA directly represents mozzarella, tomato, and basil with oil and vinegar; component proportions and dressing amount vary."
         ],
         "source": {
-          "dataType": "Survey (FNDDS)",
+          "dataType": "FNDDS 2021-2023",
           "database": "FoodData Central",
-          "name": "USDA FoodData Central Survey (FNDDS)",
-          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "organization": "USDA Agricultural Research Service",
           "recordID": "2705818",
           "recordName": "Mozzarella cheese, tomato, and basil, with oil and vinegar dressing",
           "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-27",
           "serving": {
             "description": "1 cup",
             "grams": 160.0
           },
-          "sourceID": "2705818",
           "url": "https://fdc.nal.usda.gov/food-details/2705818/nutrients"
         }
       },
@@ -14187,7 +14185,7 @@
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "FNDDS mozzarella, tomato, and basil with oil-and-vinegar dressing is a close Caprese match; mozzarella and dressing ratios vary."
+        "USDA directly represents mozzarella, tomato, and basil with oil and vinegar; component proportions and dressing amount vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -14200,11 +14198,11 @@
         "carrot layer cake"
       ],
       "baselineNutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Crab, cake",
-        "similarity": 0.7,
+        "matchBasis": "reviewed FDC record",
+        "name": "Cake or cupcake, carrot",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2706549"
+        "sourceID": "2707859"
       },
       "category": "Desserts & sweets",
       "confidence": "Medium",
@@ -14223,19 +14221,19 @@
       },
       "nutritionEvidence": {
         "baselineNutritionSource": {
-          "matchBasis": "canonical",
-          "name": "Crab, cake",
-          "similarity": 0.7,
+          "matchBasis": "reviewed FDC record",
+          "name": "Cake or cupcake, carrot",
+          "similarity": null,
           "source": "usda",
-          "sourceID": "2706549"
+          "sourceID": "2707859"
         },
         "compositionEvidence": {
           "confidence": "Medium",
-          "decision": "Keep Carrot cake as a canonical dessert. Use the generic USDA carrot cake profile; frosting and slice weight remain recipe-dependent.",
-          "reason": "FNDDS carrot cake/cupcake is a close match; frosting amount and the workbook slice weight are not specified by the source serving.",
+          "decision": "Keep Carrot cake as a canonical dessert.",
+          "reason": "USDA carrot cake/cupcake is a close recipe match; the source measure is a 90 g cupcake while the catalog slice is estimated at 120 g.",
           "sources": [
             {
-              "name": "USDA FoodData Central Survey (FNDDS)",
+              "name": "FoodData Central",
               "recordName": "Cake or cupcake, carrot",
               "sourceID": "2707859",
               "url": "https://fdc.nal.usda.gov/food-details/2707859/nutrients"
@@ -14251,21 +14249,20 @@
           "protein": 2.49
         },
         "reviewReasons": [
-          "FNDDS carrot cake/cupcake is a close match; frosting amount and the workbook slice weight are not specified by the source serving."
+          "USDA carrot cake/cupcake is a close recipe match; the source measure is a 90 g cupcake while the catalog slice is estimated at 120 g."
         ],
         "source": {
-          "dataType": "Survey (FNDDS)",
+          "dataType": "FNDDS 2021-2023",
           "database": "FoodData Central",
-          "name": "USDA FoodData Central Survey (FNDDS)",
-          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "organization": "USDA Agricultural Research Service",
           "recordID": "2707859",
           "recordName": "Cake or cupcake, carrot",
           "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-27",
           "serving": {
             "description": "1 cupcake, any size",
             "grams": 90.0
           },
-          "sourceID": "2707859",
           "url": "https://fdc.nal.usda.gov/food-details/2707859/nutrients"
         }
       },
@@ -14285,7 +14282,7 @@
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "FNDDS carrot cake/cupcake is a close match; frosting amount and the workbook slice weight are not specified by the source serving."
+        "USDA carrot cake/cupcake is a close recipe match; the source measure is a 90 g cupcake while the catalog slice is estimated at 120 g."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -14297,8 +14294,15 @@
         "carrots, cooked",
         "steamed carrots"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Carrots, glazed, cooked",
+        "similarity": 0.8,
+        "source": "usda",
+        "sourceID": "2709677"
+      },
       "category": "Vegetables & potatoes",
-      "confidence": "Medium",
+      "confidence": "High",
       "defaultGrams": 155.0,
       "defaultUnit": "1 cup",
       "foodKind": "Reusable ingredient",
@@ -14306,31 +14310,74 @@
       "includedComponentsSummary": "None",
       "name": "Carrots, cooked",
       "nutrients": {
-        "calories": 150.35,
-        "carbs": 26.82,
-        "fat": 4.31,
-        "fiber": 4.5,
-        "protein": 1.4
+        "calories": 54.25,
+        "carbs": 12.74,
+        "fat": 0.28,
+        "fiber": 4.65,
+        "protein": 1.18
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Carrots, glazed, cooked",
+          "similarity": 0.8,
+          "source": "usda",
+          "sourceID": "2709677"
+        },
+        "compositionEvidence": {
+          "confidence": "High",
+          "decision": "Keep cooked carrots as a plain reusable vegetable.",
+          "reason": "Direct USDA cooked, boiled, drained carrots without salt; catalog cup calories are scaled from the per-100-g profile.",
+          "sources": [
+            {
+              "name": "FoodData Central",
+              "recordName": "Carrots, cooked, boiled, drained, without salt",
+              "sourceID": "170394",
+              "url": "https://fdc.nal.usda.gov/food-details/170394/nutrients"
+            }
+          ]
+        },
+        "confidence": "High",
+        "nutritionPer100g": {
+          "calories": 35.0,
+          "carbs": 8.22,
+          "fat": 0.18,
+          "fiber": 3.0,
+          "protein": 0.76
+        },
+        "reviewReasons": [],
+        "source": {
+          "dataType": "SR Legacy",
+          "database": "FoodData Central",
+          "organization": "USDA Agricultural Research Service",
+          "recordID": "170394",
+          "recordName": "Carrots, cooked, boiled, drained, without salt",
+          "releaseDate": "2018-04-01",
+          "reviewedDate": "2026-10-27",
+          "serving": {
+            "description": "1 tbsp",
+            "grams": 9.7
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/170394/nutrients"
+        }
       },
       "nutritionPer100g": {
-        "calories": 97.0,
-        "carbs": 17.3,
-        "fat": 2.78,
-        "fiber": 2.9,
-        "protein": 0.9
+        "calories": 35.0,
+        "carbs": 8.22,
+        "fat": 0.18,
+        "fiber": 3.0,
+        "protein": 0.76
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Carrots, glazed, cooked",
-        "similarity": 0.8,
+        "matchBasis": "reviewed FDC record",
+        "name": "Carrots, cooked, boiled, drained, without salt",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2709677"
+        "sourceID": "170394"
       },
       "optionsSummary": "None",
-      "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
-      ],
-      "reviewRequired": true,
+      "reviewReasons": [],
+      "reviewRequired": false,
       "searchEnabled": true,
       "sizeAvailable": false,
       "variationsSummary": "None"
@@ -14383,9 +14430,9 @@
         "roasted cashews"
       ],
       "baselineNutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Cashews, NFS",
-        "similarity": 0.7778,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2707493"
       },
@@ -14406,19 +14453,19 @@
       },
       "nutritionEvidence": {
         "baselineNutritionSource": {
-          "matchBasis": "canonical",
+          "matchBasis": "reviewed FDC record",
           "name": "Cashews, NFS",
-          "similarity": 0.7778,
+          "similarity": null,
           "source": "usda",
           "sourceID": "2707493"
         },
         "compositionEvidence": {
           "confidence": "Medium",
-          "decision": "Keep Cashews as one reusable ingredient. Use the generic FNDDS cashew profile for the one-ounce default; salted and roasted preparations may vary.",
-          "reason": "FNDDS Cashews, NFS is a close generic match; roasting method and salt are unspecified.",
+          "decision": "Keep Cashews as a reusable ingredient.",
+          "reason": "USDA cashews, not further specified, are a close generic match; roasting and salt differ by product.",
           "sources": [
             {
-              "name": "USDA FoodData Central Survey (FNDDS)",
+              "name": "FoodData Central",
               "recordName": "Cashews, NFS",
               "sourceID": "2707493",
               "url": "https://fdc.nal.usda.gov/food-details/2707493/nutrients"
@@ -14434,21 +14481,20 @@
           "protein": 15.3
         },
         "reviewReasons": [
-          "FNDDS Cashews, NFS is a close generic match; roasting method and salt are unspecified."
+          "USDA cashews, not further specified, are a close generic match; roasting and salt differ by product."
         ],
         "source": {
-          "dataType": "Survey (FNDDS)",
+          "dataType": "FNDDS 2021-2023",
           "database": "FoodData Central",
-          "name": "USDA FoodData Central Survey (FNDDS)",
-          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "organization": "USDA Agricultural Research Service",
           "recordID": "2707493",
           "recordName": "Cashews, NFS",
           "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-27",
           "serving": {
             "description": "1 nut",
             "grams": 1.5
           },
-          "sourceID": "2707493",
           "url": "https://fdc.nal.usda.gov/food-details/2707493/nutrients"
         }
       },
@@ -14468,7 +14514,7 @@
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "FNDDS Cashews, NFS is a close generic match; roasting method and salt are unspecified."
+        "USDA cashews, not further specified, are a close generic match; roasting and salt differ by product."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -14480,8 +14526,15 @@
         "cauliflower, cooked",
         "steamed cauliflower"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Cauliflower, pickled",
+        "similarity": 0.8649,
+        "source": "usda",
+        "sourceID": "2710074"
+      },
       "category": "Vegetables & potatoes",
-      "confidence": "Medium",
+      "confidence": "High",
       "defaultGrams": 125.0,
       "defaultUnit": "1 cup",
       "foodKind": "Reusable ingredient",
@@ -14489,31 +14542,74 @@
       "includedComponentsSummary": "None",
       "name": "Cauliflower, cooked",
       "nutrients": {
-        "calories": 51.25,
-        "carbs": 11.23,
-        "fat": 0.31,
-        "fiber": 2.12,
-        "protein": 1.99
+        "calories": 28.75,
+        "carbs": 5.14,
+        "fat": 0.56,
+        "fiber": 2.88,
+        "protein": 2.3
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Cauliflower, pickled",
+          "similarity": 0.8649,
+          "source": "usda",
+          "sourceID": "2710074"
+        },
+        "compositionEvidence": {
+          "confidence": "High",
+          "decision": "Keep cooked cauliflower as a plain reusable vegetable.",
+          "reason": "Direct USDA cooked, boiled, drained cauliflower without salt.",
+          "sources": [
+            {
+              "name": "FoodData Central",
+              "recordName": "Cauliflower, cooked, boiled, drained, without salt",
+              "sourceID": "170397",
+              "url": "https://fdc.nal.usda.gov/food-details/170397/nutrients"
+            }
+          ]
+        },
+        "confidence": "High",
+        "nutritionPer100g": {
+          "calories": 23.0,
+          "carbs": 4.11,
+          "fat": 0.45,
+          "fiber": 2.3,
+          "protein": 1.84
+        },
+        "reviewReasons": [],
+        "source": {
+          "dataType": "SR Legacy",
+          "database": "FoodData Central",
+          "organization": "USDA Agricultural Research Service",
+          "recordID": "170397",
+          "recordName": "Cauliflower, cooked, boiled, drained, without salt",
+          "releaseDate": "2018-04-01",
+          "reviewedDate": "2026-10-27",
+          "serving": {
+            "description": "1 0.5 cup (1\" pieces)",
+            "grams": 62.0
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/170397/nutrients"
+        }
       },
       "nutritionPer100g": {
-        "calories": 41.0,
-        "carbs": 8.98,
-        "fat": 0.25,
-        "fiber": 1.7,
-        "protein": 1.59
+        "calories": 23.0,
+        "carbs": 4.11,
+        "fat": 0.45,
+        "fiber": 2.3,
+        "protein": 1.84
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Cauliflower, pickled",
-        "similarity": 0.8649,
+        "matchBasis": "reviewed FDC record",
+        "name": "Cauliflower, cooked, boiled, drained, without salt",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2710074"
+        "sourceID": "170397"
       },
       "optionsSummary": "None",
-      "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
-      ],
-      "reviewRequired": true,
+      "reviewReasons": [],
+      "reviewRequired": false,
       "searchEnabled": true,
       "sizeAvailable": false,
       "variationsSummary": "None"
@@ -14524,14 +14620,14 @@
         "celery stalk"
       ],
       "baselineNutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Celery, raw",
-        "similarity": 0.75,
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2346405"
+        "sourceID": "2709778"
       },
       "category": "Vegetables & potatoes",
-      "confidence": "Medium",
+      "confidence": "High",
       "defaultGrams": 40.0,
       "defaultUnit": "1 stalk",
       "foodKind": "Reusable ingredient",
@@ -14547,26 +14643,26 @@
       },
       "nutritionEvidence": {
         "baselineNutritionSource": {
-          "matchBasis": "canonical",
+          "matchBasis": "reviewed FDC record",
           "name": "Celery, raw",
-          "similarity": 0.75,
+          "similarity": null,
           "source": "usda",
-          "sourceID": "2346405"
+          "sourceID": "2709778"
         },
         "compositionEvidence": {
-          "confidence": "Medium",
-          "decision": "Keep Celery as a reusable raw ingredient. Use the raw celery USDA profile and keep one stalk as an approximate human portion.",
-          "reason": "FNDDS raw celery directly matches the food identity; the workbook 40 g stalk portion is an estimate because stalk sizes vary.",
+          "confidence": "High",
+          "decision": "Keep Celery as a raw reusable vegetable.",
+          "reason": "Direct USDA raw celery record; per-100-g nutrition is scaled to the catalog stalk portion.",
           "sources": [
             {
-              "name": "USDA FoodData Central Survey (FNDDS)",
+              "name": "FoodData Central",
               "recordName": "Celery, raw",
               "sourceID": "2709778",
               "url": "https://fdc.nal.usda.gov/food-details/2709778/nutrients"
             }
           ]
         },
-        "confidence": "Medium",
+        "confidence": "High",
         "nutritionPer100g": {
           "calories": 17.0,
           "carbs": 3.32,
@@ -14574,22 +14670,19 @@
           "fiber": 1.6,
           "protein": 0.49
         },
-        "reviewReasons": [
-          "FNDDS raw celery directly matches the food identity; the workbook 40 g stalk portion is an estimate because stalk sizes vary."
-        ],
+        "reviewReasons": [],
         "source": {
-          "dataType": "Survey (FNDDS)",
+          "dataType": "FNDDS 2021-2023",
           "database": "FoodData Central",
-          "name": "USDA FoodData Central Survey (FNDDS)",
-          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "organization": "USDA Agricultural Research Service",
           "recordID": "2709778",
           "recordName": "Celery, raw",
           "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-27",
           "serving": {
             "description": "1 piece",
             "grams": 4.0
           },
-          "sourceID": "2709778",
           "url": "https://fdc.nal.usda.gov/food-details/2709778/nutrients"
         }
       },
@@ -14608,10 +14701,8 @@
         "sourceID": "2709778"
       },
       "optionsSummary": "None",
-      "reviewReasons": [
-        "FNDDS raw celery directly matches the food identity; the workbook 40 g stalk portion is an estimate because stalk sizes vary."
-      ],
-      "reviewRequired": true,
+      "reviewReasons": [],
+      "reviewRequired": false,
       "searchEnabled": true,
       "sizeAvailable": false,
       "variationsSummary": "None"
@@ -14808,6 +14899,13 @@
         "cheese curls",
         "cheese doodles"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Cheese, NFS",
+        "similarity": 0.8182,
+        "source": "usda",
+        "sourceID": "2705704"
+      },
       "category": "Snacks, nuts & bars",
       "confidence": "Medium",
       "defaultGrams": 28.4,
@@ -14817,29 +14915,76 @@
       "includedComponentsSummary": "None",
       "name": "Cheese puffs",
       "nutrients": {
-        "calories": 108.2,
-        "carbs": 1.23,
-        "fat": 8.89,
-        "fiber": 0.0,
-        "protein": 5.88
+        "calories": 161.03,
+        "carbs": 15.48,
+        "fat": 10.37,
+        "fiber": 0.23,
+        "protein": 1.55
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Cheese, NFS",
+          "similarity": 0.8182,
+          "source": "usda",
+          "sourceID": "2705704"
+        },
+        "compositionEvidence": {
+          "confidence": "Medium",
+          "decision": "Keep Cheese puffs as a generic cheese-flavored corn snack.",
+          "reason": "USDA cheese-flavored corn snacks are a much closer match than the previous plain cheese profile; brand, oil, and product texture still vary.",
+          "sources": [
+            {
+              "name": "FoodData Central",
+              "recordName": "Cheese flavored corn snacks",
+              "sourceID": "2708200",
+              "url": "https://fdc.nal.usda.gov/food-details/2708200/nutrients"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 567.0,
+          "carbs": 54.5,
+          "fat": 36.5,
+          "fiber": 0.8,
+          "protein": 5.46
+        },
+        "reviewReasons": [
+          "USDA cheese-flavored corn snacks are a much closer match than the previous plain cheese profile; brand, oil, and product texture still vary."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "organization": "USDA Agricultural Research Service",
+          "recordID": "2708200",
+          "recordName": "Cheese flavored corn snacks",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-27",
+          "serving": {
+            "description": "1 piece",
+            "grams": 2.0
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2708200/nutrients"
+        }
       },
       "nutritionPer100g": {
-        "calories": 381.0,
-        "carbs": 4.33,
-        "fat": 31.3,
-        "fiber": 0.0,
-        "protein": 20.7
+        "calories": 567.0,
+        "carbs": 54.5,
+        "fat": 36.5,
+        "fiber": 0.8,
+        "protein": 5.46
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Cheese, NFS",
-        "similarity": 0.8182,
+        "matchBasis": "reviewed FDC record",
+        "name": "Cheese flavored corn snacks",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2705704"
+        "sourceID": "2708200"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
+        "USDA cheese-flavored corn snacks are a much closer match than the previous plain cheese profile; brand, oil, and product texture still vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -14893,11 +15038,11 @@
         "cheese cake"
       ],
       "baselineNutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Cheesecake, fruit",
-        "similarity": 0.7692,
+        "matchBasis": "reviewed FDC record",
+        "name": "Cheesecake, plain",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2707862"
+        "sourceID": "2707861"
       },
       "category": "Desserts & sweets",
       "confidence": "Medium",
@@ -14916,19 +15061,19 @@
       },
       "nutritionEvidence": {
         "baselineNutritionSource": {
-          "matchBasis": "canonical",
-          "name": "Cheesecake, fruit",
-          "similarity": 0.7692,
+          "matchBasis": "reviewed FDC record",
+          "name": "Cheesecake, plain",
+          "similarity": null,
           "source": "usda",
-          "sourceID": "2707862"
+          "sourceID": "2707861"
         },
         "compositionEvidence": {
           "confidence": "Medium",
-          "decision": "Keep Cheesecake as a canonical dessert and use plain cheesecake as the baseline. Burnt style is not included; optional toppings remain separate additions.",
-          "reason": "FNDDS plain cheesecake is a direct generic match, but the source slice measure is 175 g while the workbook default slice is estimated at 125 g.",
+          "decision": "Keep Cheesecake as a canonical dessert; burnt style is not a variation.",
+          "reason": "USDA plain cheesecake directly matches the canonical item; recipe and slice size vary.",
           "sources": [
             {
-              "name": "USDA FoodData Central Survey (FNDDS)",
+              "name": "FoodData Central",
               "recordName": "Cheesecake, plain",
               "sourceID": "2707861",
               "url": "https://fdc.nal.usda.gov/food-details/2707861/nutrients"
@@ -14944,21 +15089,20 @@
           "protein": 5.29
         },
         "reviewReasons": [
-          "FNDDS plain cheesecake is a direct generic match, but the source slice measure is 175 g while the workbook default slice is estimated at 125 g."
+          "USDA plain cheesecake directly matches the canonical item; recipe and slice size vary."
         ],
         "source": {
-          "dataType": "Survey (FNDDS)",
+          "dataType": "FNDDS 2021-2023",
           "database": "FoodData Central",
-          "name": "USDA FoodData Central Survey (FNDDS)",
-          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "organization": "USDA Agricultural Research Service",
           "recordID": "2707861",
           "recordName": "Cheesecake, plain",
           "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-27",
           "serving": {
             "description": "1 piece/slice, any size",
             "grams": 175.0
           },
-          "sourceID": "2707861",
           "url": "https://fdc.nal.usda.gov/food-details/2707861/nutrients"
         }
       },
@@ -14978,7 +15122,7 @@
       },
       "optionsSummary": "Berry topping, Whipped cream, Chocolate",
       "reviewReasons": [
-        "FNDDS plain cheesecake is a direct generic match, but the source slice measure is 175 g while the workbook default slice is estimated at 125 g."
+        "USDA plain cheesecake directly matches the canonical item; recipe and slice size vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -14990,8 +15134,15 @@
         "chef salad",
         "chef's salad"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Beef salad",
+        "similarity": 0.8,
+        "source": "usda",
+        "sourceID": "2706749"
+      },
       "category": "Salads",
-      "confidence": "Medium",
+      "confidence": "Low",
       "defaultGrams": 340.0,
       "defaultUnit": "1 bowl",
       "foodKind": "Recipe / assembled",
@@ -14999,30 +15150,76 @@
       "includedComponentsSummary": "None",
       "name": "Chef salad",
       "nutrients": {
-        "calories": 887.4,
-        "carbs": 9.86,
-        "fat": 65.62,
-        "fiber": 1.36,
-        "protein": 60.52
+        "calories": 360.4,
+        "carbs": 10.2,
+        "fat": 19.07,
+        "fiber": 3.06,
+        "protein": 37.4
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Beef salad",
+          "similarity": 0.8,
+          "source": "usda",
+          "sourceID": "2706749"
+        },
+        "compositionEvidence": {
+          "confidence": "Low",
+          "decision": "Keep Chef salad as a canonical composed salad.",
+          "reason": "No direct chef-salad record was present in the local USDA database. Chicken/turkey garden salad with bacon and cheese is a broad proxy and omits some customary ingredients and dressing.",
+          "sources": [
+            {
+              "name": "FoodData Central",
+              "recordName": "Chicken or turkey garden salad with bacon and cheese, chicken and/or turkey, bacon, cheese, lettuce and/or greens, tomato and/or carrots, other vegetables, no dressing",
+              "sourceID": "2706812",
+              "url": "https://fdc.nal.usda.gov/food-details/2706812/nutrients"
+            }
+          ]
+        },
+        "confidence": "Low",
+        "nutritionPer100g": {
+          "calories": 106.0,
+          "carbs": 3.0,
+          "fat": 5.61,
+          "fiber": 0.9,
+          "protein": 11.0
+        },
+        "reviewReasons": [
+          "No direct chef-salad record was present in the local USDA database. Chicken/turkey garden salad with bacon and cheese is a broad proxy and omits some customary ingredients and dressing."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "organization": "USDA Agricultural Research Service",
+          "recordID": "2706812",
+          "recordName": "Chicken or turkey garden salad with bacon and cheese, chicken and/or turkey, bacon, cheese, lettuce and/or greens, tomato and/or carrots, other vegetables, no dressing",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-27",
+          "serving": {
+            "description": "1 cup",
+            "grams": 90.0
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2706812/nutrients"
+        }
       },
       "nutritionPer100g": {
-        "calories": 261.0,
-        "carbs": 2.9,
-        "fat": 19.3,
-        "fiber": 0.4,
-        "protein": 17.8
+        "calories": 106.0,
+        "carbs": 3.0,
+        "fat": 5.61,
+        "fiber": 0.9,
+        "protein": 11.0
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Beef salad",
-        "similarity": 0.8,
+        "matchBasis": "reviewed FDC record",
+        "name": "Chicken or turkey garden salad with bacon and cheese, chicken and/or turkey, bacon, cheese, lettuce and/or greens, tomato and/or carrots, other vegetables, no dressing",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2706749"
+        "sourceID": "2706812"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "No direct chef-salad record was present in the local USDA database. Chicken/turkey garden salad with bacon and cheese is a broad proxy and omits some customary ingredients and dressing."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -15034,8 +15231,15 @@
         "cherries",
         "fresh cherries"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Cherries, raw",
+        "similarity": 0.8,
+        "source": "usda",
+        "sourceID": "2709231"
+      },
       "category": "Fruit",
-      "confidence": "Medium",
+      "confidence": "High",
       "defaultGrams": 140.0,
       "defaultUnit": "1 cup",
       "foodKind": "Reusable ingredient",
@@ -15049,6 +15253,51 @@
         "fiber": 2.94,
         "protein": 1.46
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Cherries, raw",
+          "similarity": 0.8,
+          "source": "usda",
+          "sourceID": "2709231"
+        },
+        "compositionEvidence": {
+          "confidence": "High",
+          "decision": "Keep Cherries as raw cherries.",
+          "reason": "Direct USDA raw cherries record; catalog cup calories are scaled from per-100-g nutrients.",
+          "sources": [
+            {
+              "name": "FoodData Central",
+              "recordName": "Cherries, raw",
+              "sourceID": "2709231",
+              "url": "https://fdc.nal.usda.gov/food-details/2709231/nutrients"
+            }
+          ]
+        },
+        "confidence": "High",
+        "nutritionPer100g": {
+          "calories": 71.0,
+          "carbs": 16.2,
+          "fat": 0.19,
+          "fiber": 2.1,
+          "protein": 1.04
+        },
+        "reviewReasons": [],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "organization": "USDA Agricultural Research Service",
+          "recordID": "2709231",
+          "recordName": "Cherries, raw",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-27",
+          "serving": {
+            "description": "1 cherry",
+            "grams": 7.0
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2709231/nutrients"
+        }
+      },
       "nutritionPer100g": {
         "calories": 71.0,
         "carbs": 16.2,
@@ -15057,17 +15306,15 @@
         "protein": 1.04
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Cherries, raw",
-        "similarity": 0.8,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2709231"
       },
       "optionsSummary": "None",
-      "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
-      ],
-      "reviewRequired": true,
+      "reviewReasons": [],
+      "reviewRequired": false,
       "searchEnabled": true,
       "sizeAvailable": false,
       "variationsSummary": "None"
@@ -15078,9 +15325,9 @@
         "chicken dumplings"
       ],
       "baselineNutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Chicken or turkey with dumplings",
-        "similarity": 0.6792,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2706543"
       },
@@ -15101,19 +15348,19 @@
       },
       "nutritionEvidence": {
         "baselineNutritionSource": {
-          "matchBasis": "canonical",
+          "matchBasis": "reviewed FDC record",
           "name": "Chicken or turkey with dumplings",
-          "similarity": 0.6792,
+          "similarity": null,
           "source": "usda",
           "sourceID": "2706543"
         },
         "compositionEvidence": {
           "confidence": "Medium",
-          "decision": "Keep Chicken and dumplings as one prepared-food canonical. Use the generic chicken/turkey-with-dumplings record; broth, dumpling, and meat ratios vary.",
-          "reason": "FNDDS chicken or turkey with dumplings is a close generic match; the workbook bowl is 340 g versus a 244 g USDA cup measure and recipes vary.",
+          "decision": "Keep Chicken and dumplings as a canonical composed dish.",
+          "reason": "USDA chicken or turkey with dumplings is a close dish match; recipe thickness and meat ratio vary.",
           "sources": [
             {
-              "name": "USDA FoodData Central Survey (FNDDS)",
+              "name": "FoodData Central",
               "recordName": "Chicken or turkey with dumplings",
               "sourceID": "2706543",
               "url": "https://fdc.nal.usda.gov/food-details/2706543/nutrients"
@@ -15129,21 +15376,20 @@
           "protein": 15.7
         },
         "reviewReasons": [
-          "FNDDS chicken or turkey with dumplings is a close generic match; the workbook bowl is 340 g versus a 244 g USDA cup measure and recipes vary."
+          "USDA chicken or turkey with dumplings is a close dish match; recipe thickness and meat ratio vary."
         ],
         "source": {
-          "dataType": "Survey (FNDDS)",
+          "dataType": "FNDDS 2021-2023",
           "database": "FoodData Central",
-          "name": "USDA FoodData Central Survey (FNDDS)",
-          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "organization": "USDA Agricultural Research Service",
           "recordID": "2706543",
           "recordName": "Chicken or turkey with dumplings",
           "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-27",
           "serving": {
             "description": "1 cup",
             "grams": 244.0
           },
-          "sourceID": "2706543",
           "url": "https://fdc.nal.usda.gov/food-details/2706543/nutrients"
         }
       },
@@ -15163,7 +15409,7 @@
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "FNDDS chicken or turkey with dumplings is a close generic match; the workbook bowl is 340 g versus a 244 g USDA cup measure and recipes vary."
+        "USDA chicken or turkey with dumplings is a close dish match; recipe thickness and meat ratio vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -15395,6 +15641,13 @@
         "chicken chili",
         "white chicken chili"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Chicken, tail",
+        "similarity": 0.8,
+        "source": "usda",
+        "sourceID": "2706083"
+      },
       "category": "Soups & stews",
       "confidence": "Medium",
       "defaultGrams": 320.0,
@@ -15404,30 +15657,76 @@
       "includedComponentsSummary": "None",
       "name": "Chicken chili",
       "nutrients": {
-        "calories": 1452.8,
-        "carbs": 0.0,
-        "fat": 130.24,
-        "fiber": 0.0,
-        "protein": 65.28
+        "calories": 316.8,
+        "carbs": 32.64,
+        "fat": 6.66,
+        "fiber": 9.6,
+        "protein": 32.64
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Chicken, tail",
+          "similarity": 0.8,
+          "source": "usda",
+          "sourceID": "2706083"
+        },
+        "compositionEvidence": {
+          "confidence": "Medium",
+          "decision": "Keep Chicken chili as a chicken-and-bean chili identity.",
+          "reason": "Direct USDA chili with chicken and beans is a close match; white-chili recipes and bean amounts vary.",
+          "sources": [
+            {
+              "name": "FoodData Central",
+              "recordName": "Chili with chicken and beans",
+              "sourceID": "2706425",
+              "url": "https://fdc.nal.usda.gov/food-details/2706425/nutrients"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 99.0,
+          "carbs": 10.2,
+          "fat": 2.08,
+          "fiber": 3.0,
+          "protein": 10.2
+        },
+        "reviewReasons": [
+          "Direct USDA chili with chicken and beans is a close match; white-chili recipes and bean amounts vary."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "organization": "USDA Agricultural Research Service",
+          "recordID": "2706425",
+          "recordName": "Chili with chicken and beans",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-27",
+          "serving": {
+            "description": "1 cup",
+            "grams": 255.0
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2706425/nutrients"
+        }
       },
       "nutritionPer100g": {
-        "calories": 454.0,
-        "carbs": 0.0,
-        "fat": 40.7,
-        "fiber": 0.0,
-        "protein": 20.4
+        "calories": 99.0,
+        "carbs": 10.2,
+        "fat": 2.08,
+        "fiber": 3.0,
+        "protein": 10.2
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Chicken, tail",
-        "similarity": 0.8,
+        "matchBasis": "reviewed FDC record",
+        "name": "Chili with chicken and beans",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2706083"
+        "sourceID": "2706425"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "Direct USDA chili with chicken and beans is a close match; white-chili recipes and bean amounts vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -15550,6 +15849,13 @@
         "chicken fajita filling",
         "fajita chicken"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "alias",
+        "name": "Fajita, chicken",
+        "similarity": 0.94,
+        "source": "usda",
+        "sourceID": "2708604"
+      },
       "category": "Chicken & turkey",
       "confidence": "Medium",
       "defaultGrams": 190.0,
@@ -15565,6 +15871,53 @@
         "fiber": 2.85,
         "protein": 21.47
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "alias",
+          "name": "Fajita, chicken",
+          "similarity": 0.94,
+          "source": "usda",
+          "sourceID": "2708604"
+        },
+        "compositionEvidence": {
+          "confidence": "Medium",
+          "decision": "Keep Chicken fajita filling as a configurable reusable filling.",
+          "reason": "USDA chicken fajita is the closest match; it may include tortilla and other assembled components beyond the catalog filling.",
+          "sources": [
+            {
+              "name": "FoodData Central",
+              "recordName": "Fajita, chicken",
+              "sourceID": "2708604",
+              "url": "https://fdc.nal.usda.gov/food-details/2708604/nutrients"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 206.0,
+          "carbs": 18.0,
+          "fat": 9.8,
+          "fiber": 1.5,
+          "protein": 11.3
+        },
+        "reviewReasons": [
+          "USDA chicken fajita is the closest match; it may include tortilla and other assembled components beyond the catalog filling."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "organization": "USDA Agricultural Research Service",
+          "recordID": "2708604",
+          "recordName": "Fajita, chicken",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-27",
+          "serving": {
+            "description": "1 fajita",
+            "grams": 95.0
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2708604/nutrients"
+        }
+      },
       "nutritionPer100g": {
         "calories": 206.0,
         "carbs": 18.0,
@@ -15573,16 +15926,15 @@
         "protein": 11.3
       },
       "nutritionSource": {
-        "matchBasis": "alias",
+        "matchBasis": "reviewed FDC record",
         "name": "Fajita, chicken",
-        "similarity": 0.94,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2708604"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "USDA chicken fajita is the closest match; it may include tortilla and other assembled components beyond the catalog filling."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -15638,6 +15990,13 @@
         "chicken nugget",
         "nuggets"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Chicken nuggets, NFS",
+        "similarity": 0.8824,
+        "source": "usda",
+        "sourceID": "2706092"
+      },
       "category": "Chicken & turkey",
       "confidence": "Medium",
       "defaultGrams": 17.0,
@@ -15653,6 +16012,53 @@
         "fiber": 0.15,
         "protein": 2.7
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Chicken nuggets, NFS",
+          "similarity": 0.8824,
+          "source": "usda",
+          "sourceID": "2706092"
+        },
+        "compositionEvidence": {
+          "confidence": "Medium",
+          "decision": "Keep Chicken nuggets as a canonical prepared food.",
+          "reason": "USDA not-further-specified nuggets directly match the item; breading and cooking method vary.",
+          "sources": [
+            {
+              "name": "FoodData Central",
+              "recordName": "Chicken nuggets, NFS",
+              "sourceID": "2706092",
+              "url": "https://fdc.nal.usda.gov/food-details/2706092/nutrients"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 307.0,
+          "carbs": 14.9,
+          "fat": 20.4,
+          "fiber": 0.9,
+          "protein": 15.9
+        },
+        "reviewReasons": [
+          "USDA not-further-specified nuggets directly match the item; breading and cooking method vary."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "organization": "USDA Agricultural Research Service",
+          "recordID": "2706092",
+          "recordName": "Chicken nuggets, NFS",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-27",
+          "serving": {
+            "description": "1 nugget",
+            "grams": 16.0
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2706092/nutrients"
+        }
+      },
       "nutritionPer100g": {
         "calories": 307.0,
         "carbs": 14.9,
@@ -15661,16 +16067,15 @@
         "protein": 15.9
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Chicken nuggets, NFS",
-        "similarity": 0.8824,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2706092"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "USDA not-further-specified nuggets directly match the item; breading and cooking method vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -15683,6 +16088,13 @@
         "chicken parmigiana",
         "chicken parm"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Chicken Ramen",
+        "similarity": 0.8276,
+        "source": "off",
+        "sourceID": "0041789001215"
+      },
       "category": "Pizza & pasta",
       "confidence": "Medium",
       "defaultGrams": 285.0,
@@ -15692,30 +16104,76 @@
       "includedComponentsSummary": "None",
       "name": "Chicken Parmesan",
       "nutrients": {
-        "calories": 1291.41,
-        "carbs": 0.0,
-        "fat": 53.44,
-        "fiber": 8.91,
-        "protein": 26.72
+        "calories": 581.4,
+        "carbs": 31.07,
+        "fat": 30.21,
+        "fiber": 2.56,
+        "protein": 46.17
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Chicken Ramen",
+          "similarity": 0.8276,
+          "source": "off",
+          "sourceID": "0041789001215"
+        },
+        "compositionEvidence": {
+          "confidence": "Medium",
+          "decision": "Keep Chicken Parmesan as the main dish with pasta and other additions separately selectable.",
+          "reason": "USDA restaurant chicken Parmesan without pasta matches the base dish and keeps the catalog pasta option separate; recipe and serving size vary.",
+          "sources": [
+            {
+              "name": "FoodData Central",
+              "recordName": "Restaurant, Italian, chicken parmesan without pasta",
+              "sourceID": "168062",
+              "url": "https://fdc.nal.usda.gov/food-details/168062/nutrients"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 204.0,
+          "carbs": 10.9,
+          "fat": 10.6,
+          "fiber": 0.9,
+          "protein": 16.2
+        },
+        "reviewReasons": [
+          "USDA restaurant chicken Parmesan without pasta matches the base dish and keeps the catalog pasta option separate; recipe and serving size vary."
+        ],
+        "source": {
+          "dataType": "SR Legacy",
+          "database": "FoodData Central",
+          "organization": "USDA Agricultural Research Service",
+          "recordID": "168062",
+          "recordName": "Restaurant, Italian, chicken parmesan without pasta",
+          "releaseDate": "2018-04-01",
+          "reviewedDate": "2026-10-27",
+          "serving": {
+            "description": "1 serving",
+            "grams": 301.0
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/168062/nutrients"
+        }
       },
       "nutritionPer100g": {
-        "calories": 453.125,
-        "carbs": 0.0,
-        "fat": 18.75,
-        "fiber": 3.125,
-        "protein": 9.375
+        "calories": 204.0,
+        "carbs": 10.9,
+        "fat": 10.6,
+        "fiber": 0.9,
+        "protein": 16.2
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Chicken Ramen",
-        "similarity": 0.8276,
-        "source": "off",
-        "sourceID": "0041789001215"
+        "matchBasis": "reviewed FDC record",
+        "name": "Restaurant, Italian, chicken parmesan without pasta",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "168062"
       },
       "optionsSummary": "Pasta with sauce · side, Extra marinara, Extra mozzarella, Salad · side",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "USDA restaurant chicken Parmesan without pasta matches the base dish and keeps the catalog pasta option separate; recipe and serving size vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -15990,6 +16448,13 @@
         "chicken salad",
         "mayonnaise chicken salad"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Chicken spread",
+        "similarity": 0.8148,
+        "source": "usda",
+        "sourceID": "173858"
+      },
       "category": "Salads",
       "confidence": "Medium",
       "defaultGrams": 200.0,
@@ -15999,30 +16464,76 @@
       "includedComponentsSummary": "None",
       "name": "Chicken salad",
       "nutrients": {
-        "calories": 316.0,
-        "carbs": 8.1,
-        "fat": 35.2,
-        "fiber": 0.6,
-        "protein": 36.0
+        "calories": 470.0,
+        "carbs": 5.76,
+        "fat": 37.6,
+        "fiber": 0.8,
+        "protein": 27.8
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Chicken spread",
+          "similarity": 0.8148,
+          "source": "usda",
+          "sourceID": "173858"
+        },
+        "compositionEvidence": {
+          "confidence": "Medium",
+          "decision": "Keep Chicken salad as a configurable canonical salad.",
+          "reason": "USDA chicken or turkey salad made with mayonnaise is a close match; mayonnaise proportion and optional ingredients vary.",
+          "sources": [
+            {
+              "name": "FoodData Central",
+              "recordName": "Chicken or turkey salad, made with mayonnaise",
+              "sourceID": "2706799",
+              "url": "https://fdc.nal.usda.gov/food-details/2706799/nutrients"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 235.0,
+          "carbs": 2.88,
+          "fat": 18.8,
+          "fiber": 0.4,
+          "protein": 13.9
+        },
+        "reviewReasons": [
+          "USDA chicken or turkey salad made with mayonnaise is a close match; mayonnaise proportion and optional ingredients vary."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "organization": "USDA Agricultural Research Service",
+          "recordID": "2706799",
+          "recordName": "Chicken or turkey salad, made with mayonnaise",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-27",
+          "serving": {
+            "description": "1 cup",
+            "grams": 226.0
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2706799/nutrients"
+        }
       },
       "nutritionPer100g": {
-        "calories": 158.0,
-        "carbs": 4.05,
-        "fat": 17.6,
-        "fiber": 0.3,
-        "protein": 18.0
+        "calories": 235.0,
+        "carbs": 2.88,
+        "fat": 18.8,
+        "fiber": 0.4,
+        "protein": 13.9
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Chicken spread",
-        "similarity": 0.8148,
+        "matchBasis": "reviewed FDC record",
+        "name": "Chicken or turkey salad, made with mayonnaise",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "173858"
+        "sourceID": "2706799"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "USDA chicken or turkey salad made with mayonnaise is a close match; mayonnaise proportion and optional ingredients vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -16034,6 +16545,13 @@
         "chicken salad sandwich",
         "chicken salad on bread"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Chicken salad sandwich wrap",
+        "similarity": 0.898,
+        "source": "usda",
+        "sourceID": "2706992"
+      },
       "category": "Sandwiches & handhelds",
       "confidence": "Medium",
       "defaultGrams": 195.0,
@@ -16043,30 +16561,76 @@
       "includedComponentsSummary": "None",
       "name": "Chicken salad sandwich",
       "nutrients": {
-        "calories": 524.55,
-        "carbs": 33.15,
-        "fat": 32.37,
-        "fiber": 2.54,
-        "protein": 25.16
+        "calories": 479.7,
+        "carbs": 35.69,
+        "fat": 26.71,
+        "fiber": 1.95,
+        "protein": 24.18
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Chicken salad sandwich wrap",
+          "similarity": 0.898,
+          "source": "usda",
+          "sourceID": "2706992"
+        },
+        "compositionEvidence": {
+          "confidence": "Medium",
+          "decision": "Keep Chicken salad sandwich as a commonly searched assembled sandwich.",
+          "reason": "USDA chicken salad sandwich on white bread is a close match; bread and filling quantity vary.",
+          "sources": [
+            {
+              "name": "FoodData Central",
+              "recordName": "Chicken salad sandwich on white",
+              "sourceID": "2706990",
+              "url": "https://fdc.nal.usda.gov/food-details/2706990/nutrients"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 246.0,
+          "carbs": 18.3,
+          "fat": 13.7,
+          "fiber": 1.0,
+          "protein": 12.4
+        },
+        "reviewReasons": [
+          "USDA chicken salad sandwich on white bread is a close match; bread and filling quantity vary."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "organization": "USDA Agricultural Research Service",
+          "recordID": "2706990",
+          "recordName": "Chicken salad sandwich on white",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-27",
+          "serving": {
+            "description": "1 regular",
+            "grams": 180.0
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2706990/nutrients"
+        }
       },
       "nutritionPer100g": {
-        "calories": 269.0,
-        "carbs": 17.0,
-        "fat": 16.6,
-        "fiber": 1.3,
-        "protein": 12.9
+        "calories": 246.0,
+        "carbs": 18.3,
+        "fat": 13.7,
+        "fiber": 1.0,
+        "protein": 12.4
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Chicken salad sandwich wrap",
-        "similarity": 0.898,
+        "matchBasis": "reviewed FDC record",
+        "name": "Chicken salad sandwich on white",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2706992"
+        "sourceID": "2706990"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "USDA chicken salad sandwich on white bread is a close match; bread and filling quantity vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -16671,6 +17235,13 @@
         "buffalo wings",
         "wing"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Chicken wing, stewed",
+        "similarity": 0.8125,
+        "source": "usda",
+        "sourceID": "2706061"
+      },
       "category": "Chicken & turkey",
       "confidence": "Medium",
       "defaultGrams": 45.0,
@@ -16680,30 +17251,76 @@
       "includedComponentsSummary": "None",
       "name": "Chicken wings",
       "nutrients": {
-        "calories": 111.15,
-        "carbs": 0.0,
-        "fat": 7.51,
+        "calories": 115.65,
+        "carbs": 0.27,
+        "fat": 8.1,
         "fiber": 0.0,
-        "protein": 10.17
+        "protein": 10.53
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Chicken wing, stewed",
+          "similarity": 0.8125,
+          "source": "usda",
+          "sourceID": "2706061"
+        },
+        "compositionEvidence": {
+          "confidence": "Medium",
+          "decision": "Keep Chicken wings as a canonical prepared food with sauce and dressing options.",
+          "reason": "USDA chicken wing, cooking method not specified, matches the plain wing; the catalog wing portion is approximate and bone yield varies.",
+          "sources": [
+            {
+              "name": "FoodData Central",
+              "recordName": "Chicken wing, NS as to cooking method",
+              "sourceID": "2706056",
+              "url": "https://fdc.nal.usda.gov/food-details/2706056/nutrients"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 257.0,
+          "carbs": 0.6,
+          "fat": 18.0,
+          "fiber": 0.0,
+          "protein": 23.4
+        },
+        "reviewReasons": [
+          "USDA chicken wing, cooking method not specified, matches the plain wing; the catalog wing portion is approximate and bone yield varies."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "organization": "USDA Agricultural Research Service",
+          "recordID": "2706056",
+          "recordName": "Chicken wing, NS as to cooking method",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-27",
+          "serving": {
+            "description": "1 wing, any size",
+            "grams": 35.0
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2706056/nutrients"
+        }
       },
       "nutritionPer100g": {
-        "calories": 247.0,
-        "carbs": 0.0,
-        "fat": 16.7,
+        "calories": 257.0,
+        "carbs": 0.6,
+        "fat": 18.0,
         "fiber": 0.0,
-        "protein": 22.6
+        "protein": 23.4
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Chicken wing, stewed",
-        "similarity": 0.8125,
+        "matchBasis": "reviewed FDC record",
+        "name": "Chicken wing, NS as to cooking method",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2706061"
+        "sourceID": "2706056"
       },
       "optionsSummary": "Buffalo wing sauce, Ranch dressing, Blue cheese dressing",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "USDA chicken wing, cooking method not specified, matches the plain wing; the catalog wing portion is approximate and bone yield varies."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -16715,8 +17332,15 @@
         "chicken wrap",
         "chicken tortilla wrap"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Chicken Ramen",
+        "similarity": 0.8,
+        "source": "off",
+        "sourceID": "0041789001215"
+      },
       "category": "Sandwiches & handhelds",
-      "confidence": "Medium",
+      "confidence": "Low",
       "defaultGrams": 220.0,
       "defaultUnit": "1 wrap",
       "foodKind": "Recipe / assembled",
@@ -16724,30 +17348,76 @@
       "includedComponentsSummary": "None",
       "name": "Chicken wrap",
       "nutrients": {
-        "calories": 996.88,
-        "carbs": 0.0,
-        "fat": 41.25,
-        "fiber": 6.88,
-        "protein": 20.62
+        "calories": 554.4,
+        "carbs": 38.06,
+        "fat": 22.88,
+        "fiber": 2.64,
+        "protein": 45.76
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Chicken Ramen",
+          "similarity": 0.8,
+          "source": "off",
+          "sourceID": "0041789001215"
+        },
+        "compositionEvidence": {
+          "confidence": "Low",
+          "decision": "Keep Chicken wrap as a canonical assembled wrap.",
+          "reason": "The closest USDA record is a grilled fast-food chicken fillet wrap; fillings, sauces, breading, and size vary.",
+          "sources": [
+            {
+              "name": "FoodData Central",
+              "recordName": "Chicken fillet wrap sandwich, grilled, from fast food",
+              "sourceID": "2707017",
+              "url": "https://fdc.nal.usda.gov/food-details/2707017/nutrients"
+            }
+          ]
+        },
+        "confidence": "Low",
+        "nutritionPer100g": {
+          "calories": 252.0,
+          "carbs": 17.3,
+          "fat": 10.4,
+          "fiber": 1.2,
+          "protein": 20.8
+        },
+        "reviewReasons": [
+          "The closest USDA record is a grilled fast-food chicken fillet wrap; fillings, sauces, breading, and size vary."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "organization": "USDA Agricultural Research Service",
+          "recordID": "2707017",
+          "recordName": "Chicken fillet wrap sandwich, grilled, from fast food",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-27",
+          "serving": {
+            "description": "1 sandwich, any size",
+            "grams": 161.0
+          },
+          "url": "https://fdc.nal.usda.gov/food-details/2707017/nutrients"
+        }
       },
       "nutritionPer100g": {
-        "calories": 453.125,
-        "carbs": 0.0,
-        "fat": 18.75,
-        "fiber": 3.125,
-        "protein": 9.375
+        "calories": 252.0,
+        "carbs": 17.3,
+        "fat": 10.4,
+        "fiber": 1.2,
+        "protein": 20.8
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Chicken Ramen",
-        "similarity": 0.8,
-        "source": "off",
-        "sourceID": "0041789001215"
+        "matchBasis": "reviewed FDC record",
+        "name": "Chicken fillet wrap sandwich, grilled, from fast food",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2707017"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "The closest USDA record is a grilled fast-food chicken fillet wrap; fillings, sauces, breading, and size vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
