@@ -360,6 +360,7 @@ class DiaryStore: ObservableObject {
     private func perform<T: Sendable>(
         scope: DiaryScope,
         operation: TimedDiaryOperation? = nil,
+        syncHealth: Bool = true,
         _ action: @escaping @Sendable (DiaryEngine) throws -> T
     ) async throws -> T {
         do {
@@ -371,7 +372,7 @@ class DiaryStore: ObservableObject {
             operation?.record("database_mutation_finished")
             SharedDiaryStorage.reloadWidget()
             operation?.record("widget_reload_requested")
-            startHealthSync(operation: operation)
+            if syncHealth { startHealthSync(operation: operation) }
             do {
                 try await refresh(repository, referenceDate: Date(), operation: operation)
             } catch {
@@ -721,6 +722,14 @@ class DiaryStore: ObservableObject {
 
     func status(on date: Date) -> DayStatus? {
         engine.status(on: date)
+    }
+
+    func dailyNote(on date: Date) -> String? {
+        engine.dailyNote(on: date)
+    }
+
+    func saveDailyNote(_ text: String?, on date: Date) async throws {
+        try await perform(scope: .day(date), syncHealth: false) { $0.setDailyNote(text, on: date) }
     }
 
     func canLogFood(on date: Date) -> Bool {

@@ -4096,6 +4096,44 @@ extension CalorieTrackerTests {
 
         XCTAssertEqual(document.schemaVersion, 5)
         XCTAssertTrue(document.alcoholEntries.isEmpty)
+        XCTAssertTrue(document.dailyNotes.isEmpty)
+
+        var withNote = document
+        withNote.dailyNotes = [DailyNote(date: testDate(day: 5), text: "Late dinner")]
+        let roundTrip = try JSONDecoder().decode(DiaryDocument.self, from: JSONEncoder().encode(withNote))
+        XCTAssertEqual(roundTrip.dailyNotes, withNote.dailyNotes)
+    }
+
+    func testDailyNotesAreDateScopedAcrossDaylightSavingAndDoNotChangeDiaryData() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "America/Los_Angeles")!
+        let firstDay = calendar.date(from: DateComponents(year: 2026, month: 3, day: 8, hour: 14))!
+        let secondDay = calendar.date(from: DateComponents(year: 2026, month: 3, day: 9, hour: 14))!
+        let url = temporaryDiaryURL()
+        let repository = try DiaryRepository(fileURL: url, calendar: calendar)
+        let food = testFood(calories: 420, name: "Brunch")
+
+        try repository.performSync(scope: .day(firstDay)) { engine in
+            engine.log(food, amount: 1, unit: .serving, on: firstDay)
+            engine.setDailyNote("First day", on: firstDay)
+        }
+        try repository.performSync(scope: .day(secondDay)) {
+            $0.setDailyNote("Second day", on: secondDay)
+        }
+
+        let firstSnapshot = try repository.snapshotSync(scope: .day(firstDay)).document
+        let secondSnapshot = try repository.snapshotSync(scope: .day(secondDay)).document
+        XCTAssertEqual(firstSnapshot.dailyNotes.map(\.text), ["First day"])
+        XCTAssertEqual(secondSnapshot.dailyNotes.map(\.text), ["Second day"])
+        XCTAssertEqual(firstSnapshot.entries.count, 1)
+        XCTAssertTrue(firstSnapshot.dayStatuses.isEmpty)
+        XCTAssertTrue(secondSnapshot.dayStatuses.isEmpty)
+
+        try repository.performSync(scope: .day(firstDay)) { $0.setDailyNote(nil, on: firstDay) }
+        let cleared = try repository.snapshotSync(scope: .day(firstDay)).document
+        XCTAssertTrue(cleared.dailyNotes.isEmpty)
+        XCTAssertEqual(cleared.entries.count, 1)
+        XCTAssertEqual(try repository.snapshotSync(scope: .day(secondDay)).document.dailyNotes.map(\.text), ["Second day"])
     }
 
     @MainActor

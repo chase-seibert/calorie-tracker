@@ -12,6 +12,7 @@ required; both targets link Apple's system SQLite library.
 | Personal foods, reusable meals and ingredients | Same database | Stable identities; deleting a template must not delete history |
 | Favorites, combined favorite ordering, per-food quantities, renamed foods | Same database | Changed transactionally with diary/library operations |
 | Goal, tracking start, day statuses, alcohol aggregates | Same database | Consistent diary/report/HealthKit rules |
+| Optional note attached to a calendar day | Same database | Private local context; excluded from HealthKit and weekly reports |
 | Quick-log receipt | Same database | Committed in the same transaction as the log |
 | Pending HealthKit days and known/deleted sample identities | Same database | Survives process death and disconnected Health permissions |
 | Focus toggles, onboarding completion, debug controls | UserDefaults | Small independent preferences |
@@ -64,7 +65,8 @@ Views wait for commits before dismissing edit forms or reporting success.
 Load/save failures are visible; a failed initial load cannot expose an empty
 writable diary. Unsupported schemas and non-SQLite files are rejected, not
 replaced. Schema changes after this cutover must use numbered transactional
-migrations; the initial schema is `PRAGMA user_version = 1`.
+migrations; the current schema is `PRAGMA user_version = 3`. Version 2 to 3 adds
+the day-keyed `daily_notes` table without rewriting existing diary rows.
 
 HealthKit work is a durable, revisioned day queue. Each diary transaction retains
 known sample identities, including deleted entries, and marks affected days.

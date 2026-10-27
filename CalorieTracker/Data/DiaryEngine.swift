@@ -318,6 +318,19 @@ final class DiaryEngine {
         document.dayStatuses.first { calendar.isDate($0.date, inSameDayAs: date) }
     }
 
+    func dailyNote(on date: Date) -> String? {
+        document.dailyNotes.first { calendar.isDate($0.date, inSameDayAs: date) }?.text
+    }
+
+    func setDailyNote(_ text: String?, on date: Date) {
+        let day = calendar.startOfDay(for: date)
+        let normalizedText = text?.trimmingCharacters(in: .whitespacesAndNewlines)
+        document.dailyNotes.removeAll { calendar.isDate($0.date, inSameDayAs: day) }
+        guard let normalizedText, !normalizedText.isEmpty else { return }
+        document.dailyNotes.append(DailyNote(date: day, text: normalizedText))
+        document.dailyNotes.sort { $0.date < $1.date }
+    }
+
     func canLogFood(on date: Date) -> Bool {
         status(on: date)?.kind != .cheat
     }

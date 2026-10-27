@@ -146,6 +146,13 @@ struct DayStatus: Codable, Hashable, Identifiable, Sendable {
     var id: Date { date }
 }
 
+struct DailyNote: Codable, Hashable, Identifiable, Sendable {
+    var date: Date
+    var text: String
+
+    var id: Date { date }
+}
+
 struct StreakSummary: Equatable, Sendable {
     let dates: [Date]
     let averageNutrients: MacroNutrients
@@ -821,6 +828,7 @@ struct DiaryDocument: Codable, Sendable {
     var dailyCalorieGoal: Int? = nil
     var trackingStartDate: Date? = nil
     var dayStatuses: [DayStatus] = []
+    var dailyNotes: [DailyNote] = []
     var entries: [DiaryEntry] = []
     var favorites: [Food] = []
     var favoriteMealIDs: [UUID] = []
@@ -842,6 +850,7 @@ struct DiaryDocument: Codable, Sendable {
         case dailyCalorieGoal
         case trackingStartDate
         case dayStatuses
+        case dailyNotes
         case entries
         case favorites
         case favoriteMealIDs
@@ -863,6 +872,7 @@ struct DiaryDocument: Codable, Sendable {
         dailyCalorieGoal = try container.decodeIfPresent(Int.self, forKey: .dailyCalorieGoal)
         trackingStartDate = try container.decodeIfPresent(Date.self, forKey: .trackingStartDate)
         dayStatuses = try container.decodeIfPresent([DayStatus].self, forKey: .dayStatuses) ?? []
+        dailyNotes = try container.decodeIfPresent([DailyNote].self, forKey: .dailyNotes) ?? []
         entries = try container.decodeIfPresent([DiaryEntry].self, forKey: .entries) ?? []
         favorites = try container.decodeIfPresent([Food].self, forKey: .favorites) ?? []
         favoriteMealIDs = try container.decodeIfPresent([UUID].self, forKey: .favoriteMealIDs) ?? []

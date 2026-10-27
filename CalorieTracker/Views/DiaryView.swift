@@ -25,6 +25,8 @@ struct DiaryView: View {
     @State private var showingTrends = ProcessInfo.processInfo.arguments.contains("--show-trends")
     @State private var showingStreak = ProcessInfo.processInfo.arguments.contains("--show-streak-report")
     @State private var showingAlcoholEntry = false
+    @State private var showingDailyNoteEditor = false
+    @State private var dailyNoteDraft = ""
     @State private var diaryEntriesHeight: CGFloat = 0
     @State private var showingBottomCheatPopover = false
     @State private var showingBannerCheatPopover = false
@@ -322,6 +324,38 @@ struct DiaryView: View {
                     .environmentObject(diary)
                     .presentationDetents([.medium])
             }
+            .sheet(isPresented: $showingDailyNoteEditor) {
+                NavigationStack {
+                    VStack(alignment: .leading, spacing: 12) {
+                        TextEditor(text: $dailyNoteDraft)
+                            .frame(minHeight: 180)
+                            .padding(8)
+                            .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 14))
+                            .accessibilityLabel("Day note")
+                            .accessibilityIdentifier("daily-note-editor")
+                        Spacer(minLength: 0)
+                    }
+                    .padding(16)
+                    .background(AppTheme.background.ignoresSafeArea())
+                    .navigationTitle("Day Note")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Cancel") { showingDailyNoteEditor = false }
+                        }
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Save") { saveDailyNote() }
+                                .fontWeight(.semibold)
+                        }
+                        if diary.dailyNote(on: date) != nil {
+                            ToolbarItem(placement: .bottomBar) {
+                                Button("Clear Note", role: .destructive) { clearDailyNote() }
+                            }
+                        }
+                    }
+                }
+                .presentationDetents([.medium, .large])
+            }
             .fullScreenCover(item: $editingEntry) { entry in
                 LoggedItemDetailView(entryID: entry.id, catalog: catalog)
                     .environmentObject(diary)
@@ -569,6 +603,35 @@ struct DiaryView: View {
                     }
                 }
             }
+            dailyNoteSection
+        }
+    }
+
+    private var dailyNoteSection: some View {
+        DailyNoteSection(note: diary.dailyNote(on: date), onEdit: editDailyNote)
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+        .padding(.bottom, 10)
+    }
+
+    private func editDailyNote() {
+        dailyNoteDraft = diary.dailyNote(on: date) ?? ""
+        showingDailyNoteEditor = true
+    }
+
+    private func saveDailyNote() {
+        let editedDate = date
+        diary.run {
+            try await diary.saveDailyNote(dailyNoteDraft, on: editedDate)
+            showingDailyNoteEditor = false
+        }
+    }
+
+    private func clearDailyNote() {
+        let editedDate = date
+        diary.run {
+            try await diary.saveDailyNote(nil, on: editedDate)
+            showingDailyNoteEditor = false
         }
     }
 
@@ -1653,6 +1716,28 @@ private final class IntrinsicCollectionView: UICollectionView {
 
     override var intrinsicContentSize: CGSize {
         CGSize(width: UIView.noIntrinsicMetric, height: contentSize.height)
+    }
+}
+
+private struct DailyNoteSection: View {
+    let note: String?
+    let onEdit: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            if let note {
+                Text(note)
+                    .font(.subheadline)
+                    .foregroundStyle(.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("daily-note-text")
+            }
+            Button(note == nil ? "Add Note" : "Edit", action: onEdit)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(AppTheme.muted)
+                .accessibilityIdentifier(note == nil ? "add-daily-note" : "edit-daily-note")
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

@@ -47,6 +47,7 @@ enum DiaryJSONMigration {
         var sorted = document
         sorted.entries.sort { $0.id.uuidString < $1.id.uuidString }
         sorted.dayStatuses.sort { $0.date < $1.date }
+        sorted.dailyNotes.sort { $0.date < $1.date }
         sorted.alcoholEntries.sort { $0.date < $1.date }
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .secondsSince1970
@@ -98,8 +99,11 @@ enum DiaryJSONMigration {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         var document = try decoder.decode(DiaryDocument.self, from: bytes)
+        document.dailyNotes = document.dailyNotes.map {
+            DailyNote(date: calendar.startOfDay(for: $0.date), text: $0.text)
+        }
         document.schemaVersion = max(document.schemaVersion, DiaryDocument().schemaVersion)
-        try DiaryRepository.validateDocument(document)
+        try DiaryRepository.validateDocument(document, calendar: calendar)
         let expected = try canonicalData(document)
 
         // Stage on the destination volume so the final no-replace publication is atomic.
@@ -241,7 +245,7 @@ private struct DiarySettings: Codable, Equatable {
 /// Each process has its own connection and serial executor. SQLite coordinates processes.
 /// No caller-owned document is ever written wholesale over another process's changes.
 final class DiaryRepository: @unchecked Sendable {
-    static let schemaVersion = 2
+    static let schemaVersion = 3
     let fileURL: URL
     private let calendar: Calendar
     private let queue = DispatchQueue(label: "com.cseibert.CalorieTracker.diary", qos: .userInitiated)
@@ -300,14 +304,19 @@ final class DiaryRepository: @unchecked Sendable {
             let version = Int(try scalar("PRAGMA user_version"))
             if version == 0, !existed {
                 try execute(Self.schema)
-                try execute("PRAGMA user_version = 2")
+                try execute("PRAGMA user_version = 3")
                 try execute("INSERT INTO store_state(id, revision, initialized) VALUES(1, 0, 0)")
                 try putSettings(DiaryDocument())
             } else if version == 1 {
                 try execute("CREATE TABLE food_suggestions(id TEXT PRIMARY KEY, position INTEGER NOT NULL, payload TEXT NOT NULL)")
                 try execute("CREATE TABLE saved_food_configurations(id TEXT PRIMARY KEY, base_food_id TEXT NOT NULL, position INTEGER NOT NULL, payload TEXT NOT NULL)")
                 try execute("CREATE INDEX saved_food_configurations_base ON saved_food_configurations(base_food_id, position)")
+                try execute("CREATE TABLE daily_notes(day REAL PRIMARY KEY, payload TEXT NOT NULL)")
                 try execute("PRAGMA user_version = 2")
+                try execute("PRAGMA user_version = 3")
+            } else if version == 2 {
+                try execute("CREATE TABLE daily_notes(day REAL PRIMARY KEY, payload TEXT NOT NULL)")
+                try execute("PRAGMA user_version = 3")
             } else if version != Self.schemaVersion {
                 throw DiaryDatabaseError.unsupportedVersion(version)
             }
@@ -380,7 +389,7 @@ final class DiaryRepository: @unchecked Sendable {
 
     /// Imports only into a new, uninitialized store; migration calls this on a staging database.
     func importDocument(_ document: DiaryDocument) throws {
-        try Self.validateDocument(document)
+        try Self.validateDocument(document, calendar: calendar)
         try queue.sync {
             try transaction {
                 guard try scalar("SELECT initialized FROM store_state WHERE id = 1") == 0 else {
@@ -472,6 +481,9 @@ final class DiaryRepository: @unchecked Sendable {
             document.customFoodNames[row["food_id"]!.string!] = row["name"]!.string!
         }
         document.dayStatuses = try objects("SELECT payload FROM day_statuses ORDER BY day")
+        let (notePredicate, noteBindings) = try notePredicate(for: scope)
+        document.dailyNotes = try objects(
+            "SELECT payload FROM daily_notes WHERE \(notePredicate) ORDER BY day", noteBindings)
         document.alcoholEntries = try objects("SELECT payload FROM alcohol_entries ORDER BY day")
         document.foodSuggestions = try objects("SELECT payload FROM food_suggestions ORDER BY position")
         document.savedFoodConfigurations = try objects("SELECT payload FROM saved_food_configurations ORDER BY base_food_id, position")
@@ -569,6 +581,34 @@ final class DiaryRepository: @unchecked Sendable {
         }
     }
 
+    private func notePredicate(for scope: DiaryScope) throws -> (String, [Value]) {
+        switch scope {
+        case .all: return ("1", [])
+        case .day(let day):
+            let start = calendar.startOfDay(for: day)
+            let end = calendar.date(byAdding: .day, value: 1, to: start)!
+            return ("day >= ? AND day < ?", [.real(start.timeIntervalSince1970), .real(end.timeIntervalSince1970)])
+        case .range(let startDate, let endDate):
+            let start = calendar.startOfDay(for: startDate)
+            let end = calendar.startOfDay(for: endDate)
+            return ("day >= ? AND day < ?", [.real(start.timeIntervalSince1970), .real(end.timeIntervalSince1970)])
+        case .window(let reference, let selected):
+            let start = calendar.date(byAdding: .day, value: -89, to: calendar.startOfDay(for: reference))!
+            let end = calendar.date(byAdding: .day, value: 2, to: calendar.startOfDay(for: reference))!
+            let window = "(day >= ? AND day < ?)"
+            var values: [Value] = [.real(start.timeIntervalSince1970), .real(end.timeIntervalSince1970)]
+            guard let selected else { return (window, values) }
+            let selectedStart = calendar.startOfDay(for: selected)
+            let selectedEnd = calendar.date(byAdding: .day, value: 1, to: selectedStart)!
+            values += [.real(selectedStart.timeIntervalSince1970), .real(selectedEnd.timeIntervalSince1970)]
+            return ("\(window) OR (day >= ? AND day < ?)", values)
+        case .entryAndDay(_, let day), .entriesAndDay(_, let day):
+            return try notePredicate(for: .day(day))
+        case .library, .search, .entries, .food, .foods, .meal:
+            return ("0", [])
+        }
+    }
+
     private func applyChanges(from old: DiaryDocument, to new: DiaryDocument) throws {
         let oldEntries = Dictionary(uniqueKeysWithValues: old.entries.map { ($0.id, $0) })
         let newEntries = Dictionary(uniqueKeysWithValues: new.entries.map { ($0.id, $0) })
@@ -656,6 +696,17 @@ final class DiaryRepository: @unchecked Sendable {
                     [.real(day.timeIntervalSince1970), try encoded(after)])
             } else {
                 try execute("DELETE FROM day_statuses WHERE day = ?", [.real(day.timeIntervalSince1970)])
+            }
+        }
+        let oldNotes = Dictionary(uniqueKeysWithValues: old.dailyNotes.map { (calendar.startOfDay(for: $0.date), $0) })
+        let newNotes = Dictionary(uniqueKeysWithValues: new.dailyNotes.map { (calendar.startOfDay(for: $0.date), $0) })
+        for day in Set(oldNotes.keys).union(newNotes.keys) where oldNotes[day] != newNotes[day] {
+            if let note = newNotes[day] {
+                try execute(
+                    "INSERT OR REPLACE INTO daily_notes(day, payload) VALUES(?, ?)",
+                    [.real(day.timeIntervalSince1970), try encoded(DailyNote(date: day, text: note.text))])
+            } else {
+                try execute("DELETE FROM daily_notes WHERE day = ?", [.real(day.timeIntervalSince1970)])
             }
         }
         for day in Set(old.alcoholEntries.map(\.date)).union(new.alcoholEntries.map(\.date)) {
@@ -930,7 +981,7 @@ final class DiaryRepository: @unchecked Sendable {
         }
     }
 
-    static func validateDocument(_ document: DiaryDocument) throws {
+    static func validateDocument(_ document: DiaryDocument, calendar: Calendar = .current) throws {
         func unique<T: Hashable>(_ keys: [T], _ label: String) throws {
             guard Set(keys).count == keys.count else { throw DiaryDatabaseError.invalidData("Duplicate \(label).") }
         }
@@ -940,6 +991,13 @@ final class DiaryRepository: @unchecked Sendable {
         try unique(document.favorites.map(\.id), "favorite food IDs")
         try unique(document.favoriteMealIDs, "favorite meal IDs")
         try unique(document.dayStatuses.map(\.date), "day statuses")
+        let noteDays = document.dailyNotes.map { calendar.startOfDay(for: $0.date) }
+        try unique(noteDays, "daily notes")
+        for note in document.dailyNotes {
+            guard note.date.timeIntervalSince1970.isFinite,
+                !note.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            else { throw DiaryDatabaseError.invalidData("A daily note must have a valid date and nonempty text.") }
+        }
         try unique(document.alcoholEntries.map(\.date), "alcohol days")
         try unique(document.alcoholEntries.map(\.id), "alcohol IDs")
         try unique(document.foodSuggestions.map(\.id), "food suggestion IDs")
@@ -1093,6 +1151,7 @@ final class DiaryRepository: @unchecked Sendable {
         CREATE TABLE food_preferences(food_id TEXT PRIMARY KEY, payload TEXT NOT NULL);
         CREATE TABLE food_names(food_id TEXT PRIMARY KEY, name TEXT NOT NULL);
         CREATE TABLE day_statuses(day REAL PRIMARY KEY, payload TEXT NOT NULL);
+        CREATE TABLE daily_notes(day REAL PRIMARY KEY, payload TEXT NOT NULL);
         CREATE TABLE alcohol_entries(day REAL PRIMARY KEY, id TEXT NOT NULL UNIQUE, payload TEXT NOT NULL);
         CREATE TABLE quick_log_receipt(id INTEGER PRIMARY KEY CHECK(id=1), title TEXT NOT NULL, selection_id TEXT NOT NULL, logged_at REAL NOT NULL);
         CREATE TABLE health_sync_jobs(day REAL PRIMARY KEY, revision INTEGER NOT NULL);
