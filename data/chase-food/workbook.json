@@ -1487,8 +1487,8 @@
       "Yes",
       "cappuccino coffee",
       "",
-      "Nutrition reviewed · Medium",
-      "Catalog default 1 cup (about 180.0 g); source serving: 1 fl oz. See nutrition evidence and review reason.",
+      "Nutrition estimate · Low",
+      "Component-free base estimated by subtracting default Whole milk from the USDA generic Medium cappuccino profile; see nutrition evidence.",
       "",
       "None",
       "Whole milk, 2% milk, Skim milk, Almond milk, Oat milk, Sugar, Cocoa powder, Cinnamon, Extra espresso, 1% milk",
@@ -51596,14 +51596,14 @@
     [
       "food_cappuccino",
       "Cappuccino",
-      "USDA FDC direct match",
-      27.0,
-      1.71,
-      2.75,
-      0.99,
+      "USDA cappuccino less default milk estimate",
+      6.38,
+      0.61,
+      1.19,
+      0.0,
       "2710472",
-      "Medium",
-      "FNDDS generic cappuccino is a close beverage match; milk type, milk-to-espresso ratio, and cup size vary. The 180 g catalog cup is a six-fluid-ounce estimate."
+      "Medium (355 g)",
+      "Component-free estimate: FNDDS cappuccino less 120 g catalog Whole milk; Low confidence."
     ],
     [
       "food_espresso",

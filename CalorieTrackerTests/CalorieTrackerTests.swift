@@ -2689,6 +2689,111 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(configured.nutrients(for: 1, unit: .serving, portionID: portion).calories, total.calories, accuracy: 0.0001)
     }
 
+    func testConfigurationCalculatorScalesOptionsWithParentSizeAndQuantity() throws {
+        func componentFood(_ name: String, calories: Double) -> Food {
+            Food(sourceID: name.lowercased().replacingOccurrences(of: " ", with: "-"), source: .custom,
+                name: name, nutrients: MacroNutrients(calories: calories, carbs: 0, fat: 0, protein: 0, fiber: 0),
+                baseAmountGrams: 100, servingGrams: 100, portions: [FoodPortion(id: "100g", label: "100 g", grams: 100)])
+        }
+        let component = componentFood("Whole milk", calories: 50)
+        let alternative = componentFood("2% milk", calories: 30)
+        let optional = componentFood("Sugar", calories: 100)
+        let food = Food(sourceID: "portion-scaled-food", source: .chaseFood, name: "Sized food",
+            nutrients: MacroNutrients(calories: 60, carbs: 6, fat: 3, protein: 3, fiber: 0),
+            baseAmountGrams: 200,
+            portions: [FoodPortion(id: "small", label: "Small", grams: 100),
+                FoodPortion(id: "medium", label: "Medium", grams: 200),
+                FoodPortion(id: "large", label: "Large", grams: 400)])
+        let options = [
+            ChaseFoodOption(id: "whole", food: component, displayName: "Whole milk", amountGrams: 80,
+                relationship: "included", includedByDefault: true, displayOrder: 0, optionGroup: "Milk", selectionMode: "exclusive"),
+            ChaseFoodOption(id: "two-percent", food: alternative, displayName: "2% milk", amountGrams: 80,
+                relationship: "included", includedByDefault: false, displayOrder: 1, optionGroup: "Milk", selectionMode: "exclusive"),
+            ChaseFoodOption(id: "sugar", food: optional, displayName: "Sugar", amountGrams: 10,
+                relationship: "addition", includedByDefault: false, displayOrder: 2, optionGroup: nil, selectionMode: "multiple")
+        ]
+
+        XCTAssertEqual(FoodConfigurationCalculator.componentAmountGrams(for: options[0], food: food, portionID: "small"), 40)
+        XCTAssertEqual(FoodConfigurationCalculator.componentAmountGrams(for: options[0], food: food, portionID: "large"), 160)
+        XCTAssertEqual(FoodConfigurationCalculator.componentAmountGrams(for: options[2], food: food, portionID: "small"), 5)
+
+        let smallWithDefault = FoodConfigurationCalculator.nutrients(food: food, options: options,
+            selected: ["whole"], extras: [], portionID: "small")
+        let mediumWithDefault = FoodConfigurationCalculator.nutrients(food: food, options: options,
+            selected: ["whole"], extras: [], portionID: "medium")
+        let largeWithDefault = FoodConfigurationCalculator.nutrients(food: food, options: options,
+            selected: ["whole"], extras: [], portionID: "large")
+        XCTAssertEqual(smallWithDefault.calories, 30, accuracy: 0.0001)
+        XCTAssertEqual(mediumWithDefault.calories, 60, accuracy: 0.0001)
+        XCTAssertEqual(largeWithDefault.calories, 120, accuracy: 0.0001)
+        XCTAssertEqual(mediumWithDefault.scaled(by: 2).calories, 120, accuracy: 0.0001,
+            "Logged quantity scales the resolved parent serving separately from its size")
+
+        let deselected = FoodConfigurationCalculator.nutrients(food: food, options: options,
+            selected: [], extras: [], portionID: "medium")
+        let replaced = FoodConfigurationCalculator.nutrients(food: food, options: options,
+            selected: ["two-percent"], extras: [], portionID: "medium")
+        XCTAssertEqual(deselected.calories, 20, accuracy: 0.0001)
+        XCTAssertEqual(replaced.calories, 44, accuracy: 0.0001,
+            "Selecting the exclusive alternative removes the default milk and adds the replacement once")
+        XCTAssertEqual(FoodConfigurationCalculator.nutrients(food: food, options: options,
+            selected: ["whole"], extras: [], portionID: "medium").calories, mediumWithDefault.calories,
+            "An unselected add-in has no effect on the total")
+        XCTAssertEqual(FoodConfigurationCalculator.componentAmountGrams(for: options[0], food: testFood(calories: 10, name: "Single portion"), portionID: nil), 80,
+            "Foods without distinct portions retain their authored option amounts")
+    }
+
+    func testCappuccinoConfigurationUsesSizeScaledMilkAndComponentFreeBase() throws {
+        let catalog = resolutionCatalog
+        let cappuccino = try XCTUnwrap(catalog.food(sourceID: "food_cappuccino", source: .chaseFood))
+        let options = catalog.chaseFoodOptions(for: cappuccino.sourceID)
+        let wholeMilk = try XCTUnwrap(options.first { $0.food.sourceID == "food_milk_whole" })
+        let twoPercent = try XCTUnwrap(options.first { $0.food.sourceID == "food_milk_2" })
+
+        for (portionID, expectedRatio) in [("prt_food_cappuccino_small", 237.0 / 355.0),
+                                           ("prt_food_cappuccino_default", 1.0),
+                                           ("prt_food_cappuccino_large", 473.0 / 355.0)] {
+            let amount = FoodConfigurationCalculator.componentAmountGrams(for: wholeMilk, food: cappuccino, portionID: portionID)
+            XCTAssertEqual(amount, wholeMilk.amountGrams * expectedRatio, accuracy: 0.0001)
+            let total = FoodConfigurationCalculator.nutrients(food: cappuccino, options: options,
+                selected: [wholeMilk.id], extras: [], portionID: portionID)
+            let base = cappuccino.nutrients(for: 1, unit: .serving, portionID: portionID)
+            let component = wholeMilk.food.nutrients(for: amount, unit: .grams)
+            XCTAssertEqual(total.calories, base.calories + component.calories, accuracy: 0.0001)
+            XCTAssertGreaterThanOrEqual(total.calories, component.calories)
+        }
+
+        let smallWhole = FoodConfigurationCalculator.nutrients(food: cappuccino, options: options,
+            selected: [wholeMilk.id], extras: [], portionID: "prt_food_cappuccino_small")
+        let smallTwoPercent = FoodConfigurationCalculator.nutrients(food: cappuccino, options: options,
+            selected: [twoPercent.id], extras: [], portionID: "prt_food_cappuccino_small")
+        XCTAssertGreaterThan(smallWhole.calories, smallTwoPercent.calories)
+        XCTAssertGreaterThan(smallTwoPercent.calories, 0)
+    }
+
+    func testChangingNamedPortionKeepsCountWhileWeightUnitsPreserveMass() {
+        let food = Food(sourceID: "sized-food", source: .chaseFood, name: "Sized food",
+            nutrients: .zero, baseAmountGrams: 355,
+            portions: [FoodPortion(id: "small", label: "Small", grams: 237),
+                FoodPortion(id: "medium", label: "Medium", grams: 355),
+                FoodPortion(id: "large", label: "Large", grams: 473)])
+
+        let oneMedium = FoodCustomizationQuantity.amount(afterSelecting: .portion("medium"), from: .portion("small"),
+            currentAmount: 1, food: food)
+        let oneLarge = FoodCustomizationQuantity.amount(afterSelecting: .portion("large"), from: .portion("medium"),
+            currentAmount: oneMedium, food: food)
+        XCTAssertEqual(oneMedium, 1)
+        XCTAssertEqual(oneLarge, 1)
+
+        let gramsFromMedium = FoodCustomizationQuantity.amount(afterSelecting: .grams, from: .portion("medium"),
+            currentAmount: 1, food: food)
+        XCTAssertEqual(gramsFromMedium, 355)
+        XCTAssertEqual(FoodCustomizationQuantity.amount(afterSelecting: .portion("large"), from: .grams,
+            currentAmount: gramsFromMedium, food: food), 355.0 / 473.0, accuracy: 0.0001)
+        XCTAssertEqual(FoodCustomizationQuantity.amount(afterSelecting: .ounces, from: .portion("medium"),
+            currentAmount: 1, food: food) * 28.349_523_125, 355, accuracy: 0.0001)
+    }
+
     func testNonChaseConfiguredFoodsKeepFractionalExtrasThroughWeightEditAndReload() throws {
         let catalog = resolutionCatalog
         let sources: [(FoodSource, String)] = [(.usda, "2709265"), (.openFoodFacts, "0096619483556")]

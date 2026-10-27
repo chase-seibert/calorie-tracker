@@ -14011,7 +14011,7 @@
         "sourceID": "2710472"
       },
       "category": "Beverages",
-      "confidence": "Medium",
+      "confidence": "Low",
       "defaultGrams": 180.0,
       "defaultUnit": "1 cup",
       "foodKind": "Beverage",
@@ -14019,11 +14019,11 @@
       "includedComponentsSummary": "None",
       "name": "Cappuccino",
       "nutrients": {
-        "calories": 48.6,
-        "carbs": 4.95,
-        "fat": 1.78,
+        "calories": 11.48,
+        "carbs": 2.14,
+        "fat": 0.0,
         "fiber": 0.0,
-        "protein": 3.08
+        "protein": 1.1
       },
       "nutritionEvidence": {
         "baselineNutritionSource": {
@@ -14034,61 +14034,68 @@
           "sourceID": "2710472"
         },
         "compositionEvidence": {
-          "confidence": "Medium",
-          "decision": "Keep Cappuccino as a beverage with selectable milk and add-ins.",
-          "reason": "USDA cappuccino, not-further-specified, is the closest direct prepared-drink profile. Milk choice and espresso-to-milk ratio can change nutrition.",
+          "confidence": "Low",
+          "decision": "Model Cappuccino as a component-free espresso-and-foam base plus the selected milk and add-ins.",
+          "reason": "The base is an estimate derived from the USDA FNDDS generic cappuccino profile at the 355 g Medium portion, subtracting the catalog default 120 g Whole milk component. The remaining profile is normalized to 100 g; milk type and recipe proportions vary.",
           "sources": [
             {
-              "name": "FoodData Central",
+              "name": "USDA FoodData Central",
               "recordName": "Coffee, Cappuccino",
               "sourceID": "2710472",
               "url": "https://fdc.nal.usda.gov/food-details/2710472/nutrients"
+            },
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Milk, whole, 3.25% milkfat",
+              "sourceID": "172217",
+              "url": "https://fdc.nal.usda.gov/food-details/172217/nutrients"
             }
           ]
         },
-        "confidence": "Medium",
+        "confidence": "Low",
         "nutritionPer100g": {
-          "calories": 27.0,
-          "carbs": 2.75,
-          "fat": 0.99,
+          "calories": 6.38,
+          "carbs": 1.19,
+          "fat": 0.0,
           "fiber": 0.0,
-          "protein": 1.71
+          "protein": 0.61
         },
         "reviewReasons": [
-          "USDA cappuccino, not-further-specified, is the closest direct prepared-drink profile. Milk choice and espresso-to-milk ratio can change nutrition."
+          "Component-free base is an estimate: the USDA generic cappuccino profile is reduced by the catalog default 120 g Whole milk at the 355 g Medium parent portion; milk-to-coffee ratios vary."
         ],
         "source": {
           "dataType": "FNDDS 2021-2023",
           "database": "FoodData Central",
+          "matchBasis": "USDA FNDDS parent profile less default milk component",
           "organization": "USDA Agricultural Research Service",
           "recordID": "2710472",
-          "recordName": "Coffee, Cappuccino",
+          "recordName": "Coffee, Cappuccino (component-free estimate)",
           "releaseDate": "2024-10-31",
           "reviewedDate": "2026-10-27",
           "serving": {
-            "description": "1 fl oz",
-            "grams": 30.0
+            "description": "Medium parent serving",
+            "grams": 355
           },
           "url": "https://fdc.nal.usda.gov/food-details/2710472/nutrients"
         }
       },
       "nutritionPer100g": {
-        "calories": 27.0,
-        "carbs": 2.75,
-        "fat": 0.99,
+        "calories": 6.38,
+        "carbs": 1.19,
+        "fat": 0.0,
         "fiber": 0.0,
-        "protein": 1.71
+        "protein": 0.61
       },
       "nutritionSource": {
-        "matchBasis": "reviewed FDC record",
-        "name": "Coffee, Cappuccino",
+        "matchBasis": "USDA FNDDS parent profile less default milk component",
+        "name": "Coffee, Cappuccino (component-free estimate)",
         "similarity": null,
         "source": "usda",
         "sourceID": "2710472"
       },
       "optionsSummary": "Whole milk, 2% milk, Skim milk, Almond milk, Oat milk, Sugar, Cocoa powder, Cinnamon, Extra espresso, 1% milk",
       "reviewReasons": [
-        "USDA cappuccino, not-further-specified, is the closest direct prepared-drink profile. Milk choice and espresso-to-milk ratio can change nutrition."
+        "Component-free base is an estimate: the USDA generic cappuccino profile is reduced by the catalog default 120 g Whole milk at the 355 g Medium parent portion; milk-to-coffee ratios vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,

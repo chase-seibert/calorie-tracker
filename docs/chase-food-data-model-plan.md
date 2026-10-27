@@ -82,9 +82,15 @@ scale the option nutrients by that factor. This keeps toppings proportional
 when a parent is logged as multiple slices, ounces, grams, cups, or other
 supported units. The selected parent portion supplies the conversion basis; if
 distinct parent sizes have different recipes or topping coverage, store
-size-specific component amounts or a documented size-scaling rule. Do not
-scale companion foods with the parent: each companion retains its own amount
-and diary entry.
+size-specific component amounts or a documented size-scaling rule. For named
+parent sizes whose component records do not carry size-specific amounts, treat
+the Medium portion as the component reference; if there is no Medium, use a
+Default portion, then the first portion. Scale every option amount by the
+selected parent grams divided by those reference grams. Foods with only one
+parent portion retain their authored component amounts. Use this same resolved
+amount in option calorie labels, configured totals, and saved component
+snapshots. Do not scale companion foods with the parent: each companion retains
+its own amount and diary entry.
 
 The stable catalog identity is `chaseFood:<sourceID>` (for example,
 `chaseFood:food_burger`). Add Chase Food to `FoodCatalogIdentity` wherever

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "datasetVersion": "account-calibration-2026-10-08-v2",
-  "catalogFingerprint": "60a47e83a8ff",
+  "catalogFingerprint": "11a8e65245dc",
   "rankingRuleVersion": "catalog-fts5-v2-broad-simplicity",
   "queries": [
     {

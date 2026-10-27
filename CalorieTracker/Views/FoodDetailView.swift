@@ -11,6 +11,36 @@ enum FoodCustomizationPreference {
     }
 }
 
+enum FoodCustomizationQuantity {
+    private static let gramsPerOunce = 28.349_523_125
+
+    static func amount(afterSelecting choice: QuantityUnitChoice, from currentChoice: QuantityUnitChoice,
+                       currentAmount: Double, food: Food) -> Double {
+        if case .portion = choice, case .portion = currentChoice {
+            return currentAmount
+        }
+
+        let currentGrams: Double
+        switch currentChoice {
+        case .portion(let id):
+            currentGrams = currentAmount * (food.portion(id: id)?.grams ?? food.baseAmountGrams)
+        case .grams:
+            currentGrams = currentAmount
+        case .ounces:
+            currentGrams = currentAmount * gramsPerOunce
+        }
+
+        switch choice {
+        case .portion(let id):
+            return currentGrams / max(food.portion(id: id)?.grams ?? food.baseAmountGrams, 0.001)
+        case .grams:
+            return currentGrams
+        case .ounces:
+            return currentGrams / gramsPerOunce
+        }
+    }
+}
+
 private struct ChaseFoodOptionGroup: Identifiable {
     let name: String
     let selectionMode: String
@@ -203,7 +233,7 @@ struct FoodCustomizationView: View {
                         if !includedOptions.isEmpty || !additionOptions.isEmpty {
                             VStack(alignment: .leading, spacing: 12) {
                                 sectionLabel("Add to this food or meal")
-                                Text("Tap any option; totals update instantly.")
+                                Text("Option calories and the total update with the selected size.")
                                     .font(.subheadline)
                                     .foregroundStyle(AppTheme.muted)
                                 LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
@@ -460,15 +490,12 @@ struct FoodCustomizationView: View {
 
     private var unitSelection: Binding<QuantityUnitChoice> {
         Binding(get: { unitChoice }, set: { choice in
-            let grams = currentQuantityInGrams
             let previousUnit = selectedUnit
             let previousPortion = selectedPortionID
-            switch choice {
-            case .portion(let id):
+            amount = FoodCustomizationQuantity.amount(afterSelecting: choice, from: unitChoice,
+                currentAmount: amount, food: food)
+            if case .portion(let id) = choice {
                 portionID = id
-                amount = grams / max(food.portion(id: id)?.grams ?? food.baseAmountGrams, 0.001)
-            case .grams: amount = grams
-            case .ounces: amount = grams / 28.349_523_125
             }
             unitChoice = choice
             AppAnalytics.capture(onComponentSaved == nil ? "food_log.unit_selected" : "food_component.unit_selected",
@@ -527,7 +554,8 @@ struct FoodCustomizationView: View {
     private func optionPill(_ option: ChaseFoodOption, defaultSelected: Bool) -> some View {
         let selected = selectedOptionIDs.contains(option.id)
         let isVariant = option.relationship.caseInsensitiveCompare("variant") == .orderedSame
-        let optionGrams = isVariant ? selectedPortionGrams : option.amountGrams
+        let optionGrams = isVariant ? selectedPortionGrams
+            : FoodConfigurationCalculator.componentAmountGrams(for: option, food: food, portionID: selectedPortionID)
         let calories = Int(option.food.nutrients(for: optionGrams, unit: .grams).calories.rounded())
         let detail = isVariant ? "\(calories) kcal / portion" : defaultSelected ? "\(calories) kcal" : "+\(calories) kcal"
         return selectionPill(
@@ -606,7 +634,7 @@ struct FoodCustomizationView: View {
         }.map { option in
             let amount = option.relationship.caseInsensitiveCompare("variant") == .orderedSame
                 ? (food.portion(id: selectedPortionID)?.grams ?? food.baseAmountGrams)
-                : option.amountGrams
+                : FoodConfigurationCalculator.componentAmountGrams(for: option, food: food, portionID: selectedPortionID)
             return MealItem(id: UUID(), food: option.food, amount: amount, unit: .grams, configurationOptionID: option.id)
         }
         selected += extraComponents

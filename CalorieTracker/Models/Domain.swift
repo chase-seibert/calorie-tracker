@@ -1100,6 +1100,22 @@ extension Double {
 
 /// One calculator for detail previews, configured commits, and explicit variation quick-add.
 enum FoodConfigurationCalculator {
+    /// Component amounts in Chase Food are authored for one reference parent portion.
+    /// Named size families use Medium as that reference; single-portion foods keep
+    /// their authored amounts unchanged.
+    static func componentAmountGrams(for option: ChaseFoodOption, food: Food, portionID: String?) -> Double {
+        let portions = food.availablePortions
+        guard portions.count > 1,
+              let selectedPortion = food.portion(id: portionID),
+              let referencePortion = portions.first(where: { $0.label.localizedCaseInsensitiveContains("medium") })
+                ?? portions.first(where: { $0.label.localizedCaseInsensitiveContains("default") })
+                ?? portions.first,
+              referencePortion.grams > 0 else {
+            return option.amountGrams
+        }
+        return option.amountGrams * selectedPortion.grams / referencePortion.grams
+    }
+
     static func nutrients(food: Food, options: [ChaseFoodOption], selected: Set<String>,
                           extras: [MealItem], portionID: String?) -> MacroNutrients {
         var total = food.nutrients(for: 1, unit: .serving, portionID: portionID)
@@ -1107,20 +1123,31 @@ enum FoodConfigurationCalculator {
         if let variant {
             total = variant.food.nutrients(for: food.portion(id: portionID)?.grams ?? food.baseAmountGrams, unit: .grams)
         }
-        for option in options where !["style", "variant"].contains(option.relationship.lowercased()) {
-            if variant != nil && option.includedByDefault { continue }
-            let included = selected.contains(option.id)
-            guard included != option.includedByDefault else { continue }
-            let value = option.food.nutrients(for: option.amountGrams, unit: .grams)
-            if included { total = total + value }
-            else {
-                total = MacroNutrients(calories: max(0, total.calories - value.calories),
-                    carbs: max(0, total.carbs - value.carbs), fat: max(0, total.fat - value.fat),
-                    protein: max(0, total.protein - value.protein),
-                    fiber: total.fiber.map { max(0, $0 - (value.fiber ?? 0)) })
+        let hasComponentFreeBaseline = food.source == .chaseFood && food.sourceID == "food_cappuccino"
+        let components = options.filter { !["style", "variant"].contains($0.relationship.lowercased()) }
+        // Existing catalog profiles include their default components. Normalize that
+        // baseline first, then add only the currently selected components. Cappuccino
+        // is authored as component-free because its source profile was reconstructed.
+        if variant == nil && !hasComponentFreeBaseline {
+            for option in components where option.includedByDefault {
+                let amount = componentAmountGrams(for: option, food: food, portionID: portionID)
+                let value = option.food.nutrients(for: amount, unit: .grams)
+                total = subtract(value, from: total)
             }
         }
+        for option in components where selected.contains(option.id) {
+            if variant != nil && option.includedByDefault { continue }
+            let amount = componentAmountGrams(for: option, food: food, portionID: portionID)
+            total = total + option.food.nutrients(for: amount, unit: .grams)
+        }
         return extras.reduce(total) { $0 + $1.food.nutrients(for: $1.amount, unit: $1.unit, portionID: $1.portionID) }
+    }
+
+    private static func subtract(_ value: MacroNutrients, from total: MacroNutrients) -> MacroNutrients {
+        MacroNutrients(calories: max(0, total.calories - value.calories),
+            carbs: max(0, total.carbs - value.carbs), fat: max(0, total.fat - value.fat),
+            protein: max(0, total.protein - value.protein),
+            fiber: total.fiber.map { max(0, $0 - (value.fiber ?? 0)) })
     }
 
     static func configuredFood(base: Food, portionNutrients: MacroNutrients, portionID: String?) -> Food {
