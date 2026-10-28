@@ -20,9 +20,12 @@ records include reviewed source portions, confidence, and preparation notes.
 The 2026-10-20 revision adds a single Kebabs search identity with exclusive
 lamb, chicken, and beef protein variants; the former Lamb kebab and Beef kebab
 IDs remain history-resolvable and serve as reusable variant components. The
-2026-10-23 through 2026-10-27 revisions add reviewed nutrition evidence for
-100 more identities; two October 24 foods now resolve to broader canonical foods
-while their original IDs remain history-resolvable.
+2026-10-23 through 2026-10-28 revisions add reviewed nutrition evidence for
+120 more identities; two October 24 foods now resolve to broader canonical foods
+while their original IDs remain history-resolvable. The October 28 review used
+a low-confidence vegetable curry proxy for Chickpea curry because no direct USDA
+record was available, and retained low confidence for Cobb salad because the
+available USDA record excludes dressing.
 Companion suggestions are separate foods logged independently. The generated
 review workbook is rebuilt from the same catalog projection.
 

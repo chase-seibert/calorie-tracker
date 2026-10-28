@@ -6609,7 +6609,7 @@
       "2"
     ]
   ],
-  "datasetVersion": "chase-food-2026-10-27-37",
+  "datasetVersion": "chase-food-2026-10-28-38",
   "foods": [
     {
       "aliases": [
@@ -17436,8 +17436,15 @@
         "chickpea curry",
         "chana masala"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Chicken curry",
+        "similarity": 0.8889,
+        "source": "usda",
+        "sourceID": "2706437"
+      },
       "category": "Asian & international",
-      "confidence": "Medium",
+      "confidence": "Low",
       "defaultGrams": 300.0,
       "defaultUnit": "1 bowl",
       "foodKind": "Recipe / assembled",
@@ -17445,30 +17452,77 @@
       "includedComponentsSummary": "None",
       "name": "Chickpea curry",
       "nutrients": {
-        "calories": 321.0,
-        "carbs": 19.62,
-        "fat": 19.44,
-        "fiber": 4.2,
-        "protein": 19.44
+        "calories": 258.0,
+        "carbs": 26.43,
+        "fat": 15.81,
+        "fiber": 5.4,
+        "protein": 4.8
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Chicken curry",
+          "similarity": 0.8889,
+          "source": "usda",
+          "sourceID": "2706437"
+        },
+        "compositionEvidence": {
+          "decision": "Retain Chickpea curry as a distinct prepared-food identity; the available USDA generic vegetable curry record is only a low-confidence nutrition proxy.",
+          "reason": "No direct chickpea-curry record is present in the bundled USDA catalog. Vegetable curry is a broad prepared-dish proxy and may understate the chickpea and oil content.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Vegetable curry",
+              "sourceID": "2710067",
+              "url": "https://fdc.nal.usda.gov/food-search?query=Vegetable%20curry"
+            }
+          ]
+        },
+        "confidence": "Low",
+        "nutritionPer100g": {
+          "calories": 86.0,
+          "carbs": 8.81,
+          "fat": 5.27,
+          "fiber": 1.8,
+          "protein": 1.6
+        },
+        "reviewReasons": [
+          "No direct chickpea-curry record is present in the bundled USDA catalog. Vegetable curry is a broad prepared-dish proxy and may understate the chickpea and oil content."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2710067",
+          "recordName": "Vegetable curry",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-28",
+          "serving": {
+            "description": "1 cup",
+            "grams": 240.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search?query=Vegetable%20curry"
+        }
       },
       "nutritionPer100g": {
-        "calories": 107.0,
-        "carbs": 6.54,
-        "fat": 6.48,
-        "fiber": 1.4,
-        "protein": 6.48
+        "calories": 86.0,
+        "carbs": 8.81,
+        "fat": 5.27,
+        "fiber": 1.8,
+        "protein": 1.6
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Chicken curry",
-        "similarity": 0.8889,
+        "matchBasis": "reviewed FDC record",
+        "name": "Vegetable curry",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2706437"
+        "sourceID": "2710067"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "No direct chickpea-curry record is present in the bundled USDA catalog. Vegetable curry is a broad prepared-dish proxy and may understate the chickpea and oil content."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -17746,6 +17800,13 @@
         "chimichanga",
         "fried burrito"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Chimichanga, meat",
+        "similarity": 0.8148,
+        "source": "usda",
+        "sourceID": "2708587"
+      },
       "category": "Mexican & Tex-Mex",
       "confidence": "Medium",
       "defaultGrams": 300.0,
@@ -17761,6 +17822,54 @@
         "fiber": 5.4,
         "protein": 36.3
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Chimichanga, meat",
+          "similarity": 0.8148,
+          "source": "usda",
+          "sourceID": "2708587"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Chimichanga as a prepared assembled food. Use the generic meat chimichanga profile and retain uncertainty around filling and serving size.",
+          "reason": "USDA meat chimichanga is the closest generic match; filling and restaurant size vary. The catalog 300 g default exceeds the source 190 g regular item.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Chimichanga, meat",
+              "sourceID": "2708587",
+              "url": "https://fdc.nal.usda.gov/food-search?query=Chimichanga%2C%20meat"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 324.0,
+          "carbs": 25.8,
+          "fat": 18.8,
+          "fiber": 1.8,
+          "protein": 12.1
+        },
+        "reviewReasons": [
+          "USDA meat chimichanga is the closest generic match; filling and restaurant size vary. The catalog 300 g default exceeds the source 190 g regular item."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2708587",
+          "recordName": "Chimichanga, meat",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-28",
+          "serving": {
+            "description": "1 item, any size",
+            "grams": 190.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search?query=Chimichanga%2C%20meat"
+        }
+      },
       "nutritionPer100g": {
         "calories": 324.0,
         "carbs": 25.8,
@@ -17769,16 +17878,15 @@
         "protein": 12.1
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Chimichanga, meat",
-        "similarity": 0.8148,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2708587"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "USDA meat chimichanga is the closest generic match; filling and restaurant size vary. The catalog 300 g default exceeds the source 190 g regular item."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -17791,6 +17899,13 @@
         "chocolate squares",
         "milk chocolate"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "alias",
+        "name": "milk chocolate",
+        "similarity": 0.94,
+        "source": "off",
+        "sourceID": "03424005"
+      },
       "category": "Desserts & sweets",
       "confidence": "Medium",
       "defaultGrams": 28.4,
@@ -17800,30 +17915,77 @@
       "includedComponentsSummary": "None",
       "name": "Chocolate",
       "nutrients": {
-        "calories": 138.7,
-        "carbs": 7.38,
-        "fat": 3.69,
-        "fiber": null,
-        "protein": 0.85
+        "calories": 151.94,
+        "carbs": 16.87,
+        "fat": 8.43,
+        "fiber": 0.97,
+        "protein": 2.17
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "alias",
+          "name": "milk chocolate",
+          "similarity": 0.94,
+          "source": "off",
+          "sourceID": "03424005"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Chocolate as a broad searchable identity; use generic chocolate candy as a middle estimate while acknowledging the unresolved chocolate type.",
+          "reason": "Generic chocolate candy is used for the broad Chocolate identity; milk, dark, and filled chocolate vary substantially.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Chocolate candy, other, NFS",
+              "sourceID": "2710327",
+              "url": "https://fdc.nal.usda.gov/food-search?query=Chocolate%20candy%2C%20other%2C%20NFS"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 535.0,
+          "carbs": 59.4,
+          "fat": 29.7,
+          "fiber": 3.4,
+          "protein": 7.65
+        },
+        "reviewReasons": [
+          "Generic chocolate candy is used for the broad Chocolate identity; milk, dark, and filled chocolate vary substantially."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2710327",
+          "recordName": "Chocolate candy, other, NFS",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-28",
+          "serving": {
+            "description": "1 piece",
+            "grams": 8.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search?query=Chocolate%20candy%2C%20other%2C%20NFS"
+        }
       },
       "nutritionPer100g": {
-        "calories": 488.3721,
-        "carbs": 26.0,
-        "fat": 13.0,
-        "fiber": null,
-        "protein": 3.0
+        "calories": 535.0,
+        "carbs": 59.4,
+        "fat": 29.7,
+        "fiber": 3.4,
+        "protein": 7.65
       },
       "nutritionSource": {
-        "matchBasis": "alias",
-        "name": "milk chocolate",
-        "similarity": 0.94,
-        "source": "off",
-        "sourceID": "03424005"
+        "matchBasis": "reviewed FDC record",
+        "name": "Chocolate candy, other, NFS",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2710327"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Fiber unavailable in matched record"
+        "Generic chocolate candy is used for the broad Chocolate identity; milk, dark, and filled chocolate vary substantially."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -17835,6 +17997,13 @@
         "chocolate cake",
         "chocolate layer cake"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Chocolate Shake",
+        "similarity": 0.8966,
+        "source": "off",
+        "sourceID": "0643843715344"
+      },
       "category": "Desserts & sweets",
       "confidence": "Medium",
       "defaultGrams": 110.0,
@@ -17844,30 +18013,77 @@
       "includedComponentsSummary": "None",
       "name": "Chocolate cake",
       "nutrients": {
-        "calories": 56.1,
-        "carbs": 1.35,
-        "fat": 1.01,
-        "fiber": 2.2,
-        "protein": 10.14
+        "calories": 427.9,
+        "carbs": 58.08,
+        "fat": 22.0,
+        "fiber": 2.42,
+        "protein": 3.83
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Chocolate Shake",
+          "similarity": 0.8966,
+          "source": "off",
+          "sourceID": "0643843715344"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Chocolate cake as one prepared-food identity; use commercially prepared frosted chocolate cake as the default estimate.",
+          "reason": "Commercial chocolate cake with frosting is a close generic slice match; frosting and recipe proportions vary.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Cake, chocolate, commercially prepared with chocolate frosting, in-store bakery",
+              "sourceID": "174934",
+              "url": "https://fdc.nal.usda.gov/food-search?query=Cake%2C%20chocolate%2C%20commercially%20prepared%20with%20chocolate%20frosting%2C%20in-store%20bakery"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 389.0,
+          "carbs": 52.8,
+          "fat": 20.0,
+          "fiber": 2.2,
+          "protein": 3.48
+        },
+        "reviewReasons": [
+          "Commercial chocolate cake with frosting is a close generic slice match; frosting and recipe proportions vary."
+        ],
+        "source": {
+          "dataType": "SR Legacy",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "174934",
+          "recordName": "Cake, chocolate, commercially prepared with chocolate frosting, in-store bakery",
+          "releaseDate": "2018-04-01",
+          "reviewedDate": "2026-10-28",
+          "serving": {
+            "description": "1 piece (1/12 of a cake)",
+            "grams": 138.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search?query=Cake%2C%20chocolate%2C%20commercially%20prepared%20with%20chocolate%20frosting%2C%20in-store%20bakery"
+        }
       },
       "nutritionPer100g": {
-        "calories": 51.0,
-        "carbs": 1.23,
-        "fat": 0.92,
-        "fiber": 2.0,
-        "protein": 9.22
+        "calories": 389.0,
+        "carbs": 52.8,
+        "fat": 20.0,
+        "fiber": 2.2,
+        "protein": 3.48
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Chocolate Shake",
-        "similarity": 0.8966,
-        "source": "off",
-        "sourceID": "0643843715344"
+        "matchBasis": "reviewed FDC record",
+        "name": "Cake, chocolate, commercially prepared with chocolate frosting, in-store bakery",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "174934"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "Commercial chocolate cake with frosting is a close generic slice match; frosting and recipe proportions vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -18412,6 +18628,13 @@
         "clams, cooked",
         "steamed clams"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Calamari, cooked",
+        "similarity": 0.8148,
+        "source": "usda",
+        "sourceID": "2706333"
+      },
       "category": "Seafood",
       "confidence": "Medium",
       "defaultGrams": 140.0,
@@ -18421,30 +18644,77 @@
       "includedComponentsSummary": "None",
       "name": "Clams, cooked",
       "nutrients": {
-        "calories": 217.0,
-        "carbs": 5.36,
-        "fat": 8.75,
+        "calories": 207.2,
+        "carbs": 7.18,
+        "fat": 2.73,
         "fiber": 0.0,
-        "protein": 27.16
+        "protein": 35.84
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Calamari, cooked",
+          "similarity": 0.8148,
+          "source": "usda",
+          "sourceID": "2706333"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Clams, cooked as a reusable cooked seafood identity; use mixed-species clams cooked with moist heat.",
+          "reason": "Direct cooked clam record prepared with moist heat; clam species and edible yield vary.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Mollusks, clam, mixed species, cooked, moist heat",
+              "sourceID": "171975",
+              "url": "https://fdc.nal.usda.gov/food-search?query=Mollusks%2C%20clam%2C%20mixed%20species%2C%20cooked%2C%20moist%20heat"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 148.0,
+          "carbs": 5.13,
+          "fat": 1.95,
+          "fiber": 0.0,
+          "protein": 25.6
+        },
+        "reviewReasons": [
+          "Direct cooked clam record prepared with moist heat; clam species and edible yield vary."
+        ],
+        "source": {
+          "dataType": "SR Legacy",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "171975",
+          "recordName": "Mollusks, clam, mixed species, cooked, moist heat",
+          "releaseDate": "2018-04-01",
+          "reviewedDate": "2026-10-28",
+          "serving": {
+            "description": "1 3 oz",
+            "grams": 85.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search?query=Mollusks%2C%20clam%2C%20mixed%20species%2C%20cooked%2C%20moist%20heat"
+        }
       },
       "nutritionPer100g": {
-        "calories": 155.0,
-        "carbs": 3.83,
-        "fat": 6.25,
+        "calories": 148.0,
+        "carbs": 5.13,
+        "fat": 1.95,
         "fiber": 0.0,
-        "protein": 19.4
+        "protein": 25.6
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Calamari, cooked",
-        "similarity": 0.8148,
+        "matchBasis": "reviewed FDC record",
+        "name": "Mollusks, clam, mixed species, cooked, moist heat",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2706333"
+        "sourceID": "171975"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "Direct cooked clam record prepared with moist heat; clam species and edible yield vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -18497,6 +18767,13 @@
         "turkey club",
         "sandwich club"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Cuban sandwich",
+        "similarity": 0.8889,
+        "source": "usda",
+        "sourceID": "2706973"
+      },
       "category": "Sandwiches & handhelds",
       "confidence": "Medium",
       "defaultGrams": 240.0,
@@ -18506,30 +18783,77 @@
       "includedComponentsSummary": "None",
       "name": "Club sandwich",
       "nutrients": {
-        "calories": 547.2,
-        "carbs": 39.12,
-        "fat": 25.68,
+        "calories": 561.6,
+        "carbs": 44.16,
+        "fat": 25.44,
         "fiber": 1.92,
-        "protein": 38.16
+        "protein": 38.4
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Cuban sandwich",
+          "similarity": 0.8889,
+          "source": "usda",
+          "sourceID": "2706973"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Club sandwich as an assembled sandwich; restaurant profile provides a representative average, not a fixed recipe.",
+          "reason": "USDA restaurant club sandwich is a direct assembled-sandwich match; bread, bacon, cheese, and mayonnaise proportions vary.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Club sandwich or sub, restaurant",
+              "sourceID": "2706997",
+              "url": "https://fdc.nal.usda.gov/food-search?query=Club%20sandwich%20or%20sub%2C%20restaurant"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 234.0,
+          "carbs": 18.4,
+          "fat": 10.6,
+          "fiber": 0.8,
+          "protein": 16.0
+        },
+        "reviewReasons": [
+          "USDA restaurant club sandwich is a direct assembled-sandwich match; bread, bacon, cheese, and mayonnaise proportions vary."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2706997",
+          "recordName": "Club sandwich or sub, restaurant",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-28",
+          "serving": {
+            "description": "1 regular",
+            "grams": 145.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search?query=Club%20sandwich%20or%20sub%2C%20restaurant"
+        }
       },
       "nutritionPer100g": {
-        "calories": 228.0,
-        "carbs": 16.3,
-        "fat": 10.7,
+        "calories": 234.0,
+        "carbs": 18.4,
+        "fat": 10.6,
         "fiber": 0.8,
-        "protein": 15.9
+        "protein": 16.0
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Cuban sandwich",
-        "similarity": 0.8889,
+        "matchBasis": "reviewed FDC record",
+        "name": "Club sandwich or sub, restaurant",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2706973"
+        "sourceID": "2706997"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "USDA restaurant club sandwich is a direct assembled-sandwich match; bread, bacon, cheese, and mayonnaise proportions vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -18541,8 +18865,15 @@
         "cobb salad",
         "cobb"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Crab salad",
+        "similarity": 0.8,
+        "source": "usda",
+        "sourceID": "2706824"
+      },
       "category": "Salads",
-      "confidence": "Medium",
+      "confidence": "Low",
       "defaultGrams": 375.0,
       "defaultUnit": "1 bowl",
       "foodKind": "Recipe / assembled",
@@ -18550,30 +18881,77 @@
       "includedComponentsSummary": "None",
       "name": "Cobb salad",
       "nutrients": {
-        "calories": 705.0,
-        "carbs": 4.76,
-        "fat": 59.62,
-        "fiber": 1.5,
-        "protein": 35.25
+        "calories": 348.75,
+        "carbs": 9.94,
+        "fat": 16.24,
+        "fiber": 4.5,
+        "protein": 42.38
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Crab salad",
+          "similarity": 0.8,
+          "source": "usda",
+          "sourceID": "2706824"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Cobb salad as an assembled salad; use the available no-dressing record and leave dressing as a material source of uncertainty.",
+          "reason": "USDA Cobb salad record explicitly excludes dressing. Dressing and portion composition can materially increase calories.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Cobb salad, no dressing",
+              "sourceID": "2709832",
+              "url": "https://fdc.nal.usda.gov/food-search?query=Cobb%20salad%2C%20no%20dressing"
+            }
+          ]
+        },
+        "confidence": "Low",
+        "nutritionPer100g": {
+          "calories": 93.0,
+          "carbs": 2.65,
+          "fat": 4.33,
+          "fiber": 1.2,
+          "protein": 11.3
+        },
+        "reviewReasons": [
+          "USDA Cobb salad record explicitly excludes dressing. Dressing and portion composition can materially increase calories."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2709832",
+          "recordName": "Cobb salad, no dressing",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-28",
+          "serving": {
+            "description": "1 cup",
+            "grams": 105.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search?query=Cobb%20salad%2C%20no%20dressing"
+        }
       },
       "nutritionPer100g": {
-        "calories": 188.0,
-        "carbs": 1.27,
-        "fat": 15.9,
-        "fiber": 0.4,
-        "protein": 9.4
+        "calories": 93.0,
+        "carbs": 2.65,
+        "fat": 4.33,
+        "fiber": 1.2,
+        "protein": 11.3
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Crab salad",
-        "similarity": 0.8,
+        "matchBasis": "reviewed FDC record",
+        "name": "Cobb salad, no dressing",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2706824"
+        "sourceID": "2709832"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "USDA Cobb salad record explicitly excludes dressing. Dressing and portion composition can materially increase calories."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -18585,8 +18963,15 @@
         "cocktail",
         "mixed alcoholic drink"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Cocktail, NFS",
+        "similarity": 0.8,
+        "source": "usda",
+        "sourceID": "2710626"
+      },
       "category": "Beverages",
-      "confidence": "Medium",
+      "confidence": "Low",
       "defaultGrams": 180.0,
       "defaultUnit": "1 glass",
       "foodKind": "Beverage",
@@ -18600,6 +18985,54 @@
         "fiber": 0.0,
         "protein": 0.0
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Cocktail, NFS",
+          "similarity": 0.8,
+          "source": "usda",
+          "sourceID": "2710626"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Cocktail generic; the USDA NFS estimate is only a broad baseline because recipes and alcohol pours vary greatly.",
+          "reason": "Cocktail, NFS is a broad one-ounce alcoholic cocktail estimate; spirit, mixer, and pour size vary widely.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Cocktail, NFS",
+              "sourceID": "2710626",
+              "url": "https://fdc.nal.usda.gov/food-search?query=Cocktail%2C%20NFS"
+            }
+          ]
+        },
+        "confidence": "Low",
+        "nutritionPer100g": {
+          "calories": 89.0,
+          "carbs": 7.8,
+          "fat": 0.19,
+          "fiber": 0.0,
+          "protein": 0.0
+        },
+        "reviewReasons": [
+          "Cocktail, NFS is a broad one-ounce alcoholic cocktail estimate; spirit, mixer, and pour size vary widely."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2710626",
+          "recordName": "Cocktail, NFS",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-28",
+          "serving": {
+            "description": "1 fl oz",
+            "grams": 30.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search?query=Cocktail%2C%20NFS"
+        }
+      },
       "nutritionPer100g": {
         "calories": 89.0,
         "carbs": 7.8,
@@ -18608,15 +19041,15 @@
         "protein": 0.0
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Cocktail, NFS",
-        "similarity": 0.8,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2710626"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
+        "Cocktail, NFS is a broad one-ounce alcoholic cocktail estimate; spirit, mixer, and pour size vary widely."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -18774,6 +19207,13 @@
         "cod, cooked",
         "baked cod"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Chard, cooked",
+        "similarity": 0.8182,
+        "source": "usda",
+        "sourceID": "2709575"
+      },
       "category": "Seafood",
       "confidence": "Medium",
       "defaultGrams": 165.0,
@@ -18783,30 +19223,77 @@
       "includedComponentsSummary": "None",
       "name": "Cod, cooked",
       "nutrients": {
-        "calories": 72.6,
-        "carbs": 6.43,
-        "fat": 4.87,
-        "fiber": 2.8,
-        "protein": 3.1
+        "calories": 173.25,
+        "carbs": 0.0,
+        "fat": 1.42,
+        "fiber": 0.0,
+        "protein": 37.62
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Chard, cooked",
+          "similarity": 0.8182,
+          "source": "usda",
+          "sourceID": "2709575"
+        },
+        "compositionEvidence": {
+          "decision": "Keep cooked cod as a plain cooked fish identity; use Atlantic cod dry-heat preparation without added oil.",
+          "reason": "Direct USDA Atlantic cod cooked with dry heat; species and cooking additions can vary.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Fish, cod, Atlantic, cooked, dry heat",
+              "sourceID": "171956",
+              "url": "https://fdc.nal.usda.gov/food-search?query=Fish%2C%20cod%2C%20Atlantic%2C%20cooked%2C%20dry%20heat"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 105.0,
+          "carbs": 0.0,
+          "fat": 0.86,
+          "fiber": 0.0,
+          "protein": 22.8
+        },
+        "reviewReasons": [
+          "Direct USDA Atlantic cod cooked with dry heat; species and cooking additions can vary."
+        ],
+        "source": {
+          "dataType": "SR Legacy",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "171956",
+          "recordName": "Fish, cod, Atlantic, cooked, dry heat",
+          "releaseDate": "2018-04-01",
+          "reviewedDate": "2026-10-28",
+          "serving": {
+            "description": "1 3 oz",
+            "grams": 85.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search?query=Fish%2C%20cod%2C%20Atlantic%2C%20cooked%2C%20dry%20heat"
+        }
       },
       "nutritionPer100g": {
-        "calories": 44.0,
-        "carbs": 3.9,
-        "fat": 2.95,
-        "fiber": 1.7,
-        "protein": 1.88
+        "calories": 105.0,
+        "carbs": 0.0,
+        "fat": 0.86,
+        "fiber": 0.0,
+        "protein": 22.8
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Chard, cooked",
-        "similarity": 0.8182,
+        "matchBasis": "reviewed FDC record",
+        "name": "Fish, cod, Atlantic, cooked, dry heat",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2709575"
+        "sourceID": "171956"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "Direct USDA Atlantic cod cooked with dry heat; species and cooking additions can vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -20054,8 +20541,15 @@
         "couscous",
         "cooked couscous"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Couscous, dry",
+        "similarity": 0.8,
+        "source": "usda",
+        "sourceID": "169699"
+      },
       "category": "Asian & international",
-      "confidence": "Medium",
+      "confidence": "High",
       "defaultGrams": 157.0,
       "defaultUnit": "1 cup",
       "foodKind": "Reusable ingredient",
@@ -20063,29 +20557,77 @@
       "includedComponentsSummary": "None",
       "name": "Couscous",
       "nutrients": {
-        "calories": 590.32,
-        "carbs": 121.52,
-        "fat": 1.0,
-        "fiber": 7.85,
-        "protein": 20.1
+        "calories": 175.84,
+        "carbs": 36.42,
+        "fat": 0.25,
+        "fiber": 2.2,
+        "protein": 5.95
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Couscous, dry",
+          "similarity": 0.8,
+          "source": "usda",
+          "sourceID": "169699"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Couscous as the cooked reusable grain identity; dry couscous is not the logged prepared portion.",
+          "reason": "Direct USDA cooked couscous record with a matching one-cup 157 g serving.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Couscous, cooked",
+              "sourceID": "169700",
+              "url": "https://fdc.nal.usda.gov/food-search?query=Couscous%2C%20cooked"
+            }
+          ]
+        },
+        "confidence": "High",
+        "nutritionPer100g": {
+          "calories": 112.0,
+          "carbs": 23.2,
+          "fat": 0.16,
+          "fiber": 1.4,
+          "protein": 3.79
+        },
+        "reviewReasons": [
+          "Direct USDA cooked couscous record with a matching one-cup 157 g serving."
+        ],
+        "source": {
+          "dataType": "SR Legacy",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "169700",
+          "recordName": "Couscous, cooked",
+          "releaseDate": "2018-04-01",
+          "reviewedDate": "2026-10-28",
+          "serving": {
+            "description": "1 cup, cooked",
+            "grams": 157.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search?query=Couscous%2C%20cooked"
+        }
       },
       "nutritionPer100g": {
-        "calories": 376.0,
-        "carbs": 77.4,
-        "fat": 0.64,
-        "fiber": 5.0,
-        "protein": 12.8
+        "calories": 112.0,
+        "carbs": 23.2,
+        "fat": 0.16,
+        "fiber": 1.4,
+        "protein": 3.79
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Couscous, dry",
-        "similarity": 0.8,
+        "matchBasis": "reviewed FDC record",
+        "name": "Couscous, cooked",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "169699"
+        "sourceID": "169700"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
+        "Direct USDA cooked couscous record with a matching one-cup 157 g serving."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -20097,6 +20639,13 @@
         "crab cakes",
         "crab cake"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Crab, cake",
+        "similarity": 0.9474,
+        "source": "usda",
+        "sourceID": "2706549"
+      },
       "category": "Seafood",
       "confidence": "Medium",
       "defaultGrams": 95.0,
@@ -20112,6 +20661,54 @@
         "fiber": 0.28,
         "protein": 13.68
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Crab, cake",
+          "similarity": 0.9474,
+          "source": "usda",
+          "sourceID": "2706549"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Crab cakes as a prepared seafood item; use the generic crab cake record and retain recipe uncertainty.",
+          "reason": "USDA crab cake record is a close prepared-food match; recipe and breading vary.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Crab, cake",
+              "sourceID": "2706549",
+              "url": "https://fdc.nal.usda.gov/food-search?query=Crab%2C%20cake"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 214.0,
+          "carbs": 4.48,
+          "fat": 15.0,
+          "fiber": 0.3,
+          "protein": 14.4
+        },
+        "reviewReasons": [
+          "USDA crab cake record is a close prepared-food match; recipe and breading vary."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2706549",
+          "recordName": "Crab, cake",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-28",
+          "serving": {
+            "description": "1 cake or patty",
+            "grams": 85.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search?query=Crab%2C%20cake"
+        }
+      },
       "nutritionPer100g": {
         "calories": 214.0,
         "carbs": 4.48,
@@ -20120,16 +20717,15 @@
         "protein": 14.4
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Crab, cake",
-        "similarity": 0.9474,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2706549"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "USDA crab cake record is a close prepared-food match; recipe and breading vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -20247,8 +20843,15 @@
         "goldfish crackers",
         "goldfish snack crackers"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Crackers, NFS",
+        "similarity": 0.8,
+        "source": "usda",
+        "sourceID": "2708132"
+      },
       "category": "Snacks, nuts & bars",
-      "confidence": "Medium",
+      "confidence": "Low",
       "defaultGrams": 28.4,
       "defaultUnit": "1 oz",
       "foodKind": "Reusable ingredient",
@@ -20262,6 +20865,54 @@
         "fiber": 0.65,
         "protein": 1.89
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Crackers, NFS",
+          "similarity": 0.8,
+          "source": "usda",
+          "sourceID": "2708132"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Crackers broad; the available NFS estimate may overstate leaner saltine or whole-grain varieties.",
+          "reason": "USDA Crackers, NFS profile is high-fat and may represent butter crackers; generic cracker type is unspecified.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Crackers, NFS",
+              "sourceID": "2708132",
+              "url": "https://fdc.nal.usda.gov/food-search?query=Crackers%2C%20NFS"
+            }
+          ]
+        },
+        "confidence": "Low",
+        "nutritionPer100g": {
+          "calories": 510.0,
+          "carbs": 61.3,
+          "fat": 26.4,
+          "fiber": 2.3,
+          "protein": 6.64
+        },
+        "reviewReasons": [
+          "USDA Crackers, NFS profile is high-fat and may represent butter crackers; generic cracker type is unspecified."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2708132",
+          "recordName": "Crackers, NFS",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-28",
+          "serving": {
+            "description": "1 cracker",
+            "grams": 3.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search?query=Crackers%2C%20NFS"
+        }
+      },
       "nutritionPer100g": {
         "calories": 510.0,
         "carbs": 61.3,
@@ -20270,15 +20921,15 @@
         "protein": 6.64
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Crackers, NFS",
-        "similarity": 0.8,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2708132"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
+        "USDA Crackers, NFS profile is high-fat and may represent butter crackers; generic cracker type is unspecified."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -20290,6 +20941,13 @@
         "cranberry juice cocktail",
         "cranberry juice drink"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Cranberry juice cocktail, bottled",
+        "similarity": 0.8571,
+        "source": "usda",
+        "sourceID": "171903"
+      },
       "category": "Beverages",
       "confidence": "Medium",
       "defaultGrams": 248.0,
@@ -20305,6 +20963,54 @@
         "fiber": 0.0,
         "protein": 0.0
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Cranberry juice cocktail, bottled",
+          "similarity": 0.8571,
+          "source": "usda",
+          "sourceID": "171903"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Cranberry juice cocktail generic; use the bottled sweetened beverage profile, not concentrate.",
+          "reason": "USDA bottled cranberry juice cocktail is a direct beverage match; sweetness varies by product.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Cranberry juice cocktail, bottled",
+              "sourceID": "171903",
+              "url": "https://fdc.nal.usda.gov/food-search?query=Cranberry%20juice%20cocktail%2C%20bottled"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 54.0,
+          "carbs": 13.5,
+          "fat": 0.1,
+          "fiber": 0.0,
+          "protein": 0.0
+        },
+        "reviewReasons": [
+          "USDA bottled cranberry juice cocktail is a direct beverage match; sweetness varies by product."
+        ],
+        "source": {
+          "dataType": "SR Legacy",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "171903",
+          "recordName": "Cranberry juice cocktail, bottled",
+          "releaseDate": "2018-04-01",
+          "reviewedDate": "2026-10-28",
+          "serving": {
+            "description": "1 fl oz",
+            "grams": 31.6
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search?query=Cranberry%20juice%20cocktail%2C%20bottled"
+        }
+      },
       "nutritionPer100g": {
         "calories": 54.0,
         "carbs": 13.5,
@@ -20313,15 +21019,15 @@
         "protein": 0.0
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Cranberry juice cocktail, bottled",
-        "similarity": 0.8571,
+        "similarity": null,
         "source": "usda",
         "sourceID": "171903"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
+        "USDA bottled cranberry juice cocktail is a direct beverage match; sweetness varies by product."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -20480,6 +21186,13 @@
         "cream of wheat",
         "hot wheat cereal"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Cream of wheat, NFS",
+        "similarity": 0.875,
+        "source": "usda",
+        "sourceID": "2708433"
+      },
       "category": "Breakfast & eggs",
       "confidence": "Medium",
       "defaultGrams": 240.0,
@@ -20495,6 +21208,54 @@
         "fiber": 1.2,
         "protein": 3.46
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Cream of wheat, NFS",
+          "similarity": 0.875,
+          "source": "usda",
+          "sourceID": "2708433"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Cream of wheat as a cooked hot cereal; the NFS record has a matching cup weight but does not resolve preparation.",
+          "reason": "USDA Cream of Wheat NFS matches one cooked cup; preparation with water, milk, or added fat varies.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Cream of wheat, NFS",
+              "sourceID": "2708433",
+              "url": "https://fdc.nal.usda.gov/food-search?query=Cream%20of%20wheat%2C%20NFS"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 65.0,
+          "carbs": 10.4,
+          "fat": 1.8,
+          "fiber": 0.5,
+          "protein": 1.44
+        },
+        "reviewReasons": [
+          "USDA Cream of Wheat NFS matches one cooked cup; preparation with water, milk, or added fat varies."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2708433",
+          "recordName": "Cream of wheat, NFS",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-28",
+          "serving": {
+            "description": "1 cup, cooked",
+            "grams": 240.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search?query=Cream%20of%20wheat%2C%20NFS"
+        }
+      },
       "nutritionPer100g": {
         "calories": 65.0,
         "carbs": 10.4,
@@ -20503,16 +21264,15 @@
         "protein": 1.44
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Cream of wheat, NFS",
-        "similarity": 0.875,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2708433"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "USDA Cream of Wheat NFS matches one cooked cup; preparation with water, milk, or added fat varies."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -20607,8 +21367,15 @@
         "raw cucumber",
         "sliced cucumber"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Cucumber, raw",
+        "similarity": 0.8,
+        "source": "usda",
+        "sourceID": "2709784"
+      },
       "category": "Vegetables & potatoes",
-      "confidence": "Medium",
+      "confidence": "High",
       "defaultGrams": 100.0,
       "defaultUnit": "1 cup",
       "foodKind": "Reusable ingredient",
@@ -20622,6 +21389,54 @@
         "fiber": 0.5,
         "protein": 0.62
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Cucumber, raw",
+          "similarity": 0.8,
+          "source": "usda",
+          "sourceID": "2709784"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Cucumber as a plain raw reusable ingredient; no added preparation is represented.",
+          "reason": "Direct USDA raw cucumber record; the default 100 g is a simple edible-portion estimate.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Cucumber, raw",
+              "sourceID": "2709784",
+              "url": "https://fdc.nal.usda.gov/food-search?query=Cucumber%2C%20raw"
+            }
+          ]
+        },
+        "confidence": "High",
+        "nutritionPer100g": {
+          "calories": 16.0,
+          "carbs": 2.95,
+          "fat": 0.18,
+          "fiber": 0.5,
+          "protein": 0.62
+        },
+        "reviewReasons": [
+          "Direct USDA raw cucumber record; the default 100 g is a simple edible-portion estimate."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2709784",
+          "recordName": "Cucumber, raw",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-28",
+          "serving": {
+            "description": "1 piece/slice",
+            "grams": 10.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search?query=Cucumber%2C%20raw"
+        }
+      },
       "nutritionPer100g": {
         "calories": 16.0,
         "carbs": 2.95,
@@ -20630,15 +21445,15 @@
         "protein": 0.62
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Cucumber, raw",
-        "similarity": 0.8,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2709784"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
+        "Direct USDA raw cucumber record; the default 100 g is a simple edible-portion estimate."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -20908,8 +21723,15 @@
         "danish pastry",
         "danish"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Danish pastry, cheese",
+        "similarity": 0.7879,
+        "source": "usda",
+        "sourceID": "172754"
+      },
       "category": "Desserts & sweets",
-      "confidence": "Medium",
+      "confidence": "Low",
       "defaultGrams": 90.0,
       "defaultUnit": "1 pastry",
       "foodKind": "Recipe / assembled",
@@ -20917,30 +21739,77 @@
       "includedComponentsSummary": "None",
       "name": "Danish pastry",
       "nutrients": {
-        "calories": 336.6,
-        "carbs": 33.48,
-        "fat": 19.71,
-        "fiber": 0.9,
-        "protein": 7.2
+        "calories": 362.7,
+        "carbs": 40.14,
+        "fat": 20.16,
+        "fiber": 1.17,
+        "protein": 6.3
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Danish pastry, cheese",
+          "similarity": 0.7879,
+          "source": "usda",
+          "sourceID": "172754"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Danish pastry generic; use plain/spice pastry as a low-confidence estimate while cheese and fruit fillings remain unresolved.",
+          "reason": "Generic plain/spice Danish pastry is closer than the prior cheese Danish, but flavor and filling are unspecified.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Danish pastry, plain or spice",
+              "sourceID": "2708059",
+              "url": "https://fdc.nal.usda.gov/food-search?query=Danish%20pastry%2C%20plain%20or%20spice"
+            }
+          ]
+        },
+        "confidence": "Low",
+        "nutritionPer100g": {
+          "calories": 403.0,
+          "carbs": 44.6,
+          "fat": 22.4,
+          "fiber": 1.3,
+          "protein": 7.0
+        },
+        "reviewReasons": [
+          "Generic plain/spice Danish pastry is closer than the prior cheese Danish, but flavor and filling are unspecified."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2708059",
+          "recordName": "Danish pastry, plain or spice",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-28",
+          "serving": {
+            "description": "1 cubic inch",
+            "grams": 6.5
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search?query=Danish%20pastry%2C%20plain%20or%20spice"
+        }
       },
       "nutritionPer100g": {
-        "calories": 374.0,
-        "carbs": 37.2,
-        "fat": 21.9,
-        "fiber": 1.0,
-        "protein": 8.0
+        "calories": 403.0,
+        "carbs": 44.6,
+        "fat": 22.4,
+        "fiber": 1.3,
+        "protein": 7.0
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Danish pastry, cheese",
-        "similarity": 0.7879,
+        "matchBasis": "reviewed FDC record",
+        "name": "Danish pastry, plain or spice",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "172754"
+        "sourceID": "2708059"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "Generic plain/spice Danish pastry is closer than the prior cheese Danish, but flavor and filling are unspecified."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -21269,6 +22138,13 @@
         "diet coke",
         "diet soda"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "alias",
+        "name": "Diet Coke",
+        "similarity": 0.94,
+        "source": "off",
+        "sourceID": "04965802"
+      },
       "category": "Beverages",
       "confidence": "Medium",
       "defaultGrams": 355.0,
@@ -21278,30 +22154,77 @@
       "includedComponentsSummary": "None",
       "name": "Diet cola",
       "nutrients": {
-        "calories": 0.0,
-        "carbs": 0.0,
-        "fat": 0.0,
-        "fiber": null,
-        "protein": 0.0
+        "calories": 7.1,
+        "carbs": 1.03,
+        "fat": 0.11,
+        "fiber": 0.0,
+        "protein": 0.39
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "alias",
+          "name": "Diet Coke",
+          "similarity": 0.94,
+          "source": "off",
+          "sourceID": "04965802"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Diet cola as a distinct beverage identity; use the generic USDA diet-cola estimate and preserve its nonzero reported value.",
+          "reason": "USDA generic diet cola reports a small nonzero energy value; brands and label-rounding vary.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Soft drink, cola, diet",
+              "sourceID": "2710542",
+              "url": "https://fdc.nal.usda.gov/food-search?query=Soft%20drink%2C%20cola%2C%20diet"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 2.0,
+          "carbs": 0.29,
+          "fat": 0.03,
+          "fiber": 0.0,
+          "protein": 0.11
+        },
+        "reviewReasons": [
+          "USDA generic diet cola reports a small nonzero energy value; brands and label-rounding vary."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2710542",
+          "recordName": "Soft drink, cola, diet",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-28",
+          "serving": {
+            "description": "1 fl oz (no ice)",
+            "grams": 30.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search?query=Soft%20drink%2C%20cola%2C%20diet"
+        }
       },
       "nutritionPer100g": {
-        "calories": 0.0,
-        "carbs": 0.0,
-        "fat": 0.0,
-        "fiber": null,
-        "protein": 0.0
+        "calories": 2.0,
+        "carbs": 0.29,
+        "fat": 0.03,
+        "fiber": 0.0,
+        "protein": 0.11
       },
       "nutritionSource": {
-        "matchBasis": "alias",
-        "name": "Diet Coke",
-        "similarity": 0.94,
-        "source": "off",
-        "sourceID": "04965802"
+        "matchBasis": "reviewed FDC record",
+        "name": "Soft drink, cola, diet",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2710542"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Fiber unavailable in matched record"
+        "USDA generic diet cola reports a small nonzero energy value; brands and label-rounding vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -21626,6 +22549,13 @@
         "donut",
         "glazed donut"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Doughnut, NFS",
+        "similarity": 0.8,
+        "source": "usda",
+        "sourceID": "2708062"
+      },
       "category": "Desserts & sweets",
       "confidence": "Medium",
       "defaultGrams": 70.0,
@@ -21641,6 +22571,54 @@
         "fiber": 1.26,
         "protein": 3.86
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Doughnut, NFS",
+          "similarity": 0.8,
+          "source": "usda",
+          "sourceID": "2708062"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Doughnut generic; NFS is a representative average and not a specific style.",
+          "reason": "USDA doughnut NFS is a generic prepared-doughnut profile; cake, yeast, glaze, and filling vary.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Doughnut, NFS",
+              "sourceID": "2708062",
+              "url": "https://fdc.nal.usda.gov/food-search?query=Doughnut%2C%20NFS"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 426.0,
+          "carbs": 49.5,
+          "fat": 22.9,
+          "fiber": 1.8,
+          "protein": 5.52
+        },
+        "reviewReasons": [
+          "USDA doughnut NFS is a generic prepared-doughnut profile; cake, yeast, glaze, and filling vary."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2708062",
+          "recordName": "Doughnut, NFS",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-28",
+          "serving": {
+            "description": "1 doughnut",
+            "grams": 75.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search?query=Doughnut%2C%20NFS"
+        }
+      },
       "nutritionPer100g": {
         "calories": 426.0,
         "carbs": 49.5,
@@ -21649,16 +22627,15 @@
         "protein": 5.52
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Doughnut, NFS",
-        "similarity": 0.8,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2708062"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "USDA doughnut NFS is a generic prepared-doughnut profile; cake, yeast, glaze, and filling vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -22431,6 +23408,13 @@
         "egg salad sandwich",
         "egg sandwich with mayonnaise"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Egg salad sandwich on wheat",
+        "similarity": 0.8,
+        "source": "usda",
+        "sourceID": "2707281"
+      },
       "category": "Sandwiches & handhelds",
       "confidence": "Medium",
       "defaultGrams": 185.0,
@@ -22440,30 +23424,77 @@
       "includedComponentsSummary": "None",
       "name": "Egg salad sandwich",
       "nutrients": {
-        "calories": 479.15,
-        "carbs": 29.23,
-        "fat": 31.08,
-        "fiber": 3.33,
-        "protein": 19.61
+        "calories": 481.0,
+        "carbs": 31.64,
+        "fat": 30.71,
+        "fiber": 1.48,
+        "protein": 18.46
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Egg salad sandwich on wheat",
+          "similarity": 0.8,
+          "source": "usda",
+          "sourceID": "2707281"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Egg salad sandwich assembled; white bread is the reference profile while bread type and mayonnaise amount vary.",
+          "reason": "USDA egg salad sandwich on white is a close assembled-food match; the canonical entry permits bread choices.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Egg salad sandwich on white",
+              "sourceID": "2707280",
+              "url": "https://fdc.nal.usda.gov/food-search?query=Egg%20salad%20sandwich%20on%20white"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 260.0,
+          "carbs": 17.1,
+          "fat": 16.6,
+          "fiber": 0.8,
+          "protein": 9.98
+        },
+        "reviewReasons": [
+          "USDA egg salad sandwich on white is a close assembled-food match; the canonical entry permits bread choices."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2707280",
+          "recordName": "Egg salad sandwich on white",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-28",
+          "serving": {
+            "description": "1 regular",
+            "grams": 180.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search?query=Egg%20salad%20sandwich%20on%20white"
+        }
       },
       "nutritionPer100g": {
-        "calories": 259.0,
-        "carbs": 15.8,
-        "fat": 16.8,
-        "fiber": 1.8,
-        "protein": 10.6
+        "calories": 260.0,
+        "carbs": 17.1,
+        "fat": 16.6,
+        "fiber": 0.8,
+        "protein": 9.98
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Egg salad sandwich on wheat",
-        "similarity": 0.8,
+        "matchBasis": "reviewed FDC record",
+        "name": "Egg salad sandwich on white",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2707281"
+        "sourceID": "2707280"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "USDA egg salad sandwich on white is a close assembled-food match; the canonical entry permits bread choices."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -22696,6 +23727,13 @@
       "aliases": [
         "eggs benedict"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Egg, Benedict",
+        "similarity": 0.96,
+        "source": "usda",
+        "sourceID": "2707180"
+      },
       "category": "Breakfast & eggs",
       "confidence": "Medium",
       "defaultGrams": 210.0,
@@ -22711,6 +23749,54 @@
         "fiber": 1.26,
         "protein": 28.98
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Egg, Benedict",
+          "similarity": 0.96,
+          "source": "usda",
+          "sourceID": "2707180"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Eggs Benedict as an assembled breakfast; use the direct USDA prepared-dish record and note recipe portion variability.",
+          "reason": "USDA Eggs Benedict record directly matches the assembled dish; egg count, English muffin, and hollandaise portions vary.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Egg, Benedict",
+              "sourceID": "2707180",
+              "url": "https://fdc.nal.usda.gov/food-search?query=Egg%2C%20Benedict"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 288.0,
+          "carbs": 8.48,
+          "fat": 22.1,
+          "fiber": 0.6,
+          "protein": 13.8
+        },
+        "reviewReasons": [
+          "USDA Eggs Benedict record directly matches the assembled dish; egg count, English muffin, and hollandaise portions vary."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2707180",
+          "recordName": "Egg, Benedict",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-28",
+          "serving": {
+            "description": "1 egg",
+            "grams": 155.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search?query=Egg%2C%20Benedict"
+        }
+      },
       "nutritionPer100g": {
         "calories": 288.0,
         "carbs": 8.48,
@@ -22719,16 +23805,15 @@
         "protein": 13.8
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Egg, Benedict",
-        "similarity": 0.96,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2707180"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "USDA Eggs Benedict record directly matches the assembled dish; egg count, English muffin, and hollandaise portions vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
