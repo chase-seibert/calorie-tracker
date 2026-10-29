@@ -17462,6 +17462,966 @@
         },
         "url": "https://fdc.nal.usda.gov/food-search?query=Egg%2C%20Benedict"
       }
+    },
+    "food_enchiladas": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2708565",
+        "name": "Enchilada, NFS",
+        "matchBasis": "fallback",
+        "similarity": 0.8696
+      },
+      "compositionEvidence": {
+        "decision": "Keep Enchiladas as a generic assembled-food identity; use the USDA NFS recipe profile and retain uncertainty about protein and recipe proportions.",
+        "reason": "USDA Enchilada, NFS is a direct generic assembled-dish match, but meat, cheese, sauce, and filling proportions vary. Source serving: 1 enchilada, any size (150 g).",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Enchilada, NFS",
+            "sourceID": "2708565",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Enchilada%2C%20NFS"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 178.0,
+        "carbs": 14.6,
+        "fat": 9.02,
+        "fiber": 2.3,
+        "protein": 10.0
+      },
+      "reviewReasons": [
+        "USDA Enchilada, NFS is a direct generic assembled-dish match, but meat, cheese, sauce, and filling proportions vary. Source serving: 1 enchilada, any size (150 g)."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2708565",
+        "recordName": "Enchilada, NFS",
+        "reviewedDate": "2026-10-29",
+        "releaseDate": "2024-10-31",
+        "serving": {
+          "description": "1 enchilada, any size",
+          "grams": 150.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Enchilada%2C%20NFS"
+      }
+    },
+    "food_fajitas": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2708603",
+        "name": "Fajita, NFS",
+        "matchBasis": "fallback",
+        "similarity": 0.8235
+      },
+      "compositionEvidence": {
+        "decision": "Keep Fajitas generic; use the USDA NFS prepared fajita estimate while recognizing protein and serving size are unspecified.",
+        "reason": "USDA Fajita, NFS directly represents a prepared fajita; protein, vegetables, tortilla count, and restaurant portion vary. Source serving: 1 fajita (95 g).",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Fajita, NFS",
+            "sourceID": "2708603",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Fajita%2C%20NFS"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 219.0,
+        "carbs": 18.0,
+        "fat": 11.0,
+        "fiber": 1.5,
+        "protein": 11.7
+      },
+      "reviewReasons": [
+        "USDA Fajita, NFS directly represents a prepared fajita; protein, vegetables, tortilla count, and restaurant portion vary. Source serving: 1 fajita (95 g)."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2708603",
+        "recordName": "Fajita, NFS",
+        "reviewedDate": "2026-10-29",
+        "releaseDate": "2024-10-31",
+        "serving": {
+          "description": "1 fajita",
+          "grams": 95.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Fajita%2C%20NFS"
+      }
+    },
+    "food_falafel_wrap": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2707483",
+        "name": "Falafel sandwich",
+        "matchBasis": "alias",
+        "similarity": 0.94
+      },
+      "compositionEvidence": {
+        "decision": "Keep Falafel wrap as an assembled wrap; USDA falafel sandwich is the nearest generic filling-and-bread profile.",
+        "reason": "USDA Falafel sandwich is a close assembled-food match; wrap versus pita, sauces, and vegetable amounts vary. Source serving: 1 sandwich, any size (215 g).",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Falafel sandwich",
+            "sourceID": "2707483",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Falafel%20sandwich"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 265.0,
+        "carbs": 27.0,
+        "fat": 14.8,
+        "fiber": 2.5,
+        "protein": 6.22
+      },
+      "reviewReasons": [
+        "USDA Falafel sandwich is a close assembled-food match; wrap versus pita, sauces, and vegetable amounts vary. Source serving: 1 sandwich, any size (215 g)."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2707483",
+        "recordName": "Falafel sandwich",
+        "reviewedDate": "2026-10-29",
+        "releaseDate": "2024-10-31",
+        "serving": {
+          "description": "1 sandwich, any size",
+          "grams": 215.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Falafel%20sandwich"
+      }
+    },
+    "food_fish_sandwich": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2707026",
+        "name": "Fish sandwich, NFS",
+        "matchBasis": "canonical",
+        "similarity": 0.8667
+      },
+      "compositionEvidence": {
+        "decision": "Keep Fish sandwich generic; NFS record represents the assembled sandwich but does not resolve fried versus grilled fish.",
+        "reason": "USDA Fish sandwich, NFS is a direct assembled-sandwich match; breading, cooking method, and toppings vary. Source serving: 1 sandwich, any size (151 g).",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Fish sandwich, NFS",
+            "sourceID": "2707026",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Fish%20sandwich%2C%20NFS"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 252.0,
+        "carbs": 22.8,
+        "fat": 11.0,
+        "fiber": 0.8,
+        "protein": 15.3
+      },
+      "reviewReasons": [
+        "USDA Fish sandwich, NFS is a direct assembled-sandwich match; breading, cooking method, and toppings vary. Source serving: 1 sandwich, any size (151 g)."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2707026",
+        "recordName": "Fish sandwich, NFS",
+        "reviewedDate": "2026-10-29",
+        "releaseDate": "2024-10-31",
+        "serving": {
+          "description": "1 sandwich, any size",
+          "grams": 151.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Fish%20sandwich%2C%20NFS"
+      }
+    },
+    "food_fish_sticks": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2706231",
+        "name": "Fish, stick",
+        "matchBasis": "canonical",
+        "similarity": 0.9524
+      },
+      "compositionEvidence": {
+        "decision": "Keep Fish sticks as the prepared breaded fish identity; use the generic FNDDS stick profile and scale to the catalog piece weight.",
+        "reason": "USDA Fish, stick directly matches a prepared fish stick; product size and breading vary. Source serving: 1 stick (20 g).",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Fish, stick",
+            "sourceID": "2706231",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Fish%2C%20stick"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 277.0,
+        "carbs": 21.7,
+        "fat": 16.2,
+        "fiber": 1.5,
+        "protein": 11.0
+      },
+      "reviewReasons": [
+        "USDA Fish, stick directly matches a prepared fish stick; product size and breading vary. Source serving: 1 stick (20 g)."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2706231",
+        "recordName": "Fish, stick",
+        "reviewedDate": "2026-10-29",
+        "releaseDate": "2024-10-31",
+        "serving": {
+          "description": "1 stick",
+          "grams": 20.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Fish%2C%20stick"
+      }
+    },
+    "food_french_toast": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2708331",
+        "name": "French toast, NFS",
+        "matchBasis": "canonical",
+        "similarity": 0.8571
+      },
+      "compositionEvidence": {
+        "decision": "Keep French toast generic; use the NFS slice profile while toppings remain separately selectable.",
+        "reason": "USDA French toast, NFS is a direct prepared-food match; bread thickness and cooking fat vary. Source serving: 1 slice, any size (65 g).",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "French toast, NFS",
+            "sourceID": "2708331",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=French%20toast%2C%20NFS"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 273.0,
+        "carbs": 32.3,
+        "fat": 11.4,
+        "fiber": 1.2,
+        "protein": 10.4
+      },
+      "reviewReasons": [
+        "USDA French toast, NFS is a direct prepared-food match; bread thickness and cooking fat vary. Source serving: 1 slice, any size (65 g)."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2708331",
+        "recordName": "French toast, NFS",
+        "reviewedDate": "2026-10-29",
+        "releaseDate": "2024-10-31",
+        "serving": {
+          "description": "1 slice, any size",
+          "grams": 65.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=French%20toast%2C%20NFS"
+      }
+    },
+    "food_fried_egg": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2710048",
+        "name": "Fried eggplant",
+        "matchBasis": "canonical",
+        "similarity": 0.7826
+      },
+      "compositionEvidence": {
+        "decision": "Keep Fried egg as a single cooked egg; the USDA fried whole-egg profile is direct, with added cooking fat unresolved.",
+        "reason": "USDA cooked-fried whole egg is a direct preparation match; cooking fat and egg size vary. Source serving: 1 large egg (46 g).",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Egg, whole, cooked, fried",
+            "sourceID": "173423",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Egg%2C%20whole%2C%20cooked%2C%20fried"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 196.0,
+        "carbs": 0.83,
+        "fat": 14.8,
+        "fiber": 0.0,
+        "protein": 13.6
+      },
+      "reviewReasons": [
+        "USDA cooked-fried whole egg is a direct preparation match; cooking fat and egg size vary. Source serving: 1 large egg (46 g)."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "SR Legacy",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "173423",
+        "recordName": "Egg, whole, cooked, fried",
+        "reviewedDate": "2026-10-29",
+        "releaseDate": "2018-04-01",
+        "serving": {
+          "description": "1 large egg",
+          "grams": 46.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Egg%2C%20whole%2C%20cooked%2C%20fried"
+      }
+    },
+    "food_fried_rice": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2707794",
+        "name": "Bread, rice",
+        "matchBasis": "canonical",
+        "similarity": 0.8
+      },
+      "compositionEvidence": {
+        "decision": "Keep Fried rice generic; use the USDA NFS fried-rice profile and retain uncertainty around meat and added oil.",
+        "reason": "USDA Rice, fried, NFS directly matches the cooked preparation; meat, egg, oil, and restaurant recipe vary. Source serving: 1 cup (198 g).",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Rice, fried, NFS",
+            "sourceID": "2708952",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Rice%2C%20fried%2C%20NFS"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 174.0,
+        "carbs": 32.5,
+        "fat": 3.19,
+        "fiber": 1.1,
+        "protein": 3.84
+      },
+      "reviewReasons": [
+        "USDA Rice, fried, NFS directly matches the cooked preparation; meat, egg, oil, and restaurant recipe vary. Source serving: 1 cup (198 g)."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2708952",
+        "recordName": "Rice, fried, NFS",
+        "reviewedDate": "2026-10-29",
+        "releaseDate": "2024-10-31",
+        "serving": {
+          "description": "1 cup",
+          "grams": 198.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Rice%2C%20fried%2C%20NFS"
+      }
+    },
+    "food_frozen_yogurt": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2705451",
+        "name": "Frozen yogurt, NFS",
+        "matchBasis": "canonical",
+        "similarity": 0.8667
+      },
+      "compositionEvidence": {
+        "decision": "Keep Frozen yogurt generic and use the USDA NFS profile; flavor-specific variation remains unresolved.",
+        "reason": "USDA Frozen yogurt, NFS is a direct generic match; flavor, fat level, and soft-serve recipe vary. Source serving: 1 cup (175 g).",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Frozen yogurt, NFS",
+            "sourceID": "2705451",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Frozen%20yogurt%2C%20NFS"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 127.0,
+        "carbs": 21.6,
+        "fat": 3.6,
+        "fiber": 0.0,
+        "protein": 3.0
+      },
+      "reviewReasons": [
+        "USDA Frozen yogurt, NFS is a direct generic match; flavor, fat level, and soft-serve recipe vary. Source serving: 1 cup (175 g)."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2705451",
+        "recordName": "Frozen yogurt, NFS",
+        "reviewedDate": "2026-10-29",
+        "releaseDate": "2024-10-31",
+        "serving": {
+          "description": "1 cup",
+          "grams": 175.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Frozen%20yogurt%2C%20NFS"
+      }
+    },
+    "food_garlic_bread": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2707626",
+        "name": "Garlic bread, NFS",
+        "matchBasis": "canonical",
+        "similarity": 0.8571
+      },
+      "compositionEvidence": {
+        "decision": "Keep Garlic bread as an assembled bread item; use the generic USDA NFS slice profile.",
+        "reason": "USDA Garlic bread, NFS directly matches the prepared food; bread type and butter/oil quantity vary. Source serving: 1 small slice (39 g).",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Garlic bread, NFS",
+            "sourceID": "2707626",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Garlic%20bread%2C%20NFS"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 349.0,
+        "carbs": 41.6,
+        "fat": 16.6,
+        "fiber": 2.5,
+        "protein": 8.34
+      },
+      "reviewReasons": [
+        "USDA Garlic bread, NFS directly matches the prepared food; bread type and butter/oil quantity vary. Source serving: 1 small slice (39 g)."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2707626",
+        "recordName": "Garlic bread, NFS",
+        "reviewedDate": "2026-10-29",
+        "releaseDate": "2024-10-31",
+        "serving": {
+          "description": "1 small slice",
+          "grams": 39.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Garlic%20bread%2C%20NFS"
+      }
+    },
+    "food_general_tso_s_chicken": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2706794",
+        "name": "General Tso chicken",
+        "matchBasis": "canonical",
+        "similarity": 0.95
+      },
+      "compositionEvidence": {
+        "decision": "Keep General Tso chicken as an assembled entrée; use the direct FNDDS dish profile without adding a separate rice side to its nutrition.",
+        "reason": "USDA General Tso chicken is an exact dish-name match; breading, sauce amount, and side inclusion vary. Source serving: 1 cup (146 g).",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "General Tso chicken",
+            "sourceID": "2706794",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=General%20Tso%20chicken"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 295.0,
+        "carbs": 24.0,
+        "fat": 16.4,
+        "fiber": 0.9,
+        "protein": 12.9
+      },
+      "reviewReasons": [
+        "USDA General Tso chicken is an exact dish-name match; breading, sauce amount, and side inclusion vary. Source serving: 1 cup (146 g)."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2706794",
+        "recordName": "General Tso chicken",
+        "reviewedDate": "2026-10-29",
+        "releaseDate": "2024-10-31",
+        "serving": {
+          "description": "1 cup",
+          "grams": 146.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=General%20Tso%20chicken"
+      }
+    },
+    "food_grapefruit": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2709165",
+        "name": "Grapefruit, raw",
+        "matchBasis": "canonical",
+        "similarity": 0.8333
+      },
+      "compositionEvidence": {
+        "decision": "Keep Grapefruit as a plain raw fruit; use the direct USDA raw profile and scale to the catalog serving.",
+        "reason": "Direct USDA raw grapefruit record; default edible portion is estimated at 230 g. Source serving: 1 fruit (308 g). USDA raw grapefruit is a direct food match, but its listed 308 g whole-fruit portion differs from the catalog 230 g default; portion size remains an estimate.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Grapefruit, raw",
+            "sourceID": "2709165",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Grapefruit%2C%20raw"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 42.0,
+        "carbs": 10.7,
+        "fat": 0.14,
+        "fiber": 1.6,
+        "protein": 0.77
+      },
+      "reviewReasons": [
+        "Direct USDA raw grapefruit record; default edible portion is estimated at 230 g. Source serving: 1 fruit (308 g). USDA raw grapefruit is a direct food match, but its listed 308 g whole-fruit portion differs from the catalog 230 g default; portion size remains an estimate."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2709165",
+        "recordName": "Grapefruit, raw",
+        "reviewedDate": "2026-10-29",
+        "releaseDate": "2024-10-31",
+        "serving": {
+          "description": "1 fruit",
+          "grams": 308.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Grapefruit%2C%20raw"
+      }
+    },
+    "food_green_beans_cooked": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2710070",
+        "name": "Green beans, pickled",
+        "matchBasis": "canonical",
+        "similarity": 0.8649
+      },
+      "compositionEvidence": {
+        "decision": "Keep Green beans, cooked as a plain vegetable; use fresh cooked without added fat as the reference preparation.",
+        "reason": "USDA fresh green beans cooked without added fat is a close plain-preparation match; cooking fat and canned/frozen forms vary. Source serving: 1 cup (140 g).",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Green beans, fresh, cooked, no added fat",
+            "sourceID": "2709852",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Green%20beans%2C%20fresh%2C%20cooked%2C%20no%20added%20fat"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 42.0,
+        "carbs": 7.7,
+        "fat": 0.29,
+        "fiber": 3.1,
+        "protein": 2.05
+      },
+      "reviewReasons": [
+        "USDA fresh green beans cooked without added fat is a close plain-preparation match; cooking fat and canned/frozen forms vary. Source serving: 1 cup (140 g)."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2709852",
+        "recordName": "Green beans, fresh, cooked, no added fat",
+        "reviewedDate": "2026-10-29",
+        "releaseDate": "2024-10-31",
+        "serving": {
+          "description": "1 cup",
+          "grams": 140.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Green%20beans%2C%20fresh%2C%20cooked%2C%20no%20added%20fat"
+      }
+    },
+    "food_grilled_cheese": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2707660",
+        "name": "Roll, cheese",
+        "matchBasis": "canonical",
+        "similarity": 0.8
+      },
+      "compositionEvidence": {
+        "decision": "Keep Grilled cheese assembled from bread, cheese, and cooking fat; the USDA NFS profile provides a representative estimate.",
+        "reason": "USDA Grilled cheese sandwich, NFS directly matches the assembled sandwich; bread, cheese, and cooking fat proportions vary. Source serving: 1 sandwich (116 g).",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Grilled cheese sandwich, NFS",
+            "sourceID": "2705801",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Grilled%20cheese%20sandwich%2C%20NFS"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 343.0,
+        "carbs": 28.1,
+        "fat": 20.8,
+        "fiber": 1.2,
+        "protein": 11.0
+      },
+      "reviewReasons": [
+        "USDA Grilled cheese sandwich, NFS directly matches the assembled sandwich; bread, cheese, and cooking fat proportions vary. Source serving: 1 sandwich (116 g)."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2705801",
+        "recordName": "Grilled cheese sandwich, NFS",
+        "reviewedDate": "2026-10-29",
+        "releaseDate": "2024-10-31",
+        "serving": {
+          "description": "1 sandwich",
+          "grams": 116.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Grilled%20cheese%20sandwich%2C%20NFS"
+      }
+    },
+    "food_guacamole": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2709307",
+        "name": "Guacamole, NFS",
+        "matchBasis": "canonical",
+        "similarity": 0.8182
+      },
+      "compositionEvidence": {
+        "decision": "Keep Guacamole as a generic dip; the USDA NFS tablespoon profile matches the default portion.",
+        "reason": "Direct USDA Guacamole, NFS record with the same 15 g tablespoon portion as the catalog default. Source serving: 1 tablespoon (15 g).",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Guacamole, NFS",
+            "sourceID": "2709307",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Guacamole%2C%20NFS"
+          }
+        ]
+      },
+      "confidence": "High",
+      "nutritionPer100g": {
+        "calories": 155.0,
+        "carbs": 8.45,
+        "fat": 14.2,
+        "fiber": 6.5,
+        "protein": 1.95
+      },
+      "reviewReasons": [
+        "Direct USDA Guacamole, NFS record with the same 15 g tablespoon portion as the catalog default. Source serving: 1 tablespoon (15 g)."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2709307",
+        "recordName": "Guacamole, NFS",
+        "reviewedDate": "2026-10-29",
+        "releaseDate": "2024-10-31",
+        "serving": {
+          "description": "1 tablespoon",
+          "grams": 15.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Guacamole%2C%20NFS"
+      }
+    },
+    "food_gyro": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2706962",
+        "name": "Gyro sandwich",
+        "matchBasis": "alias",
+        "similarity": 0.94
+      },
+      "compositionEvidence": {
+        "decision": "Keep Gyro as an assembled sandwich; use the direct USDA gyro sandwich profile and scale to the catalog portion.",
+        "reason": "USDA Gyro sandwich is a direct assembled-food match; meat, sauce, and serving size vary. Source serving: 1 sandwich, any size (200 g).",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Gyro sandwich",
+            "sourceID": "2706962",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Gyro%20sandwich"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 184.0,
+        "carbs": 18.8,
+        "fat": 6.76,
+        "fiber": 1.0,
+        "protein": 11.2
+      },
+      "reviewReasons": [
+        "USDA Gyro sandwich is a direct assembled-food match; meat, sauce, and serving size vary. Source serving: 1 sandwich, any size (200 g)."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2706962",
+        "recordName": "Gyro sandwich",
+        "reviewedDate": "2026-10-29",
+        "releaseDate": "2024-10-31",
+        "serving": {
+          "description": "1 sandwich, any size",
+          "grams": 200.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Gyro%20sandwich"
+      }
+    },
+    "food_hamburger_bun": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2706920",
+        "name": "Hamburger, NFS",
+        "matchBasis": "canonical",
+        "similarity": 0.8462
+      },
+      "compositionEvidence": {
+        "decision": "Keep Hamburger bun as a reusable bread item; use a white bun reference while preserving uncertainty about type and portion.",
+        "reason": "USDA white hamburger bun is the closest direct bread match; canonical bread type and full bun size vary. Source serving: 1 miniature/small hamburger bun (28 g).",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Roll, white, hamburger bun",
+            "sourceID": "2707657",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Roll%2C%20white%2C%20hamburger%20bun"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 267.0,
+        "carbs": 49.2,
+        "fat": 3.59,
+        "fiber": 2.3,
+        "protein": 9.43
+      },
+      "reviewReasons": [
+        "USDA white hamburger bun is the closest direct bread match; canonical bread type and full bun size vary. Source serving: 1 miniature/small hamburger bun (28 g)."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2707657",
+        "recordName": "Roll, white, hamburger bun",
+        "reviewedDate": "2026-10-29",
+        "releaseDate": "2024-10-31",
+        "serving": {
+          "description": "1 miniature/small hamburger bun",
+          "grams": 28.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Roll%2C%20white%2C%20hamburger%20bun"
+      }
+    },
+    "food_honeydew_melon": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2709241",
+        "name": "Honeydew melon, raw",
+        "matchBasis": "canonical",
+        "similarity": 0.875
+      },
+      "compositionEvidence": {
+        "decision": "Keep Honeydew melon as a plain raw fruit and use the matching USDA raw profile.",
+        "reason": "Direct USDA raw honeydew melon profile; edible fruit portion is estimated at the catalog default. Source serving: 1 cube (15 g). USDA raw honeydew is a direct food match, but its listed 15 g cube portion differs from the catalog 170 g cup default; portion size remains an estimate.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Honeydew melon, raw",
+            "sourceID": "2709241",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Honeydew%20melon%2C%20raw"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 36.0,
+        "carbs": 9.09,
+        "fat": 0.14,
+        "fiber": 0.8,
+        "protein": 0.54
+      },
+      "reviewReasons": [
+        "Direct USDA raw honeydew melon profile; edible fruit portion is estimated at the catalog default. Source serving: 1 cube (15 g). USDA raw honeydew is a direct food match, but its listed 15 g cube portion differs from the catalog 170 g cup default; portion size remains an estimate."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2709241",
+        "recordName": "Honeydew melon, raw",
+        "reviewedDate": "2026-10-29",
+        "releaseDate": "2024-10-31",
+        "serving": {
+          "description": "1 cube",
+          "grams": 15.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Honeydew%20melon%2C%20raw"
+      }
+    },
+    "food_hot_dog_bun": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2706166",
+        "name": "Hot dog, NFS",
+        "matchBasis": "canonical",
+        "similarity": 0.8182
+      },
+      "compositionEvidence": {
+        "decision": "Keep Hot dog bun as a reusable bread item; use a white bun reference and retain type/size uncertainty.",
+        "reason": "USDA white hot dog bun is a direct bread match; wheat type and bun size vary. Source serving: 1 hot dog bun (45 g).",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Roll, white, hot dog bun",
+            "sourceID": "2707656",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Roll%2C%20white%2C%20hot%20dog%20bun"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 267.0,
+        "carbs": 49.2,
+        "fat": 3.59,
+        "fiber": 2.3,
+        "protein": 9.43
+      },
+      "reviewReasons": [
+        "USDA white hot dog bun is a direct bread match; wheat type and bun size vary. Source serving: 1 hot dog bun (45 g)."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2707656",
+        "recordName": "Roll, white, hot dog bun",
+        "reviewedDate": "2026-10-29",
+        "releaseDate": "2024-10-31",
+        "serving": {
+          "description": "1 hot dog bun",
+          "grams": 45.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Roll%2C%20white%2C%20hot%20dog%20bun"
+      }
+    },
+    "food_ice_cream": {
+      "baselineNutritionSource": {
+        "source": "usda",
+        "sourceID": "2707872",
+        "name": "Cake, cream",
+        "matchBasis": "canonical",
+        "similarity": 0.8421
+      },
+      "compositionEvidence": {
+        "decision": "Keep Ice cream generic; the USDA NFS profile is a better match than the prior cream-cake record.",
+        "reason": "USDA Ice cream, NFS directly matches generic ice cream; flavor, milkfat, and scoop size vary. Source serving: 1 cup (135 g).",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Ice cream, NFS",
+            "sourceID": "2705629",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Ice%20cream%2C%20NFS"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 221.0,
+        "carbs": 26.4,
+        "fat": 11.3,
+        "fiber": 0.8,
+        "protein": 3.57
+      },
+      "reviewReasons": [
+        "USDA Ice cream, NFS directly matches generic ice cream; flavor, milkfat, and scoop size vary. Source serving: 1 cup (135 g)."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2705629",
+        "recordName": "Ice cream, NFS",
+        "reviewedDate": "2026-10-29",
+        "releaseDate": "2024-10-31",
+        "serving": {
+          "description": "1 cup",
+          "grams": 135.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Ice%20cream%2C%20NFS"
+      }
     }
   },
   "schemaVersion": 1
