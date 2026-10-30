@@ -6609,7 +6609,7 @@
       "2"
     ]
   ],
-  "datasetVersion": "chase-food-2026-10-29-39",
+  "datasetVersion": "chase-food-2026-10-30-40",
   "foods": [
     {
       "aliases": [
@@ -30908,6 +30908,13 @@
         "italian dressing",
         "italian salad dressing"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Italian dressing, light",
+        "similarity": 0.8421,
+        "source": "usda",
+        "sourceID": "2710224"
+      },
       "category": "Sauces, oils & toppings",
       "confidence": "Medium",
       "defaultGrams": 15.0,
@@ -30917,29 +30924,77 @@
       "includedComponentsSummary": "None",
       "name": "Italian dressing",
       "nutrients": {
-        "calories": 15.3,
-        "carbs": 1.5,
-        "fat": 1.0,
+        "calories": 36.0,
+        "carbs": 1.81,
+        "fat": 3.17,
         "fiber": 0.0,
         "protein": 0.06
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Italian dressing, light",
+          "similarity": 0.8421,
+          "source": "usda",
+          "sourceID": "2710224"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Italian dressing as one canonical food and use the closest preparation-matched USDA profile available.",
+          "reason": "Use the standard oil-and-vinegar Italian dressing profile; regular versus light recipes vary. Default tablespoon is scaled from a USDA cup measure.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Italian dressing, made with vinegar and oil",
+              "sourceID": "2710203",
+              "url": "https://fdc.nal.usda.gov/food-search/?query=Italian%20dressing%2C%20made%20with%20vinegar%20and%20oil"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 240.0,
+          "carbs": 12.1,
+          "fat": 21.1,
+          "fiber": 0.0,
+          "protein": 0.41
+        },
+        "reviewReasons": [
+          "Use the standard oil-and-vinegar Italian dressing profile; regular versus light recipes vary. Default tablespoon is scaled from a USDA cup measure."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2710203",
+          "recordName": "Italian dressing, made with vinegar and oil",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-30",
+          "serving": {
+            "description": "1 cup",
+            "grams": 235.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search/?query=Italian%20dressing%2C%20made%20with%20vinegar%20and%20oil"
+        }
+      },
       "nutritionPer100g": {
-        "calories": 102.0,
-        "carbs": 9.99,
-        "fat": 6.68,
+        "calories": 240.0,
+        "carbs": 12.1,
+        "fat": 21.1,
         "fiber": 0.0,
-        "protein": 0.39
+        "protein": 0.41
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Italian dressing, light",
-        "similarity": 0.8421,
+        "matchBasis": "reviewed FDC record",
+        "name": "Italian dressing, made with vinegar and oil",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2710224"
+        "sourceID": "2710203"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
+        "Use the standard oil-and-vinegar Italian dressing profile; regular versus light recipes vary. Default tablespoon is scaled from a USDA cup measure."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -31245,6 +31300,13 @@
         "gelatin dessert",
         "jello"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "alias",
+        "name": "Gelatin dessert",
+        "similarity": 0.94,
+        "source": "usda",
+        "sourceID": "2710310"
+      },
       "category": "Desserts & sweets",
       "confidence": "Medium",
       "defaultGrams": 140.0,
@@ -31260,6 +31322,54 @@
         "fiber": 0.0,
         "protein": 1.71
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "alias",
+          "name": "Gelatin dessert",
+          "similarity": 0.94,
+          "source": "usda",
+          "sourceID": "2710310"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Jell-O as one canonical food and use the closest preparation-matched USDA profile available.",
+          "reason": "Generic USDA gelatin dessert is a close match for the Jell-O search alias; brand and flavor specific label values are not represented. Default portion is smaller than the source cup.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Gelatin dessert",
+              "sourceID": "2710310",
+              "url": "https://fdc.nal.usda.gov/food-search/?query=Gelatin%20dessert"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 60.0,
+          "carbs": 14.2,
+          "fat": 0.0,
+          "fiber": 0.0,
+          "protein": 1.22
+        },
+        "reviewReasons": [
+          "Generic USDA gelatin dessert is a close match for the Jell-O search alias; brand and flavor specific label values are not represented. Default portion is smaller than the source cup."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2710310",
+          "recordName": "Gelatin dessert",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-30",
+          "serving": {
+            "description": "1 cup",
+            "grams": 240.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search/?query=Gelatin%20dessert"
+        }
+      },
       "nutritionPer100g": {
         "calories": 60.0,
         "carbs": 14.2,
@@ -31268,16 +31378,15 @@
         "protein": 1.22
       },
       "nutritionSource": {
-        "matchBasis": "alias",
+        "matchBasis": "reviewed FDC record",
         "name": "Gelatin dessert",
-        "similarity": 0.94,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2710310"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "Generic USDA gelatin dessert is a close match for the Jell-O search alias; brand and flavor specific label values are not represented. Default portion is smaller than the source cup."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -31475,6 +31584,13 @@
         "kidney beans",
         "red kidney beans"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Kidney beans, NFS",
+        "similarity": 0.8571,
+        "source": "usda",
+        "sourceID": "2707379"
+      },
       "category": "Bread, grains & legumes",
       "confidence": "Medium",
       "defaultGrams": 177.0,
@@ -31484,29 +31600,77 @@
       "includedComponentsSummary": "None",
       "name": "Kidney beans",
       "nutrients": {
-        "calories": 313.29,
-        "carbs": 37.52,
-        "fat": 12.34,
-        "fiber": 12.21,
-        "protein": 14.27
+        "calories": 223.02,
+        "carbs": 40.18,
+        "fat": 0.89,
+        "fiber": 13.1,
+        "protein": 15.26
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Kidney beans, NFS",
+          "similarity": 0.8571,
+          "source": "usda",
+          "sourceID": "2707379"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Kidney beans as one canonical food and use the closest preparation-matched USDA profile available.",
+          "reason": "Use cooked kidney beans without added fat; the catalog identity does not specify canned versus cooked-from-dried preparation. Source cup is close to the catalog portion.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Kidney beans, from dried, no added fat",
+              "sourceID": "2707381",
+              "url": "https://fdc.nal.usda.gov/food-search/?query=Kidney%20beans%2C%20from%20dried%2C%20no%20added%20fat"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 126.0,
+          "carbs": 22.7,
+          "fat": 0.5,
+          "fiber": 7.4,
+          "protein": 8.62
+        },
+        "reviewReasons": [
+          "Use cooked kidney beans without added fat; the catalog identity does not specify canned versus cooked-from-dried preparation. Source cup is close to the catalog portion."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2707381",
+          "recordName": "Kidney beans, from dried, no added fat",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-30",
+          "serving": {
+            "description": "1 cup",
+            "grams": 180.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search/?query=Kidney%20beans%2C%20from%20dried%2C%20no%20added%20fat"
+        }
       },
       "nutritionPer100g": {
-        "calories": 177.0,
-        "carbs": 21.2,
-        "fat": 6.97,
-        "fiber": 6.9,
-        "protein": 8.06
+        "calories": 126.0,
+        "carbs": 22.7,
+        "fat": 0.5,
+        "fiber": 7.4,
+        "protein": 8.62
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Kidney beans, NFS",
-        "similarity": 0.8571,
+        "matchBasis": "reviewed FDC record",
+        "name": "Kidney beans, from dried, no added fat",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2707379"
+        "sourceID": "2707381"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
+        "Use cooked kidney beans without added fat; the catalog identity does not specify canned versus cooked-from-dried preparation. Source cup is close to the catalog portion."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -32082,8 +32246,15 @@
       "aliases": [
         "lemon caper sauce"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Lemon-butter sauce",
+        "similarity": 0.8,
+        "source": "usda",
+        "sourceID": "2710170"
+      },
       "category": "Ingredients",
-      "confidence": "Medium",
+      "confidence": "Low",
       "defaultGrams": 30.0,
       "defaultUnit": "1 serving",
       "foodKind": "Reusable ingredient",
@@ -32097,6 +32268,54 @@
         "fiber": 0.0,
         "protein": 0.24
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Lemon-butter sauce",
+          "similarity": 0.8,
+          "source": "usda",
+          "sourceID": "2710170"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Lemon caper sauce as one canonical food and use the closest preparation-matched USDA profile available.",
+          "reason": "No direct lemon-caper sauce record was available locally. Lemon-butter sauce is a broad butter-based proxy; capers and recipe proportions can materially change the result.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Lemon-butter sauce",
+              "sourceID": "2710170",
+              "url": "https://fdc.nal.usda.gov/food-search/?query=Lemon-butter%20sauce"
+            }
+          ]
+        },
+        "confidence": "Low",
+        "nutritionPer100g": {
+          "calories": 671.0,
+          "carbs": 0.74,
+          "fat": 74.0,
+          "fiber": 0.0,
+          "protein": 0.8
+        },
+        "reviewReasons": [
+          "No direct lemon-caper sauce record was available locally. Lemon-butter sauce is a broad butter-based proxy; capers and recipe proportions can materially change the result."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2710170",
+          "recordName": "Lemon-butter sauce",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-30",
+          "serving": {
+            "description": "1 tablespoon",
+            "grams": 16.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search/?query=Lemon-butter%20sauce"
+        }
+      },
       "nutritionPer100g": {
         "calories": 671.0,
         "carbs": 0.74,
@@ -32105,15 +32324,15 @@
         "protein": 0.8
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Lemon-butter sauce",
-        "similarity": 0.8,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2710170"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
+        "No direct lemon-caper sauce record was available locally. Lemon-butter sauce is a broad butter-based proxy; capers and recipe proportions can materially change the result."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -32596,6 +32815,13 @@
         "lobster tail",
         "lobster tail meat"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Lobster salad",
+        "similarity": 0.8,
+        "source": "usda",
+        "sourceID": "2706825"
+      },
       "category": "Seafood",
       "confidence": "Medium",
       "defaultGrams": 145.0,
@@ -32605,30 +32831,77 @@
       "includedComponentsSummary": "None",
       "name": "Lobster tail",
       "nutrients": {
-        "calories": 271.15,
-        "carbs": 1.77,
-        "fat": 22.33,
-        "fiber": 0.58,
-        "protein": 14.94
+        "calories": 85.26,
+        "carbs": 1.28,
+        "fat": 0.53,
+        "fiber": null,
+        "protein": 18.85
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Lobster salad",
+          "similarity": 0.8,
+          "source": "usda",
+          "sourceID": "2706825"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Lobster tail as one canonical food and use the closest preparation-matched USDA profile available.",
+          "reason": "Direct lobster tail meat record is frozen and raw, while the catalog entry represents a prepared edible tail. The USDA record provides a 100 g nutrient basis but no household portion.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Lobster, tail only, frozen, wild caught",
+              "sourceID": "2747657",
+              "url": "https://fdc.nal.usda.gov/food-search/?query=Lobster%2C%20tail%20only%2C%20frozen%2C%20wild%20caught"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 58.8,
+          "carbs": 0.886,
+          "fat": 0.367,
+          "fiber": null,
+          "protein": 13.0
+        },
+        "reviewReasons": [
+          "Direct lobster tail meat record is frozen and raw, while the catalog entry represents a prepared edible tail. The USDA record provides a 100 g nutrient basis but no household portion."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2747657",
+          "recordName": "Lobster, tail only, frozen, wild caught",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-30",
+          "serving": {
+            "description": "100 g nutrient reference (no household measure listed)",
+            "grams": 100.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search/?query=Lobster%2C%20tail%20only%2C%20frozen%2C%20wild%20caught"
+        }
       },
       "nutritionPer100g": {
-        "calories": 187.0,
-        "carbs": 1.22,
-        "fat": 15.4,
-        "fiber": 0.4,
-        "protein": 10.3
+        "calories": 58.8,
+        "carbs": 0.886,
+        "fat": 0.367,
+        "fiber": null,
+        "protein": 13.0
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Lobster salad",
-        "similarity": 0.8,
+        "matchBasis": "reviewed FDC record",
+        "name": "Lobster, tail only, frozen, wild caught",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2706825"
+        "sourceID": "2747657"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "Direct lobster tail meat record is frozen and raw, while the catalog entry represents a prepared edible tail. The USDA record provides a 100 g nutrient basis but no household portion."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -33167,6 +33440,13 @@
         "mashed potatoes",
         "mashed potato"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Stewed potatoes",
+        "similarity": 0.8,
+        "source": "usda",
+        "sourceID": "2709554"
+      },
       "category": "Vegetables & potatoes",
       "confidence": "Medium",
       "defaultGrams": 210.0,
@@ -33176,30 +33456,77 @@
       "includedComponentsSummary": "None",
       "name": "Mashed potatoes",
       "nutrients": {
-        "calories": 216.3,
-        "carbs": 34.23,
-        "fat": 7.12,
-        "fiber": 4.41,
-        "protein": 4.18
+        "calories": 237.3,
+        "carbs": 35.28,
+        "fat": 8.86,
+        "fiber": 3.15,
+        "protein": 3.91
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Stewed potatoes",
+          "similarity": 0.8,
+          "source": "usda",
+          "sourceID": "2709554"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Mashed potatoes as one canonical food and use the closest preparation-matched USDA profile available.",
+          "reason": "Home-prepared mashed potatoes with whole milk and butter; milk, butter, and recipe proportions vary. The USDA cup measure matches the catalog default.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Potatoes, mashed, home-prepared, whole milk and butter added",
+              "sourceID": "168555",
+              "url": "https://fdc.nal.usda.gov/food-search/?query=Potatoes%2C%20mashed%2C%20home-prepared%2C%20whole%20milk%20and%20butter%20added"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 113.0,
+          "carbs": 16.8,
+          "fat": 4.22,
+          "fiber": 1.5,
+          "protein": 1.86
+        },
+        "reviewReasons": [
+          "Home-prepared mashed potatoes with whole milk and butter; milk, butter, and recipe proportions vary. The USDA cup measure matches the catalog default."
+        ],
+        "source": {
+          "dataType": "SR Legacy",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "168555",
+          "recordName": "Potatoes, mashed, home-prepared, whole milk and butter added",
+          "releaseDate": "2018-04-01",
+          "reviewedDate": "2026-10-30",
+          "serving": {
+            "description": "1 cup",
+            "grams": 210.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search/?query=Potatoes%2C%20mashed%2C%20home-prepared%2C%20whole%20milk%20and%20butter%20added"
+        }
       },
       "nutritionPer100g": {
-        "calories": 103.0,
-        "carbs": 16.3,
-        "fat": 3.39,
-        "fiber": 2.1,
-        "protein": 1.99
+        "calories": 113.0,
+        "carbs": 16.8,
+        "fat": 4.22,
+        "fiber": 1.5,
+        "protein": 1.86
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Stewed potatoes",
-        "similarity": 0.8,
+        "matchBasis": "reviewed FDC record",
+        "name": "Potatoes, mashed, home-prepared, whole milk and butter added",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2709554"
+        "sourceID": "168555"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "Home-prepared mashed potatoes with whole milk and butter; milk, butter, and recipe proportions vary. The USDA cup measure matches the catalog default."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -33211,6 +33538,13 @@
         "mayonnaise",
         "mayo"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "REAL MAYONNAISE",
+        "similarity": 0.8,
+        "source": "off",
+        "sourceID": "0048001354500"
+      },
       "category": "Sauces, oils & toppings",
       "confidence": "Medium",
       "defaultGrams": 14.0,
@@ -33220,29 +33554,77 @@
       "includedComponentsSummary": "None",
       "name": "Mayonnaise",
       "nutrients": {
-        "calories": 100.0,
-        "carbs": 0.0,
-        "fat": 11.0,
+        "calories": 95.2,
+        "carbs": 0.08,
+        "fat": 10.47,
         "fiber": 0.0,
-        "protein": 0.0
+        "protein": 0.13
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "REAL MAYONNAISE",
+          "similarity": 0.8,
+          "source": "off",
+          "sourceID": "0048001354500"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Mayonnaise as one canonical food and use the closest preparation-matched USDA profile available.",
+          "reason": "Generic regular mayonnaise; brands and formulations vary. This replaces the prior packaged Open Food Facts record with a generic USDA profile.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Mayonnaise, regular",
+              "sourceID": "2710204",
+              "url": "https://fdc.nal.usda.gov/food-search/?query=Mayonnaise%2C%20regular"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 680.0,
+          "carbs": 0.57,
+          "fat": 74.8,
+          "fiber": 0.0,
+          "protein": 0.96
+        },
+        "reviewReasons": [
+          "Generic regular mayonnaise; brands and formulations vary. This replaces the prior packaged Open Food Facts record with a generic USDA profile."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2710204",
+          "recordName": "Mayonnaise, regular",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-30",
+          "serving": {
+            "description": "1 cup",
+            "grams": 220.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search/?query=Mayonnaise%2C%20regular"
+        }
       },
       "nutritionPer100g": {
-        "calories": 714.2857,
-        "carbs": 0.0,
-        "fat": 78.5714,
+        "calories": 680.0,
+        "carbs": 0.57,
+        "fat": 74.8,
         "fiber": 0.0,
-        "protein": 0.0
+        "protein": 0.96
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "REAL MAYONNAISE",
-        "similarity": 0.8,
-        "source": "off",
-        "sourceID": "0048001354500"
+        "matchBasis": "reviewed FDC record",
+        "name": "Mayonnaise, regular",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2710204"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
+        "Generic regular mayonnaise; brands and formulations vary. This replaces the prior packaged Open Food Facts record with a generic USDA profile."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -34241,6 +34623,13 @@
         "salad greens",
         "spring mix"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Mixed seeds",
+        "similarity": 0.7826,
+        "source": "usda",
+        "sourceID": "2707589"
+      },
       "category": "Vegetables & potatoes",
       "confidence": "Medium",
       "defaultGrams": 40.0,
@@ -34250,29 +34639,77 @@
       "includedComponentsSummary": "None",
       "name": "Mixed greens",
       "nutrients": {
-        "calories": 232.0,
-        "carbs": 8.68,
-        "fat": 19.84,
-        "fiber": 4.0,
-        "protein": 8.8
+        "calories": 8.4,
+        "carbs": 1.37,
+        "fat": 0.08,
+        "fiber": 0.56,
+        "protein": 0.52
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Mixed seeds",
+          "similarity": 0.7826,
+          "source": "usda",
+          "sourceID": "2707589"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Mixed greens as one canonical food and use the closest preparation-matched USDA profile available.",
+          "reason": "Direct raw mixed salad greens match; the catalog default is slightly larger than the USDA one-cup measure.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Mixed salad greens, raw",
+              "sourceID": "2709792",
+              "url": "https://fdc.nal.usda.gov/food-search/?query=Mixed%20salad%20greens%2C%20raw"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 21.0,
+          "carbs": 3.43,
+          "fat": 0.21,
+          "fiber": 1.4,
+          "protein": 1.31
+        },
+        "reviewReasons": [
+          "Direct raw mixed salad greens match; the catalog default is slightly larger than the USDA one-cup measure."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2709792",
+          "recordName": "Mixed salad greens, raw",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-30",
+          "serving": {
+            "description": "1 cup",
+            "grams": 35.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search/?query=Mixed%20salad%20greens%2C%20raw"
+        }
       },
       "nutritionPer100g": {
-        "calories": 580.0,
-        "carbs": 21.7,
-        "fat": 49.6,
-        "fiber": 10.0,
-        "protein": 22.0
+        "calories": 21.0,
+        "carbs": 3.43,
+        "fat": 0.21,
+        "fiber": 1.4,
+        "protein": 1.31
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Mixed seeds",
-        "similarity": 0.7826,
+        "matchBasis": "reviewed FDC record",
+        "name": "Mixed salad greens, raw",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2707589"
+        "sourceID": "2709792"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
+        "Direct raw mixed salad greens match; the catalog default is slightly larger than the USDA one-cup measure."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -34285,6 +34722,13 @@
         "nuts",
         "nut mix"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Mixed nuts, NFS",
+        "similarity": 0.8333,
+        "source": "usda",
+        "sourceID": "2707504"
+      },
       "category": "Snacks, nuts & bars",
       "confidence": "Medium",
       "defaultGrams": 28.4,
@@ -34300,6 +34744,54 @@
         "fiber": 2.1,
         "protein": 5.57
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Mixed nuts, NFS",
+          "similarity": 0.8333,
+          "source": "usda",
+          "sourceID": "2707504"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Mixed nuts as one canonical food and use the closest preparation-matched USDA profile available.",
+          "reason": "Direct mixed nuts, not further specified, match the canonical item. Nut proportions and salted status vary; default ounce is scaled from a USDA cup measure.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Mixed nuts, NFS",
+              "sourceID": "2707504",
+              "url": "https://fdc.nal.usda.gov/food-search/?query=Mixed%20nuts%2C%20NFS"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 610.0,
+          "carbs": 20.9,
+          "fat": 53.8,
+          "fiber": 7.4,
+          "protein": 19.6
+        },
+        "reviewReasons": [
+          "Direct mixed nuts, not further specified, match the canonical item. Nut proportions and salted status vary; default ounce is scaled from a USDA cup measure."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2707504",
+          "recordName": "Mixed nuts, NFS",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-30",
+          "serving": {
+            "description": "1 cup",
+            "grams": 142.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search/?query=Mixed%20nuts%2C%20NFS"
+        }
+      },
       "nutritionPer100g": {
         "calories": 610.0,
         "carbs": 20.9,
@@ -34308,15 +34800,15 @@
         "protein": 19.6
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Mixed nuts, NFS",
-        "similarity": 0.8333,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2707504"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
+        "Direct mixed nuts, not further specified, match the canonical item. Nut proportions and salted status vary; default ounce is scaled from a USDA cup measure."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -34327,6 +34819,13 @@
       "aliases": [
         "mixed vegetables, cooked"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Mixed vegetable juice",
+        "similarity": 0.8182,
+        "source": "usda",
+        "sourceID": "2709810"
+      },
       "category": "Ingredients",
       "confidence": "Medium",
       "defaultGrams": 30.0,
@@ -34336,29 +34835,77 @@
       "includedComponentsSummary": "None",
       "name": "Mixed vegetables, cooked",
       "nutrients": {
-        "calories": 8.4,
-        "carbs": 1.89,
-        "fat": 0.05,
-        "fiber": 0.36,
-        "protein": 0.22
+        "calories": 25.8,
+        "carbs": 3.81,
+        "fat": 0.81,
+        "fiber": 1.29,
+        "protein": 0.83
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Mixed vegetable juice",
+          "similarity": 0.8182,
+          "source": "usda",
+          "sourceID": "2709810"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Mixed vegetables, cooked as one canonical food and use the closest preparation-matched USDA profile available.",
+          "reason": "Generic classic mixed vegetables, cooked, without a specific vegetable blend or fat preparation. Default portion is a small side amount rather than the source cup.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Classic mixed vegetables, NS as to form, cooked",
+              "sourceID": "2710015",
+              "url": "https://fdc.nal.usda.gov/food-search/?query=Classic%20mixed%20vegetables%2C%20NS%20as%20to%20form%2C%20cooked"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 86.0,
+          "carbs": 12.7,
+          "fat": 2.69,
+          "fiber": 4.3,
+          "protein": 2.78
+        },
+        "reviewReasons": [
+          "Generic classic mixed vegetables, cooked, without a specific vegetable blend or fat preparation. Default portion is a small side amount rather than the source cup."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2710015",
+          "recordName": "Classic mixed vegetables, NS as to form, cooked",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-30",
+          "serving": {
+            "description": "1 cup",
+            "grams": 185.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search/?query=Classic%20mixed%20vegetables%2C%20NS%20as%20to%20form%2C%20cooked"
+        }
       },
       "nutritionPer100g": {
-        "calories": 28.0,
-        "carbs": 6.3,
-        "fat": 0.16,
-        "fiber": 1.2,
-        "protein": 0.72
+        "calories": 86.0,
+        "carbs": 12.7,
+        "fat": 2.69,
+        "fiber": 4.3,
+        "protein": 2.78
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Mixed vegetable juice",
-        "similarity": 0.8182,
+        "matchBasis": "reviewed FDC record",
+        "name": "Classic mixed vegetables, NS as to form, cooked",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2709810"
+        "sourceID": "2710015"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
+        "Generic classic mixed vegetables, cooked, without a specific vegetable blend or fat preparation. Default portion is a small side amount rather than the source cup."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -34687,6 +35234,13 @@
         "blueberry muffin",
         "bakery muffin"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Muffin, wheat",
+        "similarity": 0.8333,
+        "source": "usda",
+        "sourceID": "2707835"
+      },
       "category": "Desserts & sweets",
       "confidence": "Medium",
       "defaultGrams": 110.0,
@@ -34696,30 +35250,77 @@
       "includedComponentsSummary": "None",
       "name": "Muffin, sweet",
       "nutrients": {
-        "calories": 409.2,
-        "carbs": 50.27,
-        "fat": 19.8,
-        "fiber": 1.98,
-        "protein": 7.61
+        "calories": 412.5,
+        "carbs": 58.3,
+        "fat": 17.71,
+        "fiber": 1.21,
+        "protein": 4.94
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Muffin, wheat",
+          "similarity": 0.8333,
+          "source": "usda",
+          "sourceID": "2707835"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Muffin, sweet as one canonical food and use the closest preparation-matched USDA profile available.",
+          "reason": "USDA muffin, not further specified, is the closest generic sweet muffin profile. Flavor, topping, and size vary; source serving exceeds the catalog portion.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Muffin, NFS",
+              "sourceID": "2707829",
+              "url": "https://fdc.nal.usda.gov/food-search/?query=Muffin%2C%20NFS"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 375.0,
+          "carbs": 53.0,
+          "fat": 16.1,
+          "fiber": 1.1,
+          "protein": 4.49
+        },
+        "reviewReasons": [
+          "USDA muffin, not further specified, is the closest generic sweet muffin profile. Flavor, topping, and size vary; source serving exceeds the catalog portion."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2707829",
+          "recordName": "Muffin, NFS",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-30",
+          "serving": {
+            "description": "1 serving",
+            "grams": 130.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search/?query=Muffin%2C%20NFS"
+        }
       },
       "nutritionPer100g": {
-        "calories": 372.0,
-        "carbs": 45.7,
-        "fat": 18.0,
-        "fiber": 1.8,
-        "protein": 6.92
+        "calories": 375.0,
+        "carbs": 53.0,
+        "fat": 16.1,
+        "fiber": 1.1,
+        "protein": 4.49
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Muffin, wheat",
-        "similarity": 0.8333,
+        "matchBasis": "reviewed FDC record",
+        "name": "Muffin, NFS",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2707835"
+        "sourceID": "2707829"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "USDA muffin, not further specified, is the closest generic sweet muffin profile. Flavor, topping, and size vary; source serving exceeds the catalog portion."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -34811,6 +35412,13 @@
         "mushroom soup",
         "cream of mushroom soup"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "alias",
+        "name": "Cream of Mushroom Soup",
+        "similarity": 0.94,
+        "source": "off",
+        "sourceID": "0051000012616"
+      },
       "category": "Soups & stews",
       "confidence": "Medium",
       "defaultGrams": 275.0,
@@ -34820,30 +35428,77 @@
       "includedComponentsSummary": "None",
       "name": "Mushroom soup",
       "nutrients": {
-        "calories": 229.17,
-        "carbs": 0.0,
-        "fat": 16.04,
-        "fiber": 0.0,
-        "protein": 4.58
+        "calories": 203.5,
+        "carbs": 15.68,
+        "fat": 13.09,
+        "fiber": 3.3,
+        "protein": 5.78
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "alias",
+          "name": "Cream of Mushroom Soup",
+          "similarity": 0.94,
+          "source": "off",
+          "sourceID": "0051000012616"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Mushroom soup as one canonical food and use the closest preparation-matched USDA profile available.",
+          "reason": "USDA cream of mushroom soup is the closest generic mushroom soup record; broth-based and condensed preparations vary. Source cup is close to the catalog serving.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Soup, cream of mushroom",
+              "sourceID": "2710107",
+              "url": "https://fdc.nal.usda.gov/food-search/?query=Soup%2C%20cream%20of%20mushroom"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 74.0,
+          "carbs": 5.7,
+          "fat": 4.76,
+          "fiber": 1.2,
+          "protein": 2.1
+        },
+        "reviewReasons": [
+          "USDA cream of mushroom soup is the closest generic mushroom soup record; broth-based and condensed preparations vary. Source cup is close to the catalog serving."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2710107",
+          "recordName": "Soup, cream of mushroom",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-30",
+          "serving": {
+            "description": "1 cup",
+            "grams": 255.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search/?query=Soup%2C%20cream%20of%20mushroom"
+        }
       },
       "nutritionPer100g": {
-        "calories": 83.3333,
-        "carbs": 0.0,
-        "fat": 5.8333,
-        "fiber": 0.0,
-        "protein": 1.6667
+        "calories": 74.0,
+        "carbs": 5.7,
+        "fat": 4.76,
+        "fiber": 1.2,
+        "protein": 2.1
       },
       "nutritionSource": {
-        "matchBasis": "alias",
-        "name": "Cream of Mushroom Soup",
-        "similarity": 0.94,
-        "source": "off",
-        "sourceID": "0051000012616"
+        "matchBasis": "reviewed FDC record",
+        "name": "Soup, cream of mushroom",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2710107"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "USDA cream of mushroom soup is the closest generic mushroom soup record; broth-based and condensed preparations vary. Source cup is close to the catalog serving."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -34855,6 +35510,13 @@
         "mushrooms, cooked",
         "sauteed mushrooms"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Mushrooms, pickled",
+        "similarity": 0.8485,
+        "source": "usda",
+        "sourceID": "2710084"
+      },
       "category": "Vegetables & potatoes",
       "confidence": "Medium",
       "defaultGrams": 155.0,
@@ -34864,29 +35526,77 @@
       "includedComponentsSummary": "None",
       "name": "Mushrooms, cooked",
       "nutrients": {
-        "calories": 71.3,
-        "carbs": 12.85,
-        "fat": 0.46,
-        "fiber": 2.17,
-        "protein": 3.72
+        "calories": 60.45,
+        "carbs": 8.0,
+        "fat": 0.67,
+        "fiber": 3.41,
+        "protein": 5.61
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Mushrooms, pickled",
+          "similarity": 0.8485,
+          "source": "usda",
+          "sourceID": "2710084"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Mushrooms, cooked as one canonical food and use the closest preparation-matched USDA profile available.",
+          "reason": "USDA cooked mushrooms as an ingredient directly matches plain cooked mushrooms; added cooking fat is not included. Source serving is larger than the catalog default.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Mushrooms, cooked, as ingredient",
+              "sourceID": "2710797",
+              "url": "https://fdc.nal.usda.gov/food-search/?query=Mushrooms%2C%20cooked%2C%20as%20ingredient"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 39.0,
+          "carbs": 5.16,
+          "fat": 0.43,
+          "fiber": 2.2,
+          "protein": 3.62
+        },
+        "reviewReasons": [
+          "USDA cooked mushrooms as an ingredient directly matches plain cooked mushrooms; added cooking fat is not included. Source serving is larger than the catalog default."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2710797",
+          "recordName": "Mushrooms, cooked, as ingredient",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-30",
+          "serving": {
+            "description": "1 serving",
+            "grams": 248.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search/?query=Mushrooms%2C%20cooked%2C%20as%20ingredient"
+        }
       },
       "nutritionPer100g": {
-        "calories": 46.0,
-        "carbs": 8.29,
-        "fat": 0.3,
-        "fiber": 1.4,
-        "protein": 2.4
+        "calories": 39.0,
+        "carbs": 5.16,
+        "fat": 0.43,
+        "fiber": 2.2,
+        "protein": 3.62
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Mushrooms, pickled",
-        "similarity": 0.8485,
+        "matchBasis": "reviewed FDC record",
+        "name": "Mushrooms, cooked, as ingredient",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2710084"
+        "sourceID": "2710797"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
+        "USDA cooked mushrooms as an ingredient directly matches plain cooked mushrooms; added cooking fat is not included. Source serving is larger than the catalog default."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -35217,8 +35927,15 @@
         "nectarine",
         "fresh nectarine"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Nectarine, raw",
+        "similarity": 0.8182,
+        "source": "usda",
+        "sourceID": "2709245"
+      },
       "category": "Fruit",
-      "confidence": "Medium",
+      "confidence": "High",
       "defaultGrams": 142.0,
       "defaultUnit": "1 nectarine",
       "foodKind": "Reusable ingredient",
@@ -35232,6 +35949,54 @@
         "fiber": 2.13,
         "protein": 1.51
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Nectarine, raw",
+          "similarity": 0.8182,
+          "source": "usda",
+          "sourceID": "2709245"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Nectarine as one canonical food and use the closest preparation-matched USDA profile available.",
+          "reason": "Direct raw nectarine record; USDA fruit portion is 140 g and closely matches the catalog default.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Nectarine, raw",
+              "sourceID": "2709245",
+              "url": "https://fdc.nal.usda.gov/food-search/?query=Nectarine%2C%20raw"
+            }
+          ]
+        },
+        "confidence": "High",
+        "nutritionPer100g": {
+          "calories": 43.0,
+          "carbs": 9.18,
+          "fat": 0.28,
+          "fiber": 1.5,
+          "protein": 1.06
+        },
+        "reviewReasons": [
+          "Direct raw nectarine record; USDA fruit portion is 140 g and closely matches the catalog default."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2709245",
+          "recordName": "Nectarine, raw",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-30",
+          "serving": {
+            "description": "1 fruit",
+            "grams": 140.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search/?query=Nectarine%2C%20raw"
+        }
+      },
       "nutritionPer100g": {
         "calories": 43.0,
         "carbs": 9.18,
@@ -35240,15 +36005,15 @@
         "protein": 1.06
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Nectarine, raw",
-        "similarity": 0.8182,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2709245"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
+        "Direct raw nectarine record; USDA fruit portion is 140 g and closely matches the catalog default."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -35750,6 +36515,13 @@
         "sauteed onions",
         "caramelized onions"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Onions, green, cooked",
+        "similarity": 0.8125,
+        "source": "usda",
+        "sourceID": "2709953"
+      },
       "category": "Vegetables & potatoes",
       "confidence": "Medium",
       "defaultGrams": 210.0,
@@ -35759,29 +36531,77 @@
       "includedComponentsSummary": "None",
       "name": "Onions, cooked",
       "nutrients": {
-        "calories": 132.3,
-        "carbs": 17.58,
-        "fat": 6.74,
-        "fiber": 6.3,
-        "protein": 4.39
+        "calories": 98.7,
+        "carbs": 23.1,
+        "fat": 0.25,
+        "fiber": 4.2,
+        "protein": 2.71
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Onions, green, cooked",
+          "similarity": 0.8125,
+          "source": "usda",
+          "sourceID": "2709953"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Onions, cooked as one canonical food and use the closest preparation-matched USDA profile available.",
+          "reason": "USDA cooked onions without added fat; sauteed onions may include oil or butter, so the plain profile is a reasonable base estimate.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Onions, cooked, no added fat",
+              "sourceID": "2709950",
+              "url": "https://fdc.nal.usda.gov/food-search/?query=Onions%2C%20cooked%2C%20no%20added%20fat"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 47.0,
+          "carbs": 11.0,
+          "fat": 0.12,
+          "fiber": 2.0,
+          "protein": 1.29
+        },
+        "reviewReasons": [
+          "USDA cooked onions without added fat; sauteed onions may include oil or butter, so the plain profile is a reasonable base estimate."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2709950",
+          "recordName": "Onions, cooked, no added fat",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-30",
+          "serving": {
+            "description": "1 cup",
+            "grams": 210.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search/?query=Onions%2C%20cooked%2C%20no%20added%20fat"
+        }
       },
       "nutritionPer100g": {
-        "calories": 63.0,
-        "carbs": 8.37,
-        "fat": 3.21,
-        "fiber": 3.0,
-        "protein": 2.09
+        "calories": 47.0,
+        "carbs": 11.0,
+        "fat": 0.12,
+        "fiber": 2.0,
+        "protein": 1.29
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Onions, green, cooked",
-        "similarity": 0.8125,
+        "matchBasis": "reviewed FDC record",
+        "name": "Onions, cooked, no added fat",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2709953"
+        "sourceID": "2709950"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
+        "USDA cooked onions without added fat; sauteed onions may include oil or butter, so the plain profile is a reasonable base estimate."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -36150,6 +36970,13 @@
         "pad thai",
         "pad thai noodles"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Pad Thai, NFS",
+        "similarity": 0.8,
+        "source": "usda",
+        "sourceID": "2708804"
+      },
       "category": "Asian & international",
       "confidence": "Medium",
       "defaultGrams": 350.0,
@@ -36165,6 +36992,54 @@
         "fiber": 4.2,
         "protein": 28.46
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Pad Thai, NFS",
+          "similarity": 0.8,
+          "source": "usda",
+          "sourceID": "2708804"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Pad Thai as one canonical food and use the closest preparation-matched USDA profile available.",
+          "reason": "USDA Pad Thai, not further specified, directly matches the dish; protein choice and restaurant recipe vary. Catalog portion is scaled from a one-cup measure.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Pad Thai, NFS",
+              "sourceID": "2708804",
+              "url": "https://fdc.nal.usda.gov/food-search/?query=Pad%20Thai%2C%20NFS"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 154.0,
+          "carbs": 14.4,
+          "fat": 7.5,
+          "fiber": 1.2,
+          "protein": 8.13
+        },
+        "reviewReasons": [
+          "USDA Pad Thai, not further specified, directly matches the dish; protein choice and restaurant recipe vary. Catalog portion is scaled from a one-cup measure."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2708804",
+          "recordName": "Pad Thai, NFS",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-30",
+          "serving": {
+            "description": "1 cup",
+            "grams": 200.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search/?query=Pad%20Thai%2C%20NFS"
+        }
+      },
       "nutritionPer100g": {
         "calories": 154.0,
         "carbs": 14.4,
@@ -36173,16 +37048,15 @@
         "protein": 8.13
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Pad Thai, NFS",
-        "similarity": 0.8,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2708804"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "USDA Pad Thai, not further specified, directly matches the dish; protein choice and restaurant recipe vary. Catalog portion is scaled from a one-cup measure."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -36450,6 +37324,13 @@
         "parmesan",
         "parmesan topping"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Grated Parmesan Cheese",
+        "similarity": 0.8108,
+        "source": "off",
+        "sourceID": "0021000010615"
+      },
       "category": "Pizza & pasta",
       "confidence": "Medium",
       "defaultGrams": 5.0,
@@ -36459,29 +37340,76 @@
       "includedComponentsSummary": "None",
       "name": "Parmesan cheese",
       "nutrients": {
-        "calories": 20.0,
-        "carbs": 0.0,
-        "fat": 1.5,
-        "fiber": 0.0,
-        "protein": 2.0
+        "calories": 20.15,
+        "carbs": 0.22,
+        "fat": 1.48,
+        "fiber": null,
+        "protein": 1.5
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Grated Parmesan Cheese",
+          "similarity": 0.8108,
+          "source": "off",
+          "sourceID": "0021000010615"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Parmesan cheese as one canonical food and use the closest preparation-matched USDA profile available.",
+          "reason": "Direct refrigerated grated Parmesan record; exact serving matches the catalog default. USDA fiber is not reported for this record and remains unavailable.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Cheese, parmesan, grated, refrigerated",
+              "sourceID": "2259795",
+              "url": "https://fdc.nal.usda.gov/food-search/?query=Cheese%2C%20parmesan%2C%20grated%2C%20refrigerated"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 403.0,
+          "carbs": 4.33,
+          "fat": 29.5,
+          "fiber": null,
+          "protein": 30.1
+        },
+        "reviewReasons": [
+          "Direct refrigerated grated Parmesan record; exact serving matches the catalog default. USDA fiber is not reported for this record and remains unavailable."
+        ],
+        "source": {
+          "dataType": "Foundation Foods",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2259795",
+          "recordName": "Cheese, parmesan, grated, refrigerated",
+          "reviewedDate": "2026-10-30",
+          "serving": {
+            "description": "1 RACC",
+            "grams": 5.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search/?query=Cheese%2C%20parmesan%2C%20grated%2C%20refrigerated"
+        }
       },
       "nutritionPer100g": {
-        "calories": 400.0,
-        "carbs": 0.0,
-        "fat": 30.0,
-        "fiber": 0.0,
-        "protein": 40.0
+        "calories": 403.0,
+        "carbs": 4.33,
+        "fat": 29.5,
+        "fiber": null,
+        "protein": 30.1
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Grated Parmesan Cheese",
-        "similarity": 0.8108,
-        "source": "off",
-        "sourceID": "0021000010615"
+        "matchBasis": "reviewed FDC record",
+        "name": "Cheese, parmesan, grated, refrigerated",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2259795"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation"
+        "Direct refrigerated grated Parmesan record; exact serving matches the catalog default. USDA fiber is not reported for this record and remains unavailable."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -36819,6 +37747,13 @@
         "pasta salad",
         "cold pasta salad"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Pea salad",
+        "similarity": 0.8,
+        "source": "usda",
+        "sourceID": "2710056"
+      },
       "category": "Pizza & pasta",
       "confidence": "Medium",
       "defaultGrams": 170.0,
@@ -36828,30 +37763,77 @@
       "includedComponentsSummary": "None",
       "name": "Pasta salad",
       "nutrients": {
-        "calories": 306.0,
-        "carbs": 18.02,
-        "fat": 23.8,
-        "fiber": 4.59,
-        "protein": 5.07
+        "calories": 375.7,
+        "carbs": 41.82,
+        "fat": 19.55,
+        "fiber": 2.38,
+        "protein": 7.58
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Pea salad",
+          "similarity": 0.8,
+          "source": "usda",
+          "sourceID": "2710056"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Pasta salad as one canonical food and use the closest preparation-matched USDA profile available.",
+          "reason": "USDA macaroni or pasta salad made with mayonnaise is the closest generic pasta salad profile; pasta shapes, dressings, and recipes vary.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Macaroni or pasta salad, made with mayonnaise",
+              "sourceID": "2708932",
+              "url": "https://fdc.nal.usda.gov/food-search/?query=Macaroni%20or%20pasta%20salad%2C%20made%20with%20mayonnaise"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 221.0,
+          "carbs": 24.6,
+          "fat": 11.5,
+          "fiber": 1.4,
+          "protein": 4.46
+        },
+        "reviewReasons": [
+          "USDA macaroni or pasta salad made with mayonnaise is the closest generic pasta salad profile; pasta shapes, dressings, and recipes vary."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2708932",
+          "recordName": "Macaroni or pasta salad, made with mayonnaise",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-30",
+          "serving": {
+            "description": "1 cup",
+            "grams": 204.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search/?query=Macaroni%20or%20pasta%20salad%2C%20made%20with%20mayonnaise"
+        }
       },
       "nutritionPer100g": {
-        "calories": 180.0,
-        "carbs": 10.6,
-        "fat": 14.0,
-        "fiber": 2.7,
-        "protein": 2.98
+        "calories": 221.0,
+        "carbs": 24.6,
+        "fat": 11.5,
+        "fiber": 1.4,
+        "protein": 4.46
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "Pea salad",
-        "similarity": 0.8,
+        "matchBasis": "reviewed FDC record",
+        "name": "Macaroni or pasta salad, made with mayonnaise",
+        "similarity": null,
         "source": "usda",
-        "sourceID": "2710056"
+        "sourceID": "2708932"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "USDA macaroni or pasta salad made with mayonnaise is the closest generic pasta salad profile; pasta shapes, dressings, and recipes vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -37102,8 +38084,15 @@
         "pb&j",
         "peanut butter jelly sandwich"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Peanut butter and jelly sandwich, NFS",
+        "similarity": 0.9412,
+        "source": "usda",
+        "sourceID": "2707554"
+      },
       "category": "Sandwiches & handhelds",
-      "confidence": "Medium",
+      "confidence": "High",
       "defaultGrams": 112.0,
       "defaultUnit": "1 sandwich",
       "foodKind": "Recipe / assembled",
@@ -37117,6 +38106,54 @@
         "fiber": 3.14,
         "protein": 12.77
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Peanut butter and jelly sandwich, NFS",
+          "similarity": 0.9412,
+          "source": "usda",
+          "sourceID": "2707554"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Peanut butter and jelly sandwich as one canonical food and use the closest preparation-matched USDA profile available.",
+          "reason": "Direct USDA peanut butter and jelly sandwich profile; the one-sandwich source portion exactly matches the catalog default.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Peanut butter and jelly sandwich, NFS",
+              "sourceID": "2707554",
+              "url": "https://fdc.nal.usda.gov/food-search/?query=Peanut%20butter%20and%20jelly%20sandwich%2C%20NFS"
+            }
+          ]
+        },
+        "confidence": "High",
+        "nutritionPer100g": {
+          "calories": 361.0,
+          "carbs": 45.2,
+          "fat": 16.6,
+          "fiber": 2.8,
+          "protein": 11.4
+        },
+        "reviewReasons": [
+          "Direct USDA peanut butter and jelly sandwich profile; the one-sandwich source portion exactly matches the catalog default."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2707554",
+          "recordName": "Peanut butter and jelly sandwich, NFS",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-30",
+          "serving": {
+            "description": "1 sandwich",
+            "grams": 112.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search/?query=Peanut%20butter%20and%20jelly%20sandwich%2C%20NFS"
+        }
+      },
       "nutritionPer100g": {
         "calories": 361.0,
         "carbs": 45.2,
@@ -37125,16 +38162,15 @@
         "protein": 11.4
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Peanut butter and jelly sandwich, NFS",
-        "similarity": 0.9412,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2707554"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "Direct USDA peanut butter and jelly sandwich profile; the one-sandwich source portion exactly matches the catalog default."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
@@ -37146,6 +38182,13 @@
         "peanut butter sandwich",
         "pb sandwich"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Peanut butter sandwich, NFS",
+        "similarity": 0.9167,
+        "source": "usda",
+        "sourceID": "2707549"
+      },
       "category": "Bread, grains & legumes",
       "confidence": "Medium",
       "defaultGrams": 135.0,
@@ -37161,6 +38204,54 @@
         "fiber": 4.32,
         "protein": 18.77
       },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "Peanut butter sandwich, NFS",
+          "similarity": 0.9167,
+          "source": "usda",
+          "sourceID": "2707549"
+        },
+        "compositionEvidence": {
+          "decision": "Keep Peanut butter sandwich as one canonical food and use the closest preparation-matched USDA profile available.",
+          "reason": "Direct USDA peanut butter sandwich profile; the source sandwich is 92 g versus the 135 g catalog default, so portion mapping needs review.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central",
+              "recordName": "Peanut butter sandwich, NFS",
+              "sourceID": "2707549",
+              "url": "https://fdc.nal.usda.gov/food-search/?query=Peanut%20butter%20sandwich%2C%20NFS"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 382.0,
+          "carbs": 39.8,
+          "fat": 20.2,
+          "fiber": 3.2,
+          "protein": 13.9
+        },
+        "reviewReasons": [
+          "Direct USDA peanut butter sandwich profile; the source sandwich is 92 g versus the 135 g catalog default, so portion mapping needs review."
+        ],
+        "source": {
+          "dataType": "FNDDS 2021-2023",
+          "database": "FoodData Central",
+          "matchBasis": "reviewed FDC record",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2707549",
+          "recordName": "Peanut butter sandwich, NFS",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-10-30",
+          "serving": {
+            "description": "1 sandwich",
+            "grams": 92.0
+          },
+          "source": "usda",
+          "url": "https://fdc.nal.usda.gov/food-search/?query=Peanut%20butter%20sandwich%2C%20NFS"
+        }
+      },
       "nutritionPer100g": {
         "calories": 382.0,
         "carbs": 39.8,
@@ -37169,16 +38260,15 @@
         "protein": 13.9
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
+        "matchBasis": "reviewed FDC record",
         "name": "Peanut butter sandwich, NFS",
-        "similarity": 0.9167,
+        "similarity": null,
         "source": "usda",
         "sourceID": "2707549"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Approximate existing-catalog match; verify identity and preparation",
-        "Prepared dish; direct match may not represent recipe composition"
+        "Direct USDA peanut butter sandwich profile; the source sandwich is 92 g versus the 135 g catalog default, so portion mapping needs review."
       ],
       "reviewRequired": true,
       "searchEnabled": true,

@@ -28,6 +28,11 @@ record was available, and retained low confidence for Cobb salad because the
 available USDA record excludes dressing. The October 29 review corrected
 preparation mismatches for Fried egg, Fried rice, Green beans, cooked, Grilled
 cheese, Hamburger bun, Hot dog bun, and Ice cream while preserving their IDs.
+The October 30 review replaced mismatched matches for Kidney beans, Lobster
+tail, Mashed potatoes, Mayonnaise, Mixed greens, Mixed vegetables, cooked,
+Mushroom soup, Mushrooms, cooked, Onions, cooked, Parmesan cheese, and Pasta
+salad; recipe or portion uncertainty remains documented for the broader and
+composite foods.
 Companion suggestions are separate foods logged independently. The generated
 review workbook is rebuilt from the same catalog projection.
 
