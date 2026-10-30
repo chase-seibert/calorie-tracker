@@ -1,0 +1,537 @@
+{
+  "schemaVersion": 1,
+  "records": [
+    {
+      "source": "chaseFood",
+      "source_id": "food_bacon",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The default food is cured pork bacon; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_bbq_beef_sandwich",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The default profile is a barbecue beef sandwich."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_bbq_ribs",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The reviewed default profile is pork ribs."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_beef_and_broccoli",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The default canonical recipe contains beef and broccoli."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_beef_jerky",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The default food is dried beef jerky; beef is red meat and jerky is processed meat."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_beef_kebab",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The default profile is a beef shish kebab with vegetables."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_beef_patty",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The default reusable ingredient is a cooked beef patty."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_beef_snack_stick",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The default food is a smoked beef snack stick; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_beef_stew",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The default canonical food is beef stew."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_blt_sandwich",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The default BLT includes cured pork bacon; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_bratwurst",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The default bratwurst is a mammalian sausage; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_breakfast_burrito",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The reviewed default profile includes sausage; the standard profile is mammalian sausage."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_breakfast_sausage",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The default is a cooked pork sausage patty; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_burger",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The default protein choice is a beef patty; bacon is optional."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_canadian_bacon",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The default is cured pork Canadian bacon; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_chef_salad",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The reviewed default profile includes pork bacon; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_chili_con_carne",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The default profile is chili con carne; the reviewed USDA match is chili con carne with beans."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_chorizo",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The canonical default is mammalian chorizo sausage; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_club_sandwich",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The reviewed USDA restaurant club-sandwich profile includes bacon; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_cobb_salad",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The default USDA profile includes pork bacon; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_corned_beef",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The default is cured beef; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_deli_sandwich",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The reviewed default profile includes processed pork ham as well as turkey."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_egg_roll",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The reviewed default USDA filling is beef and/or pork; ordinary cooking does not make it processed meat."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_eggs_benedict",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The default USDA profile includes Canadian bacon or ham; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_french_dip_sandwich",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The canonical assembled food is a French dip sandwich with roast beef."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_ground_beef_cooked",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The reviewed default is cooked 85/15 ground beef."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_gumbo",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The reviewed USDA gumbo profile includes pork; ordinary cooking does not make it processed meat."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_gyro",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The reviewed default USDA gyro sandwich uses mammalian gyro meat."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_ham",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The canonical food is cured pork ham; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_ham_sandwich",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The reviewed default profile is a Spam sandwich; Spam is processed pork."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_ham_steak",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The reviewed default profile is cured pork ham steak; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_hard_shell_taco",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The reviewed default USDA profile is a beef taco."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_hot_dog",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The default assembled food includes a beef frankfurter; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_hot_dog_sausage",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The default reusable ingredient is a beef frankfurter; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_italian_sausage",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The canonical default is mammalian Italian sausage; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_jambalaya",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The reviewed USDA jambalaya profile includes meat and sausage; the default is treated as mammalian processed sausage."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_kebabs",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The selected default protein and nutrition profile are lamb kebab."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_kielbasa",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The default reusable ingredient is mammalian kielbasa; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_lamb_chop",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The canonical food is an unprocessed lamb chop."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_lamb_kebab",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The default profile is cooked lamb cubes for kebab."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_lasagna",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The reviewed default is a meat lasagna; the standard mammalian-meat profile is red meat."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_meatball_sub",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The direct USDA profile classifies the generic meatball sandwich/sub as red meat."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_meatloaf",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The default USDA match is meatloaf; the user-selected default classification treats the standard meatloaf as mammalian meat."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_pepperoni",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The canonical food is cured beef/pork pepperoni; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_philly_cheesesteak",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The reviewed default is a direct beef cheesesteak sandwich match."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_pork",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The reviewed default is generic unprocessed pork."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_pork_chop",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The default canonical food is an unprocessed pork chop."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_pork_tenderloin",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The default canonical food is unprocessed pork tenderloin."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_pot_roast",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The reviewed default nutrition source is pork roast."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_prosciutto",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The canonical food is cured pork prosciutto; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_pulled_pork",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The reviewed default profile is barbecue pulled pork."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_pulled_pork_sandwich",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The reviewed default nutrition source is a pork sandwich."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_reuben_sandwich",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The canonical Reuben default contains cured corned beef or pastrami; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_ribeye_steak",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The reviewed default is cooked ribeye steak."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_roast_beef",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The canonical food is roast beef."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_roast_beef_sandwich",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The default assembled food is a roast beef sandwich."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_salami",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The default generic salami is a processed mammalian meat; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_sausage",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The reviewed USDA default match is pork sausage; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_sausage_patty",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The default is a cooked pork sausage patty; both independent flags apply."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_sirloin_steak",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The reviewed default is cooked sirloin steak."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_sloppy_joe",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The reviewed default USDA profile is a Sloppy Joe sandwich with meat filling."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_spaghetti_with_meat_sauce",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The default nutrition profile is spaghetti sauce with meat."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_steak",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The default generic steak profile is beef."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_stromboli",
+      "contains_processed_meat": true,
+      "contains_red_meat": false,
+      "basis": "The reviewed USDA school-recipe profile uses processed turkey ham; poultry is processed meat but not red meat."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_taco",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The reviewed default USDA profile is a meat taco; its standard filling is red meat."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_taco_salad",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The reviewed default USDA profile is a meat taco salad; its standard filling is red meat."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_taquito",
+      "contains_processed_meat": false,
+      "contains_red_meat": true,
+      "basis": "The reviewed default USDA profile is a beef-or-pork taquito."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_turkey_bacon",
+      "contains_processed_meat": true,
+      "contains_red_meat": false,
+      "basis": "Turkey bacon is a preserved poultry product."
+    },
+    {
+      "source": "off",
+      "source_id": "02289805",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The packaged item is a beef snack stick; both independent flags apply."
+    },
+    {
+      "source": "off",
+      "source_id": "0853016002076",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The packaged item is a beef snack stick; both independent flags apply."
+    },
+    {
+      "source": "off",
+      "source_id": "0856584004183",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The packaged item is a beef snack stick; both independent flags apply."
+    },
+    {
+      "source": "off",
+      "source_id": "0856584004763",
+      "contains_processed_meat": true,
+      "contains_red_meat": true,
+      "basis": "The packaged item is a beef snack stick; both independent flags apply."
+    },
+    {
+      "source": "usda",
+      "source_id": "171638",
+      "contains_processed_meat": false,
+      "contains_red_meat": false,
+      "basis": "The frozen Italian-style meatball record has no curing or preservation evidence and does not specify a red-meat blend."
+    },
+    {
+      "source": "usda",
+      "source_id": "172345",
+      "contains_processed_meat": false,
+      "contains_red_meat": false,
+      "basis": "Animal fat or bacon grease is not meat; this row was matched by the bacon token."
+    },
+    {
+      "source": "usda",
+      "source_id": "2706395",
+      "contains_processed_meat": false,
+      "contains_red_meat": false,
+      "basis": "The Puerto Rican meatball record has no curing or preservation evidence and does not specify a red-meat blend."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710165",
+      "contains_processed_meat": false,
+      "contains_red_meat": false,
+      "basis": "Animal fat or drippings is not meat; recipe ingredient text must not turn the fat-only identity into meat."
+    }
+  ]
+}

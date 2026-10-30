@@ -19,13 +19,14 @@ import urllib.parse
 import urllib.error
 import urllib.request
 import zipfile
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Iterable, Iterator
 
 
 ROOT = Path(__file__).resolve().parents[1]
 DOWNLOADS = ROOT / "data" / "downloads"
+MEAT_CLASSIFICATIONS_PATH = ROOT / "data" / "food-catalog" / "meat-classifications.json"
 
 USDA_DOWNLOADS = {
     "foundation": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_foundation_food_json_2026-04-30.zip",
@@ -78,9 +79,20 @@ class CatalogFood:
 
 PROCESSED_MEAT_PATTERN = re.compile(
     r"\b(?:bacon|ham|hot[ -]?dogs?|frankfurters?|wieners?|luncheon meat|cold cuts?|"
-    r"deli meats?|sausages?|pepperoni|salami|prosciutto|pastrami|pancetta|mortadella|"
+    r"deli meats?|sausages?|(?:beef|pork|meat) (?:snack )?sticks?|pepperoni|salami|prosciutto|pastrami|pancetta|mortadella|"
     r"capicola|coppa|soppressata|chorizo|kielbasa|bratwurst|andouille|liverwurst|"
     r"braunschweiger|corned beef|jerky|biltong|canned meat|spam)\b",
+    re.IGNORECASE,
+)
+MAMMALIAN_PROCESSED_MEAT_PATTERN = re.compile(
+    r"\b(?:bacon|ham|sausages?|pepperoni|salami|prosciutto|pastrami|pancetta|mortadella|"
+    r"capicola|coppa|soppressata|chorizo|kielbasa|bratwurst|andouille|liverwurst|"
+    r"braunschweiger|corned beef|jerky|biltong|spam)\b",
+    re.IGNORECASE,
+)
+POULTRY_PROCESSED_MEAT_PATTERN = re.compile(
+    r"\b(?:turkey|chicken|duck|goose|poultry)\s+(?:bacon|ham|sausages?|frankfurters?|"
+    r"hot[ -]?dogs?|luncheon meat|cold cuts?|deli meats?|jerky)\b",
     re.IGNORECASE,
 )
 PROCESS_METHOD_PATTERN = re.compile(
@@ -106,6 +118,13 @@ NON_MEAT_RED_PRODUCT_PATTERN = re.compile(
     r"tallow|fat|suet)\b",
     re.IGNORECASE,
 )
+NON_MEAT_FAT_PRODUCT_PATTERN = re.compile(
+    r"^\s*(?:animal fat\b.*|bacon grease\b.*|"
+    r"(?:beef|pork|lamb|veal|chicken|turkey|poultry)\b.*"
+    r"\b(?:separable fat|external fat|intermuscular fat|subcutaneous fat|backfat)\b.*|"
+    r"(?:beef|pork|lamb)?\s*(?:tallow|suet)\b.*)\s*$",
+    re.IGNORECASE,
+)
 NON_MUSCLE_MEAT_PATTERN = re.compile(
     r"\b(?:variety meats?|by-products?|brain|heart|kidney|liver|lung|pancreas|"
     r"spleen|sweetbread|thymus|tongue|tripe|seam fat|fat only)\b",
@@ -118,14 +137,16 @@ NON_MEAT_NAME_PATTERN = re.compile(
 
 
 def classify_meat_text(text: str, category: str = "") -> tuple[bool, bool]:
-    """Return processed-meat and unprocessed-red-meat presence flags."""
+    """Return independent processed-meat and red-meat presence flags."""
+    if NON_MEAT_FAT_PRODUCT_PATTERN.search(text):
+        return False, False
     combined = f"{text} {category}".strip()
-    processed_text = re.sub(r"\bleg\s*\(ham\)", "leg", combined, flags=re.IGNORECASE)
-    processed_text = re.sub(r"\bham hocks?\b", "hock", processed_text, flags=re.IGNORECASE)
-    processed_text = re.sub(
+    name_text = re.sub(r"\bleg\s*\(ham\)", "leg", text, flags=re.IGNORECASE)
+    name_text = re.sub(r"\bham hocks?\b", "hock", name_text, flags=re.IGNORECASE)
+    name_text = re.sub(
         r"\b(?:includes? )?cuts? to be cured\b",
         "cuts",
-        processed_text,
+        name_text,
         flags=re.IGNORECASE,
     )
     has_red_species = bool(RED_MEAT_PATTERN.search(combined))
@@ -136,6 +157,10 @@ def classify_meat_text(text: str, category: str = "") -> tuple[bool, bool]:
         return False, False
 
     category_lower = category.lower()
+    meatball_exception = bool(re.search(r"\bmeatballs?\b", text, re.IGNORECASE)) and not (
+        PROCESSED_MEAT_PATTERN.search(name_text)
+        or PROCESS_METHOD_PATTERN.search(name_text)
+    )
     processed_category = any(
         value in category_lower
         for value in (
@@ -146,12 +171,12 @@ def classify_meat_text(text: str, category: str = "") -> tuple[bool, bool]:
             "frankfurters",
             "sausages",
         )
-    )
-    explicit_processed = bool(PROCESSED_MEAT_PATTERN.search(processed_text))
+    ) and not ("sausages and luncheon meats" in category_lower and meatball_exception)
+    explicit_processed = bool(PROCESSED_MEAT_PATTERN.search(name_text))
     is_mixed_dish = bool(re.search(r"\b(?:sandwich|sub|salad|pizza|soup|burger)\b", text, re.IGNORECASE))
     if explicit_processed and NON_MEAT_NAME_PATTERN.search(text) and not has_red_species and not has_poultry and not is_mixed_dish:
         explicit_processed = False
-    method_processed = bool(PROCESS_METHOD_PATTERN.search(processed_text)) and (
+    method_processed = bool(PROCESS_METHOD_PATTERN.search(name_text)) and (
         has_red_species or has_other_meat
     )
     contains_processed = processed_category or explicit_processed or method_processed
@@ -169,9 +194,11 @@ def classify_meat_text(text: str, category: str = "") -> tuple[bool, bool]:
     ) or category_lower == "pork"
     non_meat_product = bool(NON_MEAT_RED_PRODUCT_PATTERN.search(text))
     non_muscle_meat = bool(NON_MUSCLE_MEAT_PATTERN.search(text))
+    implied_mammalian_processed_meat = bool(MAMMALIAN_PROCESSED_MEAT_PATTERN.search(name_text)) and not bool(
+        POULTRY_PROCESSED_MEAT_PATTERN.search(name_text)
+    )
     contains_red = (
-        (has_red_species or red_category)
-        and not contains_processed
+        (has_red_species or red_category or implied_mammalian_processed_meat)
         and not non_meat_product
         and not non_muscle_meat
     )
@@ -179,10 +206,13 @@ def classify_meat_text(text: str, category: str = "") -> tuple[bool, bool]:
 
 
 def classify_usda_meat(raw: dict) -> tuple[bool, bool]:
+    description = clean_text(raw.get("description")) or ""
+    if NON_MEAT_FAT_PRODUCT_PATTERN.search(description):
+        return False, False
     category = clean_text((raw.get("foodCategory") or {}).get("description")) or clean_text(
         (raw.get("wweiaFoodCategory") or {}).get("wweiaFoodCategoryDescription")
     ) or ""
-    direct = classify_meat_text(clean_text(raw.get("description")) or "", category)
+    direct = classify_meat_text(description, category)
     classifications = [direct]
     for ingredient in raw.get("inputFoods") or []:
         description = (
@@ -193,22 +223,53 @@ def classify_usda_meat(raw: dict) -> tuple[bool, bool]:
         classifications.append(classify_meat_text(description))
     contains_processed = any(processed for processed, _ in classifications)
     contains_red = any(red for _, red in classifications)
-    direct_processed_categories = (
-        "sausages and luncheon meats",
-        "cold cuts and cured meats",
-        "bacon",
-        "frankfurters",
-        "sausages",
-    )
-    if direct[0] and any(value in category.lower() for value in direct_processed_categories):
-        contains_red = False
     return contains_processed, contains_red
 
 
 def classify_off_meat(raw: dict, name: str) -> tuple[bool, bool]:
+    if NON_MEAT_FAT_PRODUCT_PATTERN.search(name):
+        return False, False
     categories = " ".join(str(value) for value in raw.get("categories_tags") or [])
     ingredients = " ".join(str(value) for value in raw.get("ingredients_tags") or [])
     return classify_meat_text(f"{name} {ingredients}", categories)
+
+
+def load_meat_classifications(path: Path = MEAT_CLASSIFICATIONS_PATH) -> dict[tuple[str, str], dict[str, object]]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if payload.get("schemaVersion") != 1 or not isinstance(payload.get("records"), list):
+        raise ValueError(f"Unsupported meat-classification source format: {path}")
+    classifications: dict[tuple[str, str], dict[str, object]] = {}
+    for record in payload["records"]:
+        source = record.get("source")
+        source_id = record.get("source_id")
+        if source not in {"chaseFood", "usda", "off"} or not isinstance(source_id, str) or not source_id:
+            raise ValueError(f"Invalid source identity in meat classifications: {record!r}")
+        key = (source, source_id)
+        if key in classifications:
+            raise ValueError(f"Duplicate meat classification for {source}/{source_id}")
+        for field in ("contains_processed_meat", "contains_red_meat"):
+            if not isinstance(record.get(field), bool):
+                raise ValueError(f"{source}/{source_id} must define boolean {field}")
+        if not isinstance(record.get("basis"), str) or not record["basis"].strip():
+            raise ValueError(f"{source}/{source_id} must include a classification basis")
+        classifications[key] = record
+    return classifications
+
+
+def apply_meat_classifications(
+    foods: Iterable[CatalogFood],
+    classifications: dict[tuple[str, str], dict[str, object]],
+) -> list[CatalogFood]:
+    return [
+        replace(
+            food,
+            contains_processed_meat=classification["contains_processed_meat"],
+            contains_red_meat=classification["contains_red_meat"],
+        )
+        if (classification := classifications.get((food.source, food.source_id))) is not None
+        else food
+        for food in foods
+    ]
 
 
 def parse_args() -> argparse.Namespace:
@@ -829,6 +890,8 @@ def main() -> int:
                 fiber=float(nutrients["fiber"]) if nutrients.get("fiber") is not None else None,
                 base_grams=serving_grams, serving_grams=serving_grams,
                 serving_description=str(item.get("defaultUnit") or "serving"), portions=tuple(portions),
+                contains_processed_meat=bool(item.get("containsProcessedMeat", False)),
+                contains_red_meat=bool(item.get("containsRedMeat", False)),
                 search_text=" ".join(aliases), rank=50,
                 search_enabled=bool(item.get("searchEnabled", True)),
             ))
@@ -844,6 +907,7 @@ def main() -> int:
             ))
         payload_aliases = [(a["foodID"], a["alias"], a.get("kind", "synonym")) for a in chase.get("aliases", [])]
         foods = list(foods) + chase_foods
+    foods = apply_meat_classifications(foods, load_meat_classifications())
     count, counts = create_database(arguments.output.resolve(), foods)
     if chase_path.exists():
         with sqlite3.connect(arguments.output.resolve()) as database:

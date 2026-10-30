@@ -509,6 +509,20 @@ drift. In the inline enrichment readout, prioritize Variations and Options;
 show calories, confidence, and evidence, and omit other macros unless requested
 or needed to explain a material discrepancy.
 
+## Meat classification source
+
+Maintain Chase Food meat-presence classifications in
+`data/food-catalog/meat-classifications.json`, keyed by stable food ID and
+reviewed against the canonical default food and nutrition evidence. The two
+fields remain independent: cured, smoked, salted, or otherwise preserved
+mammalian meat can set both, while processed poultry sets only the processed
+flag. A default food is tagged only for meat in its base composition; optional
+protein, filling, topping, or ingredient choices do not change the base tag.
+Items whose default profile does not establish the meat type or preservation
+remain untagged until evidence supports a classification. The catalog
+preparation step includes these fields in its generated food projection, and
+the SQLite builder writes them to the existing classification columns.
+
 ## Data and history boundaries for implementation
 
 - Give every Chase Food record a stable ID and a source identity that remains

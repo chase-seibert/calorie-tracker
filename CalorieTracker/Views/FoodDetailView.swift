@@ -49,6 +49,114 @@ private struct ChaseFoodOptionGroup: Identifiable {
     var id: String { name }
 }
 
+#if DEBUG
+private struct FoodDetailDebugCapture: Encodable {
+    var formatVersion = 1
+    let capturedAt: String
+    let appVersion: String?
+    let appBuild: String?
+    let catalogVersion: String?
+    let food: Food
+    let quantity: Quantity
+    let selectedOptionIDs: [String]
+    let options: [Option]
+    let extraComponents: [Component]
+    let screenContext: String
+    let preservesLegacySnapshot: Bool
+    let rebuiltLegacyValues: Bool
+    let currentQuantityGrams: Double
+    let configuredPortionNutrients: MacroNutrients
+    let displayedTotalNutrients: MacroNutrients
+    let sourceConfiguration: Configuration?
+    let sourceEntry: Entry?
+    let sourceComponent: Component?
+
+    struct Quantity: Encodable {
+        let amount: Double
+        let unit: String
+        let portionID: String?
+        let selectedPortionGrams: Double
+        let quantityInSelectedPortions: Double
+    }
+
+    struct Option: Encodable {
+        let definition: ChaseFoodOption
+        let selected: Bool
+        let calculatedAmountGrams: Double
+        let calculatedNutrients: MacroNutrients
+        let displayedCalories: Int
+    }
+
+    struct Component: Encodable {
+        let food: Food
+        let amount: Double
+        let unit: LogUnit
+        let portionID: String?
+        let configurationOptionID: String?
+        let calculatedNutrients: MacroNutrients
+
+        init(_ item: MealItem) {
+            food = item.food
+            amount = item.amount
+            unit = item.unit
+            portionID = item.portionID
+            configurationOptionID = item.configurationOptionID
+            calculatedNutrients = item.food.nutrients(for: item.amount, unit: item.unit, portionID: item.portionID)
+        }
+    }
+
+    struct Configuration: Encodable {
+        let baseFoodID: String
+        let selectedOptionIDs: [String]
+        let portionID: String?
+        let snapshot: Snapshot?
+
+        init(_ configuration: SavedFoodConfiguration) {
+            baseFoodID = configuration.baseFoodID
+            selectedOptionIDs = configuration.selectedOptionIDs.sorted()
+            portionID = configuration.portionID
+            snapshot = configuration.snapshot.map(Snapshot.init)
+        }
+    }
+
+    struct Snapshot: Encodable {
+        let selectedOptionIDs: [String]
+        let catalogVersion: String?
+        let baseFood: Food?
+        let options: [ChaseFoodOption]?
+        let extraComponents: [Component]?
+        let portionID: String?
+
+        init(_ snapshot: FoodConfigurationSnapshot) {
+            selectedOptionIDs = snapshot.selectedOptionIDs.sorted()
+            catalogVersion = snapshot.catalogVersion
+            baseFood = snapshot.baseFood
+            options = snapshot.options
+            extraComponents = snapshot.extraComponents?.map(Component.init)
+            portionID = snapshot.portionID
+        }
+    }
+
+    struct Entry: Encodable {
+        let food: Food
+        let amount: Double
+        let unit: LogUnit
+        let portionID: String?
+        let nutrients: MacroNutrients
+        let configuration: Snapshot?
+
+        init(_ entry: DiaryEntry) {
+            food = entry.food
+            amount = entry.amount
+            unit = entry.unit
+            portionID = entry.portionID
+            nutrients = entry.nutrients
+            configuration = entry.foodConfigurationSnapshot.map(Snapshot.init)
+        }
+    }
+}
+#endif
+
 struct FoodCustomizationView: View {
     @EnvironmentObject private var diary: DiaryStore
     @Environment(\.dismiss) private var dismiss
@@ -85,6 +193,11 @@ struct FoodCustomizationView: View {
     @State private var showingIngredientSearch = false
     @State private var selectedCompanionFoodIDs: Set<String> = []
     @State private var removedLegacyBurgerFries = false
+#if DEBUG
+    @State private var showingDebugCopyConfirmation = false
+    @State private var debugCopySucceeded = true
+    @State private var debugCopyError: String?
+#endif
 
     init(food: Food, catalog: CatalogStore, date: Date, initialConfiguration: SavedFoodConfiguration? = nil,
          initialPreference: QuantityPreference? = nil,
@@ -112,7 +225,11 @@ struct FoodCustomizationView: View {
         componentActionTitle = isNewComponent ? "Add to parent" : "Use changes"
         self.onComponentSaved = onComponentSaved
         self.onLogged = onLogged
-        let loadedOptions = needsLegacyRebuild
+        // A saved variation can carry frozen option-food nutrients from an older
+        // catalog. New edits should keep its selections but calculate from the
+        // current option definitions; logged-entry snapshots remain historical.
+        let refreshOptionsFromCatalog = needsLegacyRebuild || initialConfiguration != nil
+        let loadedOptions = refreshOptionsFromCatalog
             ? (base.source == .chaseFood ? catalog.chaseFoodOptions(for: base.sourceID) : [])
             : snapshot?.options ?? (base.source == .chaseFood ? catalog.chaseFoodOptions(for: base.sourceID) : [])
         let initialSelectedOptionIDs = Set(initialConfiguration?.selectedOptionIDs
@@ -392,6 +509,15 @@ struct FoodCustomizationView: View {
             } message: {
                 Text("This removes the variation from Recent Variations. It does not change foods already logged.")
             }
+#if DEBUG
+            .alert(debugCopySucceeded ? "Food debug info copied" : "Couldn’t copy food debug info", isPresented: $showingDebugCopyConfirmation) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(debugCopySucceeded
+                    ? "The clipboard contains this food’s source data, selected options, portion calculations, and nutrition totals. It does not include the diary."
+                    : debugCopyError ?? "Try copying the debug info again.")
+            }
+#endif
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
         }
@@ -439,6 +565,12 @@ struct FoodCustomizationView: View {
         if onComponentSaved == nil {
             Button("Rename") { showingNameEditor = true }
         }
+#if DEBUG
+        Button("Copy Food Debug Info", systemImage: "doc.on.doc") {
+            copyFoodDebugInfo()
+        }
+        .accessibilityIdentifier("food-copy-debug-info")
+#endif
         Divider()
         Section("Recent Variations") {
             if recentConfigurations.isEmpty {
@@ -453,6 +585,63 @@ struct FoodCustomizationView: View {
             }
         }
     }
+
+#if DEBUG
+    private func copyFoodDebugInfo() {
+        let optionsForCapture = options.map { option in
+            let isVariant = option.relationship.caseInsensitiveCompare("variant") == .orderedSame
+            let grams = isVariant
+                ? selectedPortionGrams
+                : FoodConfigurationCalculator.componentAmountGrams(for: option, food: food, portionID: selectedPortionID)
+            return FoodDetailDebugCapture.Option(
+                definition: option,
+                selected: selectedOptionIDs.contains(option.id),
+                calculatedAmountGrams: grams,
+                calculatedNutrients: option.food.nutrients(for: grams, unit: .grams),
+                displayedCalories: Int(option.food.nutrients(for: grams, unit: .grams).calories.rounded())
+            )
+        }
+        let info = FoodDetailDebugCapture(
+            capturedAt: ISO8601DateFormatter().string(from: Date()),
+            appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
+            appBuild: Bundle.main.infoDictionary?["CFBundleVersion"] as? String,
+            catalogVersion: catalog.catalogVersion,
+            food: food,
+            quantity: .init(amount: amount, unit: selectedUnit.rawValue, portionID: selectedPortionID,
+                selectedPortionGrams: selectedPortionGrams, quantityInSelectedPortions: quantityInSelectedPortions),
+            selectedOptionIDs: selectedOptionIDs.sorted(),
+            options: optionsForCapture,
+            extraComponents: extraComponents.map(FoodDetailDebugCapture.Component.init),
+            screenContext: originalEntry != nil ? "loggedEntry" : originalComponent != nil ? "mealComponent" : initialConfiguration != nil ? "savedConfiguration" : "newFood",
+            preservesLegacySnapshot: preservesLegacySnapshot,
+            rebuiltLegacyValues: rebuiltLegacyValues,
+            currentQuantityGrams: currentQuantityInGrams,
+            configuredPortionNutrients: configuredPortionNutrients,
+            displayedTotalNutrients: totalNutrients,
+            sourceConfiguration: initialConfiguration.map(FoodDetailDebugCapture.Configuration.init),
+            sourceEntry: originalEntry.map(FoodDetailDebugCapture.Entry.init),
+            sourceComponent: originalComponent.map(FoodDetailDebugCapture.Component.init)
+        )
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
+        do {
+            let data = try encoder.encode(info)
+            guard let text = String(data: data, encoding: .utf8) else {
+                debugCopySucceeded = false
+                debugCopyError = "The debug data could not be converted to text."
+                showingDebugCopyConfirmation = true
+                return
+            }
+            UIPasteboard.general.string = text
+            debugCopySucceeded = true
+            debugCopyError = nil
+        } catch {
+            debugCopySucceeded = false
+            debugCopyError = error.localizedDescription
+        }
+        showingDebugCopyConfirmation = true
+    }
+#endif
     private var quantityControls: some View {
         CustomizationQuantityControls(amount: $amount, identifier: "custom-food-quantity-value") { unitControl }
     }
@@ -677,8 +866,12 @@ struct FoodCustomizationView: View {
     }
 
     private func apply(_ configuration: SavedFoodConfiguration) {
-        let loadedOptions = configuration.snapshot?.options
-            ?? (food.source == .chaseFood ? catalog.chaseFoodOptions(for: food.sourceID) : [])
+        let currentBaseFood = catalog.food(sourceID: food.sourceID, source: food.source)
+            ?? configuration.snapshot?.baseFood
+            ?? food
+        let loadedOptions = currentBaseFood.source == .chaseFood
+            ? catalog.chaseFoodOptions(for: currentBaseFood.sourceID)
+            : configuration.snapshot?.options ?? []
         let compatibleConfiguration = FoodConfigurationCompatibility.removingLegacyBurgerFries(
             baseFoodID: configuration.baseFoodID,
             options: loadedOptions,
@@ -688,7 +881,7 @@ struct FoodCustomizationView: View {
         selectedOptionIDs = compatibleConfiguration.selectedOptionIDs
         removedLegacyBurgerFries = compatibleConfiguration.removedFries
         extraComponents = configuration.components
-        if let base = configuration.snapshot?.baseFood { food = base }
+        food = currentBaseFood
         if let portionID = configuration.portionID, food.portion(id: portionID) != nil {
             self.portionID = portionID
             unitChoice = .portion(portionID)

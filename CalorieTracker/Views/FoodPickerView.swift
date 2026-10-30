@@ -376,7 +376,10 @@ struct FoodPickerView: View {
             suggestions: magicSuggestionsSnapshot,
             hasExcludedMatches: magicHasExcludedMatchesSnapshot,
             onQuickLog: logMagicSuggestion,
-            onOpenFood: { editFood($0) },
+            onOpenFood: { food, configuration in
+                if let configuration { editConfiguration(food, configuration) }
+                else { editFood(food) }
+            },
             onOpenMeal: editMeal
         )
     }
@@ -844,7 +847,7 @@ private struct MagicFoodSuggestionsList: View {
     let suggestions: [MagicFoodSuggestion]
     let hasExcludedMatches: Bool
     let onQuickLog: (MagicFoodSuggestion) -> Void
-    let onOpenFood: (Food) -> Void
+    let onOpenFood: (Food, SavedFoodConfiguration?) -> Void
     let onOpenMeal: (SavedMeal) -> Void
 
     var body: some View {
@@ -901,7 +904,7 @@ private struct MagicFoodSuggestionRow: View {
     @EnvironmentObject private var diary: DiaryStore
     let suggestion: MagicFoodSuggestion
     let onQuickLog: () -> Void
-    let onOpenFood: (Food) -> Void
+    let onOpenFood: (Food, SavedFoodConfiguration?) -> Void
     let onOpenMeal: (SavedMeal) -> Void
 
     var body: some View {
@@ -942,7 +945,7 @@ private struct MagicFoodSuggestionRow: View {
     private func itemButton(_ item: FoodPickerItem) -> some View {
         switch item {
         case .food(let food):
-            Button { onOpenFood(food) } label: {
+            Button { onOpenFood(food, suggestion.configuration(for: food)) } label: {
                 HStack(spacing: 9) {
                     SourceBadge(source: food.source)
                     VStack(alignment: .leading, spacing: 2) {

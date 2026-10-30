@@ -19,6 +19,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_WORKBOOK = ROOT / "data/chase-food/workbook.json"
 DEFAULT_ENRICHMENTS = ROOT / "data/chase-food/enrichments.json"
+DEFAULT_MEAT_CLASSIFICATIONS = ROOT / "data/food-catalog/meat-classifications.json"
 DEFAULT_CATALOG = ROOT / "CalorieTracker/Resources/FoodCatalog.sqlite3"
 DEFAULT_OUTPUT = ROOT / "data/chase-food/catalog.json"
 
@@ -114,6 +115,29 @@ def clean(value: object) -> str:
 def normalize(value: str) -> str:
     value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode().lower()
     return " ".join(re.findall(r"[a-z0-9]+", value))
+
+
+def load_chase_food_meat_classifications(path: Path, known_food_ids: set[str]) -> dict[str, dict[str, object]]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if payload.get("schemaVersion") != 1 or not isinstance(payload.get("records"), list):
+        raise ValueError(f"Unsupported meat-classification source format: {path}")
+
+    classifications: dict[str, dict[str, object]] = {}
+    for record in payload["records"]:
+        if record.get("source") != "chaseFood":
+            continue
+        food_id = record.get("source_id")
+        if not isinstance(food_id, str) or food_id not in known_food_ids:
+            raise ValueError(f"Unknown Chase Food ID in meat classifications: {food_id!r}")
+        if food_id in classifications:
+            raise ValueError(f"Duplicate Chase Food meat classification: {food_id}")
+        for field in ("contains_processed_meat", "contains_red_meat"):
+            if not isinstance(record.get(field), bool):
+                raise ValueError(f"{food_id} must define boolean {field}")
+        if not isinstance(record.get("basis"), str) or not record["basis"].strip():
+            raise ValueError(f"{food_id} must include a classification basis")
+        classifications[food_id] = record
+    return classifications
 
 
 def similarity(left: str, right: str) -> float:
@@ -226,6 +250,15 @@ def main() -> int:
     foods_rows = workbook["foods"]
     food_headers = foods_rows[0]
     food_index = {name: food_headers.index(name) for name in food_headers}
+    known_food_ids = {
+        clean(row[food_index["food_id"]])
+        for row in foods_rows[1:]
+        if len(row) > food_index["food_id"] and clean(row[food_index["food_id"]])
+    }
+    meat_classifications = load_chase_food_meat_classifications(
+        DEFAULT_MEAT_CLASSIFICATIONS,
+        known_food_ids,
+    )
     alias_by_food: dict[str, list[str]] = {}
     nutrition_alias_by_food: dict[str, list[str]] = {}
     alias_records: list[dict] = []
@@ -346,6 +379,8 @@ def main() -> int:
             "variationsSummary": clean(row[food_index["Variations"]]),
             "optionsSummary": clean(row[food_index["Options"]]),
             "includedComponentsSummary": clean(row[food_index["Included components"]]),
+            "containsProcessedMeat": bool(meat_classifications.get(food_id, {}).get("contains_processed_meat", False)),
+            "containsRedMeat": bool(meat_classifications.get(food_id, {}).get("contains_red_meat", False)),
             "nutrients": nutrients,
             "nutritionPer100g": enrichment["nutritionPer100g"] if enrichment else (({key: round(float(match[key] or 0), 4) for key in ("calories", "carbs", "fat", "protein")} | {"fiber": round(float(match["fiber"]), 4) if match["fiber"] is not None else None}) if match else None),
             "nutritionSource": nutrition_source,

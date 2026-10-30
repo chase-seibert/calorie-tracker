@@ -1,0 +1,532 @@
+Alfredo sauce
+Almond butter
+Almond milk
+Almonds
+American cheese
+Apple
+Apple juice
+Apple pie
+Applesauce
+Asparagus, cooked
+Avocado
+Avocado oil
+Bacon
+Bagel
+Bagel with cream cheese
+Baked beans
+Baked chicken breast
+Baked potato
+Baked potato soup
+Baked ziti
+Balsamic vinaigrette
+Banana
+BBQ beef sandwich
+BBQ ribs
+BBQ sauce
+Bean burger
+Bean patty
+Bean salad
+Beef and broccoli
+Beef jerky
+Beef kebab
+Beef patty
+Beef snack stick
+Beef stew
+Beer
+Bell pepper
+Biryani
+Biscuit
+Biscuits and gravy
+Black beans
+Black olives
+Blackberries
+BLT sandwich
+Blue cheese
+Blue cheese dressing
+Blueberries
+Boiled egg
+Bran flakes cereal
+Bratwurst
+Breadsticks
+Breakfast burrito
+Breakfast casserole
+Breakfast sandwich
+Breakfast sausage
+Breakfast smoothie bowl
+Breakfast taco
+Broccoli cheddar soup
+Broccoli, cooked
+Broccoli, raw
+Brown rice
+Brownie
+Brussels sprouts, cooked
+Buffalo chicken dip
+Buffalo wing sauce
+Burger
+Burnt style
+Burnt style
+Burrito
+Burrito bowl
+Butter
+Butter chicken
+Butter popcorn
+Caesar dressing
+Caesar salad
+Calzone
+Canadian bacon
+Candy bar
+Canned peaches
+Canned tuna
+Cantaloupe
+Capers
+Cappuccino
+Caprese salad
+Carrot cake
+Carrots, cooked
+Carrots, raw
+Cashews
+Cauliflower, cooked
+Celery
+Cereal
+Cheddar cheese
+Cheese puffs
+Cheese sauce
+Cheesecake
+Chef salad
+Cherries
+Chicken and dumplings
+Chicken Caesar salad
+Chicken casserole
+Chicken chili
+Chicken drumstick
+Chicken fajita filling
+Chicken noodle soup
+Chicken nuggets
+Chicken Parmesan
+Chicken piccata
+Chicken pot pie
+Chicken rice bowl
+Chicken salad
+Chicken salad sandwich
+Chicken sandwich
+Chicken stir-fry
+Chicken tenders
+Chicken thighs
+Chicken tikka masala
+Chicken tortilla soup
+Chicken wings
+Chicken wrap
+Chickpea curry
+Chilaquiles
+Chili
+Chili con carne
+Chimichanga
+Chocolate
+Chocolate cake
+Chocolate chip cookie
+Chocolate milk
+Chorizo
+Cinnamon
+Cinnamon raisin bagel
+Cinnamon roll
+Clam chowder
+Clams, cooked
+Classic style
+Club sandwich
+Cobb salad
+Cocktail
+Cocoa powder
+Coconut oil
+Cod, cooked
+Coffee
+Coffee with milk
+Cola soda
+Cold brew coffee
+Coleslaw
+Cooked chickpeas
+Cooked lentils
+Corn flakes
+Corn kernels
+Corn on the cob
+Corn tortilla
+Cornbread
+Corned beef
+Cottage cheese
+Couscous
+Crab cakes
+Crab meat
+Crackers
+Cranberry juice cocktail
+Cream
+Cream cheese
+Cream of wheat
+Croissant
+Croutons
+Cucumber
+Cucumber salad
+Cupcake
+Dal
+Danish pastry
+Dates
+Deep dish pizza crust
+Deli sandwich
+Diet cola
+Dijon mustard
+Dill
+Dinner roll
+Doughnut
+Dried cranberries
+Drunken noodles
+Dumplings
+Edamame
+Egg
+Egg bagel
+Egg roll
+Egg salad
+Egg salad sandwich
+Egg whites
+Eggplant Parmesan
+Eggs Benedict
+Elote
+Enchiladas
+Energy bar
+Energy drink
+English muffin
+Espresso
+Everything bagel
+Fajitas
+Falafel
+Falafel wrap
+Feta cheese
+Fettuccine Alfredo
+Fish and chips
+Fish sandwich
+Fish sticks
+Flavored yogurt
+Flour tortilla
+food_pizza_crust
+French dip sandwich
+French fries
+French onion soup
+French toast
+Fried chicken
+Fried chicken sandwich
+Fried egg
+Fried fish
+Fried rice
+Fried shrimp
+Frosted corn flakes
+Frozen yogurt
+Fruit cobbler
+Fruit salad
+Fruit snacks
+Garlic bread
+Gelato
+General Tso's chicken
+Ginger beer
+Goat cheese
+Goldfish crackers
+Graham crackers
+Granola
+Granola bar
+Grapefruit
+Grapes
+Gravy
+Greek dressing
+Greek salad
+Greek yogurt
+Green bean casserole
+Green beans, cooked
+Grilled cheese
+Grilled chicken breast
+Grilled shrimp
+Grits
+Ground beef, cooked
+Ground turkey, cooked
+Guacamole
+Gumbo
+Gummy candy
+Gyro
+Ham
+Ham sandwich
+Ham steak
+Hamburger bun
+Hard candy
+Hard-shell taco
+Hash browns
+Home fries
+Honey
+Honeydew melon
+Hot chocolate
+Hot dog
+Hot dog bun
+Hot dog sausage
+Hot sauce
+Hot tea
+Huevos rancheros
+Hummus
+Hummus with crackers
+Ice cream
+Iced coffee
+Italian dressing
+Italian sausage
+Jam
+Jambalaya
+Jasmine rice
+Jell-O
+Kale, raw
+Kebabs
+Ketchup
+Kidney beans
+Kiwi
+Kung pao chicken
+Lamb chop
+Lamb kebab
+Lasagna
+Latte
+Lemon
+Lemon caper sauce
+Lemon-lime soda
+Lemonade
+Lentil soup
+Lettuce
+Lime
+Lo mein
+Lobster tail
+Macaroni and cheese
+Macaroni salad
+Mandarin orange
+Mango
+Maple syrup
+Marshmallows
+Mashed potatoes
+Mayonnaise
+Meatball sub
+Meatballs
+Meatloaf
+Mexican rice
+Milk, 1%
+Milk, 2%
+Milk, skim
+Milk, whole
+Milkshake
+Minestrone soup
+Miso soup
+Mixed greens
+Mixed nuts
+Mixed vegetables, cooked
+Monterey Jack cheese
+Mozzarella cheese
+Muesli
+Muffin, sweet
+Multigrain bagel
+Mushroom soup
+Mushrooms, cooked
+Mussels, cooked
+Naan
+Nachos
+Nectarine
+Oat milk
+Oat ring cereal
+Oatmeal
+Oatmeal cookie
+Oats
+Olive oil
+Omelet
+Onions, cooked
+Orange
+Orange chicken
+Orange juice
+Orange sauce
+Pad Thai
+Pancake
+Pancake syrup
+Panini
+Parmesan cheese
+Parmesan peppercorn dressing
+Pasta pesto
+Pasta primavera
+Pasta salad
+Pasta with sauce
+Pasta, cooked
+Peach
+Peanut butter
+Peanut butter and jelly sandwich
+Peanut butter sandwich
+Peanuts
+Pear
+Peas, cooked
+Pecan pie
+Pepper Jack cheese
+Pepperoni
+Pesto sauce
+Philly cheesesteak
+Pho
+Pickle
+Pickle relish
+Pico de gallo
+Pineapple
+Pinto beans
+Pistachios
+Pita bread
+Pizza
+Pizza crust
+Plum
+Poached egg
+Poke bowl
+Popcorn
+Popsicle
+Pork
+Pork chop
+Pork tenderloin
+Pot roast
+Potato chips
+Potato salad
+Pretzel
+Prosciutto
+Protein bar
+Protein powder
+Protein shake
+Provolone cheese
+Pudding
+Pulled pork
+Pulled pork sandwich
+Pumpernickel bagel
+Pumpkin pie
+Quesadilla
+Quinoa
+Raisins
+Ramen noodle soup
+Ranch dressing
+Raspberries
+Ravioli
+Refried beans
+Reuben sandwich
+Ribeye steak
+Rice cake
+Rice cereal squares
+Ricotta cheese
+Roast beef
+Roast beef sandwich
+Roast chicken
+Roast turkey
+Roast turkey with gravy
+Roasted mixed vegetables
+Roasted potatoes
+Romaine lettuce
+Root beer
+Rotisserie chicken
+Rye bread
+Salad
+Salami
+Salmon
+Salsa
+Salsa verde
+Sandwich
+Sashimi
+Sauerkraut
+Sausage
+Sausage patty
+Scalloped potatoes
+Scallops
+Scrambled eggs
+Seaweed salad
+Sesame bagel
+Sesame seeds
+Shawarma wrap
+Shredded wheat cereal
+Shrimp cocktail
+Shrimp scampi
+Shrimp
+Sirloin steak
+Sloppy joe
+Smoothie
+Snap peas
+Snow peas
+Sorbet
+Sour cream
+Sourdough bread
+Soy milk
+Soy sauce
+Spaghetti with meat sauce
+Spaghetti with tomato sauce
+Sparkling water
+Spinach salad
+Spinach, cooked
+Spinach, raw
+Split pea soup
+Sports drink
+Spring roll
+Steak
+Stir-fried vegetables
+Strawberries
+String cheese
+Stromboli
+Stuffing
+Sugar
+Sugar cookie
+Sushi rice
+Sushi roll
+Sweet and sour chicken
+Sweet potato fries
+Sweet potato, baked
+Sweet tea
+Swiss cheese
+Tabbouleh
+Taco
+Taco salad
+Tamale
+Taquito
+Tartar sauce
+Tater tots
+Tempeh
+Teriyaki chicken
+Teriyaki sauce
+Thousand Island dressing
+Tilapia, cooked
+Toast
+Tofu
+Tomato
+Tomato pasta sauce
+Tomato soup
+Tortellini
+Tortilla chips
+Tostada
+Trail mix
+Tuna salad
+Tuna salad sandwich
+Tuna steak
+Turkey bacon
+Turkey breast
+Turkey burger
+Turkey chili
+Turkey meatballs
+Turkey sandwich
+Turkey wrap
+Vanilla cake
+Vanilla syrup
+Vegetable curry
+Vegetable oil
+Vegetable soup
+Vegetable wrap
+Vegetarian chili
+Veggie burger
+Waffles
+Walnuts
+Water
+Watermelon
+Whipped cream
+White bread
+White rice
+Whole egg
+Whole wheat bagel
+Whole wheat bread
+Wine
+Yellow mustard
+Yogurt
+Yogurt parfait
+Yogurt, low fat
+Zucchini, cooked
+Deep dish cheese pizza
+Garlic naan
+Kielbasa

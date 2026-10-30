@@ -28,6 +28,17 @@ confidence, portion estimates, aliases, and configurable component options.
 Nutrition values are screening estimates from the existing catalog. The
 calorie and macro figures in the concept PDF are placeholders.
 
+Processed-meat and red-meat classifications are maintained as independent
+flags in a reviewed, stable-ID source at
+[`data/food-catalog/meat-classifications.json`](../data/food-catalog/meat-classifications.json).
+It records Chase Food's positive tags and reviewed source-specific corrections
+for USDA and Open Food Facts. The catalog build carries them into the existing
+SQLite classification columns. A cured or otherwise preserved mammalian meat
+can have both flags set; processed poultry can have only the processed-meat
+flag. Only ingredients in a Chase Food item's default composition affect its
+tags; optional customization choices do not change the base food's
+classification.
+
 ## USDA FoodData Central
 
 The current catalog imports Foundation Foods, SR Legacy, and FNDDS. USDA Branded

@@ -819,7 +819,60 @@ final class DiaryEngine {
             let previousEntryCount = entries(on: date).count
             switch item {
             case .food(let food):
-                quickLog(food, on: date)
+                if let configuration = suggestion.configuration(for: food),
+                   let snapshot = configuration.snapshot {
+                    if snapshot.hasEditorInputs,
+                       let base = snapshot.baseFood,
+                       let options = snapshot.options {
+                        let selected = Set(configuration.selectedOptionIDs)
+                        let portionID = configuration.portionID ?? snapshot.portionID
+                        let preference = preference(for: food)
+                        let portionGrams = base.portion(id: portionID)?.grams ?? base.baseAmountGrams
+                        let quantity = preference.unit.grams(for: preference.amount, food: base, portionID: portionID)
+                            / max(portionGrams, 0.001)
+                        let portionNutrients = FoodConfigurationCalculator.nutrients(
+                            food: base,
+                            options: options,
+                            selected: selected,
+                            extras: configuration.components,
+                            portionID: portionID
+                        )
+                        let optionComponents = options.filter {
+                            selected.contains($0.id) && $0.relationship.lowercased() != "style"
+                                && $0.food.id != base.id
+                                && (!options.contains { $0.relationship.lowercased() == "variant" && selected.contains($0.id) }
+                                    || !$0.includedByDefault || $0.relationship.lowercased() == "variant")
+                        }.map {
+                            MealItem(
+                                id: UUID(),
+                                food: $0.food,
+                                amount: $0.relationship.lowercased() == "variant" ? portionGrams : $0.amountGrams,
+                                unit: .grams,
+                                configurationOptionID: $0.id
+                            )
+                        }
+                        logConfiguredFood(
+                            base,
+                            nutrients: portionNutrients.scaled(by: quantity),
+                            selectedOptionIDs: configuration.selectedOptionIDs,
+                            components: optionComponents + configuration.components,
+                            suggestedChanges: snapshot.suggestedChanges,
+                            portionID: portionID,
+                            amount: preference.amount,
+                            unit: preference.unit,
+                            snapshot: snapshot,
+                            on: date
+                        )
+                    } else {
+                        quickLog(food, on: date)
+                        if document.entries.count > previousEntryCount,
+                           let index = document.entries.indices.last {
+                            document.entries[index].foodConfigurationSnapshot = snapshot
+                        }
+                    }
+                } else {
+                    quickLog(food, on: date)
+                }
             case .meal(let meal):
                 logMeal(meal, on: date)
             }

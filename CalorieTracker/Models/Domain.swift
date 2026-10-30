@@ -812,9 +812,19 @@ enum MagicFoodTimeRange: String, CaseIterable, Identifiable, Sendable {
 
 struct MagicFoodSuggestion: Identifiable, Hashable, Sendable {
     let items: [FoodPickerItem]
+    var foodConfigurations: [String: SavedFoodConfiguration]
+
+    init(items: [FoodPickerItem], foodConfigurations: [String: SavedFoodConfiguration] = [:]) {
+        self.items = items
+        self.foodConfigurations = foodConfigurations
+    }
 
     var id: String {
         items.map(\.id).sorted().joined(separator: "|")
+    }
+
+    func configuration(for food: Food) -> SavedFoodConfiguration? {
+        foodConfigurations[food.id]
     }
 }
 

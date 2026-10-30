@@ -436,11 +436,19 @@ struct QuickLogSnapshot: Sendable {
         struct Observation {
             let item: FoodPickerItem
             let latest: Date
+            let foodConfiguration: SavedFoodConfiguration?
         }
         struct RankedSuggestion {
             let suggestion: MagicFoodSuggestion
             let score: Double
             let latest: Date
+        }
+        func configurationMap(for observations: [Observation]) -> [String: SavedFoodConfiguration] {
+            Dictionary(uniqueKeysWithValues: observations.compactMap { observation in
+                guard case .food(let food) = observation.item,
+                      let configuration = observation.foodConfiguration else { return nil }
+                return (food.id, configuration)
+            })
         }
 
         var observationsByDay: [Date: [String: Observation]] = [:]
@@ -454,7 +462,8 @@ struct QuickLogSnapshot: Sendable {
             }
             observationsByDay[day, default: [:]][item.id] = Observation(
                 item: item,
-                latest: entry.loggedAt
+                latest: entry.loggedAt,
+                foodConfiguration: savedConfiguration(for: entry)
             )
         }
 
@@ -487,7 +496,10 @@ struct QuickLogSnapshot: Sendable {
                 continue
             }
             ranked.append(RankedSuggestion(
-                suggestion: MagicFoodSuggestion(items: [observation.item]),
+                suggestion: MagicFoodSuggestion(
+                    items: [observation.item],
+                    foodConfigurations: configurationMap(for: [observation])
+                ),
                 score: Double(count),
                 latest: observation.latest
             ))
@@ -533,7 +545,10 @@ struct QuickLogSnapshot: Sendable {
                 hasExcludedMatches = true
             }
             ranked.append(RankedSuggestion(
-                suggestion: MagicFoodSuggestion(items: items),
+                suggestion: MagicFoodSuggestion(
+                    items: items,
+                    foodConfigurations: configurationMap(for: items.compactMap { latestObservation[$0.id] })
+                ),
                 score: Double(days.count) + 1.25 + (Double(items.count - 2) * 0.25),
                 latest: combinationLatest[key] ?? .distantPast
             ))
@@ -561,6 +576,19 @@ struct QuickLogSnapshot: Sendable {
             suggestions: suggestions,
             hasExcludedMatches: suggestions.isEmpty && hasExcludedMatches
         )
+    }
+
+    private func savedConfiguration(for entry: DiaryEntry) -> SavedFoodConfiguration? {
+        guard !entry.isMeal, let snapshot = entry.foodConfigurationSnapshot else { return nil }
+        var configuration = SavedFoodConfiguration(
+            baseFoodID: snapshot.baseFood?.id ?? entry.food.id,
+            label: "Magic suggestion",
+            selectedOptionIDs: snapshot.selectedOptionIDs,
+            components: snapshot.extraComponents ?? snapshot.components,
+            portionID: snapshot.portionID ?? entry.portionID
+        )
+        configuration.snapshot = snapshot
+        return configuration
     }
 
     private func selection(for item: FoodPickerItem) -> QuickLogSelection {
