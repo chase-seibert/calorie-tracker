@@ -32,7 +32,11 @@ The October 30 review replaced mismatched matches for Kidney beans, Lobster
 tail, Mashed potatoes, Mayonnaise, Mixed greens, Mixed vegetables, cooked,
 Mushroom soup, Mushrooms, cooked, Onions, cooked, Parmesan cheese, and Pasta
 salad; recipe or portion uncertainty remains documented for the broader and
-composite foods.
+composite foods. The October 31 review corrected source mismatches for Peas,
+cooked, Pot roast, Quesadilla, Roast chicken, Roast turkey, Roasted potatoes,
+and Salsa verde, and clarified USDA baselines for yogurt, sandwiches, and
+other reviewed portions. The Pot roast and generic Sandwich profiles remain
+low confidence because their assembled compositions vary substantially.
 Companion suggestions are separate foods logged independently. The generated
 review workbook is rebuilt from the same catalog projection.
 

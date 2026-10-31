@@ -19381,6 +19381,964 @@
         "url": "https://fdc.nal.usda.gov/food-search/?query=Peanut%20butter%20sandwich%2C%20NFS",
         "releaseDate": "2024-10-31"
       }
+    },
+    "food_peas_cooked": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Pasta, cooked",
+        "similarity": 0.8696,
+        "source": "usda",
+        "sourceID": "2708357"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Peas, cooked as one canonical food and use the closest preparation-matched USDA profile available.",
+        "reason": "Direct USDA green peas cooked, with preparation and added-fat status unspecified. Catalog cup weight is close to the USDA cup portion.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Green peas, NS as to form, cooked",
+            "sourceID": "2709962",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Green%20peas%2C%20NS%20as%20to%20form%2C%20cooked"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 98.0,
+        "carbs": 13.8,
+        "fat": 2.81,
+        "fiber": 4.4,
+        "protein": 4.99
+      },
+      "reviewReasons": [
+        "Direct USDA green peas cooked, with preparation and added-fat status unspecified. Catalog cup weight is close to the USDA cup portion."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2709962",
+        "recordName": "Green peas, NS as to form, cooked",
+        "reviewedDate": "2026-10-31",
+        "serving": {
+          "description": "1 cup",
+          "grams": 165.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Green%20peas%2C%20NS%20as%20to%20form%2C%20cooked",
+        "releaseDate": "2024-10-31"
+      }
+    },
+    "food_penne_pasta_with_sauce": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Pasta with sauce, NFS",
+        "similarity": 0.8889,
+        "source": "usda",
+        "sourceID": "2708828"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Pasta with sauce as one canonical food and use the closest preparation-matched USDA profile available.",
+        "reason": "Direct generic pasta with sauce profile. Sauce type and recipe proportions vary; the one-cup USDA measure is scaled to the catalog portion.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Pasta with sauce, NFS",
+            "sourceID": "2708828",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Pasta%20with%20sauce%2C%20NFS"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 125.0,
+        "carbs": 19.2,
+        "fat": 2.58,
+        "fiber": 1.6,
+        "protein": 5.86
+      },
+      "reviewReasons": [
+        "Direct generic pasta with sauce profile. Sauce type and recipe proportions vary; the one-cup USDA measure is scaled to the catalog portion."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2708828",
+        "recordName": "Pasta with sauce, NFS",
+        "reviewedDate": "2026-10-31",
+        "serving": {
+          "description": "1 cup",
+          "grams": 250.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Pasta%20with%20sauce%2C%20NFS",
+        "releaseDate": "2024-10-31"
+      }
+    },
+    "food_pepperoni": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Pepperoni, NFS",
+        "similarity": 0.8182,
+        "source": "usda",
+        "sourceID": "2706185"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Pepperoni as one canonical food and use the closest preparation-matched USDA profile available.",
+        "reason": "Direct pepperoni profile, not further specified. The USDA listed serving is a whole sausage rather than the thin-slice catalog amount, so the per-100 g value is scaled.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Pepperoni, NFS",
+            "sourceID": "2706185",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Pepperoni%2C%20NFS"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 504.0,
+        "carbs": 1.18,
+        "fat": 46.3,
+        "fiber": 0.0,
+        "protein": 19.2
+      },
+      "reviewReasons": [
+        "Direct pepperoni profile, not further specified. The USDA listed serving is a whole sausage rather than the thin-slice catalog amount, so the per-100 g value is scaled."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2706185",
+        "recordName": "Pepperoni, NFS",
+        "reviewedDate": "2026-10-31",
+        "serving": {
+          "description": "1 sausage (10-1/4\" long x 1-3/8\" dia)",
+          "grams": 251.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Pepperoni%2C%20NFS",
+        "releaseDate": "2024-10-31"
+      }
+    },
+    "food_pico_de_gallo": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Salsa, pico de gallo",
+        "similarity": 0.8125,
+        "source": "usda",
+        "sourceID": "2709737"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Pico de gallo as one canonical food and use the closest preparation-matched USDA profile available.",
+        "reason": "Direct USDA pico de gallo profile. Source portion is one cup; the catalog tablespoon estimate is scaled from the per-100 g values.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Salsa, pico de gallo",
+            "sourceID": "2709737",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Salsa%2C%20pico%20de%20gallo"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 17.0,
+        "carbs": 3.7,
+        "fat": 0.14,
+        "fiber": 1.1,
+        "protein": 0.71
+      },
+      "reviewReasons": [
+        "Direct USDA pico de gallo profile. Source portion is one cup; the catalog tablespoon estimate is scaled from the per-100 g values."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2709737",
+        "recordName": "Salsa, pico de gallo",
+        "reviewedDate": "2026-10-31",
+        "serving": {
+          "description": "1 cup",
+          "grams": 240.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Salsa%2C%20pico%20de%20gallo",
+        "releaseDate": "2024-10-31"
+      }
+    },
+    "food_pineapple": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Pineapple, raw",
+        "similarity": 0.8182,
+        "source": "usda",
+        "sourceID": "2346398"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Pineapple as one canonical food and use the closest preparation-matched USDA profile available.",
+        "reason": "Direct raw pineapple profile. USDA reference portion is 140 g and the catalog 165 g portion represents about one cup.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Pineapple, raw",
+            "sourceID": "2346398",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Pineapple%2C%20raw"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 60.1,
+        "carbs": 14.1,
+        "fat": 0.211,
+        "fiber": 0.935,
+        "protein": 0.461
+      },
+      "reviewReasons": [
+        "Direct raw pineapple profile. USDA reference portion is 140 g and the catalog 165 g portion represents about one cup."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "Foundation Foods",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2346398",
+        "recordName": "Pineapple, raw",
+        "reviewedDate": "2026-10-31",
+        "serving": {
+          "description": "1 RACC",
+          "grams": 140.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Pineapple%2C%20raw"
+      }
+    },
+    "food_pinto_beans": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Pinto beans, NFS",
+        "similarity": 0.8462,
+        "source": "usda",
+        "sourceID": "2707371"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Pinto beans as one canonical food and use the closest preparation-matched USDA profile available.",
+        "reason": "Cooked canned pinto beans without added fat; the canonical food does not specify canned versus home-cooked. USDA cup portion closely matches the catalog portion.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Pinto beans, from canned, no added fat",
+            "sourceID": "2707375",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Pinto%20beans%2C%20from%20canned%2C%20no%20added%20fat"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 137.0,
+        "carbs": 25.3,
+        "fat": 0.93,
+        "fiber": 7.7,
+        "protein": 7.66
+      },
+      "reviewReasons": [
+        "Cooked canned pinto beans without added fat; the canonical food does not specify canned versus home-cooked. USDA cup portion closely matches the catalog portion."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2707375",
+        "recordName": "Pinto beans, from canned, no added fat",
+        "reviewedDate": "2026-10-31",
+        "serving": {
+          "description": "1 cup",
+          "grams": 180.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Pinto%20beans%2C%20from%20canned%2C%20no%20added%20fat",
+        "releaseDate": "2024-10-31"
+      }
+    },
+    "food_plain_yogurt": {
+      "baselineNutritionSource": {
+        "matchBasis": "alias",
+        "name": "Plain Yogurt",
+        "similarity": 0.94,
+        "source": "off",
+        "sourceID": "0036632002822"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Yogurt as one canonical food and use the closest preparation-matched USDA profile available.",
+        "reason": "Direct plain whole-milk yogurt profile. The catalog identity also supports other yogurt types as options; USDA fiber is not reported and remains unavailable.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Yogurt, plain, whole milk",
+            "sourceID": "2259793",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Yogurt%2C%20plain%2C%20whole%20milk"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 78.0,
+        "carbs": 5.57,
+        "fat": 4.48,
+        "fiber": null,
+        "protein": 3.82
+      },
+      "reviewReasons": [
+        "Direct plain whole-milk yogurt profile. The catalog identity also supports other yogurt types as options; USDA fiber is not reported and remains unavailable."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "Foundation Foods",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2259793",
+        "recordName": "Yogurt, plain, whole milk",
+        "reviewedDate": "2026-10-31",
+        "serving": {
+          "description": "1 RACC",
+          "grams": 170.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Yogurt%2C%20plain%2C%20whole%20milk"
+      }
+    },
+    "food_pot_roast": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Pork, roast",
+        "similarity": 0.8421,
+        "source": "usda",
+        "sourceID": "2705882"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Pot roast as one canonical food and use the closest preparation-matched USDA profile available.",
+        "reason": "USDA beef pot roast is a direct meat preparation match but does not represent the full assembled pot-roast dish or vegetables; recipe composition remains uncertain.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Beef, pot roast",
+            "sourceID": "2705848",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Beef%2C%20pot%20roast"
+          }
+        ]
+      },
+      "confidence": "Low",
+      "nutritionPer100g": {
+        "calories": 251.0,
+        "carbs": 0.0,
+        "fat": 15.4,
+        "fiber": 0.0,
+        "protein": 28.4
+      },
+      "reviewReasons": [
+        "USDA beef pot roast is a direct meat preparation match but does not represent the full assembled pot-roast dish or vegetables; recipe composition remains uncertain."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2705848",
+        "recordName": "Beef, pot roast",
+        "reviewedDate": "2026-10-31",
+        "serving": {
+          "description": "1 regular/thin slice",
+          "grams": 60.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Beef%2C%20pot%20roast",
+        "releaseDate": "2024-10-31"
+      }
+    },
+    "food_potato_chips": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Potato chips, NFS",
+        "similarity": 0.8571,
+        "source": "usda",
+        "sourceID": "2709421"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Potato chips as one canonical food and use the closest preparation-matched USDA profile available.",
+        "reason": "Direct plain potato chips, not further specified. USDA portion is one chip; the catalog one-ounce serving is scaled from the per-100 g values.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Potato chips, NFS",
+            "sourceID": "2709421",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Potato%20chips%2C%20NFS"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 532.0,
+        "carbs": 53.8,
+        "fat": 34.0,
+        "fiber": 3.1,
+        "protein": 6.39
+      },
+      "reviewReasons": [
+        "Direct plain potato chips, not further specified. USDA portion is one chip; the catalog one-ounce serving is scaled from the per-100 g values."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2709421",
+        "recordName": "Potato chips, NFS",
+        "reviewedDate": "2026-10-31",
+        "serving": {
+          "description": "1 chip",
+          "grams": 2.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Potato%20chips%2C%20NFS",
+        "releaseDate": "2024-10-31"
+      }
+    },
+    "food_prosciutto": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Ham, prosciutto",
+        "similarity": 0.8333,
+        "source": "usda",
+        "sourceID": "2705879"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Prosciutto as one canonical food and use the closest preparation-matched USDA profile available.",
+        "reason": "Direct USDA prosciutto profile. The listed thin slice is 9.2 g compared with the 12 g catalog default.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Ham, prosciutto",
+            "sourceID": "2705879",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Ham%2C%20prosciutto"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 195.0,
+        "carbs": 0.3,
+        "fat": 8.32,
+        "fiber": 0.0,
+        "protein": 27.8
+      },
+      "reviewReasons": [
+        "Direct USDA prosciutto profile. The listed thin slice is 9.2 g compared with the 12 g catalog default."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2705879",
+        "recordName": "Ham, prosciutto",
+        "reviewedDate": "2026-10-31",
+        "serving": {
+          "description": "1 thin slice",
+          "grams": 9.2
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Ham%2C%20prosciutto",
+        "releaseDate": "2024-10-31"
+      }
+    },
+    "food_pulled_pork_sandwich": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Pork sandwich",
+        "similarity": 0.7879,
+        "source": "usda",
+        "sourceID": "2706977"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Pulled pork sandwich as one canonical food and use the closest preparation-matched USDA profile available.",
+        "reason": "Barbecue pork sandwich on a white bun is the closest direct assembled-food match; sauce, bun size, and serving weight vary.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Barbecue pork sandwich, on white bun",
+            "sourceID": "2706975",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Barbecue%20pork%20sandwich%2C%20on%20white%20bun"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 243.0,
+        "carbs": 24.9,
+        "fat": 8.83,
+        "fiber": 0.8,
+        "protein": 15.0
+      },
+      "reviewReasons": [
+        "Barbecue pork sandwich on a white bun is the closest direct assembled-food match; sauce, bun size, and serving weight vary."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2706975",
+        "recordName": "Barbecue pork sandwich, on white bun",
+        "reviewedDate": "2026-10-31",
+        "serving": {
+          "description": "1 regular sandwich",
+          "grams": 180.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Barbecue%20pork%20sandwich%2C%20on%20white%20bun",
+        "releaseDate": "2024-10-31"
+      }
+    },
+    "food_quesadilla": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Quesadilla, egg",
+        "similarity": 0.8333,
+        "source": "usda",
+        "sourceID": "2708597"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Quesadilla as one canonical food and use the closest preparation-matched USDA profile available.",
+        "reason": "Direct cheese-only quesadilla profile, avoiding the prior egg quesadilla mismatch. The USDA circle serving is smaller than the 210 g catalog estimate; meat and vegetable versions are separately represented as options.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Quesadilla, cheese only",
+            "sourceID": "2708591",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Quesadilla%2C%20cheese%20only"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 316.0,
+        "carbs": 28.6,
+        "fat": 16.2,
+        "fiber": 2.0,
+        "protein": 13.4
+      },
+      "reviewReasons": [
+        "Direct cheese-only quesadilla profile, avoiding the prior egg quesadilla mismatch. The USDA circle serving is smaller than the 210 g catalog estimate; meat and vegetable versions are separately represented as options."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2708591",
+        "recordName": "Quesadilla, cheese only",
+        "reviewedDate": "2026-10-31",
+        "serving": {
+          "description": "1 full circle",
+          "grams": 120.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Quesadilla%2C%20cheese%20only",
+        "releaseDate": "2024-10-31"
+      }
+    },
+    "food_roast_beef_sandwich": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Roast beef sandwich on wheat",
+        "similarity": 0.8085,
+        "source": "usda",
+        "sourceID": "2706955"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Roast beef sandwich as one canonical food and use the closest preparation-matched USDA profile available.",
+        "reason": "Direct roast beef sandwich on wheat profile. The source regular sandwich is 115 g compared with the larger 190 g catalog default; bread and condiment choices vary.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Roast beef sandwich on wheat",
+            "sourceID": "2706955",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Roast%20beef%20sandwich%20on%20wheat"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 192.0,
+        "carbs": 23.8,
+        "fat": 3.84,
+        "fiber": 2.8,
+        "protein": 14.9
+      },
+      "reviewReasons": [
+        "Direct roast beef sandwich on wheat profile. The source regular sandwich is 115 g compared with the larger 190 g catalog default; bread and condiment choices vary."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2706955",
+        "recordName": "Roast beef sandwich on wheat",
+        "reviewedDate": "2026-10-31",
+        "serving": {
+          "description": "1 regular",
+          "grams": 115.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Roast%20beef%20sandwich%20on%20wheat",
+        "releaseDate": "2024-10-31"
+      }
+    },
+    "food_roast_chicken": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Fat, chicken",
+        "similarity": 0.8333,
+        "source": "usda",
+        "sourceID": "173564"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Roast chicken as one canonical food and use the closest preparation-matched USDA profile available.",
+        "reason": "Generic roasted chicken profile with skin eaten; chicken part and skin preference are not specified in the canonical identity.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Chicken, NS as to part, baked, broiled, or roasted, skin eaten",
+            "sourceID": "2705933",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Chicken%2C%20NS%20as%20to%20part%2C%20baked%2C%20broiled%2C%20or%20roasted%2C%20skin%20eaten"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 203.0,
+        "carbs": 0.0,
+        "fat": 10.8,
+        "fiber": 0.0,
+        "protein": 24.7
+      },
+      "reviewReasons": [
+        "Generic roasted chicken profile with skin eaten; chicken part and skin preference are not specified in the canonical identity."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2705933",
+        "recordName": "Chicken, NS as to part, baked, broiled, or roasted, skin eaten",
+        "reviewedDate": "2026-10-31",
+        "serving": {
+          "description": "1 cup, cooked, diced",
+          "grams": 135.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Chicken%2C%20NS%20as%20to%20part%2C%20baked%2C%20broiled%2C%20or%20roasted%2C%20skin%20eaten",
+        "releaseDate": "2024-10-31"
+      }
+    },
+    "food_roast_turkey": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Fat, turkey",
+        "similarity": 0.8182,
+        "source": "usda",
+        "sourceID": "173571"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Roast turkey as one canonical food and use the closest preparation-matched USDA profile available.",
+        "reason": "USDA roasted light and dark turkey meat with skin eaten. The catalog does not specify cut or skin preference; default serving is scaled from the listed slice.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Turkey, light and dark meat, roasted, skin eaten",
+            "sourceID": "2706114",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Turkey%2C%20light%20and%20dark%20meat%2C%20roasted%2C%20skin%20eaten"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 183.0,
+        "carbs": 0.04,
+        "fat": 7.54,
+        "fiber": 0.0,
+        "protein": 27.5
+      },
+      "reviewReasons": [
+        "USDA roasted light and dark turkey meat with skin eaten. The catalog does not specify cut or skin preference; default serving is scaled from the listed slice."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2706114",
+        "recordName": "Turkey, light and dark meat, roasted, skin eaten",
+        "reviewedDate": "2026-10-31",
+        "serving": {
+          "description": "1 small or thin slice",
+          "grams": 30.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Turkey%2C%20light%20and%20dark%20meat%2C%20roasted%2C%20skin%20eaten",
+        "releaseDate": "2024-10-31"
+      }
+    },
+    "food_roast_turkey_with_gravy": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Turkey with gravy",
+        "similarity": 0.85,
+        "source": "usda",
+        "sourceID": "2706430"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Roast turkey with gravy as one canonical food and use the closest preparation-matched USDA profile available.",
+        "reason": "Direct turkey with gravy prepared-food profile. Gravy amount and turkey cut vary; source cup portion is close to the catalog plate estimate.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Turkey with gravy",
+            "sourceID": "2706430",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Turkey%20with%20gravy"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 125.0,
+        "carbs": 1.58,
+        "fat": 3.46,
+        "fiber": 0.0,
+        "protein": 20.5
+      },
+      "reviewReasons": [
+        "Direct turkey with gravy prepared-food profile. Gravy amount and turkey cut vary; source cup portion is close to the catalog plate estimate."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2706430",
+        "recordName": "Turkey with gravy",
+        "reviewedDate": "2026-10-31",
+        "serving": {
+          "description": "1 cup",
+          "grams": 244.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Turkey%20with%20gravy",
+        "releaseDate": "2024-10-31"
+      }
+    },
+    "food_roasted_potatoes": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Stewed potatoes",
+        "similarity": 0.8387,
+        "source": "usda",
+        "sourceID": "2709554"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Roasted potatoes as one canonical food and use the closest preparation-matched USDA profile available.",
+        "reason": "Direct roasted fresh potato with peel; USDA added-fat status is unspecified. The source baby-potato measure is scaled to the catalog cup estimate.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Potato, roasted, from fresh, peel eaten, NS as to fat",
+            "sourceID": "2709403",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Potato%2C%20roasted%2C%20from%20fresh%2C%20peel%20eaten%2C%20NS%20as%20to%20fat"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 126.0,
+        "carbs": 20.1,
+        "fat": 4.28,
+        "fiber": 2.1,
+        "protein": 2.39
+      },
+      "reviewReasons": [
+        "Direct roasted fresh potato with peel; USDA added-fat status is unspecified. The source baby-potato measure is scaled to the catalog cup estimate."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2709403",
+        "recordName": "Potato, roasted, from fresh, peel eaten, NS as to fat",
+        "reviewedDate": "2026-10-31",
+        "serving": {
+          "description": "1 baby potato",
+          "grams": 60.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Potato%2C%20roasted%2C%20from%20fresh%2C%20peel%20eaten%2C%20NS%20as%20to%20fat",
+        "releaseDate": "2024-10-31"
+      }
+    },
+    "food_romaine_lettuce": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Romaine lettuce, raw",
+        "similarity": 0.8824,
+        "source": "usda",
+        "sourceID": "2709590"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Romaine lettuce as one canonical food and use the closest preparation-matched USDA profile available.",
+        "reason": "Direct raw romaine lettuce profile. The USDA shredded-cup measure is larger than the small catalog portion.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Lettuce, cos or romaine, raw",
+            "sourceID": "169247",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Lettuce%2C%20cos%20or%20romaine%2C%20raw"
+          }
+        ]
+      },
+      "confidence": "Medium",
+      "nutritionPer100g": {
+        "calories": 17.0,
+        "carbs": 3.29,
+        "fat": 0.3,
+        "fiber": 2.1,
+        "protein": 1.23
+      },
+      "reviewReasons": [
+        "Direct raw romaine lettuce profile. The USDA shredded-cup measure is larger than the small catalog portion."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "SR Legacy",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "169247",
+        "recordName": "Lettuce, cos or romaine, raw",
+        "reviewedDate": "2026-10-31",
+        "serving": {
+          "description": "1 cup shredded",
+          "grams": 47.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Lettuce%2C%20cos%20or%20romaine%2C%20raw",
+        "releaseDate": "2018-04-01"
+      }
+    },
+    "food_salsa_verde": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Salsa, red",
+        "similarity": 0.8,
+        "source": "usda",
+        "sourceID": "2709738"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Salsa verde as one canonical food and use the closest preparation-matched USDA profile available.",
+        "reason": "Direct USDA green salsa or salsa verde profile. The two-tablespoon source measure is close to the catalog tablespoon portion.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Salsa verde or salsa, green",
+            "sourceID": "2709743",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Salsa%20verde%20or%20salsa%2C%20green"
+          }
+        ]
+      },
+      "confidence": "High",
+      "nutritionPer100g": {
+        "calories": 38.0,
+        "carbs": 6.36,
+        "fat": 0.89,
+        "fiber": 1.9,
+        "protein": 1.13
+      },
+      "reviewReasons": [
+        "Direct USDA green salsa or salsa verde profile. The two-tablespoon source measure is close to the catalog tablespoon portion."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2709743",
+        "recordName": "Salsa verde or salsa, green",
+        "reviewedDate": "2026-10-31",
+        "serving": {
+          "description": "1 cup",
+          "grams": 246.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Salsa%20verde%20or%20salsa%2C%20green",
+        "releaseDate": "2024-10-31"
+      }
+    },
+    "food_sandwich": {
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "Sandwich, NFS",
+        "similarity": 0.8,
+        "source": "usda",
+        "sourceID": "2706880"
+      },
+      "compositionEvidence": {
+        "decision": "Keep Sandwich as one canonical food and use the closest preparation-matched USDA profile available.",
+        "reason": "USDA generic sandwich profile provides a broad assembled-food baseline, but filling, bread, cheese, and spread choices vary substantially; source regular serving is 115 g versus 175 g in the catalog.",
+        "sources": [
+          {
+            "name": "USDA FoodData Central",
+            "recordName": "Sandwich, NFS",
+            "sourceID": "2706880",
+            "url": "https://fdc.nal.usda.gov/food-search/?query=Sandwich%2C%20NFS"
+          }
+        ]
+      },
+      "confidence": "Low",
+      "nutritionPer100g": {
+        "calories": 287.0,
+        "carbs": 33.8,
+        "fat": 12.0,
+        "fiber": 1.9,
+        "protein": 12.8
+      },
+      "reviewReasons": [
+        "USDA generic sandwich profile provides a broad assembled-food baseline, but filling, bread, cheese, and spread choices vary substantially; source regular serving is 115 g versus 175 g in the catalog."
+      ],
+      "source": {
+        "source": "usda",
+        "matchBasis": "reviewed FDC record",
+        "dataType": "FNDDS 2021-2023",
+        "database": "FoodData Central",
+        "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+        "recordID": "2706880",
+        "recordName": "Sandwich, NFS",
+        "reviewedDate": "2026-10-31",
+        "serving": {
+          "description": "1 regular",
+          "grams": 115.0
+        },
+        "url": "https://fdc.nal.usda.gov/food-search/?query=Sandwich%2C%20NFS",
+        "releaseDate": "2024-10-31"
+      }
     }
   },
   "schemaVersion": 1

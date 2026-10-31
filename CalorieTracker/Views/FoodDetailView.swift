@@ -60,6 +60,7 @@ private struct FoodDetailDebugCapture: Encodable {
     let quantity: Quantity
     let selectedOptionIDs: [String]
     let options: [Option]
+    let currentCatalogOptions: [Option]
     let extraComponents: [Component]
     let screenContext: String
     let preservesLegacySnapshot: Bool
@@ -343,6 +344,16 @@ struct FoodCustomizationView: View {
                 actionID: "food-detail-save", canSave: amount.isFinite && amount > 0 && !isCommitting && !diary.isSaving,
                 action: logConfiguration, menu: { itemMenu }, quantity: { quantityControls }) {
                     VStack(alignment: .leading, spacing: 26) {
+#if DEBUG
+                        Button {
+                            copyFoodDebugInfo()
+                        } label: {
+                            Label("Copy Food Debug Info", systemImage: "doc.on.doc")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .buttonStyle(.bordered)
+                        .accessibilityIdentifier("food-copy-debug-info")
+#endif
                         if rebuiltLegacyValues {
                             Text("Rebuilt with current catalog values. Save to update this item.")
                                 .font(.subheadline.weight(.medium)).foregroundStyle(AppTheme.muted)
@@ -565,12 +576,6 @@ struct FoodCustomizationView: View {
         if onComponentSaved == nil {
             Button("Rename") { showingNameEditor = true }
         }
-#if DEBUG
-        Button("Copy Food Debug Info", systemImage: "doc.on.doc") {
-            copyFoodDebugInfo()
-        }
-        .accessibilityIdentifier("food-copy-debug-info")
-#endif
         Divider()
         Section("Recent Variations") {
             if recentConfigurations.isEmpty {
@@ -588,19 +593,24 @@ struct FoodCustomizationView: View {
 
 #if DEBUG
     private func copyFoodDebugInfo() {
-        let optionsForCapture = options.map { option in
-            let isVariant = option.relationship.caseInsensitiveCompare("variant") == .orderedSame
-            let grams = isVariant
-                ? selectedPortionGrams
-                : FoodConfigurationCalculator.componentAmountGrams(for: option, food: food, portionID: selectedPortionID)
-            return FoodDetailDebugCapture.Option(
-                definition: option,
-                selected: selectedOptionIDs.contains(option.id),
-                calculatedAmountGrams: grams,
-                calculatedNutrients: option.food.nutrients(for: grams, unit: .grams),
-                displayedCalories: Int(option.food.nutrients(for: grams, unit: .grams).calories.rounded())
-            )
+        func captureOptions(_ definitions: [ChaseFoodOption]) -> [FoodDetailDebugCapture.Option] {
+            definitions.map { option in
+                let isVariant = option.relationship.caseInsensitiveCompare("variant") == .orderedSame
+                let grams = isVariant
+                    ? selectedPortionGrams
+                    : FoodConfigurationCalculator.componentAmountGrams(for: option, food: food, portionID: selectedPortionID)
+                let nutrients = option.food.nutrients(for: grams, unit: .grams)
+                return FoodDetailDebugCapture.Option(
+                    definition: option,
+                    selected: selectedOptionIDs.contains(option.id),
+                    calculatedAmountGrams: grams,
+                    calculatedNutrients: nutrients,
+                    displayedCalories: Int(nutrients.calories.rounded())
+                )
+            }
         }
+        let optionsForCapture = captureOptions(options)
+        let catalogOptions = food.source == .chaseFood ? catalog.chaseFoodOptions(for: food.sourceID) : []
         let info = FoodDetailDebugCapture(
             capturedAt: ISO8601DateFormatter().string(from: Date()),
             appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
@@ -611,6 +621,7 @@ struct FoodCustomizationView: View {
                 selectedPortionGrams: selectedPortionGrams, quantityInSelectedPortions: quantityInSelectedPortions),
             selectedOptionIDs: selectedOptionIDs.sorted(),
             options: optionsForCapture,
+            currentCatalogOptions: captureOptions(catalogOptions),
             extraComponents: extraComponents.map(FoodDetailDebugCapture.Component.init),
             screenContext: originalEntry != nil ? "loggedEntry" : originalComponent != nil ? "mealComponent" : initialConfiguration != nil ? "savedConfiguration" : "newFood",
             preservesLegacySnapshot: preservesLegacySnapshot,
