@@ -17,7 +17,7 @@ enum DiaryDatabaseError: LocalizedError {
             "The diary could not be opened or saved. Your existing data was not replaced. \(detail)"
         case .unsupportedVersion(let version):
             "This diary uses database version \(version). Open it with a compatible app version."
-        case .conversionRequired: "Your JSON diary needs the one-time SQLite conversion. It has not been changed."
+        case .conversionRequired: "The SQLite diary is missing and a legacy JSON diary is present. Automatic conversion is disabled, and the original file was left unchanged. Restore the SQLite diary or use a supported recovery path."
         case .alreadyInitialized: "The destination already contains a diary. Choose a new destination."
         case .invalidData(let detail): "The diary data is invalid: \(detail)"
         case .savedButRefreshFailed(let detail): "Your change was saved, but the display could not refresh. Retry opening the diary; do not log the item again. \(detail)"

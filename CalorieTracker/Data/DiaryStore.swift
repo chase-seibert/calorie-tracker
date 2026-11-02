@@ -135,6 +135,7 @@ class DiaryStore: ObservableObject {
     @Published private(set) var isSaving = false
     @Published private(set) var hasLoadedSnapshot = false
     @Published private(set) var currentStreak = StreakSummary.empty
+    @Published private(set) var isCalculatingStreak = false
     private(set) var repository: DiaryRepository?
     private var engine = DiaryEngine(document: DiaryDocument())
     private let fileURL: URL
@@ -147,6 +148,7 @@ class DiaryStore: ObservableObject {
     private var openingTask: Task<DiaryRepository, Error>?
     private var selectedDay: Date?
     private var healthTask: Task<Void, Never>?
+    private var finalizationTask: Task<Void, Never>?
     private var actionTask: Task<Void, Never>?
     private var pendingActions = 0
     private var refreshGeneration = 0
@@ -194,14 +196,6 @@ class DiaryStore: ObservableObject {
                 guard SharedDiaryStorage.hasSharedContainer else {
                     throw DiaryDatabaseError.unavailable("The shared App Group container is unavailable.")
                 }
-                let destinationExists = try DiaryJSONMigration.exists(url)
-                if !destinationExists,
-                   try SharedDiaryStorage.legacyDiaryURLs.contains(where: { try DiaryJSONMigration.exists($0) }) {
-                    await updateLoadingPhase(.migratingLegacyDiary)
-                }
-                try DiaryJSONMigration.convertIfNeeded(
-                    destination: url, sources: SharedDiaryStorage.legacyDiaryURLs,
-                    backupDirectory: SharedDiaryStorage.migrationBackupDirectory, calendar: calendar)
             }
             await updateLoadingPhase(.openingDatabase)
             let repository = try DiaryRepository(fileURL: url, calendar: calendar, catalog: catalog)
@@ -224,12 +218,11 @@ class DiaryStore: ObservableObject {
         loadingPhase = .checkingStorage
         do {
             let repository = try await open()
-            loadingPhase = .preparingDiary
-            try await repository.prepare(referenceDate: referenceDate)
             try await refresh(repository, referenceDate: referenceDate)
             lastSaveError = nil
-            startHealthSync()
             loadingPhase = .ready
+            scheduleFinalization(repository, referenceDate: referenceDate)
+            scheduleHealthSyncAfterReadiness()
         } catch {
             lastSaveError = error.localizedDescription
             loadingPhase = .failed
@@ -269,17 +262,64 @@ class DiaryStore: ObservableObject {
         }
         publish(snapshot.document)
         operation?.record("snapshot_published")
-        if isLoading { loadingPhase = .calculatingStreak }
-        operation?.record("streak_started")
-        let streak = try await repository.streak(referenceDate: referenceDate)
-        operation?.record("streak_finished")
-        guard generation == refreshGeneration else {
-            operation?.record("streak_discarded_as_stale")
-            return
-        }
-        currentStreak = streak
+        scheduleStreak(repository, referenceDate: referenceDate, snapshotGeneration: generation, operation: operation)
         isLoading = false
         operation?.record("refresh_finished")
+    }
+
+    private func scheduleStreak(
+        _ repository: DiaryRepository,
+        referenceDate: Date,
+        snapshotGeneration: Int,
+        operation: TimedDiaryOperation? = nil
+    ) {
+        if !hasLoadedSnapshot { loadingPhase = .calculatingStreak }
+        isCalculatingStreak = true
+        operation?.record("streak_started")
+        Task { [weak self] in
+            do {
+                let streak = try await repository.streak(referenceDate: referenceDate)
+                operation?.record("streak_finished")
+                guard let self, self.repository === repository,
+                      self.refreshGeneration == snapshotGeneration else {
+                    operation?.record("streak_discarded_as_stale")
+                    return
+                }
+                self.currentStreak = streak
+                self.isCalculatingStreak = false
+            } catch {
+                operation?.record("streak_failed", properties: ["error_type": String(describing: type(of: error))])
+                guard let self, self.repository === repository,
+                      self.refreshGeneration == snapshotGeneration else { return }
+                self.isCalculatingStreak = false
+            }
+        }
+    }
+
+    private func scheduleFinalization(_ repository: DiaryRepository, referenceDate: Date) {
+        guard finalizationTask == nil else { return }
+        let operation = TimedDiaryOperation(name: "startup_finalization")
+        operation.record("finalization_started")
+        finalizationTask = Task { [weak self] in
+            defer { self?.finalizationTask = nil }
+            do {
+                try await repository.prepare(referenceDate: referenceDate)
+                operation.record("finalization_finished")
+                guard let self, self.repository === repository else { return }
+                try await self.refresh(repository, referenceDate: Date(), operation: operation)
+            } catch {
+                operation.record("finalization_failed", properties: ["error_type": String(describing: type(of: error))])
+                self?.lastSaveError = error.localizedDescription
+            }
+        }
+    }
+
+    private func scheduleHealthSyncAfterReadiness() {
+        guard let healthKit else { return }
+        Task { [weak self] in
+            healthKit.refreshAuthorizationState()
+            self?.startHealthSync()
+        }
     }
 
     private func publish(_ document: DiaryDocument) {
@@ -448,6 +488,7 @@ class DiaryStore: ObservableObject {
             try repository.prepareSync(referenceDate: referenceDate)
             publish(try repository.snapshotSync().document)
             currentStreak = engine.streak(referenceDate: referenceDate)
+            isCalculatingStreak = false
             isLoading = false
         }
 

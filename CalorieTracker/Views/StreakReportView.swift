@@ -33,7 +33,7 @@ struct StreakReportView: View {
                 .foregroundStyle(AppTheme.coral)
                 .frame(width: 76, height: 76)
                 .background(AppTheme.coral.opacity(0.16), in: Circle())
-            Text("\(summary.dayCount)")
+            Text(diary.isCalculatingStreak ? "…" : "\(summary.dayCount)")
                 .font(.system(size: 52, weight: .bold, design: .rounded).monospacedDigit())
             Text(summary.dayCount == 1 ? "day streak" : "day streak")
                 .font(.title3.weight(.semibold))
@@ -56,7 +56,7 @@ struct StreakReportView: View {
             Text("Your streak counts consecutive days with at least one food or meal logged. A day without food or a meal ends the streak. Today does not count against you until it is over.")
                 .font(.subheadline)
                 .foregroundStyle(AppTheme.muted)
-            if summary.dayCount == 0 {
+            if !diary.isCalculatingStreak, summary.dayCount == 0 {
                 Text("Log food today to start a new streak.")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(AppTheme.coral)

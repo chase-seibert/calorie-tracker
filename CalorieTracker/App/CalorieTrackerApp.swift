@@ -9,7 +9,6 @@ struct CalorieTrackerApp: App {
     @State private var hasPreparedLaunch = false
     @State private var pendingOpenURL: URL?
     private let catalog: CatalogStore
-    private let analytics = AnalyticsService.shared
 
     init() {
         VitaChaseAppShortcuts.updateAppShortcutParameters()
@@ -50,17 +49,22 @@ struct CalorieTrackerApp: App {
                     defer { hasPreparedLaunch = true }
                     await diary.reloadFromDisk()
                     guard diary.lastSaveError == nil else { return }
+                    hasPreparedLaunch = true
+                    await Task.yield()
                     // Share the existing app preference with widget/Siri on the first SQLite launch.
                     LoggingPreferences.lastWeightUnit = LoggingPreferences.lastWeightUnit
                     FirstTimeOnboarding.prepareForLaunch(document: diary.document)
-                    diary.showLoadingPhase(.preparingWeeklyReports)
                     WeeklyReportBackground.diaryStore = diary
                     WeeklyReportBackground.scheduleIfEnabled()
-                    await WeeklyReportBackground.runForegroundCatchUp()
-                    hasPreparedLaunch = true
                     HomeScreenQuickActions.update(document: diary.document)
-                    await analytics.start()
-                    await analytics.recordAppLaunch()
+                    Task {
+                        await WeeklyReportBackground.runForegroundCatchUp()
+                    }
+                    Task {
+                        let analytics = AnalyticsService.shared
+                        await analytics.start()
+                        await analytics.recordAppLaunch()
+                    }
                 }
                 .onChange(of: scenePhase) { _, phase in
                     switch phase {
@@ -71,7 +75,7 @@ struct CalorieTrackerApp: App {
                         Task {
                             await diary.reloadFromDisk()
                             VitaChaseAppShortcuts.updateAppShortcutParameters()
-                            await analytics.appBecameActive()
+                            await AnalyticsService.shared.appBecameActive()
                         }
                     case .inactive, .background:
                         HomeScreenQuickActions.update(document: diary.document)

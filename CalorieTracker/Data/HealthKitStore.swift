@@ -20,8 +20,6 @@ final class HealthKitStore: ObservableObject {
     init() {
 #if targetEnvironment(simulator)
         authorizationState = .unavailable
-#else
-        refreshAuthorizationState()
 #endif
     }
 

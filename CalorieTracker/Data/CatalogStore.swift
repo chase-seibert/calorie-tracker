@@ -58,22 +58,45 @@ final class CatalogStore: @unchecked Sendable {
 
     private var database: OpaquePointer?
     private let lock = NSLock()
-    let catalogVersion: String?
+    private let url: URL?
+    private var didAttemptOpen = false
+    private var cachedCatalogVersion: String?
+    private var didComputeCatalogVersion = false
 
     init(url: URL? = Bundle.main.url(forResource: "FoodCatalog", withExtension: "sqlite3")) {
-        catalogVersion = url.flatMap { Self.contentFingerprint(at: $0) }
-        guard let url else { return }
-        if sqlite3_open_v2(url.path, &database, SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX, nil) != SQLITE_OK {
-            sqlite3_close(database)
-            database = nil
-        }
+        self.url = url
     }
 
     deinit {
         sqlite3_close(database)
     }
 
-    var isAvailable: Bool { database != nil }
+    var catalogVersion: String? {
+        lock.lock()
+        defer { lock.unlock() }
+        guard !didComputeCatalogVersion else { return cachedCatalogVersion }
+        didComputeCatalogVersion = true
+        cachedCatalogVersion = url.flatMap { Self.contentFingerprint(at: $0) }
+        return cachedCatalogVersion
+    }
+
+    var isAvailable: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        openIfNeeded()
+        return database != nil
+    }
+
+    private func openIfNeeded() {
+        guard !didAttemptOpen else { return }
+        didAttemptOpen = true
+        guard let url,
+              sqlite3_open_v2(url.path, &database, SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX, nil) == SQLITE_OK else {
+            sqlite3_close(database)
+            database = nil
+            return
+        }
+    }
 
     private static func contentFingerprint(at url: URL) -> String? {
         guard let data = try? Data(contentsOf: url, options: .mappedIfSafe) else { return nil }
@@ -285,6 +308,7 @@ final class CatalogStore: @unchecked Sendable {
     func count(source: FoodSource) -> Int {
         lock.lock()
         defer { lock.unlock() }
+        openIfNeeded()
         guard let database else { return 0 }
         var statement: OpaquePointer?
         defer { sqlite3_finalize(statement) }
@@ -296,6 +320,7 @@ final class CatalogStore: @unchecked Sendable {
 
     func chaseFoodOptions(for sourceID: String) -> [ChaseFoodOption] {
         lock.lock()
+        openIfNeeded()
         guard let database else { lock.unlock(); return [] }
         var statement: OpaquePointer?
         var rows: [(String, String, String, Double, String, Bool, Int, String?, String)] = []
@@ -330,6 +355,7 @@ final class CatalogStore: @unchecked Sendable {
 
     private func chaseFoodCompanions(parentKey: String) -> [ChaseFoodCompanion] {
         lock.lock()
+        openIfNeeded()
         guard let database else { lock.unlock(); return [] }
         var statement: OpaquePointer?
         var rows: [(String, String, Int)] = []
@@ -352,6 +378,7 @@ final class CatalogStore: @unchecked Sendable {
     func meatClassification(sourceID: String, source: FoodSource) -> MeatClassification? {
         lock.lock()
         defer { lock.unlock() }
+        openIfNeeded()
         guard let database else { return nil }
         var statement: OpaquePointer?
         defer { sqlite3_finalize(statement) }
@@ -373,6 +400,7 @@ final class CatalogStore: @unchecked Sendable {
     func fiber(sourceID: String, source: FoodSource) -> Double? {
         lock.lock()
         defer { lock.unlock() }
+        openIfNeeded()
         guard let database else { return nil }
         var statement: OpaquePointer?
         defer { sqlite3_finalize(statement) }
@@ -389,6 +417,7 @@ final class CatalogStore: @unchecked Sendable {
     private func queryFoods(sql: String, bindValues: (OpaquePointer) -> Void) -> [Food] {
         lock.lock()
         defer { lock.unlock() }
+        openIfNeeded()
         guard let database else { return [] }
         var statement: OpaquePointer?
         defer { sqlite3_finalize(statement) }

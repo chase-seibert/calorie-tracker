@@ -178,11 +178,15 @@ actor AnalyticsService {
     private static let maximumCompressedBytes = 1_048_576
     private static let maximumUncompressedBytes = 5_242_880
     private static let maximumRecentEvents = 100
+    private static let maximumQueuedEvents = 1_000
+    private static let maximumStateBytes = 5_242_880
 
     private let configuration: AnalyticsConfiguration?
     private let stateURL: URL?
     private let sessionID = UUID().uuidString
-    private var state: AnalyticsStoredState
+    private var state = AnalyticsStoredState()
+    private var didLoadState = false
+    private var statePersistenceDisabled = false
     private var isStarted = false
     private var isUploading = false
     private var didRecordAppLaunch = false
@@ -195,12 +199,25 @@ actor AnalyticsService {
     ) {
         self.configuration = configuration
         self.stateURL = stateURL
+    }
+
+    private func loadStateIfNeeded() {
+        guard !didLoadState else { return }
+        didLoadState = true
+        if let stateURL,
+           let attributes = try? FileManager.default.attributesOfItem(atPath: stateURL.path),
+           let size = attributes[.size] as? NSNumber,
+           size.intValue > Self.maximumStateBytes {
+            // Leave an unexpectedly large durable queue untouched instead of blocking launch or
+            // replacing it with an empty state. Analytics remains disabled for this process.
+            statePersistenceDisabled = true
+            state.stopLogging = true
+            return
+        }
         if let stateURL,
            let data = try? Data(contentsOf: stateURL),
            let storedState = try? JSONDecoder.analytics.decode(AnalyticsStoredState.self, from: data) {
             state = storedState
-        } else {
-            state = AnalyticsStoredState()
         }
         if let configuration {
             if let previousFingerprint = state.configurationFingerprint,
@@ -221,6 +238,7 @@ actor AnalyticsService {
     }
 
     func start() {
+        loadStateIfNeeded()
         guard !isStarted else { return }
         isStarted = true
         pruneExpiredEvents()
@@ -229,6 +247,7 @@ actor AnalyticsService {
     }
 
     func appBecameActive() {
+        loadStateIfNeeded()
         guard isStarted else {
             start()
             return
@@ -237,13 +256,16 @@ actor AnalyticsService {
     }
 
     func recordAppLaunch() {
+        loadStateIfNeeded()
         guard !didRecordAppLaunch else { return }
         didRecordAppLaunch = true
         capture(type: "app.launched")
     }
 
     func capture(type: String, properties: [String: String] = [:]) {
-        guard let configuration, !state.stopLogging else { return }
+        loadStateIfNeeded()
+        guard let configuration, !state.stopLogging,
+              state.queuedEvents.count < Self.maximumQueuedEvents else { return }
         let normalizedType = type.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedType.isEmpty else { return }
 
@@ -286,6 +308,7 @@ actor AnalyticsService {
     }
 
     func uploadNow() async {
+        loadStateIfNeeded()
         guard configuration != nil, !state.stopLogging else { return }
         retryTask?.cancel()
         retryTask = nil
@@ -297,6 +320,7 @@ actor AnalyticsService {
     }
 
     func diagnosticsSnapshot() -> AnalyticsDiagnosticsSnapshot {
+        loadStateIfNeeded()
         let oldestAge = state.queuedEvents.map(\.occurredAt).min().map {
             max(0, Date().timeIntervalSince($0))
         }
@@ -323,6 +347,7 @@ actor AnalyticsService {
 
 #if DEBUG
     func clearQueue() {
+        loadStateIfNeeded()
         retryTask?.cancel()
         retryTask = nil
         debounceTask?.cancel()
@@ -595,8 +620,9 @@ actor AnalyticsService {
     }
 
     private func persistState() {
-        guard let stateURL,
-              let data = try? JSONEncoder.analytics.encode(state) else { return }
+        guard !statePersistenceDisabled, let stateURL,
+              let data = try? JSONEncoder.analytics.encode(state),
+              data.count <= Self.maximumStateBytes else { return }
         let directory = stateURL.deletingLastPathComponent()
         do {
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)

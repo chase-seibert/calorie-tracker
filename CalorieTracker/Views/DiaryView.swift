@@ -153,11 +153,13 @@ struct DiaryView: View {
                         } label: {
                             HStack(spacing: 2) {
                                 Image(systemName: "bolt.fill")
-                                Text(diary.currentStreak.dayCount.formatted())
+                                Text(diary.isCalculatingStreak ? "…" : diary.currentStreak.dayCount.formatted())
                                     .font(.subheadline.weight(.bold).monospacedDigit())
                             }
                             .accessibilityElement(children: .ignore)
-                            .accessibilityLabel("\(diary.currentStreak.dayCount) day streak")
+                            .accessibilityLabel(diary.isCalculatingStreak
+                                ? "Calculating day streak"
+                                : "\(diary.currentStreak.dayCount) day streak")
                         }
 
                         NavigationLink {
