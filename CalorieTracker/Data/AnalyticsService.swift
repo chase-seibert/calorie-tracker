@@ -190,6 +190,7 @@ actor AnalyticsService {
     private var isStarted = false
     private var isUploading = false
     private var didRecordAppLaunch = false
+    private var didRecordInteractionReady = false
     private var retryTask: Task<Void, Never>?
     private var debounceTask: Task<Void, Never>?
 
@@ -260,6 +261,18 @@ actor AnalyticsService {
         guard !didRecordAppLaunch else { return }
         didRecordAppLaunch = true
         capture(type: "app.launched")
+    }
+
+    func recordInteractionReady(startupDurationMilliseconds: Double) {
+        loadStateIfNeeded()
+        guard !didRecordInteractionReady else { return }
+        didRecordInteractionReady = true
+        capture(
+            type: "app.interaction_ready",
+            properties: [
+                "time_to_interaction_ready_ms": String(format: "%.1f", max(0, startupDurationMilliseconds))
+            ]
+        )
     }
 
     func capture(type: String, properties: [String: String] = [:]) {

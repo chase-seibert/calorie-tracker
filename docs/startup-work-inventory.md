@@ -42,3 +42,8 @@ Record workload counts (rows/days/events/bytes), never diary contents. Report
 time-to-first-frame and time-to-usable-diary separately from background tail
 work. Compare cold and warm launch, small and large diaries, and long-idle
 histories; an observed maximum is not a worst-case guarantee.
+
+The app emits `app.interaction_ready` once per process launch when the main
+screen appears, after yielding to SwiftUI to replace the loading view. Its
+`time_to_interaction_ready_ms` property measures monotonic time from the app
+initializer to that point. Background work is intentionally not included.

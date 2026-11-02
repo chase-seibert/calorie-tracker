@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 @main
 struct CalorieTrackerApp: App {
@@ -7,10 +8,12 @@ struct CalorieTrackerApp: App {
     @StateObject private var diary: DiaryStore
     @StateObject private var healthKit: HealthKitStore
     @State private var hasPreparedLaunch = false
+    @State private var didScheduleInteractionReadyEvent = false
     @State private var pendingOpenURL: URL?
     private let catalog: CatalogStore
 
     init() {
+        _ = AppStartupMetrics.startedAtUptimeNanoseconds
         VitaChaseAppShortcuts.updateAppShortcutParameters()
         let healthKit = HealthKitStore()
         let catalog = CatalogStore()
@@ -27,15 +30,8 @@ struct CalorieTrackerApp: App {
         WindowGroup {
             Group {
                 if hasPreparedLaunch {
-                    #if DEBUG && targetEnvironment(simulator)
-                    if let route = ProcessInfo.processInfo.environment["CALORIE_TRACKER_CUSTOMIZATION_EVIDENCE"] {
-                        CustomizationEvidenceView(route: route, catalog: catalog)
-                    } else {
-                        RootView(catalog: catalog, pendingOpenURL: $pendingOpenURL)
-                    }
-                    #else
-                    RootView(catalog: catalog, pendingOpenURL: $pendingOpenURL)
-                    #endif
+                    readyContent
+                        .onAppear(perform: scheduleInteractionReadyEvent)
                 } else {
                     ProgressView(diary.loadingPhase.message)
                 }
@@ -84,6 +80,41 @@ struct CalorieTrackerApp: App {
                     }
                 }
         }
+    }
+
+    @ViewBuilder
+    private var readyContent: some View {
+#if DEBUG && targetEnvironment(simulator)
+        if let route = ProcessInfo.processInfo.environment["CALORIE_TRACKER_CUSTOMIZATION_EVIDENCE"] {
+            CustomizationEvidenceView(route: route, catalog: catalog)
+        } else {
+            RootView(catalog: catalog, pendingOpenURL: $pendingOpenURL)
+        }
+#else
+        RootView(catalog: catalog, pendingOpenURL: $pendingOpenURL)
+#endif
+    }
+
+    private func scheduleInteractionReadyEvent() {
+        guard !didScheduleInteractionReadyEvent else { return }
+        didScheduleInteractionReadyEvent = true
+        Task { @MainActor in
+            // Let SwiftUI replace the loading view before stopping the startup timer.
+            await Task.yield()
+            let elapsedMilliseconds = AppStartupMetrics.elapsedMilliseconds
+            await AnalyticsService.shared.recordInteractionReady(
+                startupDurationMilliseconds: elapsedMilliseconds
+            )
+        }
+    }
+}
+
+private enum AppStartupMetrics {
+    static let startedAtUptimeNanoseconds = DispatchTime.now().uptimeNanoseconds
+
+    static var elapsedMilliseconds: Double {
+        let elapsed = DispatchTime.now().uptimeNanoseconds - startedAtUptimeNanoseconds
+        return Double(elapsed) / 1_000_000
     }
 }
 
