@@ -118,7 +118,7 @@ final class CatalogStore: @unchecked Sendable {
             SELECT f.source_id, f.source, f.name, f.brand, f.barcode,
                    f.calories, f.carbs, f.fat, f.protein, f.fiber, f.base_grams,
                    f.serving_grams, f.serving_description, f.portions_json,
-                   f.contains_processed_meat, f.contains_red_meat
+                   f.contains_processed_meat, f.contains_red_meat, f.contains_alcohol
             FROM foods_fts
             JOIN foods f ON f.rowid = foods_fts.rowid
             WHERE foods_fts MATCH ? AND f.source = ?
@@ -167,7 +167,7 @@ final class CatalogStore: @unchecked Sendable {
             SELECT f.source_id, f.source, f.name, f.brand, f.barcode,
                    f.calories, f.carbs, f.fat, f.protein, f.fiber, f.base_grams,
                    f.serving_grams, f.serving_description, f.portions_json,
-                   f.contains_processed_meat, f.contains_red_meat
+                   f.contains_processed_meat, f.contains_red_meat, f.contains_alcohol
             FROM foods_fts
             JOIN foods f ON f.rowid = foods_fts.rowid
             WHERE foods_fts MATCH ? AND f.source IN (\(sources.map { _ in "?" }.joined(separator: ",")))
@@ -270,7 +270,7 @@ final class CatalogStore: @unchecked Sendable {
         let sql = """
             SELECT source_id, source, name, brand, barcode, calories, carbs,
                    fat, protein, fiber, base_grams, serving_grams, serving_description, portions_json,
-                   contains_processed_meat, contains_red_meat
+                   contains_processed_meat, contains_red_meat, contains_alcohol
             FROM foods WHERE source = ? AND search_enabled = 1 ORDER BY rank DESC, name LIMIT ?
             """
         return queryFoods(sql: sql) { statement in
@@ -285,7 +285,7 @@ final class CatalogStore: @unchecked Sendable {
         let sql = """
             SELECT source_id, source, name, brand, barcode, calories, carbs,
                    fat, protein, fiber, base_grams, serving_grams, serving_description, portions_json,
-                   contains_processed_meat, contains_red_meat
+                   contains_processed_meat, contains_red_meat, contains_alcohol
             FROM foods WHERE barcode = ? ORDER BY CASE source WHEN 'off' THEN 0 ELSE 1 END, rank DESC LIMIT 1
             """
         return queryFoods(sql: sql) { statement in
@@ -297,7 +297,7 @@ final class CatalogStore: @unchecked Sendable {
         queryFoods(sql: """
             SELECT source_id, source, name, brand, barcode, calories, carbs, fat, protein, fiber,
                    base_grams, serving_grams, serving_description, portions_json,
-                   contains_processed_meat, contains_red_meat
+                   contains_processed_meat, contains_red_meat, contains_alcohol
             FROM foods WHERE source_id = ? AND source = ? LIMIT 1
             """) {
             bind(sourceID, at: 1, to: $0)
@@ -421,8 +421,16 @@ final class CatalogStore: @unchecked Sendable {
         guard let database else { return [] }
         var statement: OpaquePointer?
         defer { sqlite3_finalize(statement) }
-        guard sqlite3_prepare_v2(database, sql, -1, &statement, nil) == SQLITE_OK,
-              let statement else { return [] }
+        var query = sql
+        if sqlite3_prepare_v2(database, query, -1, &statement, nil) != SQLITE_OK {
+            sqlite3_finalize(statement)
+            statement = nil
+            query = query
+                .replacingOccurrences(of: "f.contains_alcohol", with: "0")
+                .replacingOccurrences(of: ", contains_alcohol", with: ", 0")
+            guard sqlite3_prepare_v2(database, query, -1, &statement, nil) == SQLITE_OK else { return [] }
+        }
+        guard let statement else { return [] }
         bindValues(statement)
         var result: [Food] = []
         while sqlite3_step(statement) == SQLITE_ROW {
@@ -450,7 +458,8 @@ final class CatalogStore: @unchecked Sendable {
                 servingDescription: text(statement, 12),
                 portions: decodePortions(text(statement, 13)),
                 containsProcessedMeat: sqlite3_column_int(statement, 14) != 0,
-                containsRedMeat: sqlite3_column_int(statement, 15) != 0
+                containsRedMeat: sqlite3_column_int(statement, 15) != 0,
+                containsAlcohol: sqlite3_column_int(statement, 16) != 0 ? true : nil
             ))
         }
         return result

@@ -27,6 +27,7 @@ from typing import Iterable, Iterator
 ROOT = Path(__file__).resolve().parents[1]
 DOWNLOADS = ROOT / "data" / "downloads"
 MEAT_CLASSIFICATIONS_PATH = ROOT / "data" / "food-catalog" / "meat-classifications.json"
+ALCOHOL_CLASSIFICATIONS_PATH = ROOT / "data" / "food-catalog" / "alcohol-classifications.json"
 
 USDA_DOWNLOADS = {
     "foundation": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_foundation_food_json_2026-04-30.zip",
@@ -72,6 +73,7 @@ class CatalogFood:
     portions: tuple[dict[str, object], ...] = ()
     contains_processed_meat: bool = False
     contains_red_meat: bool = False
+    contains_alcohol: bool = False
     rank: int = 0
     search_text: str = ""
     search_enabled: bool = True
@@ -266,6 +268,43 @@ def apply_meat_classifications(
             contains_processed_meat=classification["contains_processed_meat"],
             contains_red_meat=classification["contains_red_meat"],
         )
+        if (classification := classifications.get((food.source, food.source_id))) is not None
+        else food
+        for food in foods
+    ]
+
+
+def load_alcohol_classifications(path: Path = ALCOHOL_CLASSIFICATIONS_PATH) -> dict[tuple[str, str], dict[str, object]]:
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if data.get("format") != "calorie-tracker-alcohol-classifications-v1":
+        raise ValueError(f"Unsupported alcohol-classification source format: {path}")
+    classifications: dict[tuple[str, str], dict[str, object]] = {}
+    for record in data.get("foods", []):
+        source, source_id = record.get("source"), record.get("source_id")
+        if source not in {"usda", "off", "chaseFood"} or not isinstance(source_id, str) or not source_id:
+            raise ValueError(f"Invalid source identity in alcohol classifications: {record!r}")
+        key = (source, source_id)
+        if key in classifications:
+            raise ValueError(f"Duplicate alcohol classification for {source}/{source_id}")
+        if not isinstance(record.get("contains_alcohol"), bool):
+            raise ValueError(f"{source}/{source_id} must include an explicit contains_alcohol boolean")
+        if not str(record.get("basis", "")).strip():
+            raise ValueError(f"{source}/{source_id} must include classification evidence/basis")
+        classifications[key] = record
+    return classifications
+
+
+def apply_alcohol_classifications(
+    foods: Iterable[CatalogFood],
+    classifications: dict[tuple[str, str], dict[str, object]],
+) -> list[CatalogFood]:
+    foods = list(foods)
+    known = {(food.source, food.source_id) for food in foods}
+    unknown = sorted(set(classifications) - known)
+    if unknown:
+        raise ValueError(f"Unknown catalog identities in alcohol classifications: {unknown[:10]}")
+    return [
+        replace(food, contains_alcohol=bool(classification["contains_alcohol"]))
         if (classification := classifications.get((food.source, food.source_id))) is not None
         else food
         for food in foods
@@ -666,6 +705,7 @@ def create_database(output: Path, foods: Iterable[CatalogFood]) -> tuple[int, di
             portions_json TEXT,
             contains_processed_meat INTEGER NOT NULL DEFAULT 0,
             contains_red_meat INTEGER NOT NULL DEFAULT 0,
+            contains_alcohol INTEGER NOT NULL DEFAULT 0,
             search_text TEXT NOT NULL DEFAULT '',
             rank INTEGER NOT NULL DEFAULT 0,
             search_enabled INTEGER NOT NULL DEFAULT 1,
@@ -706,8 +746,8 @@ def create_database(output: Path, foods: Iterable[CatalogFood]) -> tuple[int, di
         INSERT OR REPLACE INTO foods (
             source_id, source, name, brand, barcode, calories, carbs, fat,
             protein, fiber, base_grams, serving_grams, serving_description, portions_json,
-            contains_processed_meat, contains_red_meat, rank, search_text, search_enabled
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            contains_processed_meat, contains_red_meat, contains_alcohol, rank, search_text, search_enabled
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
     count = 0
     counts: dict[str, int] = {}
@@ -731,6 +771,7 @@ def create_database(output: Path, foods: Iterable[CatalogFood]) -> tuple[int, di
                 json.dumps(food.portions, separators=(",", ":")) if food.portions else None,
                 int(food.contains_processed_meat),
                 int(food.contains_red_meat),
+                int(food.contains_alcohol),
                 food.rank,
                 food.search_text,
                 int(food.search_enabled),
@@ -757,7 +798,7 @@ def create_database(output: Path, foods: Iterable[CatalogFood]) -> tuple[int, di
         );
         INSERT INTO foods_fts(rowid, name, brand, search_text)
             SELECT rowid, name, coalesce(brand, ''), search_text FROM foods WHERE search_enabled = 1;
-        INSERT INTO metadata VALUES ('schema_version', '5');
+        INSERT INTO metadata VALUES ('schema_version', '6');
         INSERT INTO metadata VALUES ('usda_release', '2026-04-30 foundation; 2018-04 SR Legacy; 2024-10-31 FNDDS');
         INSERT INTO metadata VALUES ('off_scope', 'popular products tagged United States with calorie data');
         ANALYZE;
@@ -786,6 +827,7 @@ def existing_catalog(path: Path) -> list[CatalogFood]:
                 portions=tuple(json.loads(row["portions_json"] or "[]")),
                 contains_processed_meat=bool(row["contains_processed_meat"]),
                 contains_red_meat=bool(row["contains_red_meat"]), rank=row["rank"],
+                contains_alcohol=bool(row["contains_alcohol"]) if "contains_alcohol" in row.keys() else False,
                 search_text=row["search_text"] if "search_text" in row.keys() else "",
                 search_enabled=bool(row["search_enabled"]) if "search_enabled" in row.keys() else True,
             ))
@@ -908,6 +950,7 @@ def main() -> int:
         payload_aliases = [(a["foodID"], a["alias"], a.get("kind", "synonym")) for a in chase.get("aliases", [])]
         foods = list(foods) + chase_foods
     foods = apply_meat_classifications(foods, load_meat_classifications())
+    foods = apply_alcohol_classifications(foods, load_alcohol_classifications())
     count, counts = create_database(arguments.output.resolve(), foods)
     if chase_path.exists():
         with sqlite3.connect(arguments.output.resolve()) as database:

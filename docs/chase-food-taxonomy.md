@@ -527,6 +527,14 @@ remain untagged until evidence supports a classification. The catalog
 preparation step includes these fields in its generated food projection, and
 the SQLite builder writes them to the existing classification columns.
 
+## Alcoholic beverage classification source
+
+Maintain catalog alcohol tags in `data/food-catalog/alcohol-classifications.json`, keyed by source and stable source ID. `contains_alcohol` means the catalog identity is an alcoholic beverage intended to be consumed as a drink. It does not mean that a food contains a trace of alcohol or was cooked with alcohol. Nonalcoholic beer and wine, ginger beer, root beer, juice cocktails, cocktail sauces, extracts, vinegars, cooking wine, and foods such as shrimp cocktail remain untagged. Ambiguous product identities remain untagged until their beverage type is established.
+
+`data/food-catalog/alcohol-review-manifest.jsonl` is the deterministic, full-catalog review input. It serializes every `(source, source_id)` once with its name, brand, available source context, and, for Chase Food, category and default included components. The alcohol classifications file records the SHA-256 of that manifest and the reviewed positive and boundary-negative decisions. Missing classification IDs default to false; unknown IDs in the curated file fail the catalog build so stale source identities cannot silently move to another product. Run `make alcohol-review-manifest` to refresh the review input before a new full-catalog LLM pass, then verify and curate any new alcohol candidates against their source evidence.
+
+The catalog builder writes `contains_alcohol` to SQLite and `CatalogStore` exposes it on `Food` for catalog consumers. The field is omitted from diary snapshot encoding, so catalog refreshes do not change saved food records; old snapshots continue to decode. Older SQLite catalogs without the column load with a false value. This catalog metadata does not alter the existing daily alcohol-drink count.
+
 ## Data and history boundaries for implementation
 
 - Give every Chase Food record a stable ID and a source identity that remains

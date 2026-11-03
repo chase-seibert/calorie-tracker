@@ -1,0 +1,1129 @@
+{
+  "format": "calorie-tracker-alcohol-classifications-v1",
+  "manifest_sha256": "cc7bed9e9af9616b42befa3d899b652ad17af51b29167d63a36c4fe195ddc4e5",
+  "review_note": "LLM-assisted review of the full serialized catalog manifest. True means an alcoholic beverage intended to be consumed as a drink; false boundary cases document exclusions or unresolved identities. Unlisted identities remain false.",
+  "foods": [
+    {
+      "source": "chaseFood",
+      "source_id": "food_beer",
+      "contains_alcohol": true,
+      "basis": "Chase Food canonical default is Beer, an alcoholic beverage; nonalcoholic variants have separate identities."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_cocktail",
+      "contains_alcohol": true,
+      "basis": "Chase Food canonical default describes a mixed alcoholic drink."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_cranberry_juice_cocktail",
+      "contains_alcohol": false,
+      "basis": "Juice cocktail is a nonalcoholic fruit drink."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_ginger_beer",
+      "contains_alcohol": false,
+      "basis": "Chase Food identifies this as nonalcoholic ginger beer."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_root_beer",
+      "contains_alcohol": false,
+      "basis": "Root beer is a nonalcoholic soft drink."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_shrimp_cocktail",
+      "contains_alcohol": false,
+      "basis": "Shrimp cocktail is a food dish, not a beverage."
+    },
+    {
+      "source": "chaseFood",
+      "source_id": "food_wine",
+      "contains_alcohol": true,
+      "basis": "Chase Food canonical default is Wine, an alcoholic beverage."
+    },
+    {
+      "source": "off",
+      "source_id": "0074305001161",
+      "contains_alcohol": false,
+      "basis": "Apple cider vinegar product; condiment, not an alcoholic drink."
+    },
+    {
+      "source": "off",
+      "source_id": "0074305001321",
+      "contains_alcohol": false,
+      "basis": "Apple cider vinegar product; condiment, not an alcoholic drink."
+    },
+    {
+      "source": "off",
+      "source_id": "5060770730281",
+      "contains_alcohol": false,
+      "basis": "Kombucha product without evidence that it is an alcoholic drink."
+    },
+    {
+      "source": "off",
+      "source_id": "8402001026379",
+      "contains_alcohol": false,
+      "basis": "The product name alone does not establish that this Open Food Facts item is an alcoholic beverage; leave uncertain items untagged."
+    },
+    {
+      "source": "usda",
+      "source_id": "167723",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "168746",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "168747",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "168748",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "168749",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "168750",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "168752",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "168753",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "169070",
+      "contains_alcohol": false,
+      "basis": "Cooking wine is a culinary ingredient, not a drink intended to be consumed as an alcoholic beverage."
+    },
+    {
+      "source": "usda",
+      "source_id": "169071",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "169572",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "169573",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "169574",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "169575",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "171872",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "171903",
+      "contains_alcohol": false,
+      "basis": "Bottled cranberry juice cocktail is a juice drink, not an alcoholic cocktail."
+    },
+    {
+      "source": "usda",
+      "source_id": "171906",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "171908",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "171919",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "171920",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "171925",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "172235",
+      "contains_alcohol": false,
+      "basis": "Vanilla extract is a food ingredient, not an alcoholic drink."
+    },
+    {
+      "source": "usda",
+      "source_id": "172240",
+      "contains_alcohol": false,
+      "basis": "Red-wine vinegar is a condiment, not an alcoholic drink."
+    },
+    {
+      "source": "usda",
+      "source_id": "173164",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "173168",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "173176",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "173185",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "173190",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "173191",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "173192",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "173193",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "173194",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "173195",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "173196",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "173198",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "173200",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "173201",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "173202",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "173208",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "173214",
+      "contains_alcohol": false,
+      "basis": "Cranberry juice cocktail is a juice drink, not an alcoholic cocktail."
+    },
+    {
+      "source": "usda",
+      "source_id": "173469",
+      "contains_alcohol": false,
+      "basis": "Cider vinegar is a condiment, not an alcoholic drink."
+    },
+    {
+      "source": "usda",
+      "source_id": "173653",
+      "contains_alcohol": false,
+      "basis": "Frozen cranberry juice cocktail concentrate is a juice product, not an alcoholic drink."
+    },
+    {
+      "source": "usda",
+      "source_id": "173654",
+      "contains_alcohol": false,
+      "basis": "Prepared cranberry juice cocktail is a juice drink, not an alcoholic cocktail."
+    },
+    {
+      "source": "usda",
+      "source_id": "173662",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "173663",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "173664",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "173665",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174067",
+      "contains_alcohol": false,
+      "basis": "Cocktail sauce is a condiment."
+    },
+    {
+      "source": "usda",
+      "source_id": "174109",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174110",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174141",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174145",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174810",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174812",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174815",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174817",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174818",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174819",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174833",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174834",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174835",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174836",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174837",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174838",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174839",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174840",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174841",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174843",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174844",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174845",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174848",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174849",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "174863",
+      "contains_alcohol": false,
+      "basis": "This broad malt-beverage record explicitly includes nonalcoholic beer, so the identity does not establish an alcoholic drink."
+    },
+    {
+      "source": "usda",
+      "source_id": "175097",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "175098",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "175112",
+      "contains_alcohol": true,
+      "basis": "USDA catalog explicitly identifies this record as an alcoholic beverage; it is a beverage intended to be consumed as alcohol."
+    },
+    {
+      "source": "usda",
+      "source_id": "2705772",
+      "contains_alcohol": false,
+      "basis": "Cheese with wine is a food, not a drink."
+    },
+    {
+      "source": "usda",
+      "source_id": "2706449",
+      "contains_alcohol": false,
+      "basis": "Shrimp cocktail is a food dish."
+    },
+    {
+      "source": "usda",
+      "source_id": "2709319",
+      "contains_alcohol": false,
+      "basis": "Apple cider is not labeled hard cider or alcoholic in this catalog record."
+    },
+    {
+      "source": "usda",
+      "source_id": "2709753",
+      "contains_alcohol": false,
+      "basis": "Cocktail sauce is a condiment."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710509",
+      "contains_alcohol": false,
+      "basis": "The catalog does not establish this kombucha as an alcoholic beverage; ordinary kombucha is excluded unless explicitly identified as alcoholic."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710574",
+      "contains_alcohol": false,
+      "basis": "USDA explicitly identifies this pina colada as nonalcoholic."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710575",
+      "contains_alcohol": false,
+      "basis": "USDA explicitly identifies this margarita mix as nonalcoholic."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710609",
+      "contains_alcohol": false,
+      "basis": "USDA explicitly identifies this wine as nonalcoholic."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710610",
+      "contains_alcohol": false,
+      "basis": "USDA explicitly identifies this beer as nonalcoholic."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710611",
+      "contains_alcohol": false,
+      "basis": "A Shirley Temple is a nonalcoholic mixed drink."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710616",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710617",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710618",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710619",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710620",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710621",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710622",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710623",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710624",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710625",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710626",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710627",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710628",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710629",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710630",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710631",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710632",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710633",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710634",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710635",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710636",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710637",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710638",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710639",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710640",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710641",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710642",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710643",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710644",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710645",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710646",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710647",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710648",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710649",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710650",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710651",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710652",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710653",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710654",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710655",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710656",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710657",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710658",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710659",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710660",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710661",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710662",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710663",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710664",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710665",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710666",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710667",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710668",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710669",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710670",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710671",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710672",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710673",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710674",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710675",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710676",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710677",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710678",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710679",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710680",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710681",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710682",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710683",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710684",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710685",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710686",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710687",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710688",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710689",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710690",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710691",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710692",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710693",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710694",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710695",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710696",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710697",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710698",
+      "contains_alcohol": false,
+      "basis": "Glug does not establish alcoholic composition from this catalog identity alone; leave ambiguous beverage styles untagged."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710699",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710700",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710701",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710702",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710703",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710704",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    },
+    {
+      "source": "usda",
+      "source_id": "2710705",
+      "contains_alcohol": true,
+      "basis": "USDA Food and Nutrient Database for Dietary Studies places this named beer, alcoholic malt drink, cocktail, wine, or spirit in its alcoholic-drink group."
+    }
+  ]
+}

@@ -130,7 +130,12 @@ catalog: chase-food-data
 
 .PHONY: catalog-test
 catalog-test:
+	$(PYTHON) scripts/test_alcohol_classification.py
 	$(PYTHON) scripts/test_meat_classification.py
+
+.PHONY: alcohol-review-manifest
+alcohol-review-manifest:
+	$(PYTHON) scripts/export_alcohol_review_manifest.py
 
 catalog-refresh: chase-food-data
 	$(PYTHON) scripts/build_food_catalog.py --download --off-pages $(OFF_PAGES) --output CalorieTracker/Resources/FoodCatalog.sqlite3

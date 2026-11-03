@@ -2484,6 +2484,22 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(catalog.search("fried rice", source: .usda, limit: 10).first?.name, "Rice, fried, NFS")
     }
 
+    func testCatalogAlcoholClassificationLoadsByStableSourceIdentity() throws {
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let catalog = CatalogStore(url: root.appendingPathComponent("CalorieTracker/Resources/FoodCatalog.sqlite3"))
+
+        XCTAssertEqual(catalog.food(sourceID: "2710616", source: .usda)?.containsAlcohol, true)
+        XCTAssertNil(catalog.food(sourceID: "2710610", source: .usda)?.containsAlcohol)
+        XCTAssertEqual(catalog.food(sourceID: "food_beer", source: .chaseFood)?.containsAlcohol, true)
+        XCTAssertNil(catalog.food(sourceID: "food_ginger_beer", source: .chaseFood)?.containsAlcohol)
+
+        let encoded = try XCTUnwrap(catalog.food(sourceID: "food_beer", source: .chaseFood))
+        let data = try JSONEncoder().encode(encoded)
+        let object = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        XCTAssertNil(object["containsAlcohol"], "Alcohol classification is catalog-only metadata.")
+        XCTAssertNil(try JSONDecoder().decode(Food.self, from: data).containsAlcohol)
+    }
+
     func testChaseFoodHasGroupedSandwichAndProteinShakeOptions() throws {
         let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
         let catalog = CatalogStore(url: root.appendingPathComponent("CalorieTracker/Resources/FoodCatalog.sqlite3"))

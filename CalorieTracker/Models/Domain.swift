@@ -288,8 +288,16 @@ struct Food: Codable, Hashable, Identifiable, Sendable {
     var portions: [FoodPortion]? = nil
     var containsProcessedMeat: Bool? = nil
     var containsRedMeat: Bool? = nil
+    var containsAlcohol: Bool? = nil
     // Optional for pre-resolution snapshots. Missing provenance is never treated as user consent to overwrite.
     var meatResolution: FoodMeatResolution? = nil
+
+    // Catalog-only metadata. Keep it out of diary snapshots so a catalog refresh
+    // does not rewrite or enlarge existing logged-food records.
+    private enum CodingKeys: String, CodingKey {
+        case sourceID, source, name, brand, barcode, nutrients, baseAmountGrams
+        case servingGrams, servingDescription, portions, containsProcessedMeat, containsRedMeat, meatResolution
+    }
 
     var id: String { "\(source.rawValue):\(sourceID)" }
 
