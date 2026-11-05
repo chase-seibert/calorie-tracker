@@ -2787,6 +2787,63 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertGreaterThan(smallTwoPercent.calories, 0)
     }
 
+    func testProteinShakeComponentsScaleFromDefaultPortionAndReconcile() throws {
+        let catalog = resolutionCatalog
+        let shake = try XCTUnwrap(catalog.food(sourceID: "food_protein_shake", source: .chaseFood))
+        let options = catalog.chaseFoodOptions(for: shake.sourceID)
+        let almond = try XCTUnwrap(options.first { $0.food.sourceID == "food_almond_milk" })
+        let twoPercent = try XCTUnwrap(options.first { $0.food.sourceID == "food_milk_2" })
+        let protein = try XCTUnwrap(options.first { $0.food.sourceID == "food_protein_powder" })
+        let coconutOil = try XCTUnwrap(options.first { $0.food.sourceID == "food_coconut_oil" })
+        let portionSizes: [(String, Double)] = [
+            ("prt_food_protein_shake_small", 354),
+            ("prt_food_protein_shake_default", 473),
+            ("prt_food_protein_shake_large", 591)
+        ]
+
+        XCTAssertEqual(almond.food.nutrients(for: 240, unit: .grams).calories, 48, accuracy: 0.0001,
+            "The catalog source and bundled record define Almond milk as 48 kcal per 240 g")
+        XCTAssertTrue(protein.includedByDefault)
+
+        for (portionID, portionGrams) in portionSizes {
+            let ratio = portionGrams / 473
+            let almondGrams = 240 * ratio
+            let milkGrams = 240 * ratio
+            XCTAssertEqual(FoodConfigurationCalculator.componentAmountGrams(for: almond, food: shake, portionID: portionID),
+                almondGrams, accuracy: 0.0001)
+            XCTAssertEqual(FoodConfigurationCalculator.componentAmountGrams(for: twoPercent, food: shake, portionID: portionID),
+                milkGrams, accuracy: 0.0001)
+            XCTAssertEqual(almond.food.nutrients(for: almondGrams, unit: .grams).calories,
+                48 * ratio, accuracy: 0.0001)
+            XCTAssertEqual(Int(almond.food.nutrients(for: almondGrams, unit: .grams).calories.rounded()),
+                Int((48 * ratio).rounded()), "The option label uses the same size-adjusted amount")
+            XCTAssertEqual(Int(twoPercent.food.nutrients(for: milkGrams, unit: .grams).calories.rounded()),
+                Int((122 * milkGrams / 244).rounded()), "Milk option labels use their selected portion amount")
+
+            let defaultSelections = Set(options.filter(\.includedByDefault).map(\.id))
+            let baseTotal = FoodConfigurationCalculator.nutrients(food: shake, options: options,
+                selected: defaultSelections, extras: [], portionID: portionID)
+            let baseline = shake.nutrients(for: 1, unit: .serving, portionID: portionID)
+            XCTAssertEqual(baseTotal.calories, baseline.calories, accuracy: 0.0001,
+                "Selected defaults should restore the catalog's matching portion total")
+
+            let replacedSelections = (defaultSelections.subtracting([almond.id])).union([twoPercent.id])
+            let replacedTotal = FoodConfigurationCalculator.nutrients(food: shake, options: options,
+                selected: replacedSelections, extras: [], portionID: portionID)
+            let almondCalories = almond.food.nutrients(for: almondGrams, unit: .grams).calories
+            let milkCalories = twoPercent.food.nutrients(for: milkGrams, unit: .grams).calories
+            XCTAssertEqual(replacedTotal.calories, baseline.calories - almondCalories + milkCalories, accuracy: 0.0001,
+                "Replacing the default liquid should remove it once and add the selected milk at the same portion ratio")
+
+            let withOptionalAddition = FoodConfigurationCalculator.nutrients(food: shake, options: options,
+                selected: replacedSelections.union([coconutOil.id]), extras: [], portionID: portionID)
+            let coconutGrams = FoodConfigurationCalculator.componentAmountGrams(for: coconutOil, food: shake, portionID: portionID)
+            let coconutCalories = coconutOil.food.nutrients(for: coconutGrams, unit: .grams).calories
+            XCTAssertEqual(withOptionalAddition.calories, replacedTotal.calories + coconutCalories, accuracy: 0.0001,
+                "Optional ingredients affect the total only when selected")
+        }
+    }
+
     func testChangingNamedPortionKeepsCountWhileWeightUnitsPreserveMass() {
         let food = Food(sourceID: "sized-food", source: .chaseFood, name: "Sized food",
             nutrients: .zero, baseAmountGrams: 355,

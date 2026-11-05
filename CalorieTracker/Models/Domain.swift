@@ -1125,8 +1125,14 @@ enum FoodConfigurationCalculator {
         let portions = food.availablePortions
         guard portions.count > 1,
               let selectedPortion = food.portion(id: portionID),
-              let referencePortion = portions.first(where: { $0.label.localizedCaseInsensitiveContains("medium") })
-                ?? portions.first(where: { $0.label.localizedCaseInsensitiveContains("default") })
+              let referencePortion = portions.first(where: {
+                    $0.label.localizedCaseInsensitiveContains("medium")
+                        || $0.id.localizedCaseInsensitiveContains("medium")
+                })
+                ?? portions.first(where: {
+                    $0.label.localizedCaseInsensitiveContains("default")
+                        || $0.id.localizedCaseInsensitiveContains("default")
+                })
                 ?? portions.first,
               referencePortion.grams > 0 else {
             return option.amountGrams
