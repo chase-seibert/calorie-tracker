@@ -333,9 +333,6 @@ struct TrendsView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Calories")
                     .font(.title3.weight(.bold))
-                Text(diary.dailyCalorieGoal.map { "Target: \($0.formatted()) calories" } ?? "Target: Not set")
-                    .font(.caption)
-                    .foregroundStyle(AppTheme.muted)
             }
             Chart {
                 if let goal = diary.dailyCalorieGoal {
@@ -385,11 +382,19 @@ struct TrendsView: View {
 
     private var calorieChartKey: some View {
         VStack(alignment: .leading, spacing: 6) {
-            if actualCalorieAverage != nil {
-                calorieKeyRow(color: .blue, dashPhase: 0, label: "Actual average · 30 days")
+            if let average = actualCalorieAverage {
+                calorieKeyRow(
+                    color: .blue,
+                    dashPhase: 0,
+                    label: "30-day average · \(CalorieTrendAverage.formattedCalories(average)) calories per day"
+                )
             }
-            if diary.dailyCalorieGoal != nil {
-                calorieKeyRow(color: .purple, dashPhase: 2.5, label: "Daily target")
+            if let goal = diary.dailyCalorieGoal {
+                calorieKeyRow(
+                    color: .purple,
+                    dashPhase: 2.5,
+                    label: "Daily target: \(goal.formatted()) calories"
+                )
             }
         }
         .font(.caption)
@@ -946,6 +951,11 @@ enum CalorieTrendAverage {
         let eligiblePoints = points.filter { $0.status != .gap }
         guard !eligiblePoints.isEmpty else { return nil }
         return eligiblePoints.reduce(0) { $0 + $1.calories } / Double(eligiblePoints.count)
+    }
+
+    static func formattedCalories(_ average: Double, locale: Locale = .current) -> String {
+        average.rounded(.toNearestOrAwayFromZero)
+            .formatted(.number.locale(locale).precision(.fractionLength(0)))
     }
 }
 

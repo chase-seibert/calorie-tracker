@@ -246,6 +246,17 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertNil(CalorieTrendAverage.calculate([(calories: 100, status: .gap), (calories: 0, status: .gap)]))
     }
 
+    func testCalorieTrendAverageFormatsWholeCaloriesWithLocaleGrouping() {
+        XCTAssertEqual(
+            CalorieTrendAverage.formattedCalories(1_234.5, locale: Locale(identifier: "en_US")),
+            "1,235"
+        )
+        XCTAssertEqual(
+            CalorieTrendAverage.formattedCalories(0, locale: Locale(identifier: "en_US")),
+            "0"
+        )
+    }
+
     func testCalorieTrendAverageIncludesCaloriesAlreadyPresentInDailyTotals() {
         let foodCalories = 1_250.0
         let unspecifiedDrinkCalories = Double(AlcoholType.defaultCaloriesPerDrink)

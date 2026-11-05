@@ -73,8 +73,10 @@ the row reopens its editor. Trends shows the drink count in a separate daily
 alcohol chart; logged alcohol calories also appear in the daily-calorie chart.
 That chart's dotted actual average covers its last 30 calendar days, excludes
 gap days, and includes cheat days and non-gap zero-calorie days. A visible key
-names the average and, when configured, the daily target, using distinct colors
-for their dotted lines. If every day is a gap, no average line appears.
+includes the locale-formatted, rounded whole-calorie average per day and, when
+configured, the daily calorie target. Its rows use distinct colors for the
+dotted lines. If every day is a gap, neither the average line nor its key row
+appears.
 
 The Food & Meals section in Settings contains the Personal Library, AI Food &
 Meal Import, and Food Data Sources rows. The Personal Library row shows separate

@@ -192,9 +192,9 @@
 - The calorie chart plots full daily calories and overlays a dotted actual-average
   line calculated over non-gap days in its last 30 calendar days. Cheat days,
   non-gap zero-calorie days, and logged alcohol calories are included. Its visible
-  key names the average and, when configured, the daily target; the two dotted
-  reference lines use distinct colors. If all days are gaps, no average line or
-  key entry is shown.
+  key includes the rounded, locale-formatted average per day and the configured
+  daily target, with distinct colors for their dotted lines. If all days are
+  gaps, no average line or key entry is shown.
 - Trends overlays a dotted calorie-target line when a daily goal is configured,
   a fiber recommendation based on 14 grams per 1,000 goal calories (28 grams
   when no goal is configured), a dashed two-drink daily alcohol reference, and a
