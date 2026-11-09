@@ -18391,8 +18391,15 @@
         "chocolate milk",
         "choc milk"
       ],
+      "baselineNutritionSource": {
+        "matchBasis": "canonical",
+        "name": "milk chocolate",
+        "similarity": 1.0,
+        "source": "off",
+        "sourceID": "03424005"
+      },
       "category": "Dairy, cheese & substitutes",
-      "confidence": "High",
+      "confidence": "Medium",
       "containsProcessedMeat": false,
       "containsRedMeat": false,
       "defaultGrams": 250.0,
@@ -18402,29 +18409,89 @@
       "includedComponentsSummary": "None",
       "name": "Chocolate milk",
       "nutrients": {
-        "calories": 1220.93,
-        "carbs": 65.0,
-        "fat": 32.5,
-        "fiber": null,
-        "protein": 7.5
+        "calories": 207.5,
+        "carbs": 25.75,
+        "fat": 8.47,
+        "fiber": 2.0,
+        "protein": 7.92
+      },
+      "nutritionEvidence": {
+        "baselineNutritionSource": {
+          "matchBasis": "canonical",
+          "name": "milk chocolate",
+          "similarity": 1.0,
+          "source": "off",
+          "sourceID": "03424005"
+        },
+        "catalogPortion": {
+          "grams": 250.0,
+          "label": "1 cup",
+          "nutrients": {
+            "calories": 207.5,
+            "carbs": 25.75,
+            "fat": 8.48,
+            "fiber": 2.0,
+            "protein": 7.93
+          }
+        },
+        "compositionEvidence": {
+          "confidence": "Medium",
+          "decision": "Keep Chocolate milk as one generic canonical food. Use the USDA whole chocolate milk profile as the default until a specific product or milk-fat level is requested.",
+          "reason": "The USDA whole chocolate milk record is a direct generic match, but the canonical name does not specify milk-fat level and commercial products vary.",
+          "sources": [
+            {
+              "name": "USDA FoodData Central Survey (FNDDS)",
+              "recordName": "Chocolate milk, whole",
+              "sourceID": "2705467",
+              "url": "https://fdc.nal.usda.gov/food-details/2705467/nutrients"
+            }
+          ]
+        },
+        "confidence": "Medium",
+        "nutritionPer100g": {
+          "calories": 83.0,
+          "carbs": 10.3,
+          "fat": 3.39,
+          "fiber": 0.8,
+          "protein": 3.17
+        },
+        "reviewReasons": [
+          "USDA whole chocolate milk is a close generic match; milk-fat level and product formulation vary."
+        ],
+        "source": {
+          "dataType": "Survey (FNDDS)",
+          "database": "Survey (FNDDS)",
+          "name": "USDA FoodData Central Survey (FNDDS)",
+          "organization": "U.S. Department of Agriculture, Agricultural Research Service",
+          "recordID": "2705467",
+          "recordName": "Chocolate milk, whole",
+          "releaseDate": "2024-10-31",
+          "reviewedDate": "2026-11-09",
+          "serving": {
+            "description": "1 cup",
+            "grams": 248.0
+          },
+          "sourceID": "2705467",
+          "url": "https://fdc.nal.usda.gov/food-details/2705467/nutrients"
+        }
       },
       "nutritionPer100g": {
-        "calories": 488.3721,
-        "carbs": 26.0,
-        "fat": 13.0,
-        "fiber": null,
-        "protein": 3.0
+        "calories": 83.0,
+        "carbs": 10.3,
+        "fat": 3.39,
+        "fiber": 0.8,
+        "protein": 3.17
       },
       "nutritionSource": {
-        "matchBasis": "canonical",
-        "name": "milk chocolate",
-        "similarity": 1.0,
-        "source": "off",
-        "sourceID": "03424005"
+        "matchBasis": "reviewed FDC record",
+        "name": "Chocolate milk, whole",
+        "similarity": null,
+        "source": "usda",
+        "sourceID": "2705467"
       },
       "optionsSummary": "None",
       "reviewReasons": [
-        "Fiber unavailable in matched record"
+        "USDA whole chocolate milk is a close generic match; milk-fat level and product formulation vary."
       ],
       "reviewRequired": true,
       "searchEnabled": true,
