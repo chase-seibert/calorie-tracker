@@ -344,16 +344,6 @@ struct FoodCustomizationView: View {
                 actionID: "food-detail-save", canSave: amount.isFinite && amount > 0 && !isCommitting && !diary.isSaving,
                 action: logConfiguration, menu: { itemMenu }, quantity: { quantityControls }) {
                     VStack(alignment: .leading, spacing: 26) {
-#if DEBUG
-                        Button {
-                            copyFoodDebugInfo()
-                        } label: {
-                            Label("Copy Food Debug Info", systemImage: "doc.on.doc")
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                        .buttonStyle(.bordered)
-                        .accessibilityIdentifier("food-copy-debug-info")
-#endif
                         if rebuiltLegacyValues {
                             Text("Rebuilt with current catalog values. Save to update this item.")
                                 .font(.subheadline.weight(.medium)).foregroundStyle(AppTheme.muted)
@@ -576,6 +566,13 @@ struct FoodCustomizationView: View {
         if onComponentSaved == nil {
             Button("Rename") { showingNameEditor = true }
         }
+#if DEBUG
+        Divider()
+        Button("Copy Food Debug Info", systemImage: "doc.on.doc") {
+            copyFoodDebugInfo()
+        }
+        .accessibilityIdentifier("food-copy-debug-info")
+#endif
         Divider()
         Section("Recent Variations") {
             if recentConfigurations.isEmpty {
