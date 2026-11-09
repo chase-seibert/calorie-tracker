@@ -650,7 +650,11 @@ final class DiaryEngine {
 
     func updateMealDraft(original: DiaryEntry, name: String, amount: Double, items: [MealItem], processed: Bool?, red: Bool?) throws {
         guard let index = document.entries.firstIndex(where: { $0.id == original.id }) else { throw FoodDraftError.missingEntry }
-        guard document.entries[index] == original else { throw FoodDraftError.changedEntry }
+        if document.entries[index] != original {
+            var currentWithoutRename = document.entries[index]
+            currentWithoutRename.food.name = original.food.name
+            guard currentWithoutRename == original else { throw FoodDraftError.changedEntry }
+        }
         guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, amount.isFinite, amount > 0,
               !items.isEmpty, items.allSatisfy({ $0.amount.isFinite && $0.amount > 0 }) else { throw FoodDraftError.invalidDraft }
         if amount != original.amount || items != original.mealItems {
@@ -659,6 +663,15 @@ final class DiaryEngine {
         document.entries[index].food.name = name
         document.entries[index].processedMeatOverride = processed
         document.entries[index].redMeatOverride = red
+    }
+
+    func renameMealEntry(entryID: UUID, name: String) throws {
+        guard let index = document.entries.firstIndex(where: { $0.id == entryID }) else {
+            throw FoodDraftError.missingEntry
+        }
+        let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard document.entries[index].isMeal, !normalizedName.isEmpty else { throw FoodDraftError.invalidDraft }
+        document.entries[index].food.name = normalizedName
     }
 
     func updateEntry(

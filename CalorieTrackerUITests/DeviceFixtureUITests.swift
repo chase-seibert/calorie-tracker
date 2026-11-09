@@ -398,6 +398,57 @@ final class DeviceFixtureUITests: XCTestCase {
         add(screenshot)
     }
 
+    func testRenamingLoggedAIMealPersistsInDiaryList() {
+        assertLoggedRenamePersists(originalName: "AI Import — Lentil curry bowl", renamedName: "My renamed AI meal")
+    }
+
+    func testRenamingLoggedCustomMealPersistsInDiaryList() {
+        assertLoggedRenamePersists(originalName: "Weeknight chicken bowl", renamedName: "My renamed custom meal")
+    }
+
+    func testRenamingLoggedRegularFoodPersistsInDiaryList() {
+        assertLoggedRenamePersists(originalName: "Plum, raw", renamedName: "My renamed plum")
+    }
+
+    private func assertLoggedRenamePersists(originalName: String, renamedName: String) {
+        app.launchArguments = ["-onboarding.focus.v1.completed", "YES"]
+        app.launchEnvironment = ["CALORIE_TRACKER_FIXTURE": "device", "CALORIE_TRACKER_FIXTURE_RESET": "1"]
+        app.launch()
+
+        let loggedList = app.descendants(matching: .any).matching(identifier: "logged-foods-reorder-list").firstMatch
+        XCTAssertTrue(loggedList.waitForExistence(timeout: 10))
+        let originalRow = app.staticTexts[originalName]
+        XCTAssertTrue(originalRow.waitForExistence(timeout: 5))
+        originalRow.tap()
+        XCTAssertTrue(waitUntil(timeout: 5) {
+            app.buttons["meal-detail-save"].exists || app.buttons["Save changes"].exists
+        }, "Opening a logged meal or food should show its detail screen.")
+
+        app.buttons["custom-food-recent-variations"].tap()
+        app.buttons["Rename"].tap()
+        let nameField = app.textFields["customization-name-field"]
+        XCTAssertTrue(nameField.waitForExistence(timeout: 3))
+        nameField.coordinate(withNormalizedOffset: CGVector(dx: 0.98, dy: 0.5)).tap()
+        nameField.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 64))
+        nameField.typeText(renamedName)
+        app.buttons["customization-name-save"].tap()
+
+        XCTAssertTrue(waitUntil(timeout: 5) { !nameField.exists }, "Saving the name should close the rename sheet.")
+        let title = app.staticTexts["custom-food-sticky-title"]
+        XCTAssertTrue(waitUntil(timeout: 5) { title.label == renamedName }, "The detail title should update immediately after Rename.")
+        visibleButton("custom-food-back").tap()
+        XCTAssertTrue(waitUntil(timeout: 5) { (loggedList.value as? String ?? "").contains(renamedName) })
+
+        app.terminate()
+        app.launchEnvironment["CALORIE_TRACKER_FIXTURE_RESET"] = "0"
+        app.launchEnvironment["CALORIE_TRACKER_DISABLE_SIMULATOR_FIXTURE"] = "1"
+        app.launch()
+        let relaunchedList = app.descendants(matching: .any).matching(identifier: "logged-foods-reorder-list").firstMatch
+        XCTAssertTrue(relaunchedList.waitForExistence(timeout: 10))
+        XCTAssertTrue(waitUntil(timeout: 5) { (relaunchedList.value as? String ?? "").contains(renamedName) },
+            "The renamed logged item should remain renamed after reopening the diary.")
+    }
+
     func testSharedMealCompositionUsesFoodSearchAndCancelsParentDraft() {
         app.launchArguments = ["-onboarding.focus.v1.completed", "YES",
             "-foodSource.enabled.chaseFood", "YES", "-foodSource.enabled.usda", "NO", "-foodSource.enabled.off", "NO"]

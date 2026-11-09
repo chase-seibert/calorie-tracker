@@ -893,6 +893,12 @@ class DiaryStore: ObservableObject {
         }
     }
 
+    func renameMealEntry(entryID: UUID, name: String) async throws {
+        try await perform(scope: .entries([entryID])) {
+            try $0.renameMealEntry(entryID: entryID, name: name)
+        }
+    }
+
     func updateEntryMeatClassification(entryID: UUID, processed: Bool?, red: Bool?) async throws {
         try await perform(scope: .entries([entryID])) {
             $0.updateEntryMeatClassification(entryID: entryID, processed: processed, red: red)

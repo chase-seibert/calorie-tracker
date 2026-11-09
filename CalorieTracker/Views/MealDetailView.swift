@@ -180,7 +180,16 @@ struct MealDetailView: View {
                     excludedMealIDs: excludedMealIDs, onSelect: addItems))
             }
             .sheet(isPresented: $showingNameEditor) {
-                CustomizationNameEditor(name: name, title: "Edit meal name") { name = $0 }
+                CustomizationNameEditor(name: name, title: "Edit meal name") { newName in
+                    guard case .logged(let entry) = context else {
+                        name = newName
+                        return
+                    }
+                    diary.run {
+                        try await diary.renameMealEntry(entryID: entry.id, name: newName)
+                        name = newName
+                    }
+                }
             }
         }
         .draftSaveError()

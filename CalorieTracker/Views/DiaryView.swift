@@ -1360,9 +1360,11 @@ private struct MacroSummary: View {
 }
 
 private struct DiaryEntryRow: View {
+    @EnvironmentObject private var diary: DiaryStore
     let entry: DiaryEntry
 
     var body: some View {
+        let displayedFood = diary.displayedFood(entry.food)
         HStack(spacing: 12) {
             if entry.isCheatDayAdjustment {
                 Image(systemName: "plusminus.circle.fill")
@@ -1377,22 +1379,23 @@ private struct DiaryEntryRow: View {
                 MealBadge()
             }
             VStack(alignment: .leading, spacing: 3) {
-                Text(entry.food.name)
+                Text(displayedFood.name)
                     .font(.body.weight(.semibold))
                     .lineLimit(2)
                 HStack(spacing: 4) {
                     Text(quantityDescription)
-                    if let brand = entry.food.displayBrand { Text("· \(brand)") }
+                    if let brand = displayedFood.displayBrand { Text("· \(brand)") }
                 }
                 .font(.caption)
                 .foregroundStyle(AppTheme.muted)
                 .lineLimit(1)
                 if let components = entry.foodConfigurationSnapshot?.components, !components.isEmpty {
-                    Text(components.map { $0.food.name }.joined(separator: " · "))
+                    let displayedComponents = components.map { diary.displayedFood($0.food).name }
+                    Text(displayedComponents.joined(separator: " · "))
                         .font(.caption2)
                         .foregroundStyle(AppTheme.muted)
                         .lineLimit(2)
-                        .accessibilityLabel("Contains \(components.map { $0.food.name }.joined(separator: ", "))")
+                        .accessibilityLabel("Contains \(displayedComponents.joined(separator: ", "))")
                 }
             }
             Spacer()
