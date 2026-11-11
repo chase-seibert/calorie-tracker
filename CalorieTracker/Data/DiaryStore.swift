@@ -958,6 +958,10 @@ class DiaryStore: ObservableObject {
         try await perform(scope: .library) { $0.toggleFavorite(food, preference: preference) }
     }
 
+    func removeFavorite(_ food: Food) async throws {
+        try await perform(scope: .library) { $0.removeFavorite(food) }
+    }
+
     func isFavorite(_ meal: SavedMeal) -> Bool {
         engine.isFavorite(meal)
     }

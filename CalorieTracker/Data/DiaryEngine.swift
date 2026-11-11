@@ -943,6 +943,11 @@ final class DiaryEngine {
         }
     }
 
+    func removeFavorite(_ food: Food) {
+        document.favorites.removeAll { $0.id == food.id }
+        removeFavoriteOrder(for: "food:\(food.id)")
+    }
+
     var favoriteMeals: [SavedMeal] {
         document.favoriteMealIDs.compactMap { mealID in
             document.meals.first { $0.id == mealID }

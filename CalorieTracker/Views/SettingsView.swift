@@ -532,6 +532,12 @@ private struct PrivacyAnalyticsView: View {
 
             Section {
                 NavigationLink {
+                    SavedCalorieAuditView()
+                } label: {
+                    Label("Calorie Audit", systemImage: "exclamationmark.magnifyingglass")
+                }
+
+                NavigationLink {
                     ExperimentalFeaturesView()
                 } label: {
                     Label("Experimental Features", systemImage: "flask.fill")
@@ -1011,6 +1017,244 @@ private struct ExperimentalFeaturesView: View {
         case "retry_scheduled": .orange
         case "uploading", "prepared": .blue
         default: AppTheme.muted
+        }
+    }
+}
+
+private struct SavedCalorieAuditView: View {
+    @EnvironmentObject private var diary: DiaryStore
+    @AppStorage("developer.savedCalorieAudit.threshold") private var threshold = 1_000.0
+    @State private var pendingAction: AuditAction?
+    @State private var showingActionConfirmation = false
+    @State private var deletionError: String?
+
+    private enum AuditAction {
+        case hide(Food)
+        case removeFavorite(Food)
+        case deleteCustomFood(Food)
+        case clearConfiguration(SavedFoodConfiguration)
+        case deleteMeal(SavedMeal)
+    }
+
+    private var results: [SavedCalorieAuditItem] {
+        SavedCalorieAuditItem.highCalorieItems(in: diary.document, catalog: diary.foodCatalog, threshold: threshold)
+    }
+
+    private var savedResults: [SavedCalorieAuditItem] {
+        results.filter { if case .loggedEntry = $0.target { false } else { true } }
+    }
+
+    private var loggedResults: [SavedCalorieAuditItem] {
+        results.filter { if case .loggedEntry = $0.target { true } else { false } }
+    }
+
+    var body: some View {
+        List {
+            Section {
+                Stepper(value: $threshold, in: 100...10_000, step: 100) {
+                    LabeledContent("Flag at or above", value: "\(Int(threshold)) kcal")
+                }
+                Text("Saved items are scored per serving. Logged entries are scored by the calories recorded on that date. Editing a log changes that entry; hiding or removing a saved item affects future logging only. High values are review signals, not diagnoses.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            } header: {
+                Text("Threshold")
+            }
+
+            Section("Saved for future logging · \(savedResults.count)") {
+                if savedResults.isEmpty {
+                    Text("No saved items meet this threshold.")
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(savedResults) { item in
+                        HStack(alignment: .top, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(item.name).foregroundStyle(.primary)
+                                Text(item.kind).font(.footnote).foregroundStyle(.secondary)
+                            }
+                            Spacer(minLength: 8)
+                            Text("\(formattedCalories(item.calories)) kcal / serving")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(AppTheme.coral)
+                                .multilineTextAlignment(.trailing)
+                            Menu {
+                                savedItemActions(item)
+                            } label: {
+                                Image(systemName: "ellipsis.circle")
+                                    .font(.title3)
+                                    .foregroundStyle(AppTheme.muted)
+                            }
+                            .accessibilityLabel("Future logging actions for \(item.name)")
+                        }
+                    }
+                }
+            }
+
+            Section("Logged entries · \(loggedResults.count)") {
+                if loggedResults.isEmpty {
+                    Text("No logged entries meet this threshold.")
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(loggedResults) { item in
+                        if case .loggedEntry(let entry) = item.target {
+                            HStack(alignment: .top, spacing: 12) {
+                                NavigationLink {
+                                    LoggedItemDetailView(entryID: entry.id, catalog: diary.foodCatalog)
+                                        .environmentObject(diary)
+                                } label: {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(item.name).foregroundStyle(.primary)
+                                        Text(item.kind).font(.footnote).foregroundStyle(.secondary)
+                                        Label("Edit logged entry", systemImage: "pencil")
+                                            .font(.caption.weight(.medium))
+                                            .foregroundStyle(AppTheme.protein)
+                                    }
+                                }
+                                Spacer(minLength: 8)
+                                Text("\(formattedCalories(item.calories)) kcal logged")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(AppTheme.coral)
+                                    .multilineTextAlignment(.trailing)
+                                if hasFutureActions(for: entry) {
+                                    Menu {
+                                        loggedEntryActions(entry)
+                                    } label: {
+                                        Image(systemName: "ellipsis.circle")
+                                            .font(.title3)
+                                            .foregroundStyle(AppTheme.muted)
+                                    }
+                                    .accessibilityLabel("Future logging actions for \(item.name)")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if let deletionError {
+                Section("Action failed") {
+                    Text(deletionError).foregroundStyle(.red)
+                }
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .background(AppTheme.background)
+        .navigationTitle("Calorie Audit")
+        .navigationBarTitleDisplayMode(.inline)
+        .confirmationDialog(
+            confirmationTitle,
+            isPresented: $showingActionConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button(confirmationButtonTitle, role: .destructive) {
+                if let pendingAction { perform(pendingAction) }
+            }
+            Button("Cancel", role: .cancel) { pendingAction = nil }
+        } message: {
+            Text(confirmationMessage)
+        }
+    }
+
+    @ViewBuilder
+    private func savedItemActions(_ item: SavedCalorieAuditItem) -> some View {
+        switch item.target {
+        case .customFood(let food):
+            Button("Hide from food search", systemImage: "eye.slash") { perform(.hide(food)) }
+            Button("Delete custom food", systemImage: "trash", role: .destructive) { confirm(.deleteCustomFood(food)) }
+        case .favoriteFood(let food):
+            Button("Hide from food search", systemImage: "eye.slash") { perform(.hide(food)) }
+            Button("Remove favorite only", systemImage: "star.slash") { perform(.removeFavorite(food)) }
+        case .configuration(let configuration):
+            Button("Clear saved configuration", systemImage: "slider.horizontal.3", role: .destructive) {
+                confirm(.clearConfiguration(configuration))
+            }
+        case .meal(let meal):
+            Button("Delete reusable meal template", systemImage: "trash", role: .destructive) {
+                confirm(.deleteMeal(meal))
+            }
+        case .loggedEntry:
+            EmptyView()
+        }
+    }
+
+    @ViewBuilder
+    private func loggedEntryActions(_ entry: DiaryEntry) -> some View {
+        if !entry.isMeal {
+            if diary.document.customFoods.contains(where: { $0.id == entry.food.id }) {
+                Button("Delete custom food for future logging", systemImage: "trash", role: .destructive) {
+                    confirm(.deleteCustomFood(entry.food))
+                }
+            }
+            if diary.document.favorites.contains(where: { $0.id == entry.food.id }) {
+                Button("Remove favorite only", systemImage: "star.slash") { perform(.removeFavorite(entry.food)) }
+            }
+        } else if let savedMeal = diary.document.meals.first(where: { $0.id == entry.savedMealID }) {
+            Button("Delete reusable meal template", systemImage: "trash", role: .destructive) {
+                confirm(.deleteMeal(savedMeal))
+            }
+        }
+    }
+
+    private func hasFutureActions(for entry: DiaryEntry) -> Bool {
+        !entry.isMeal
+            || diary.document.meals.contains(where: { $0.id == entry.savedMealID })
+    }
+
+    private var confirmationTitle: String {
+        switch pendingAction {
+        case .some(.deleteCustomFood(let food)): "Delete custom food ‘\(food.name)’?"
+        case .some(.clearConfiguration(let configuration)): "Clear ‘\(configuration.label)’ configuration?"
+        case .some(.deleteMeal(let meal)): "Delete reusable meal ‘\(meal.name)’?"
+        default: "Confirm saved item change"
+        }
+    }
+
+    private var confirmationButtonTitle: String {
+        switch pendingAction {
+        case .some(.deleteCustomFood): "Delete custom food"
+        case .some(.clearConfiguration): "Clear configuration"
+        case .some(.deleteMeal): "Delete meal template"
+        default: "Confirm"
+        }
+    }
+
+    private var confirmationMessage: String {
+        switch pendingAction {
+        case .some(.deleteCustomFood):
+            "This removes the custom food from future logging and its favorite reference. Logged entries and meal ingredient snapshots stay unchanged."
+        case .some(.clearConfiguration):
+            "This clears only the saved configuration. The underlying food remains available for future logging, and existing diary entries are unchanged."
+        case .some(.deleteMeal):
+            "This removes only the reusable meal template and favorite reference. Logged entries and ingredient snapshots stay unchanged."
+        default:
+            "This change affects future logging only."
+        }
+    }
+
+    private func formattedCalories(_ calories: Double) -> String {
+        calories.formatted(.number.precision(.fractionLength(0...1)))
+    }
+
+    private func confirm(_ action: AuditAction) {
+        pendingAction = action
+        showingActionConfirmation = true
+    }
+
+    private func perform(_ action: AuditAction) {
+        Task {
+            do {
+                switch action {
+                case .hide(let food): try await diary.hideFood(food)
+                case .removeFavorite(let food): try await diary.removeFavorite(food)
+                case .deleteCustomFood(let food): try await diary.deleteCustomFood(food)
+                case .clearConfiguration(let configuration): try await diary.deleteSavedFoodConfiguration(id: configuration.id)
+                case .deleteMeal(let meal): try await diary.deleteMeal(meal)
+                }
+                deletionError = nil
+            } catch {
+                deletionError = error.localizedDescription
+            }
+            pendingAction = nil
         }
     }
 }

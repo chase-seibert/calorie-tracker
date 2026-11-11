@@ -583,6 +583,91 @@ struct SavedFoodConfiguration: Codable, Hashable, Identifiable, Sendable {
     }
 }
 
+#if DEBUG
+enum SavedCalorieAuditTarget: Hashable, Sendable {
+    case customFood(Food)
+    case favoriteFood(Food)
+    case configuration(SavedFoodConfiguration)
+    case meal(SavedMeal)
+    case loggedEntry(DiaryEntry)
+}
+
+struct SavedCalorieAuditItem: Identifiable, Hashable, Sendable {
+    let id: String
+    let name: String
+    let kind: String
+    let calories: Double
+    let target: SavedCalorieAuditTarget
+
+    static func highCalorieItems(in document: DiaryDocument, catalog: CatalogStore, threshold: Double) -> [SavedCalorieAuditItem] {
+        guard threshold.isFinite, threshold > 0 else { return [] }
+        let customFoodIDs = Set(document.customFoods.map(\.id))
+        var items = [SavedCalorieAuditItem]()
+
+        func appendFood(_ food: Food, kind: String, target: SavedCalorieAuditTarget, identity: String) {
+            let calories = food.nutrients(for: 1, unit: .serving, portionID: food.availablePortions.first?.id).calories
+            guard calories.isFinite, calories > 0, calories >= threshold else { return }
+            items.append(SavedCalorieAuditItem(id: identity, name: food.name, kind: kind, calories: calories, target: target))
+        }
+
+        for food in document.customFoods {
+            appendFood(food, kind: "Custom food", target: .customFood(food), identity: "custom-food:\(food.id)")
+        }
+        for food in document.favorites where !customFoodIDs.contains(food.id) {
+            appendFood(food, kind: "Favorite food", target: .favoriteFood(food), identity: "favorite-food:\(food.id)")
+        }
+        for configuration in document.savedFoodConfigurations {
+            let base = configuration.snapshot?.baseFood
+                ?? document.customFoods.first(where: { $0.id == configuration.baseFoodID })
+                ?? document.favorites.first(where: { $0.id == configuration.baseFoodID })
+                ?? catalogFood(configuration.baseFoodID, catalog: catalog)
+            guard let base else { continue }
+            let options = configuration.snapshot?.options
+                ?? (base.source == .chaseFood ? catalog.chaseFoodOptions(for: base.sourceID) : [])
+            let extras = configuration.snapshot?.extraComponents ?? configuration.components
+            let calories = FoodConfigurationCalculator.nutrients(
+                food: base, options: options, selected: Set(configuration.selectedOptionIDs),
+                extras: extras, portionID: configuration.portionID
+            ).calories
+            guard calories.isFinite, calories > 0, calories >= threshold else { continue }
+            items.append(SavedCalorieAuditItem(
+                id: "configuration:\(configuration.id.uuidString)",
+                name: "\(base.name) · \(configuration.label)", kind: "Saved configuration",
+                calories: calories, target: .configuration(configuration)
+            ))
+        }
+        for meal in document.meals {
+            let calories = meal.nutrients.calories
+            guard calories.isFinite, calories > 0, calories >= threshold else { continue }
+            items.append(SavedCalorieAuditItem(
+                id: "meal:\(meal.id.uuidString)", name: meal.name,
+                kind: meal.origin == .imported ? "Imported meal template" : "Saved meal",
+                calories: calories, target: .meal(meal)
+            ))
+        }
+        for entry in document.entries where !entry.isCheatDayAdjustment {
+            let calories = entry.nutrients.calories
+            guard calories.isFinite, calories > 0, calories >= threshold else { continue }
+            items.append(SavedCalorieAuditItem(
+                id: "logged-entry:\(entry.id.uuidString)", name: entry.food.name,
+                kind: "Logged entry · \(entry.date.formatted(date: .abbreviated, time: .omitted))",
+                calories: calories, target: .loggedEntry(entry)
+            ))
+        }
+        return items.sorted {
+            if $0.calories != $1.calories { return $0.calories > $1.calories }
+            return $0.id < $1.id
+        }
+    }
+
+    private static func catalogFood(_ identity: String, catalog: CatalogStore) -> Food? {
+        let parts = identity.split(separator: ":", maxSplits: 1).map(String.init)
+        guard parts.count == 2, let source = FoodSource(rawValue: parts[0]) else { return nil }
+        return catalog.food(sourceID: parts[1], source: source)
+    }
+}
+#endif
+
 enum FoodSuggestionKind: String, Codable, Hashable, Sendable {
     case newCanonicalFood
     case changeToFood

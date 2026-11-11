@@ -2954,6 +2954,82 @@ final class CalorieTrackerTests: XCTestCase {
         XCTAssertEqual(engine.document.savedFoodConfigurations.count, 2)
     }
 
+    func testSavedCalorieAuditUsesServingConfigurationAndMealCaloriesWithStableScopes() throws {
+        var document = DiaryDocument()
+        let custom = testFood(calories: 1_000, name: "High custom food")
+        let favoriteOnly = testFood(calories: 1_200, name: "Favorite only")
+        let base = testFood(calories: 500, name: "Configured base")
+        let extra = testFood(calories: 600, name: "Configuration extra")
+        document.customFoods = [custom]
+        document.favorites = [custom, favoriteOnly]
+        let configuration = SavedFoodConfiguration(
+            baseFoodID: base.id, label: "Extra large", selectedOptionIDs: [],
+            components: [MealItem(id: UUID(), food: extra, amount: 1, unit: .serving)], portionID: "serving")
+        var savedConfiguration = configuration
+        savedConfiguration.snapshot = FoodConfigurationSnapshot(
+            selectedOptionIDs: [], components: savedConfiguration.components, suggestedChanges: nil,
+            catalogVersion: nil, baseFood: base, options: [], extraComponents: savedConfiguration.components,
+            portionID: "serving")
+        document.savedFoodConfigurations = [savedConfiguration]
+        let meal = SavedMeal(id: UUID(), name: "High template", items: [
+            MealItem(id: UUID(), food: testFood(calories: 700, name: "Meal one"), amount: 1, unit: .serving),
+            MealItem(id: UUID(), food: testFood(calories: 500, name: "Meal two"), amount: 1, unit: .serving)
+        ], origin: .imported)
+        document.meals = [meal]
+        let loggedEntry = testEntry(calories: 1_300, date: testDate(day: 8), name: "Historical high food")
+        document.entries = [loggedEntry]
+        let catalog = CatalogStore(url: nil)
+
+        let results = SavedCalorieAuditItem.highCalorieItems(in: document, catalog: catalog, threshold: 1_000)
+
+        XCTAssertEqual(Set(results.filter { !$0.kind.hasPrefix("Logged entry · ") }.map(\.kind)), Set(["Custom food", "Favorite food", "Saved configuration", "Imported meal template"]))
+        XCTAssertEqual(results.first(where: { $0.id == "custom-food:\(custom.id)" })?.calories, 1_000)
+        XCTAssertNil(results.first(where: { $0.id == "favorite-food:\(custom.id)" }))
+        XCTAssertEqual(results.first(where: { $0.id == "configuration:\(configuration.id.uuidString)" })?.calories, 1_100)
+        XCTAssertEqual(results.first(where: { $0.id == "meal:\(meal.id.uuidString)" })?.calories, 1_200)
+        XCTAssertEqual(results.first(where: { $0.id == "logged-entry:\(loggedEntry.id.uuidString)" })?.calories, 1_300)
+        XCTAssertTrue(results.contains { $0.kind.hasPrefix("Logged entry · ") })
+        XCTAssertTrue(SavedCalorieAuditItem.highCalorieItems(in: document, catalog: catalog, threshold: 1_301).isEmpty)
+
+        let invalidFood = testFood(calories: .infinity, name: "Invalid calories")
+        document.favorites.append(invalidFood)
+        XCTAssertFalse(SavedCalorieAuditItem.highCalorieItems(in: document, catalog: catalog, threshold: 1_000)
+            .contains { $0.name == "Invalid calories" })
+    }
+
+    func testRemoveFavoriteOnlyRemovesTheSelectedFutureLoggingFavorite() {
+        let selected = testFood(calories: 1_100, name: "Selected favorite")
+        let other = testFood(calories: 1_200, name: "Other favorite")
+        var document = DiaryDocument()
+        document.favorites = [selected, other]
+        document.favoriteItemOrder = ["food:\(selected.id)", "food:\(other.id)"]
+        let engine = DiaryEngine(document: document, calendar: testCalendar)
+
+        engine.removeFavorite(selected)
+
+        XCTAssertEqual(engine.document.favorites.map(\.id), [other.id])
+        XCTAssertEqual(engine.document.favoriteItemOrder, ["food:\(other.id)"])
+    }
+
+    func testDeletingAuditedMealTemplatePreservesLoggedSnapshot() throws {
+        let ingredient = testFood(calories: 650, name: "Historical ingredient")
+        let meal = SavedMeal(id: UUID(), name: "Reusable meal", items: [
+            MealItem(id: UUID(), food: ingredient, amount: 1, unit: .serving)
+        ], origin: .imported)
+        let engine = DiaryEngine(document: DiaryDocument(), calendar: testCalendar)
+        engine.document.meals = [meal]
+        engine.document.favoriteMealIDs = [meal.id]
+        _ = try engine.logImportedMeal(meal, saveForReuse: true, amount: 1, on: testDate(day: 1), allowCheatDay: true)
+        let historicalEntry = try XCTUnwrap(engine.document.entries.first)
+
+        engine.deleteMeal(meal)
+
+        XCTAssertTrue(engine.document.meals.isEmpty)
+        XCTAssertTrue(engine.document.favoriteMealIDs.isEmpty)
+        XCTAssertEqual(engine.document.entries, [historicalEntry])
+        XCTAssertEqual(engine.document.entries.first?.mealItems?.first?.food.id, ingredient.id)
+    }
+
     func testSharedMealDraftKeepsTemplateIsolatedAndImportedNotesSurviveReload() throws {
         let file = CustomMealFile(format: CustomMealFile.formatIdentifier, version: 1, name: "One-off soup",
             foods: [CustomFoodDefinition(name: "Soup", servingDescription: "bowl", servingGrams: 300,
