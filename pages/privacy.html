@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f4ed">
+    <meta name="description" content="How Yum Chase handles diary data, Health, analytics, and optional AI meal estimates.">
+    <title>Privacy — Yum Chase</title>
+    <link rel="stylesheet" href="site.css">
+  </head>
+  <body class="privacy-page">
+    <header class="site-header wrap">
+      <a class="wordmark" href="index.html" aria-label="Yum Chase home"><span class="wordmark-mark" aria-hidden="true">y</span>yum chase</a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="index.html">About</a>
+        <a class="active" href="privacy.html" aria-current="page">Privacy</a>
+      </nav>
+    </header>
+    <main class="privacy-main wrap">
+      <div class="draft-ribbon"><span aria-hidden="true">●</span> Release review draft · Not final policy</div>
+      <section class="privacy-intro">
+        <p class="eyebrow">Your data, clearly explained</p>
+        <h1>Privacy should be<br><em>easy to understand.</em></h1>
+        <p class="privacy-lede">Yum Chase is designed so the everyday food log stays on your device. Some optional features use connected services; this page explains what leaves your device and when.</p>
+        <p class="updated">Prepared November 12, 2026 · Effective date and policy contact still need approval.</p>
+      </section>
+
+      <section class="privacy-summary" aria-label="Privacy at a glance">
+        <div><span class="summary-icon" aria-hidden="true">⌂</span><strong>Local by default</strong><p>Diary, personal foods, saved meals, and remembered quantities are kept in the app’s local database.</p></div>
+        <div><span class="summary-icon" aria-hidden="true">↗</span><strong>Optional sharing</strong><p>AI estimates, analytics, and Apple Health each have separate behavior and data flows.</p></div>
+      </section>
+
+      <div class="policy-layout">
+        <aside class="policy-toc" aria-label="On this page">
+          <p class="eyebrow">On this page</p>
+          <a href="#local-data">On your device</a>
+          <a href="#apple-health">Apple Health</a>
+          <a href="#meal-analysis">AI meal analysis</a>
+          <a href="#weekly-reports">Weekly reports</a>
+          <a href="#analytics">Analytics and feedback</a>
+          <a href="#reminders">Reminders</a>
+          <a href="#website">This website</a>
+        </aside>
+
+        <article class="policy-copy">
+          <section id="local-data">
+            <span class="policy-index">01</span><h2>On your device</h2>
+            <p>Your diary entries, personal foods, saved meals, and remembered quantities are stored in Yum Chase’s local app database. The food catalog and search index are bundled with the app, so routine food logging and catalog search do not need an app server or an internet connection.</p>
+            <p>Yum Chase does not read information from Apple Health. If you choose to use the optional services described below, those features send the information needed for that action.</p>
+          </section>
+
+          <section id="apple-health">
+            <span class="policy-index">02</span><h2>Apple Health</h2>
+            <p>If you connect Apple Health, Yum Chase can write nutrition information such as calories, carbohydrates, fat, protein, and fiber. The app requests permission to share those nutrition types and does not request permission to read Health data. Apple Health data is managed by Apple and your device settings.</p>
+          </section>
+
+          <section id="meal-analysis">
+            <span class="policy-index">03</span><h2>AI meal analysis</h2>
+            <p>When you choose Analyze or Retry, Yum Chase sends the meal description you entered and, if selected, a prepared JPEG photo to the inference service configured for the app. The request does not include your diary history or HealthKit history. Nothing is logged until you review the estimate and choose Log.</p>
+            <p>The configured service may use an AI model provider to produce the estimate. Provider processing and retention depend on the service and provider terms; this draft does not claim zero retention. Confirm the production service, provider, retention terms, and contact route before release.</p>
+          </section>
+
+          <section id="weekly-reports">
+            <span class="policy-index">04</span><h2>Weekly reports</h2>
+            <p>If you generate a weekly report with the configured OpenAI route, the request includes up to 21 completed local days of calories, protein, known fiber, logging counts, marked cheat or gap days, and estimated cheat-day overages; up to 12 individual food highlights; your report prompt; and enabled app guidance. HealthKit data and diary entry notes are excluded.</p>
+            <p>When you choose Apple’s on-device Foundation Model and it is available, the report runs on the device. Report generation is optional.</p>
+          </section>
+
+          <section id="analytics">
+            <span class="policy-index">05</span><h2>Analytics and feedback</h2>
+            <p>When analytics is enabled in the installed build, Yum Chase sends feature-use events, catalog or local item identifiers, successful and failed food search terms, searches dismissed without logging, and unmatched barcodes to its analytics service. If you submit food feedback, the text you enter is included with that feedback event.</p>
+            <p>Analytics events do not include diary food names, meal contents, quantities, calorie totals, or Health data. Analytics availability and configuration can vary by build.</p>
+          </section>
+
+          <section id="reminders">
+            <span class="policy-index">06</span><h2>Apple Reminders</h2>
+            <p>If you connect Apple Reminders, only snack suggestions you select and their serving tips are added when you tap Add. The selected list may sync through your Apple account or be shared with people you choose. Your diary and focus settings are not exported with those reminders.</p>
+          </section>
+
+          <section id="website">
+            <span class="policy-index">07</span><h2>This website</h2>
+            <p>This static website has no sign-in, contact form, or embedded analytics. The hosting provider may process technical request information to deliver the pages; confirm the provider’s logging and retention details before public release.</p>
+          </section>
+        </article>
+      </div>
+
+      <aside class="review-callout">
+        <span class="review-icon" aria-hidden="true">✳</span>
+        <div><strong>Before this becomes the release policy</strong><p>Confirm the policy owner and jurisdiction, support/privacy contact, production AI provider and retention terms, analytics configuration, website-host logging, and the effective date. Replace this review notice with approved policy language.</p></div>
+      </aside>
+    </main>
+    <footer class="site-footer wrap">
+      <a class="wordmark wordmark-footer" href="index.html"><span class="wordmark-mark" aria-hidden="true">y</span>yum chase</a>
+      <p>Fast to log. Flexible for real life.</p>
+      <nav aria-label="Footer navigation"><a href="index.html">About</a><a href="privacy.html">Privacy</a></nav>
+      <span class="copyright">© 2026 Yum Chase</span>
+    </footer>
+  </body>
+</html>
